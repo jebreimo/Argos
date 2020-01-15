@@ -39,7 +39,9 @@ TEST_CASE("Test basics")
     argos.setAutoExit(false);
     REQUIRE(argos.programName() == "test");
 
-    //argos.addOption({"-h", "--help"}).type(.text("Show help message.");
+    argos.addOption({"-h", "--help"})
+            .type(Argos::OptionType::HELP)
+            .text("Show help message.");
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
 }

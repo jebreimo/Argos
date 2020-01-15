@@ -21,5 +21,6 @@ namespace Argos
         int minCount = 1;
         int maxCount = 1;
         bool hidden = false;
+        int m_InternalId;
     };
 }

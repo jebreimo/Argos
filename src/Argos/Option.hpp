@@ -32,5 +32,6 @@ namespace Argos
         OptionType optionType = OptionType::NORMAL;
         bool hidden = false;
         bool mandatory = false;
+        int m_InternalId;
     };
 }

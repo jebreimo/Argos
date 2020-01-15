@@ -15,6 +15,10 @@ namespace Argos
     public:
         OptionBuilder(Option* option);
 
+        OptionBuilder& argument(const std::string& name);
+
+        OptionBuilder& value(const std::string& value);
+
         OptionBuilder& text(const std::string& text);
 
         OptionBuilder& section(const std::string& name);
@@ -23,11 +27,9 @@ namespace Argos
 
         OptionBuilder& operation(ArgumentOperation operation);
 
+        OptionBuilder& type(OptionType type);
+
         OptionBuilder& mandatory(bool mandatory);
-
-        OptionBuilder& type();
-
-        OptionBuilder& count(int minCount, int maxCount);
 
         OptionBuilder& hidden(bool hidden);
     private:

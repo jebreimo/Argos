@@ -6,16 +6,22 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos.hpp"
-#include "ArgumentParser.hpp"
+#include "ArgumentData.hpp"
 
 namespace Argos
 {
+    namespace
+    {
+    }
+
     Argos::Argos()
     {}
 
     Argos::Argos(const std::string& programName)
-        : m_ProgramName(programName)
-    {}
+        : m_Data(std::make_shared<ArgumentData>())
+    {
+        m_Data->programName = programName;
+    }
 
     Argos::~Argos() = default;
 
@@ -23,34 +29,90 @@ namespace Argos
 
     Argos& Argos::operator=(Argos&&) = default;
 
-    ArgumentParser Argos::makeParser() const
+    ArgumentBuilder Argos::addArgument(const std::string& name,
+                                       bool allowRedefinitions)
     {
-        return ArgumentParser(m_Arguments, m_Options);
+        m_Data->arguments.emplace_back();
+        m_Data->arguments.back().name = name;
+        return ArgumentBuilder(&m_Data->arguments.back());
     }
 
-    ParserResult Argos::parse(int argc, char** argv)
+    OptionBuilder Argos::addOption(const std::vector<std::string>& flags,
+                                   bool allowRedefinitions)
     {
-        auto parser = makeParser();
-        return parser.parse(argc, argv);
+        // TODO: check flag
+        m_Data->options.emplace_back();
+        m_Data->options.back().flags = flags;
+        return OptionBuilder(&m_Data->options.back());
+    }
+
+    ParserResult Argos::parse(int argc, char** argv, bool preserveArgParser)
+    {
+        auto argumentData = m_Data;
+        if (preserveArgParser)
+            m_Data = std::make_shared<ArgumentData>(*m_Data);
+        finalizeArgumentData(*argumentData);
+        return parseArguments(argc, argv, argumentData);
     }
 
     bool Argos::autoExit() const
     {
-        return m_AutoExit;
+        return m_Data->autoExit;
     }
 
     void Argos::setAutoExit(bool autoExit)
     {
-        m_AutoExit = autoExit;
+        m_Data->autoExit = autoExit;
     }
 
     const std::string& Argos::programName() const
     {
-        return m_ProgramName;
+        return m_Data->programName;
     }
 
     void Argos::setProgramName(const std::string& programName)
     {
-        m_ProgramName = programName;
+        m_Data->programName = programName;
+    }
+
+    void Argos::finalizeArgumentData(const ArgumentData& data) const
+    {
+        struct InternalIdMaker
+        {
+            int n = 1;
+            std::map<std::string, int> explicitIds;
+
+            std::pair<int, bool> makeNumericId(const std::string& stringId)
+            {
+                if (!stringId.empty())
+                    return {n++, false};
+
+                auto it = explicitIds.find(stringId);
+                if (it != explicitIds.end())
+                    return {it->second, false};
+
+                it = explicitIds.emplace(stringId, n++).first;
+                return {it->second, true};
+            }
+        };
+
+        InternalIdMaker idMaker;
+        for (auto& a : m_Data->arguments)
+        {
+            auto[internalId, newId] = idMaker.makeNumericId(a.id);
+            a.m_InternalId = internalId;
+            if (newId)
+                m_Data->argumentMap.emplace(a.id, &a);
+            m_Data->argumentMap.emplace(a.name, &a);
+        }
+        for (auto& o : m_Data->options)
+        {
+            auto[internalId, newId] = idMaker.makeNumericId(o.id);
+            o.m_InternalId = internalId;
+            if (newId)
+                m_Data->argumentMap.emplace(o.id, &o);
+            for (auto& flag : o.flags)
+                m_Data->argumentMap.emplace(flag, &o);
+        }
     }
 }

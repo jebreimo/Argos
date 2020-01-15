@@ -9,4 +9,61 @@
 
 namespace Argos
 {
+    OptionBuilder::OptionBuilder(Option* option)
+        : m_Option(option)
+    {}
+
+    OptionBuilder& OptionBuilder::argument(const std::string& name)
+    {
+        m_Option->argument = name;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::value(const std::string& value)
+    {
+        m_Option->value = value;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::text(const std::string& text)
+    {
+        m_Option->text = text;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::section(const std::string& name)
+    {
+        m_Option->section = name;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::id(const std::string& id)
+    {
+        m_Option->id = id;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::operation(ArgumentOperation operation)
+    {
+        m_Option->operation = operation;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::type(OptionType type)
+    {
+        m_Option->optionType = type;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::mandatory(bool mandatory)
+    {
+        m_Option->mandatory = mandatory;
+        return *this;
+    }
+
+    OptionBuilder& OptionBuilder::hidden(bool hidden)
+    {
+        m_Option->hidden = hidden;
+        return *this;
+    }
 }

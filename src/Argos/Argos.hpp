@@ -6,17 +6,15 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "ArgumentBuilder.hpp"
-
 #include <memory>
 #include <string>
-#include "ArgumentBuilder.hpp"
-#include "OptionBuilder.hpp"
+#include <set>
+#include "ParserBuilder.hpp"
 #include "ParserResult.hpp"
 
 namespace Argos
 {
-    class ArgumentParser;
+    class ArgumentData;
 
     class Argos
     {
@@ -35,13 +33,13 @@ namespace Argos
 
         Argos& operator=(const Argos&) = delete;
 
-        ArgumentBuilder& addArgument(const std::string& name);
+        ArgumentBuilder addArgument(const std::string& name,
+                                    bool allowRedefinitions = false);
 
-        OptionBuilder& addOption(const std::string& name);
+        OptionBuilder addOption(const std::vector<std::string>& flags,
+                                bool allowRedefinitions = false);
 
-        ArgumentParser makeParser() const;
-
-        ParserResult parse(int argc, char* argv[]);
+        ParserResult parse(int argc, char* argv[], bool preserveArgParser = false);
 
         bool autoExit() const;
 
@@ -51,9 +49,12 @@ namespace Argos
 
         void setProgramName(const std::string& programName);
     private:
-        std::vector<Argument> m_Arguments;
-        std::vector<Option> m_Options;
-        std::string m_ProgramName;
-        bool m_AutoExit;
+        void finalizeArgumentData(const ArgumentData& data) const;
+
+        std::shared_ptr<ArgumentData> m_Data;
+        std::set<std::string> m_Names;
+        //ParserBuilder m_ParserBuilder;
+        //std::string m_ProgramName;
+        //bool m_AutoExit;
     };
 }

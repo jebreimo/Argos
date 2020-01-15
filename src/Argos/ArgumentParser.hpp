@@ -10,19 +10,10 @@
 #include "ArgumentBuilder.hpp"
 #include "ParserResult.hpp"
 #include "Option.hpp"
+#include "ArgumentData.hpp"
 
 namespace Argos
 {
-    class ArgumentParser
-    {
-    public:
-        ArgumentParser(const std::vector<Argument>& arguments,
-                       const std::vector<Option>& options);
-
-        ParserResult parse(int argc, char* argv[]);
-    private:
-        std::vector<std::pair<Argument, int>> m_Arguments;
-        std::vector<std::pair<Option, int>> m_Options;
-        std::map<std::string, int> m_NameIds;
-    };
+    ParserResult parseArguments(int argc, char* argv[],
+                                const std::shared_ptr<ArgumentData>& data);
 }
