@@ -45,8 +45,9 @@ namespace Argos
         if (eq == std::string_view::npos)
             return std::string(*m_ArgsIt++);
 
+        ++eq;
         m_PrecededByEqual = true;
-        m_Remainder = m_ArgsIt->substr(eq + 1);
+        m_Remainder = m_ArgsIt->substr(eq);
         return std::string((m_ArgsIt++)->substr(0, eq));
     }
 
@@ -63,5 +64,10 @@ namespace Argos
         if (m_ArgsIt != m_Args.end())
             return std::string(*m_ArgsIt++);
         return {};
+    }
+
+    bool ArgumentIterator::hasRemainder() const
+    {
+        return m_PrecededByEqual;
     }
 }

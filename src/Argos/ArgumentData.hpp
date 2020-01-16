@@ -13,15 +13,16 @@
 
 namespace Argos
 {
-    using ArgumentVariant = std::variant<const Argument*, const Option*>;
+    //using ArgumentVariant = std::variant<const Argument*, const Option*>;
     struct ArgumentData
     {
         std::vector<Argument> arguments;
         std::vector<Option> options;
-        std::map<std::string, ArgumentVariant> argumentMap;
+        //std::map<std::string, ArgumentVariant> argumentMap;
         std::multimap<int, std::string> values;
         std::string programName;
         bool autoExit;
         bool allowAbbreviatedOptions;
+        bool ignoreUndefinedArguments;
     };
 }

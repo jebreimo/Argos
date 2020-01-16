@@ -94,10 +94,10 @@ TEST_CASE("Test skipping value after =.")
     Argos::ArgumentIterator it(makeArgs(strings));
     auto value = it.next();
     REQUIRE(value.has_value());
-    REQUIRE(*value == "--def");
+    REQUIRE(*value == "--def=");
     value = it.next();
     REQUIRE(value.has_value());
-    REQUIRE(*value == "--jkl");
+    REQUIRE(*value == "--jkl=");
     value = it.next();
     REQUIRE(value.has_value());
     REQUIRE(*value == "--p");

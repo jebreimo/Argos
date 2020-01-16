@@ -22,6 +22,8 @@ namespace Argos
         std::optional<std::string> next();
 
         std::optional<std::string> nextValue();
+
+        bool hasRemainder() const;
     private:
         std::vector<std::string_view> m_Args;
         std::vector<std::string_view>::const_iterator m_ArgsIt;

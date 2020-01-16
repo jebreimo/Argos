@@ -101,18 +101,18 @@ namespace Argos
         {
             auto[internalId, newId] = idMaker.makeNumericId(a.id);
             a.m_InternalId = internalId;
-            if (newId)
-                m_Data->argumentMap.emplace(a.id, &a);
-            m_Data->argumentMap.emplace(a.name, &a);
+            //if (newId)
+            //    m_Data->argumentMap.emplace(a.id, &a);
+            //m_Data->argumentMap.emplace(a.name, &a);
         }
         for (auto& o : m_Data->options)
         {
             auto[internalId, newId] = idMaker.makeNumericId(o.id);
             o.m_InternalId = internalId;
-            if (newId)
-                m_Data->argumentMap.emplace(o.id, &o);
-            for (auto& flag : o.flags)
-                m_Data->argumentMap.emplace(flag, &o);
+            //if (newId)
+            //    m_Data->argumentMap.emplace(o.id, &o);
+            //for (auto& flag : o.flags)
+            //    m_Data->argumentMap.emplace(flag, &o);
         }
     }
 }
