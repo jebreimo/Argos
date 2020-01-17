@@ -25,6 +25,18 @@ TEST_CASE("Test empty list of arguments.")
     REQUIRE(!it.nextValue());
 }
 
+TEST_CASE("Test empty argument.")
+{
+    std::vector<std::string> strings{"", "bc"};
+    Argos::ArgumentIterator it(makeArgs(strings));
+    auto value = it.next();
+    REQUIRE(value.has_value());
+    REQUIRE(value->empty());
+    value = it.next();
+    REQUIRE(value.has_value());
+    REQUIRE(*value == "bc");
+}
+
 TEST_CASE("Test short options.")
 {
     std::vector<std::string> strings {"-a", "-bc"};
@@ -71,16 +83,16 @@ TEST_CASE("Test long options.")
     REQUIRE(*value == "--abc");
     value = it.next();
     REQUIRE(value.has_value());
-    REQUIRE(*value == "--def");
+    REQUIRE(*value == "--def=");
     value = it.nextValue();
     REQUIRE(value.has_value());
     REQUIRE(*value == "ghi");
     value = it.next();
     REQUIRE(value.has_value());
-    REQUIRE(*value == "--jklmno");
+    REQUIRE(*value == "--jklmno=");
     value = it.nextValue();
     REQUIRE(value.has_value());
-    REQUIRE(*value == "");
+    REQUIRE(value->empty());
     value = it.next();
     REQUIRE(value.has_value());
     REQUIRE(*value == "--pq");

@@ -6,68 +6,102 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "ArgumentIterator.hpp"
+#include "ArgosException.hpp"
 
 namespace Argos
 {
     ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args)
         : m_Args(move(args)),
-          m_ArgsIt(m_Args.begin())
+          m_ArgsIt(m_Args.begin()),
+          m_Pos(0)
     {}
 
     std::optional<std::string> ArgumentIterator::next()
     {
-        if (m_PrecededByEqual)
+        if (m_Pos == std::string_view::npos)
         {
-            m_PrecededByEqual = false;
-            m_Remainder = {};
+            m_Pos = 0;
+            ++m_ArgsIt;
         }
-
-        if (!m_Remainder.empty())
+        else if (m_Pos != 0)
         {
-            auto flag = m_Remainder.front();
-            m_Remainder = m_Remainder.substr(1);
-            return std::string{'-', flag};
+            if (m_Pos < m_ArgsIt->size() && (*m_ArgsIt)[1] != '-')
+                return std::string{'-', (*m_ArgsIt)[m_Pos++]};
+
+            ++m_ArgsIt;
+            m_Pos = 0;
         }
 
         if (m_ArgsIt == m_Args.end())
             return {};
 
         if (m_ArgsIt->size() <= 2 || (*m_ArgsIt)[0] != '-')
-            return std::string(*m_ArgsIt++);
+        {
+            m_Pos = std::string_view::npos;
+            return std::string(*m_ArgsIt);
+        }
 
         if ((*m_ArgsIt)[1] != '-')
         {
-            m_Remainder = m_ArgsIt->substr(2);
-            return std::string((m_ArgsIt++)->substr(0, 2));
+            m_Pos = 2;
+            return std::string(m_ArgsIt->substr(0, 2));
         }
 
         auto eq = m_ArgsIt->find('=');
         if (eq == std::string_view::npos)
-            return std::string(*m_ArgsIt++);
+        {
+            m_Pos = std::string_view::npos;
+            return std::string(*m_ArgsIt);
+        }
 
-        ++eq;
-        m_PrecededByEqual = true;
-        m_Remainder = m_ArgsIt->substr(eq);
-        return std::string((m_ArgsIt++)->substr(0, eq));
+        m_Pos = eq + 1;
+        return std::string(m_ArgsIt->substr(0, m_Pos));
     }
 
     std::optional<std::string> ArgumentIterator::nextValue()
     {
-        if (!m_Remainder.empty() || m_PrecededByEqual)
+        if (m_ArgsIt == m_Args.end())
+            return {};
+
+        if (m_Pos != std::string_view::npos)
         {
-            auto result = m_Remainder;
-            m_Remainder = {};
-            m_PrecededByEqual = false;
+            auto result = m_ArgsIt->substr(m_Pos);
+            m_Pos = std::string_view::npos;
             return std::string(result);
         }
 
-        if (m_ArgsIt != m_Args.end())
-            return std::string(*m_ArgsIt++);
-        return {};
+        if (++m_ArgsIt == m_Args.end())
+        {
+            m_Pos = 0;
+            return {};
+        }
+
+        m_Pos = m_ArgsIt->size();
+        return std::string(*m_ArgsIt);
+    }
+
+    std::string_view ArgumentIterator::current() const
+    {
+        if (m_ArgsIt == m_Args.end())
+            ARGOS_THROW("There is no current argument.");
+        return *m_ArgsIt;
     }
 
     bool ArgumentIterator::hasRemainder() const
     {
-        return m_PrecededByEqual;
+        return m_ArgsIt != m_Args.end() && m_Pos <= m_ArgsIt->size();
+    }
+
+    std::string_view ArgumentIterator::remainder() const
+    {
+        if (m_ArgsIt == m_Args.end())
+            ARGOS_THROW("There is no current argument.");
+        return m_ArgsIt->substr(m_Pos);
+    }
+
+    void ArgumentIterator::skipRemainder()
+    {
+        if (m_ArgsIt != m_Args.end() && m_Pos != std::string_view::npos)
+            m_Pos = std::string_view::npos;
     }
 }

@@ -17,17 +17,22 @@ namespace Argos
     class ArgumentIterator
     {
     public:
-        ArgumentIterator(std::vector<std::string_view> args);
+        explicit ArgumentIterator(std::vector<std::string_view> args);
 
         std::optional<std::string> next();
 
         std::optional<std::string> nextValue();
 
+        std::string_view current() const;
+
         bool hasRemainder() const;
+
+        std::string_view remainder() const;
+
+        void skipRemainder();
     private:
         std::vector<std::string_view> m_Args;
         std::vector<std::string_view>::const_iterator m_ArgsIt;
-        std::string_view m_Remainder;
-        bool m_PrecededByEqual = false;
+        size_t m_Pos;
     };
 }
