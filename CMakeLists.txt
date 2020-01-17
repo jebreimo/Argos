@@ -25,7 +25,7 @@ add_library(Argos
     src/Argos/Option.hpp
     src/Argos/ArgumentOperation.hpp
     src/Argos/ArgumentIterator.cpp
-    src/Argos/ArgumentIterator.hpp src/Argos/OptionBuilder.cpp src/Argos/OptionBuilder.hpp src/Argos/OptionType.hpp src/Argos/ParserBuilder.cpp src/Argos/ParserBuilder.hpp src/Argos/ArgumentData.hpp src/Argos/ArgosException.hpp src/Argos/VisitorUtilities.hpp)
+    src/Argos/ArgumentIterator.hpp src/Argos/OptionBuilder.cpp src/Argos/OptionBuilder.hpp src/Argos/OptionType.hpp src/Argos/ParserBuilder.cpp src/Argos/ParserBuilder.hpp src/Argos/ArgumentData.hpp src/Argos/ArgosException.hpp src/Argos/Utilities.hpp src/Argos/Utilities.cpp)
 
 target_include_directories(Argos
     PRIVATE

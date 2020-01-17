@@ -7,9 +7,11 @@
 //****************************************************************************
 #pragma once
 
-// Copied from C++17 in Detail by Bartłomiej Filipek
+#include <string_view>
+
 namespace Argos
 {
+    // Copied from C++17 in Detail by Bartłomiej Filipek
     template <class... Ts>
     struct overload : Ts ...
     {
@@ -17,4 +19,8 @@ namespace Argos
     };
 
     template <class... Ts> overload(Ts...) -> overload<Ts...>;
+
+    bool startsWith(std::string_view str, std::string_view prefix);
+
+    bool startsWithCI(std::string_view str, std::string_view prefix);
 }
