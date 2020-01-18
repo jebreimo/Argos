@@ -23,4 +23,6 @@ namespace Argos
     bool startsWith(std::string_view str, std::string_view prefix);
 
     bool startsWithCI(std::string_view str, std::string_view prefix);
+
+    bool isLessCI(std::string_view str, std::string_view prefix);
 }

@@ -25,7 +25,15 @@ TEST_CASE("Test startsWithCI")
     REQUIRE(Argos::startsWithCI("ABCDEF", "ABcDEF"));
     REQUIRE(Argos::startsWithCI("ABCDEF", "abc"));
     REQUIRE_FALSE(Argos::startsWithCI("ABCDEF", "ABCDEFG"));
-    REQUIRE(Argos::startsWithCI("@ABCDEF", "@abcdef"));
-    REQUIRE_FALSE(Argos::startsWithCI("@ABCDEF", "`abcdef"));
-    REQUIRE_FALSE(Argos::startsWithCI("{ABCDEF", "[abcdef"));
+    REQUIRE(Argos::startsWithCI("@ABCDYZ", "@abcdyz"));
+    REQUIRE_FALSE(Argos::startsWithCI("@ABCDYZ", "`abcdyz"));
+    REQUIRE_FALSE(Argos::startsWithCI("{ABCDYZ", "[abcdyz"));
+}
+
+TEST_CASE("Test isLessCI")
+{
+    REQUIRE(Argos::isLessCI("abc", "ABD"));
+    REQUIRE_FALSE(Argos::isLessCI("abc", "ABC"));
+    REQUIRE(Argos::isLessCI("abc", "ABCD"));
+    REQUIRE_FALSE(Argos::isLessCI("aBCD", "ABC"));
 }
