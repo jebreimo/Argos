@@ -6,12 +6,37 @@
 // License text is included with the source distribution.
 //****************************************************************************
 
-#include "Utilities.hpp"
+#include "StringUtilities.hpp"
 
 #include <algorithm>
 
 namespace Argos
 {
+    bool areEqualCharsCI(char a, char b)
+    {
+        if (a == b)
+            return true;
+        auto ua = uint8_t(a), ub = uint8_t(b);
+        if ((ua ^ ub) != 32)
+            return false;
+        return 'A' <= (ua & 0xDFu) && (ua & 0xDFu) <= 'Z';
+    }
+
+    bool areEqualCI(std::string_view str1, std::string_view str2)
+    {
+        if (str1.size() != str2.size())
+            return false;
+        return std::equal(str2.begin(), str2.end(), str1.begin(), areEqualCharsCI);
+    }
+
+    bool areEqual(std::string_view str1, std::string_view str2,
+                  bool caseInsensitive)
+    {
+        if (caseInsensitive)
+            return areEqualCI(str1, str2);
+        return str1 == str2;
+    }
+
     bool startsWith(std::string_view str, std::string_view prefix)
     {
         if (str.size() < prefix.size())
@@ -23,15 +48,14 @@ namespace Argos
     {
         if (str.size() < prefix.size())
             return false;
-        return std::equal(prefix.begin(), prefix.end(), str.begin(),
-                          [](auto a, auto b)
-                          {
-                              if (a == b)
-                                  return true;
-                              if ((a ^ b) != 32)
-                                  return false;
-                              return 'A' <= (a & 0xDF) && (a & 0xDF) <= 'Z';
-                          });
+        return std::equal(prefix.begin(), prefix.end(), str.begin(), areEqualCharsCI);
+    }
+
+    bool startsWith(std::string_view str, std::string_view prefix, bool caseInsensitive)
+    {
+        if (caseInsensitive)
+            return startsWithCI(str, prefix);
+        return startsWith(str, prefix);
     }
 
     int compareCI(int c1, int c2)
@@ -54,5 +78,12 @@ namespace Argos
                 return cmp < 0;
         }
         return str1.size() < str2.size();
+    }
+
+    bool isLess(std::string_view str1, std::string_view str2, bool caseInsensitive)
+    {
+        if (caseInsensitive)
+            return isLessCI(str1, str2);
+        return str1 < str2;
     }
 }

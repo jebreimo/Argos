@@ -10,11 +10,23 @@
 
 namespace Argos
 {
+    ArgumentIterator::ArgumentIterator()
+        : m_ArgsIt(m_Args.end()),
+          m_Pos(0)
+    {}
+
     ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args)
         : m_Args(move(args)),
           m_ArgsIt(m_Args.begin()),
           m_Pos(0)
     {}
+
+    void ArgumentIterator::setArguments(std::vector<std::string_view> args)
+    {
+        m_Args = move(args);
+        m_ArgsIt = m_Args.begin();
+        m_Pos = 0;
+    }
 
     std::optional<std::string> ArgumentIterator::next()
     {

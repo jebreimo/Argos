@@ -7,7 +7,7 @@
 //****************************************************************************
 
 #include <catch2/catch.hpp>
-#include "Argos/Utilities.hpp"
+#include "Argos/StringUtilities.hpp"
 
 TEST_CASE("Test startsWith")
 {

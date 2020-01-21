@@ -17,7 +17,11 @@ namespace Argos
     class ArgumentIterator
     {
     public:
+        ArgumentIterator();
+
         explicit ArgumentIterator(std::vector<std::string_view> args);
+
+        void setArguments(std::vector<std::string_view> args);
 
         std::optional<std::string> next();
 

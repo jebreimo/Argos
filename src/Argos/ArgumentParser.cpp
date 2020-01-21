@@ -8,10 +8,146 @@
 #include "ArgumentParser.hpp"
 #include "ArgumentIterator.hpp"
 #include "ArgosException.hpp"
-//#include "VisitorUtilities.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
+    namespace
+    {
+        std::vector<std::string_view> makeStringViewVector(
+                int count, char** strings, bool ignoreFirst)
+        {
+            std::vector<std::string_view> result;
+            for (int i = ignoreFirst ? 1 : 0; i < count; ++i)
+                result.emplace_back(strings[i]);
+            return result;
+        }
+
+        std::vector<std::string_view> makeStringViewVector(
+                const std::vector<std::string>& strings)
+        {
+            std::vector<std::string_view> result;
+            for (auto& s : strings)
+                result.emplace_back(s);
+            return result;
+        }
+
+        using OptionTable = std::vector<std::pair<std::string_view, const Option*>>;
+
+        OptionTable makeOptionIndex(const std::vector<Option>& options,
+                                    bool caseInsensitive)
+        {
+            OptionTable index;
+            for (auto& option : options)
+            {
+                for (auto& flag : option.flags)
+                    index.emplace_back(flag, &option);
+            }
+            if (caseInsensitive)
+            {
+                std::sort(index.begin(), index.end(), [](auto& a, auto& b)
+                {
+                    return isLessCI(a.first, b.first);
+                });
+            }
+            else
+            {
+                std::sort(index.begin(), index.end(), [](auto& a, auto& b)
+                {
+                    return a.first < b.first;
+                });
+            }
+        }
+
+        OptionTable::const_iterator findOptionCS(const OptionTable& options,
+                                                 std::string_view arg)
+        {
+            OptionTable::value_type key = {arg, nullptr};
+            return std::lower_bound(
+                    options.begin(), options.end(),
+                    key,
+                    [&](auto& a, auto& b) {return a.first < b.first;});
+        }
+
+        OptionTable::const_iterator findOptionCI(const OptionTable& options,
+                                                 std::string_view arg)
+        {
+            OptionTable::value_type key = {arg, nullptr};
+            return std::lower_bound(
+                    options.begin(), options.end(),
+                    key,
+                    [&](auto& a, auto& b) {return isLessCI(a.first, b.first);});
+        }
+
+        const Option* findOption(const OptionTable& options,
+                                 std::string_view arg,
+                                 bool allowAbbreviations,
+                                 bool caseInsensitive)
+        {
+            OptionTable::value_type key = {arg, nullptr};
+            auto it = caseInsensitive ? findOptionCI(options, arg)
+                                      : findOptionCS(options, arg);
+            if (it == options.end())
+                return nullptr;
+            if (it->first == arg)
+                return it->second;
+            if (caseInsensitive && areEqualCI(it->first, arg))
+                return it->second;
+            if (!allowAbbreviations)
+                return nullptr;
+            if (!startsWith(it->first, arg, caseInsensitive))
+                return nullptr;
+            auto nxt = next(it);
+            if (nxt != options.end()
+                && startsWith(nxt->first, arg, caseInsensitive))
+                return nullptr;
+            return it->second;
+        }
+
+        std::optional<std::vector<std::pair<size_t, const Argument*>>>
+        makeArgumentCounters(const std::vector<Argument>& arguments)
+        {
+            std::vector<std::pair<size_t, const Argument*>> result;
+            for (auto& arg : arguments)
+            {
+                if (!result.empty() && result.back().first == SIZE_MAX)
+                    return {};
+                if (arg.minCount == arg.maxCount)
+                    result.emplace_back(arg.minCount, &arg);
+                else
+                    result.emplace_back(SIZE_MAX, &arg);
+            }
+            return move(result);
+        }
+    }
+
+    ArgumentParser::ArgumentParser(int argc, char** argv, std::shared_ptr<ArgumentData> data)
+            : m_Data(move(data)),
+              m_Arguments(makeArgumentCounters(m_Data->arguments)),
+              m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_ArgumentIterator(makeStringViewVector(argc, argv, true))
+    {}
+
+    ArgumentParser::ArgumentParser(const std::vector<std::string>& args,
+                                   std::shared_ptr<ArgumentData> data)
+            : m_Data(move(data)),
+              m_Arguments(makeArgumentCounters(m_Data->arguments)),
+              m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_ArgumentIterator(makeStringViewVector(args))
+    {}
+
+    std::optional<int> ArgumentParser::next()
+    {
+        auto arg = m_ArgumentIterator.next();
+        if (!arg)
+            return {};
+
+        auto option = findOption(m_Options, *arg,
+                                 m_Data->allowAbbreviatedOptions,
+                                 m_Data->caseInsensitive);
+        return {};
+    }
+
     //std::tuple<ArgumentOperation, OptionType, int, const std::string*>
     //getArgumentParams(const ArgumentVariant & variant)
     //{
@@ -51,6 +187,14 @@ namespace Argos
             map.erase(it++);
     }
 
+    //std::vector<std::pair<std::string_view, const Option*>>::const_iterator findOption(
+    //        const std::map<std::string, const Option*>& map,
+    //        const std::string& option,
+    //        bool )
+    //
+    //{
+    //}
+
     ParserResult parseArguments(int argc, char** argv,
                                 const std::shared_ptr<ArgumentData>& data)
     {
@@ -79,14 +223,15 @@ namespace Argos
                 break;
 
             auto it = optionMap.find(*arg);
-            //if (it == optionMap.end() && data->allowAbbreviatedOptions)
-            //{
-            //    it = optionMap.lower_bound(*arg);
-            //    //if (it != optionMap.end()
-            //    //    && startsWith(it->first, *arg)
-            //    //    && next(it) == optionMap.end()
-            //    //    || !startsWith(next(it)->first, *arg))
-            //}
+            if (it == optionMap.end() && data->allowAbbreviatedOptions)
+            {
+                it = optionMap.lower_bound(*arg);
+                //if (it != optionMap.end() && !startsWith(it->first, *arg))
+                //    it = optionM
+                //    || (next(it) != optionMap.end()
+                //        && startsWith(next(it)->first, *arg)))
+
+            }
             if (it != optionMap.end())
             {
                 auto& option = *it->second;

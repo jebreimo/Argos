@@ -21,8 +21,9 @@ namespace Argos
         //std::map<std::string, ArgumentVariant> argumentMap;
         std::multimap<int, std::string> values;
         std::string programName;
-        bool autoExit;
-        bool allowAbbreviatedOptions;
-        bool ignoreUndefinedArguments;
+        bool autoExit = true;
+        bool allowAbbreviatedOptions = false;
+        bool ignoreUndefinedArguments = false;
+        bool caseInsensitive = false;
     };
 }
