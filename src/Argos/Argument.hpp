@@ -16,11 +16,12 @@ namespace Argos
         std::string name;
         std::string text;
         std::string section;
-        std::string id;
+        std::string valueName;
         ArgumentOperation operation = ArgumentOperation::ASSIGN;
         int minCount = 1;
         int maxCount = 1;
         bool hidden = false;
-        int m_InternalId;
+        int id = 0;
+        int valueId_ = 0;
     };
 }

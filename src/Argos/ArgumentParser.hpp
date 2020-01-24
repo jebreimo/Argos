@@ -12,6 +12,7 @@
 #include "ArgumentIterator.hpp"
 #include "Option.hpp"
 #include "ParserResult.hpp"
+#include "ArgumentCounter.hpp"
 
 namespace Argos
 {
@@ -26,13 +27,14 @@ namespace Argos
 
         std::optional<int> next();
     private:
+        void processOption(const Option& option);
+
+        std::optional<int> next(bool requiresArgumentId);
+
         std::shared_ptr<ArgumentData> m_Data;
-        std::optional<std::vector<std::pair<size_t, const Argument*>>> m_Arguments;
         std::vector<std::pair<std::string_view, const Option*>> m_Options;
         ParserResult m_ParserResult;
         ArgumentIterator m_ArgumentIterator;
+        std::optional<ArgumentCounter> m_ArgumentCounter;
     };
-
-    ParserResult parseArguments(int argc, char* argv[],
-                                const std::shared_ptr<ArgumentData>& data);
 }

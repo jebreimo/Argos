@@ -32,9 +32,9 @@ namespace Argos
     ArgumentBuilder Argos::addArgument(const std::string& name,
                                        bool allowRedefinitions)
     {
-        m_Data->arguments.emplace_back();
-        m_Data->arguments.back().name = name;
-        return ArgumentBuilder(&m_Data->arguments.back());
+        //m_Data->arguments.emplace_back();
+        //m_Data->arguments.back().name = name;
+        return ArgumentBuilder(name); //&m_Data->arguments.back());
     }
 
     OptionBuilder Argos::addOption(const std::vector<std::string>& flags,
@@ -52,7 +52,9 @@ namespace Argos
         if (preserveArgParser)
             m_Data = std::make_shared<ArgumentData>(*m_Data);
         finalizeArgumentData(*argumentData);
-        return parseArguments(argc, argv, argumentData);
+        ArgumentParser parser(argc, argv, argumentData);
+        // parser.next(argc, argv, argumentData);
+        return ParserResult(argumentData);
     }
 
     bool Argos::autoExit() const
@@ -99,8 +101,8 @@ namespace Argos
         InternalIdMaker idMaker;
         for (auto& a : m_Data->arguments)
         {
-            auto[internalId, newId] = idMaker.makeNumericId(a.id);
-            a.m_InternalId = internalId;
+            auto[internalId, newId] = idMaker.makeNumericId(a.valueName);
+            a.valueId_ = internalId;
             //if (newId)
             //    m_Data->argumentMap.emplace(a.id, &a);
             //m_Data->argumentMap.emplace(a.name, &a);

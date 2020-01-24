@@ -21,7 +21,7 @@ endif ()
 add_executable(ArgosTest
     ArgosTestMain.cpp
     test_Something.cpp
-    test_ArgumentIterator.cpp test_Utilities.cpp)
+    test_ArgumentIterator.cpp test_Utilities.cpp test_ArgumentCounter.cpp)
 
 target_link_libraries(ArgosTest
     PRIVATE

@@ -10,6 +10,7 @@
 #include <variant>
 #include "Argument.hpp"
 #include "Option.hpp"
+#include "OptionStyle.hpp"
 
 namespace Argos
 {
@@ -21,9 +22,12 @@ namespace Argos
         //std::map<std::string, ArgumentVariant> argumentMap;
         std::multimap<int, std::string> values;
         std::string programName;
+
+        OptionStyle optionStyle = OptionStyle::STANDARD;
         bool autoExit = true;
         bool allowAbbreviatedOptions = false;
         bool ignoreUndefinedArguments = false;
+        bool ignoreMissingArguments = false;
         bool caseInsensitive = false;
     };
 }

@@ -9,6 +9,7 @@
 #include "ArgumentIterator.hpp"
 #include "ArgosException.hpp"
 #include "StringUtilities.hpp"
+#include "HelpTextWriter.hpp"
 
 namespace Argos
 {
@@ -57,6 +58,7 @@ namespace Argos
                     return a.first < b.first;
                 });
             }
+            return index;
         }
 
         OptionTable::const_iterator findOptionCS(const OptionTable& options,
@@ -88,6 +90,13 @@ namespace Argos
             auto it = caseInsensitive ? findOptionCI(options, arg)
                                       : findOptionCS(options, arg);
             if (it == options.end())
+            {
+                if (arg.size() > 2 && arg.back() == '=')
+                    arg = arg.substr(arg.size() - 1);
+                it = caseInsensitive ? findOptionCI(options, arg)
+                                     : findOptionCS(options, arg);
+            }
+            if (it == options.end())
                 return nullptr;
             if (it->first == arg)
                 return it->second;
@@ -104,39 +113,105 @@ namespace Argos
             return it->second;
         }
 
-        std::optional<std::vector<std::pair<size_t, const Argument*>>>
-        makeArgumentCounters(const std::vector<Argument>& arguments)
+        void assign(std::multimap<int, std::string>& map,
+                    int key, const std::string& value)
         {
-            std::vector<std::pair<size_t, const Argument*>> result;
-            for (auto& arg : arguments)
+            auto it = map.lower_bound(key);
+            if (it == map.end() || it->first != key)
             {
-                if (!result.empty() && result.back().first == SIZE_MAX)
-                    return {};
-                if (arg.minCount == arg.maxCount)
-                    result.emplace_back(arg.minCount, &arg);
-                else
-                    result.emplace_back(SIZE_MAX, &arg);
+                map.emplace(key, value);
+                return;
             }
-            return move(result);
+
+            it->second = value;
+            ++it;
+            while (it != map.end() && it->first == key)
+                map.erase(it++);
+        }
+
+        bool isOption(const std::string& s, OptionStyle style)
+        {
+            if (s.size() < 2)
+                return false;
+
+            if (style == OptionStyle::WINDOWS)
+                return s[0] == '/';
+            else
+                return s[0] == '-';
         }
     }
 
     ArgumentParser::ArgumentParser(int argc, char** argv, std::shared_ptr<ArgumentData> data)
             : m_Data(move(data)),
-              m_Arguments(makeArgumentCounters(m_Data->arguments)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_ParserResult(m_Data),
               m_ArgumentIterator(makeStringViewVector(argc, argv, true))
-    {}
+    {
+        if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
+            m_ArgumentCounter.emplace(m_Data->arguments);
+    }
 
     ArgumentParser::ArgumentParser(const std::vector<std::string>& args,
                                    std::shared_ptr<ArgumentData> data)
             : m_Data(move(data)),
-              m_Arguments(makeArgumentCounters(m_Data->arguments)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_ParserResult(m_Data),
               m_ArgumentIterator(makeStringViewVector(args))
-    {}
+    {
+        if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
+            m_ArgumentCounter.emplace(m_Data->arguments);
+    }
 
     std::optional<int> ArgumentParser::next()
+    {
+        return next(true);
+    }
+
+    void ArgumentParser::processOption(const Option& option)
+    {
+        switch (option.operation)
+        {
+        case ArgumentOperation::ASSIGN:
+            if (!option.value.empty())
+            {
+                assign(m_Data->values, option.m_InternalId, option.value);
+            }
+            else if (auto value = m_ArgumentIterator.nextValue(); value)
+            {
+                assign(m_Data->values, option.m_InternalId, *value);
+            }
+            else
+            {
+                // TODO: Display error message about missing argument.
+            }
+            break;
+        case ArgumentOperation::APPEND:
+            if (!option.value.empty())
+            {
+                m_Data->values.emplace(option.m_InternalId, option.value);
+            }
+            else if (auto value = m_ArgumentIterator.nextValue(); value)
+            {
+                m_Data->values.emplace(option.m_InternalId, *value);
+            }
+            else
+            {
+                // TODO: Display error message about missing argument.
+            }
+            break;
+        case ArgumentOperation::CLEAR:
+            m_Data->values.erase(option.m_InternalId);
+            break;
+        case ArgumentOperation::NONE:
+            break;
+        }
+        if (m_ArgumentIterator.hasRemainder())
+        {
+            // TODO: Display error message about incorrect argument.
+        }
+    }
+
+    std::optional<int> ArgumentParser::next(bool requiresArgumentId)
     {
         auto arg = m_ArgumentIterator.next();
         if (!arg)
@@ -145,152 +220,31 @@ namespace Argos
         auto option = findOption(m_Options, *arg,
                                  m_Data->allowAbbreviatedOptions,
                                  m_Data->caseInsensitive);
-        return {};
-    }
-
-    //std::tuple<ArgumentOperation, OptionType, int, const std::string*>
-    //getArgumentParams(const ArgumentVariant & variant)
-    //{
-    //    std::tuple<ArgumentOperation, OptionType, int, const std::string*> result;
-    //    std::visit(overload {
-    //            [&](const Argument* a)
-    //            {
-    //                result = {a->operation,
-    //                          OptionType::NORMAL,
-    //                          a->m_InternalId,
-    //                          nullptr};
-    //            },
-    //            [&](const Option* o)
-    //            {
-    //                result = {o->operation,
-    //                          o->optionType,
-    //                          o->m_InternalId,
-    //                          o->argument.empty() ? &o->value : nullptr};
-    //            }
-    //    }, variant);
-    //    return result;
-    //}
-
-    void assign(std::multimap<int, std::string>& map,
-                int key, const std::string& value)
-    {
-        auto it = map.lower_bound(key);
-        if (it == map.end() || it->first != key)
+        if (option)
         {
-            map.emplace(key, value);
-            return;
+            processOption(*option);
         }
-
-        it->second = value;
-        ++it;
-        while (it != map.end() && it->first == key)
-            map.erase(it++);
-    }
-
-    //std::vector<std::pair<std::string_view, const Option*>>::const_iterator findOption(
-    //        const std::map<std::string, const Option*>& map,
-    //        const std::string& option,
-    //        bool )
-    //
-    //{
-    //}
-
-    ParserResult parseArguments(int argc, char** argv,
-                                const std::shared_ptr<ArgumentData>& data)
-    {
-        if (argc == 0)
-            ARGOS_THROW("argc is 0");
-        if (!data)
-            ARGOS_THROW("data is null");
-        if (data->programName.empty())
-            data->programName = argv[0];
-
-        std::map<std::string, const Option*> optionMap;
-        for (auto& option : data->options)
+        else if (isOption(*arg, m_Data->optionStyle))
         {
-            for (auto& flag : option.flags)
-                optionMap.emplace(flag, &option);
-        }
-
-        std::vector<std::string_view> args;
-        for (int i = 1; i < argc; ++i)
-            args.emplace_back(argv[i]);
-        ArgumentIterator iterator(args);
-        while (true)
-        {
-            auto arg = iterator.next();
-            if (!arg)
-                break;
-
-            auto it = optionMap.find(*arg);
-            if (it == optionMap.end() && data->allowAbbreviatedOptions)
+            if (m_Data->ignoreUndefinedArguments && *arg == m_ArgumentIterator.current())
             {
-                it = optionMap.lower_bound(*arg);
-                //if (it != optionMap.end() && !startsWith(it->first, *arg))
-                //    it = optionM
-                //    || (next(it) != optionMap.end()
-                //        && startsWith(next(it)->first, *arg)))
-
-            }
-            if (it != optionMap.end())
-            {
-                auto& option = *it->second;
-                switch (option.operation)
-                {
-                case ArgumentOperation::ASSIGN:
-                    if (!option.value.empty())
-                    {
-                        assign(data->values, option.m_InternalId,
-                               option.value);
-                    }
-                    else if (auto value = iterator.nextValue(); value)
-                    {
-                        assign(data->values, option.m_InternalId, *value);
-                    }
-                    else
-                    {
-                        // TODO: Display error message about missing argument.
-                    }
-                    break;
-                case ArgumentOperation::APPEND:
-                    if (!option.value.empty())
-                    {
-                        data->values.emplace(option.m_InternalId,
-                                             option.value);
-                    }
-                    else if (auto value = iterator.nextValue(); value)
-                    {
-                        data->values.emplace(option.m_InternalId, *value);
-                    }
-                    else
-                    {
-                        // TODO: Display error message about missing argument.
-                    }
-                    break;
-                case ArgumentOperation::CLEAR:
-                    data->values.erase(option.m_InternalId);
-                    break;
-                case ArgumentOperation::NONE:
-                    break;
-                }
-                if (iterator.hasRemainder())
-                {
-                    // TODO: Display error message about incorrect argument.
-                }
-            }
-            else if (arg->size() <= 1 || (*arg)[0] != '-')
-            {
-                // TODO: Normal argument
-            }
-            else if (data->ignoreUndefinedArguments)
-            {
-                // TODO: Copy argument to a list of some kind.
+                m_ParserResult.addUnprocessedArgument(*arg);
             }
             else
             {
-                // TODO: Display error message about undefined option.
-            }
+                HelpTextWriter writer(m_Data);
+                writer.writeErrorMessage(
+                        "Invalid option: " + std::string(m_ArgumentIterator.current()));
+            } // TODO Show error and return
         }
-        return ParserResult();
+        else if (m_ArgumentCounter)
+        {
+
+        }
+        else
+        {
+
+        }
+        return {};
     }
 }

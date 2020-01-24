@@ -9,4 +9,22 @@
 
 namespace Argos
 {
+    ParserResult::ParserResult(std::shared_ptr<ArgumentData> data)
+        : m_Data(move(data))
+    {}
+
+    const std::vector<std::string>& ParserResult::arguments() const
+    {
+        return m_Arguments;
+    }
+
+    void ParserResult::addArgument(const std::string& arg)
+    {
+        m_Arguments.push_back(arg);
+    }
+
+    void ParserResult::addUnprocessedArgument(const std::string& arg)
+    {
+        m_UnprocessedArguments.push_back(arg);
+    }
 }
