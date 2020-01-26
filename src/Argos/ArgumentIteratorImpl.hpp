@@ -9,20 +9,20 @@
 #include <string>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
-#include "StandardOptionsIterator.hpp"
+#include "StandardOptionIterator.hpp"
 #include "OptionData.hpp"
 #include "ParserResultImpl.hpp"
 
 namespace Argos
 {
-    class ArgumentIterator
+    class ArgumentIteratorImpl
     {
     public:
-        ArgumentIterator(int argc, char* argv[],
-                         std::shared_ptr<ParserData> data);
+        ArgumentIteratorImpl(int argc, char* argv[],
+                             std::shared_ptr<ParserData> data);
 
-        ArgumentIterator(const std::vector<std::string>& args,
-                         std::shared_ptr<ParserData> data);
+        ArgumentIteratorImpl(const std::vector<std::string>& args,
+                             std::shared_ptr<ParserData> data);
 
         std::optional<int> next();
     private:
@@ -37,7 +37,7 @@ namespace Argos
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
         ParserResultImpl m_ParserResult;
-        StandardOptionsIterator m_ArgumentIterator;
+        StandardOptionIterator m_ArgumentIterator;
         std::optional<ArgumentCounter> m_ArgumentCounter;
         enum class State
         {

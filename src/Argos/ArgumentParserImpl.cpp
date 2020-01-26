@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos.hpp"
+#include "ArgumentParserImpl.hpp"
 #include "ParserData.hpp"
 
 namespace Argos
@@ -14,27 +14,27 @@ namespace Argos
     {
     }
 
-    Argos::Argos()
+    ArgumentParserImpl::ArgumentParserImpl()
     {}
 
-    Argos::Argos(const std::string& programName)
+    ArgumentParserImpl::ArgumentParserImpl(const std::string& programName)
         : m_Data(std::make_shared<ParserData>())
     {
         m_Data->programName = programName;
     }
 
-    Argos::~Argos() = default;
+    ArgumentParserImpl::~ArgumentParserImpl() = default;
 
-    Argos::Argos(Argos&&) = default;
+    ArgumentParserImpl::ArgumentParserImpl(ArgumentParserImpl&&) = default;
 
-    Argos& Argos::operator=(Argos&&) = default;
+    ArgumentParserImpl& ArgumentParserImpl::operator=(ArgumentParserImpl&&) = default;
 
-    void Argos::add(ArgumentBuilder builder)
+    void ArgumentParserImpl::add(Argument builder)
     {
         m_Data->arguments.push_back(builder.get());
     }
 
-    void Argos::add(OptionBuilder builder)
+    void ArgumentParserImpl::add(Option builder)
     {
         m_Data->options.push_back(builder.get());
     }
@@ -56,38 +56,38 @@ namespace Argos
     //    return OptionBuilder(&m_Data->options.back());
     //}
 
-    ParserResultImpl Argos::parse(int argc, char** argv, bool preserveArgParser)
+    ParserResultImpl ArgumentParserImpl::parse(int argc, char** argv, bool preserveArgParser)
     {
         auto argumentData = m_Data;
         if (preserveArgParser)
             m_Data = std::make_shared<ParserData>(*m_Data);
         finalizeArgumentData(*argumentData);
-        ArgumentIterator parser(argc, argv, argumentData);
+        ArgumentIteratorImpl parser(argc, argv, argumentData);
         // parser.next(argc, argv, argumentData);
         return ParserResultImpl(argumentData);
     }
 
-    bool Argos::autoExit() const
+    bool ArgumentParserImpl::autoExit() const
     {
         return m_Data->autoExit;
     }
 
-    void Argos::setAutoExit(bool autoExit)
+    void ArgumentParserImpl::setAutoExit(bool autoExit)
     {
         m_Data->autoExit = autoExit;
     }
 
-    const std::string& Argos::programName() const
+    const std::string& ArgumentParserImpl::programName() const
     {
         return m_Data->programName;
     }
 
-    void Argos::setProgramName(const std::string& programName)
+    void ArgumentParserImpl::setProgramName(const std::string& programName)
     {
         m_Data->programName = programName;
     }
 
-    void Argos::finalizeArgumentData(const ParserData& data) const
+    void ArgumentParserImpl::finalizeArgumentData(const ParserData& data) const
     {
         struct InternalIdMaker
         {

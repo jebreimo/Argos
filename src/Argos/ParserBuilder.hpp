@@ -6,20 +6,20 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "ArgumentBuilder.hpp"
-#include "ArgumentIterator.hpp"
-#include "OptionBuilder.hpp"
+#include "Argument.hpp"
+#include "ArgumentIteratorImpl.hpp"
+#include "Option.hpp"
 
 namespace Argos
 {
     class ParserBuilder
     {
     public:
-        ArgumentBuilder addArgument(const std::string& name);
+        Argument addArgument(const std::string& name);
 
-        OptionBuilder addOption(const std::string& flag);
+        Option addOption(const std::string& flag);
 
-        ArgumentIterator makeParser() const;
+        ArgumentIteratorImpl makeParser() const;
     private:
         std::vector<ArgumentData> m_Arguments;
         std::vector<OptionData> m_Options;

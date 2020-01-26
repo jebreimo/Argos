@@ -10,28 +10,28 @@
 
 namespace Argos
 {
-    class ArgumentBuilder
+    class Argument
     {
     public:
-        ArgumentBuilder(const std::string& name);
+        Argument(const std::string& name);
 
-        ArgumentBuilder& text(const std::string& text);
+        Argument& text(const std::string& text);
 
-        ArgumentBuilder& section(const std::string& name);
+        Argument& section(const std::string& name);
 
-        ArgumentBuilder& valueName(const std::string& id);
+        Argument& valueName(const std::string& id);
 
-        ArgumentBuilder& operation(ArgumentOperation operation);
+        Argument& operation(ArgumentOperation operation);
 
-        ArgumentBuilder& optional(bool optional);
+        Argument& optional(bool optional);
 
-        ArgumentBuilder& count(int n);
+        Argument& count(int n);
 
-        ArgumentBuilder& count(int minCount, int maxCount);
+        Argument& count(int minCount, int maxCount);
 
-        ArgumentBuilder& hidden(bool hidden);
+        Argument& hidden(bool hidden);
 
-        ArgumentBuilder& id(int id);
+        Argument& id(int id);
 
         ArgumentData&& get();
     private:

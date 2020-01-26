@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "ArgumentIterator.hpp"
+#include "ArgumentIteratorImpl.hpp"
 
 #include <cassert>
 #include "ArgosException.hpp"
@@ -130,7 +130,7 @@ namespace Argos
         }
     }
 
-    ArgumentIterator::ArgumentIterator(int argc, char** argv, std::shared_ptr<ParserData> data)
+    ArgumentIteratorImpl::ArgumentIteratorImpl(int argc, char** argv, std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
               m_ParserResult(m_Data),
@@ -140,8 +140,8 @@ namespace Argos
             m_ArgumentCounter.emplace(m_Data->arguments);
     }
 
-    ArgumentIterator::ArgumentIterator(const std::vector<std::string>& args,
-                                       std::shared_ptr<ParserData> data)
+    ArgumentIteratorImpl::ArgumentIteratorImpl(const std::vector<std::string>& args,
+                                               std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
               m_ParserResult(m_Data),
@@ -151,7 +151,7 @@ namespace Argos
             m_ArgumentCounter.emplace(m_Data->arguments);
     }
 
-    std::optional<int> ArgumentIterator::next()
+    std::optional<int> ArgumentIteratorImpl::next()
     {
         if (!m_ArgumentCounter)
         {
@@ -161,7 +161,7 @@ namespace Argos
         return nextImpl();
     }
 
-    int ArgumentIterator::processOption(const OptionData& option, const std::string& flag)
+    int ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
     {
         switch (option.operation)
         {
@@ -223,7 +223,7 @@ namespace Argos
         }
     }
 
-    std::optional<int> ArgumentIterator::nextImpl()
+    std::optional<int> ArgumentIteratorImpl::nextImpl()
     {
         if (m_State == State::ERROR)
             ARGOS_THROW("next() called after error.");
@@ -309,16 +309,16 @@ namespace Argos
         return {};
     }
 
-    void ArgumentIterator::copyRemainingArgumentsToParserResult()
+    void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()
     {
         for (auto str : m_ArgumentIterator.remainingArguments())
             m_ParserResult.addUnprocessedArgument(std::string(str));
     }
 
-    size_t ArgumentIterator::countArguments() const
+    size_t ArgumentIteratorImpl::countArguments() const
     {
         size_t result = 0;
-        StandardOptionsIterator it = m_ArgumentIterator;
+        StandardOptionIterator it = m_ArgumentIterator;
         bool argumentsOnly = false;
         for (auto arg = it.next(); arg && !argumentsOnly; arg = it.next())
         {

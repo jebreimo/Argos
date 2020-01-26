@@ -9,7 +9,7 @@
 
 namespace Argos
 {
-    RawArg::RawArg(std::shared_ptr<ArgumentIterator> parser, std::string_view value)
+    RawArg::RawArg(std::shared_ptr<ArgumentIteratorImpl> parser, std::string_view value)
     {
 
     }

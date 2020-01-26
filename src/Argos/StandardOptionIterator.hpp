@@ -14,12 +14,12 @@
 
 namespace Argos
 {
-    class StandardOptionsIterator
+    class StandardOptionIterator
     {
     public:
-        StandardOptionsIterator();
+        StandardOptionIterator();
 
-        explicit StandardOptionsIterator(std::vector<std::string_view> args);
+        explicit StandardOptionIterator(std::vector<std::string_view> args);
 
         std::optional<std::string> next();
 

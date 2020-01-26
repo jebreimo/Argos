@@ -5,71 +5,71 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "ArgumentBuilder.hpp"
+#include "Argument.hpp"
 
 namespace Argos
 {
-    ArgumentBuilder::ArgumentBuilder(const std::string& name)
+    Argument::Argument(const std::string& name)
     {
         m_Argument.name = name;
     }
 
-    ArgumentBuilder& ArgumentBuilder::text(const std::string& text)
+    Argument& Argument::text(const std::string& text)
     {
         m_Argument.text = text;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::section(const std::string& name)
+    Argument& Argument::section(const std::string& name)
     {
         m_Argument.section = name;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::valueName(const std::string& id)
+    Argument& Argument::valueName(const std::string& id)
     {
         m_Argument.valueName = id;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::operation(ArgumentOperation operation)
+    Argument& Argument::operation(ArgumentOperation operation)
     {
         m_Argument.operation = operation;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::optional(bool optional)
+    Argument& Argument::optional(bool optional)
     {
         m_Argument.minCount = optional ? 0 : 1;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::count(int n)
+    Argument& Argument::count(int n)
     {
         m_Argument.minCount = m_Argument.maxCount = n;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::count(int minCount, int maxCount)
+    Argument& Argument::count(int minCount, int maxCount)
     {
         m_Argument.minCount = minCount;
         m_Argument.maxCount = maxCount;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::hidden(bool hidden)
+    Argument& Argument::hidden(bool hidden)
     {
         m_Argument.hidden = hidden;
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::id(int id)
+    Argument& Argument::id(int id)
     {
         m_Argument.id = id;
         return *this;
     }
 
-    ArgumentData&& ArgumentBuilder::get()
+    ArgumentData&& Argument::get()
     {
         return std::move(m_Argument);
     }

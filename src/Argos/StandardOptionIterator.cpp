@@ -5,23 +5,23 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "StandardOptionsIterator.hpp"
+#include "StandardOptionIterator.hpp"
 #include "ArgosException.hpp"
 
 namespace Argos
 {
-    StandardOptionsIterator::StandardOptionsIterator()
+    StandardOptionIterator::StandardOptionIterator()
         : m_ArgsIt(m_Args.end()),
           m_Pos(0)
     {}
 
-    StandardOptionsIterator::StandardOptionsIterator(std::vector<std::string_view> args)
+    StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
         : m_Args(move(args)),
           m_ArgsIt(m_Args.begin()),
           m_Pos(0)
     {}
 
-    std::optional<std::string> StandardOptionsIterator::next()
+    std::optional<std::string> StandardOptionIterator::next()
     {
         if (m_Pos == std::string_view::npos)
         {
@@ -63,7 +63,7 @@ namespace Argos
         return std::string(m_ArgsIt->substr(0, m_Pos));
     }
 
-    std::optional<std::string> StandardOptionsIterator::nextValue()
+    std::optional<std::string> StandardOptionIterator::nextValue()
     {
         if (m_ArgsIt == m_Args.end())
             return {};
@@ -85,14 +85,14 @@ namespace Argos
         return std::string(*m_ArgsIt);
     }
 
-    std::string_view StandardOptionsIterator::current() const
+    std::string_view StandardOptionIterator::current() const
     {
         if (m_ArgsIt == m_Args.end())
             ARGOS_THROW("There is no current argument.");
         return *m_ArgsIt;
     }
 
-    std::vector<std::string_view> StandardOptionsIterator::remainingArguments() const
+    std::vector<std::string_view> StandardOptionIterator::remainingArguments() const
     {
         auto it = m_Pos == 0 ? m_ArgsIt : std::next(m_ArgsIt);
         return std::vector<std::string_view>(it, m_Args.end());

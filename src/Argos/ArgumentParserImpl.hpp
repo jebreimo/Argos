@@ -16,26 +16,26 @@ namespace Argos
 {
     class ParserData;
 
-    class Argos
+    class ArgumentParserImpl
     {
     public:
-        Argos();
+        ArgumentParserImpl();
 
-        Argos(const std::string& programName);
+        ArgumentParserImpl(const std::string& programName);
 
-        Argos(Argos&&);
+        ArgumentParserImpl(ArgumentParserImpl&&);
 
-        Argos(const Argos&) = delete;
+        ArgumentParserImpl(const ArgumentParserImpl&) = delete;
 
-        ~Argos();
+        ~ArgumentParserImpl();
 
-        Argos& operator=(Argos&&);
+        ArgumentParserImpl& operator=(ArgumentParserImpl&&);
 
-        Argos& operator=(const Argos&) = delete;
+        ArgumentParserImpl& operator=(const ArgumentParserImpl&) = delete;
 
-        void add(ArgumentBuilder builder);
+        void add(Argument builder);
 
-        void add(OptionBuilder builder);
+        void add(Option builder);
 
         ParserResultImpl parse(int argc, char* argv[], bool preserveArgParser = false);
 

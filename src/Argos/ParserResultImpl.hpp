@@ -12,7 +12,7 @@
 
 namespace Argos
 {
-    class ArgumentIterator;
+    class ArgumentIteratorImpl;
 
     class ParserResultImpl
     {
@@ -23,7 +23,7 @@ namespace Argos
 
         const std::vector<std::string>& arguments() const;
     private:
-        friend ArgumentIterator;
+        friend ArgumentIteratorImpl;
 
         void addArgument(const std::string& arg);
 

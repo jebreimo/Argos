@@ -7,13 +7,13 @@
 //****************************************************************************
 #include <catch2/catch.hpp>
 #include "Argos/ArgumentCounter.hpp"
-#include "Argos/ArgumentBuilder.hpp"
+#include "Argos/Argument.hpp"
 
 TEST_CASE("Test non-deterministic counter.")
 {
     std::vector<Argos::ArgumentData> args {
-            Argos::ArgumentBuilder("1").count(0, 1).get(),
-            Argos::ArgumentBuilder("2").count(2).get()
+            Argos::Argument("1").count(0, 1).get(),
+            Argos::Argument("2").count(2).get()
     };
 
     REQUIRE(Argos::ArgumentCounter::requiresArgumentCount(args));

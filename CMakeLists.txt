@@ -11,23 +11,23 @@ project(Argos)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(Argos
-    src/Argos/Argos.cpp
-    src/Argos/Argos.hpp
-    src/Argos/ArgumentBuilder.cpp
-    src/Argos/ArgumentBuilder.hpp
+    src/Argos/ArgumentParserImpl.cpp
+    src/Argos/ArgumentParserImpl.hpp
+    src/Argos/Argument.cpp
+    src/Argos/Argument.hpp
     src/Argos/ParserResultImpl.cpp
     src/Argos/ParserResultImpl.hpp
-    src/Argos/ArgumentIterator.cpp
-    src/Argos/ArgumentIterator.hpp
+    src/Argos/ArgumentIteratorImpl.cpp
+    src/Argos/ArgumentIteratorImpl.hpp
     src/Argos/RawArg.cpp
     src/Argos/RawArg.hpp
     src/Argos/ArgumentData.hpp
     src/Argos/OptionData.hpp
     src/Argos/ArgumentOperation.hpp
-    src/Argos/StandardOptionsIterator.cpp
-    src/Argos/StandardOptionsIterator.hpp
-    src/Argos/OptionBuilder.cpp
-    src/Argos/OptionBuilder.hpp
+    src/Argos/StandardOptionIterator.cpp
+    src/Argos/StandardOptionIterator.hpp
+    src/Argos/Option.cpp
+    src/Argos/Option.hpp
     src/Argos/OptionType.hpp
     src/Argos/ParserBuilder.cpp
     src/Argos/ParserBuilder.hpp
