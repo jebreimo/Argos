@@ -10,23 +10,40 @@
 #include <variant>
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
-#include "OptionStyle.hpp"
+#include "Argos/OptionStyle.hpp"
 
 namespace Argos
 {
-    //using ArgumentVariant = std::variant<const Argument*, const Option*>;
-    struct ParserData
+    struct ParserSettings
     {
-        std::vector<ArgumentData> arguments;
-        std::vector<OptionData> options;
-        //std::map<std::string, ArgumentVariant> argumentMap;
-        std::string programName;
-
         OptionStyle optionStyle = OptionStyle::STANDARD;
         bool autoExit = true;
         bool allowAbbreviatedOptions = false;
         bool ignoreUndefinedArguments = false;
         bool ignoreMissingArguments = false;
         bool caseInsensitive = false;
+    };
+
+    struct HelpSettings
+    {
+        std::string programName;
+    };
+
+    struct ParserData
+    {
+        std::vector<std::shared_ptr<ArgumentData>> arguments;
+        std::vector<std::shared_ptr<OptionData>> options;
+
+        ParserSettings parserSettings;
+        HelpSettings helpSettings;
+
+        //std::string programName;
+        //
+        //OptionStyle optionStyle = OptionStyle::STANDARD;
+        //bool autoExit = true;
+        //bool allowAbbreviatedOptions = false;
+        //bool ignoreUndefinedArguments = false;
+        //bool ignoreMissingArguments = false;
+        //bool caseInsensitive = false;
     };
 }

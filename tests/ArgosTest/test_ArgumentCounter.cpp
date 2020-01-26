@@ -7,13 +7,13 @@
 //****************************************************************************
 #include <catch2/catch.hpp>
 #include "Argos/ArgumentCounter.hpp"
-#include "Argos/Argument.hpp"
+#include "../../include/Argos/Argument.hpp"
 
 TEST_CASE("Test non-deterministic counter.")
 {
-    std::vector<Argos::ArgumentData> args {
-            Argos::Argument("1").count(0, 1).get(),
-            Argos::Argument("2").count(2).get()
+    std::vector<std::shared_ptr<Argos::ArgumentData>> args {
+            Argos::Argument("1").count(0, 1).release(),
+            Argos::Argument("2").count(2).release()
     };
 
     REQUIRE(Argos::ArgumentCounter::requiresArgumentCount(args));
@@ -22,11 +22,11 @@ TEST_CASE("Test non-deterministic counter.")
     {
         Argos::ArgumentCounter counter(args);
         REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == &args[0]);
+        REQUIRE(counter.nextArgument() == args[0].get());
         REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == &args[1]);
+        REQUIRE(counter.nextArgument() == args[1].get());
         REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == &args[1]);
+        REQUIRE(counter.nextArgument() == args[1].get());
         REQUIRE(counter.isComplete());
         REQUIRE(counter.nextArgument() == nullptr);
     }
@@ -34,9 +34,9 @@ TEST_CASE("Test non-deterministic counter.")
     {
         Argos::ArgumentCounter counter(args, 2);
         REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == &args[1]);
+        REQUIRE(counter.nextArgument() == args[1].get());
         REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == &args[1]);
+        REQUIRE(counter.nextArgument() == args[1].get());
         REQUIRE(counter.isComplete());
         REQUIRE(counter.nextArgument() == nullptr);
     }

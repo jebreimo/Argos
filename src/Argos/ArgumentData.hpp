@@ -7,7 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <string>
-#include "ArgumentOperation.hpp"
+#include "Argos/ArgumentOperation.hpp"
 
 namespace Argos
 {
@@ -18,8 +18,8 @@ namespace Argos
         std::string section;
         std::string valueName;
         ArgumentOperation operation = ArgumentOperation::ASSIGN;
-        int minCount = 1;
-        int maxCount = 1;
+        unsigned minCount = 1;
+        unsigned maxCount = 1;
         bool hidden = false;
         int id = 0;
         int valueId_ = 0;

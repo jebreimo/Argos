@@ -11,10 +11,10 @@
 
 namespace Argos
 {
-    class HelpTextWriter
+    class HelpWriter
     {
     public:
-        explicit HelpTextWriter(std::shared_ptr<ParserData> data);
+        explicit HelpWriter(std::shared_ptr<ParserData> data);
 
         void writeHelpText() const;
 

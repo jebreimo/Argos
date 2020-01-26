@@ -14,10 +14,10 @@ namespace Argos
 {
     class ArgumentIteratorImpl;
 
-    class ParserResultImpl
+    class ParsedArgumentsImpl
     {
     public:
-        ParserResultImpl(std::shared_ptr<ParserData> data);
+        ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
         RawArg get(const std::string& name) const;
 

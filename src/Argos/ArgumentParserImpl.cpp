@@ -5,39 +5,46 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include "Argos/ArgosException.hpp"
 #include "ArgumentParserImpl.hpp"
 #include "ParserData.hpp"
 
+//#define CHECK_PARSER_DATA_POINTER() \
+//        if (!m_Data) \
+//            ARGOS_THROW("ArgumentParser cannot be used after parsing arguments.");
+
 namespace Argos
 {
-    namespace
-    {
-    }
+    //namespace
+    //{
+    //}
+    //
+    //ArgumentParserImpl::ArgumentParserImpl()
+    //    : m_Data(std::make_shared<ParserData>())
+    //{}
+    //
+    //ArgumentParserImpl::ArgumentParserImpl(const std::string& programName)
+    //    : m_Data(std::make_shared<ParserData>())
+    //{
+    //    m_Data->programName = programName;
+    //}
+    //
+    //void ArgumentParserImpl::add(Option& option)
+    //{
+    //    CHECK_PARSER_DATA_POINTER();
+    //    // TODO: check if option is valid
+    //    // TODO: check if flags are unique
+    //}
 
-    ArgumentParserImpl::ArgumentParserImpl()
-    {}
-
-    ArgumentParserImpl::ArgumentParserImpl(const std::string& programName)
-        : m_Data(std::make_shared<ParserData>())
-    {
-        m_Data->programName = programName;
-    }
-
-    ArgumentParserImpl::~ArgumentParserImpl() = default;
-
-    ArgumentParserImpl::ArgumentParserImpl(ArgumentParserImpl&&) = default;
-
-    ArgumentParserImpl& ArgumentParserImpl::operator=(ArgumentParserImpl&&) = default;
-
-    void ArgumentParserImpl::add(Argument builder)
-    {
-        m_Data->arguments.push_back(builder.get());
-    }
-
-    void ArgumentParserImpl::add(Option builder)
-    {
-        m_Data->options.push_back(builder.get());
-    }
+    //void ArgumentParserImpl::add(Argument builder)
+    //{
+    //    m_Data->arguments.push_back(builder.get());
+    //}
+    //
+    //void ArgumentParserImpl::add(Option builder)
+    //{
+    //    m_Data->options.push_back(builder.get());
+    //}
 
     //ArgumentBuilder Argos::addArgument(const std::string& name,
     //                                   bool allowRedefinitions)
@@ -56,75 +63,26 @@ namespace Argos
     //    return OptionBuilder(&m_Data->options.back());
     //}
 
-    ParserResultImpl ArgumentParserImpl::parse(int argc, char** argv, bool preserveArgParser)
-    {
-        auto argumentData = m_Data;
-        if (preserveArgParser)
-            m_Data = std::make_shared<ParserData>(*m_Data);
-        finalizeArgumentData(*argumentData);
-        ArgumentIteratorImpl parser(argc, argv, argumentData);
-        // parser.next(argc, argv, argumentData);
-        return ParserResultImpl(argumentData);
-    }
-
-    bool ArgumentParserImpl::autoExit() const
-    {
-        return m_Data->autoExit;
-    }
-
-    void ArgumentParserImpl::setAutoExit(bool autoExit)
-    {
-        m_Data->autoExit = autoExit;
-    }
-
-    const std::string& ArgumentParserImpl::programName() const
-    {
-        return m_Data->programName;
-    }
-
-    void ArgumentParserImpl::setProgramName(const std::string& programName)
-    {
-        m_Data->programName = programName;
-    }
-
-    void ArgumentParserImpl::finalizeArgumentData(const ParserData& data) const
-    {
-        struct InternalIdMaker
-        {
-            int n = 1;
-            std::map<std::string, int> explicitIds;
-
-            std::pair<int, bool> makeNumericId(const std::string& stringId)
-            {
-                if (!stringId.empty())
-                    return {n++, false};
-
-                auto it = explicitIds.find(stringId);
-                if (it != explicitIds.end())
-                    return {it->second, false};
-
-                it = explicitIds.emplace(stringId, n++).first;
-                return {it->second, true};
-            }
-        };
-
-        InternalIdMaker idMaker;
-        for (auto& a : m_Data->arguments)
-        {
-            auto[internalId, newId] = idMaker.makeNumericId(a.valueName);
-            a.valueId_ = internalId;
-            //if (newId)
-            //    m_Data->argumentMap.emplace(a.id, &a);
-            //m_Data->argumentMap.emplace(a.name, &a);
-        }
-        for (auto& o : m_Data->options)
-        {
-            auto[internalId, newId] = idMaker.makeNumericId(o.valueName);
-            o.valueId_ = internalId;
-            //if (newId)
-            //    m_Data->argumentMap.emplace(o.id, &o);
-            //for (auto& flag : o.flags)
-            //    m_Data->argumentMap.emplace(flag, &o);
-        }
-    }
+    //std::unique_ptr<ParsedArgumentsImpl> ArgumentParserImpl::parse(int argc, char** argv)
+    //{
+    //    CHECK_PARSER_DATA_POINTER();
+    //    auto argumentData = std::move(m_Data);
+    //    finalizeArgumentData(*argumentData);
+    //    ArgumentIteratorImpl parser(argc, argv, argumentData);
+    //    return ParsedArgumentsImpl(argumentData);
+    //}
+    //
+    //const ParserData& ArgumentParserImpl::parserData() const
+    //{
+    //    if (!m_Data)
+    //        ARGOS_THROW("ArgumentParser cannot be used after parsing arguments.");
+    //    return *m_Data;
+    //}
+    //
+    //ParserData& ArgumentParserImpl::parserData()
+    //{
+    //    if (!m_Data)
+    //        ARGOS_THROW("ArgumentParser cannot be used after parsing arguments.");
+    //    return *m_Data;
+    //}
 }

@@ -14,16 +14,19 @@ namespace Argos
     class ArgumentCounter
     {
     public:
-        explicit ArgumentCounter(const std::vector<ArgumentData>& arguments);
+        explicit ArgumentCounter(
+                const std::vector<std::shared_ptr<ArgumentData>>& arguments);
 
-        ArgumentCounter(const std::vector<ArgumentData>& arguments,
-                        size_t argumentCount);
+        ArgumentCounter(
+                const std::vector<std::shared_ptr<ArgumentData>>& arguments,
+                size_t argumentCount);
 
         const ArgumentData* nextArgument();
 
         bool isComplete() const;
 
-        static bool requiresArgumentCount(const std::vector<ArgumentData>& arguments);
+        static bool requiresArgumentCount(
+                const std::vector<std::shared_ptr<ArgumentData>>& arguments);
     private:
         using Counter = std::pair<size_t, const ArgumentData*>;
         std::vector<Counter> m_Counters;

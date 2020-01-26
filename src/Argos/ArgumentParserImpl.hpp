@@ -9,48 +9,51 @@
 #include <memory>
 #include <string>
 #include <set>
-#include "ParserBuilder.hpp"
-#include "ParserResultImpl.hpp"
+#include "ArgumentIteratorImpl.hpp"
+#include "Argos/Argument.hpp"
+#include "Argos/Option.hpp"
 
 namespace Argos
 {
     class ParserData;
 
+    class ParsedArguments;
+
     class ArgumentParserImpl
     {
     public:
-        ArgumentParserImpl();
+        //ArgumentParserImpl();
+        //
+        //explicit ArgumentParserImpl(const std::string& programName);
+        //
+        //void add(Argument& argument);
+        //
+        //void add(Option& option);
+        //
+        //std::unique_ptr<ParsedArgumentsImpl> parse(int argc, char* argv[]);
+        //
+        //std::unique_ptr<ParsedArgumentsImpl> parse(int argc, char* argv[]) const;
+        //
+        //std::unique_ptr<ArgumentIteratorImpl> makeIterator(int argc, char* argv[]);
+        //
+        //std::unique_ptr<ArgumentIteratorImpl> makeIterator(int argc, char* argv[]) const;
+        //
+        //const ParserData& parserData() const;
+        //
+        //ParserData& parserData();
 
-        ArgumentParserImpl(const std::string& programName);
-
-        ArgumentParserImpl(ArgumentParserImpl&&);
-
-        ArgumentParserImpl(const ArgumentParserImpl&) = delete;
-
-        ~ArgumentParserImpl();
-
-        ArgumentParserImpl& operator=(ArgumentParserImpl&&);
-
-        ArgumentParserImpl& operator=(const ArgumentParserImpl&) = delete;
-
-        void add(Argument builder);
-
-        void add(Option builder);
-
-        ParserResultImpl parse(int argc, char* argv[], bool preserveArgParser = false);
-
-        bool autoExit() const;
-
-        void setAutoExit(bool autoExit);
-
-        const std::string& programName() const;
-
-        void setProgramName(const std::string& programName);
+        //bool autoExit() const;
+        //
+        //void setAutoExit(bool autoExit);
+        //
+        //const std::string& programName() const;
+        //
+        //void setProgramName(const std::string& programName);
     private:
-        void finalizeArgumentData(const ParserData& data) const;
-
-        std::shared_ptr<ParserData> m_Data;
-        std::set<std::string> m_Names;
+        //void finalizeArgumentData(const ParserData& data) const;
+        //
+        //std::shared_ptr<ParserData> m_Data;
+        //std::set<std::string> m_Names;
         //ParserBuilder m_ParserBuilder;
         //std::string m_ProgramName;
         //bool m_AutoExit;

@@ -11,7 +11,7 @@
 #include "ParserData.hpp"
 #include "StandardOptionIterator.hpp"
 #include "OptionData.hpp"
-#include "ParserResultImpl.hpp"
+#include "ParsedArgumentsImpl.hpp"
 
 namespace Argos
 {
@@ -25,6 +25,10 @@ namespace Argos
                              std::shared_ptr<ParserData> data);
 
         std::optional<int> next();
+
+        std::unique_ptr<ParsedArgumentsImpl> releaseResult();
+
+        void parseAll();
     private:
         int processOption(const OptionData& option, const std::string& flag);
 
@@ -36,7 +40,7 @@ namespace Argos
 
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
-        ParserResultImpl m_ParserResult;
+        ParsedArgumentsImpl m_ParserResult;
         StandardOptionIterator m_ArgumentIterator;
         std::optional<ArgumentCounter> m_ArgumentCounter;
         enum class State

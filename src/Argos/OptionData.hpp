@@ -8,18 +8,11 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "ArgumentOperation.hpp"
+#include "Argos/ArgumentOperation.hpp"
+#include "Argos/OptionType.hpp"
 
 namespace Argos
 {
-    enum class OptionType
-    {
-        NORMAL,
-        HELP,
-        BREAK,
-        FINAL
-    };
-
     struct OptionData
     {
         std::vector<std::string> flags;

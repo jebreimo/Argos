@@ -8,8 +8,8 @@
 #include "ArgumentIteratorImpl.hpp"
 
 #include <cassert>
-#include "ArgosException.hpp"
-#include "HelpTextWriter.hpp"
+#include "Argos/ArgosException.hpp"
+#include "HelpWriter.hpp"
 #include "StringUtilities.hpp"
 
 namespace Argos
@@ -36,14 +36,14 @@ namespace Argos
 
         using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
 
-        OptionTable makeOptionIndex(const std::vector<OptionData>& options,
+        OptionTable makeOptionIndex(const std::vector<std::shared_ptr<OptionData>>& options,
                                     bool caseInsensitive)
         {
             OptionTable index;
             for (auto& option : options)
             {
-                for (auto& flag : option.flags)
-                    index.emplace_back(flag, &option);
+                for (auto& flag : option->flags)
+                    index.emplace_back(flag, option.get());
             }
             if (caseInsensitive)
             {
@@ -87,7 +87,6 @@ namespace Argos
                                      bool allowAbbreviations,
                                      bool caseInsensitive)
         {
-            OptionTable::value_type key = {arg, nullptr};
             auto it = caseInsensitive ? findOptionCI(options, arg)
                                       : findOptionCS(options, arg);
             bool equalChar = false;
@@ -132,7 +131,7 @@ namespace Argos
 
     ArgumentIteratorImpl::ArgumentIteratorImpl(int argc, char** argv, std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
-              m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
               m_ParserResult(m_Data),
               m_ArgumentIterator(makeStringViewVector(argc, argv, true))
     {
@@ -143,7 +142,7 @@ namespace Argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(const std::vector<std::string>& args,
                                                std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
-              m_Options(makeOptionIndex(m_Data->options, m_Data->caseInsensitive)),
+              m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
               m_ParserResult(m_Data),
               m_ArgumentIterator(makeStringViewVector(args))
     {
@@ -159,6 +158,16 @@ namespace Argos
                                                 countArguments());
         }
         return nextImpl();
+    }
+
+    std::unique_ptr<ParsedArgumentsImpl> ArgumentIteratorImpl::releaseResult()
+    {
+        return std::unique_ptr<ParsedArgumentsImpl>();
+    }
+
+    void ArgumentIteratorImpl::parseAll()
+    {
+
     }
 
     int ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
@@ -177,7 +186,7 @@ namespace Argos
             else
             {
                 m_State = State::ERROR;
-                HelpTextWriter(m_Data).writeErrorMessage(
+                HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
                 return 2;
             }
@@ -194,7 +203,7 @@ namespace Argos
             else
             {
                 m_State = State::ERROR;
-                HelpTextWriter(m_Data).writeErrorMessage(
+                HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
                 return 2;
             }
@@ -211,7 +220,7 @@ namespace Argos
         case OptionType::NORMAL:
             return 0;
         case OptionType::HELP:
-            HelpTextWriter(m_Data).writeHelpText();
+            HelpWriter(m_Data).writeHelpText();
             m_State = State::DONE;
             return 1;
         case OptionType::BREAK:
@@ -239,19 +248,19 @@ namespace Argos
         if (m_State == State::ARGUMENTS_AND_OPTIONS)
         {
             auto option = findOption(m_Options, *arg,
-                                     m_Data->allowAbbreviatedOptions,
-                                     m_Data->caseInsensitive);
+                                     m_Data->parserSettings.allowAbbreviatedOptions,
+                                     m_Data->parserSettings.caseInsensitive);
             if (option)
             {
                 switch (processOption(*option, *arg))
                 {
                 case 1:
-                    if (m_Data->autoExit)
+                    if (m_Data->parserSettings.autoExit)
                         exit(0);
                     copyRemainingArgumentsToParserResult();
                     return option->id;
                 case 2:
-                    if (m_Data->autoExit)
+                    if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
                     return {};
@@ -259,18 +268,19 @@ namespace Argos
                     return option->id;
                 }
             }
-            else if (isOption(*arg, m_Data->optionStyle))
+            else if (isOption(*arg, m_Data->parserSettings.optionStyle))
             {
-                if (m_Data->ignoreUndefinedArguments && *arg == m_ArgumentIterator.current())
+                if (m_Data->parserSettings.ignoreUndefinedArguments
+                    && *arg == m_ArgumentIterator.current())
                 {
                     m_ParserResult.addUnprocessedArgument(*arg);
                 }
                 else
                 {
-                    HelpTextWriter(m_Data).writeErrorMessage(
+                    HelpWriter(m_Data).writeErrorMessage(
                             "Invalid option: " + std::string(m_ArgumentIterator.current()));
                     m_State = State::ERROR;
-                    if (m_Data->autoExit)
+                    if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
                     return {};
@@ -285,17 +295,17 @@ namespace Argos
                 m_ParserResult.assignValue(argument->valueId_, *arg);
                 return argument->valueId_;
             }
-            else if (m_Data->ignoreUndefinedArguments)
+            else if (m_Data->parserSettings.ignoreUndefinedArguments)
             {
                 m_ParserResult.addUnprocessedArgument(*arg);
                 return {};
             }
             else
             {
-                HelpTextWriter(m_Data).writeErrorMessage(
+                HelpWriter(m_Data).writeErrorMessage(
                         "Too many arguments, starting with " + *arg);
                 m_State = State::ERROR;
-                if (m_Data->autoExit)
+                if (m_Data->parserSettings.autoExit)
                     exit(1);
                 copyRemainingArgumentsToParserResult();
                 return {};
@@ -323,8 +333,8 @@ namespace Argos
         for (auto arg = it.next(); arg && !argumentsOnly; arg = it.next())
         {
             auto option = findOption(m_Options, *arg,
-                                     m_Data->allowAbbreviatedOptions,
-                                     m_Data->caseInsensitive);
+                                     m_Data->parserSettings.allowAbbreviatedOptions,
+                                     m_Data->parserSettings.caseInsensitive);
             if (option)
             {
                 if (!option->argument.empty())
@@ -341,7 +351,7 @@ namespace Argos
                     break;
                 }
             }
-            else if (!isOption(*arg, m_Data->optionStyle))
+            else if (!isOption(*arg, m_Data->parserSettings.optionStyle))
             {
                 ++result;
             }

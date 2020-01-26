@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include <catch2/catch.hpp>
-#include "Argos/ArgumentParserImpl.hpp"
+#include "Argos/ArgumentParser.hpp"
 
 #include <string>
 #include <vector>
@@ -35,8 +35,8 @@ struct Argv
 
 TEST_CASE("Test basics")
 {
-    Argos::ArgumentParserImpl argos("test");
-    argos.setAutoExit(false);
+    Argos::ArgumentParser argos("test");
+    argos.autoExitEnabled(false);
     REQUIRE(argos.programName() == "test");
 
     argos.add(Argos::Option({"-h", "--help"})
