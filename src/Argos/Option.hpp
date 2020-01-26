@@ -25,13 +25,14 @@ namespace Argos
         std::vector<std::string> flags;
         std::string text;
         std::string section;
-        std::string id;
+        std::string valueName;
         std::string argument;
         std::string value;
         ArgumentOperation operation = ArgumentOperation::ASSIGN;
         OptionType optionType = OptionType::NORMAL;
         bool hidden = false;
         bool mandatory = false;
-        int m_InternalId;
+        int id = 0;
+        int valueId_ = 0;
     };
 }

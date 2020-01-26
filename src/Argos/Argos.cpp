@@ -29,22 +29,32 @@ namespace Argos
 
     Argos& Argos::operator=(Argos&&) = default;
 
-    ArgumentBuilder Argos::addArgument(const std::string& name,
-                                       bool allowRedefinitions)
+    void Argos::add(ArgumentBuilder builder)
     {
-        //m_Data->arguments.emplace_back();
-        //m_Data->arguments.back().name = name;
-        return ArgumentBuilder(name); //&m_Data->arguments.back());
+        m_Data->arguments.push_back(builder.get());
     }
 
-    OptionBuilder Argos::addOption(const std::vector<std::string>& flags,
-                                   bool allowRedefinitions)
+    void Argos::add(OptionBuilder builder)
     {
-        // TODO: check flag
-        m_Data->options.emplace_back();
-        m_Data->options.back().flags = flags;
-        return OptionBuilder(&m_Data->options.back());
+        m_Data->options.push_back(builder.get());
     }
+
+    //ArgumentBuilder Argos::addArgument(const std::string& name,
+    //                                   bool allowRedefinitions)
+    //{
+    //    //m_Data->arguments.emplace_back();
+    //    //m_Data->arguments.back().name = name;
+    //    return ArgumentBuilder(name); //&m_Data->arguments.back());
+    //}
+    //
+    //OptionBuilder Argos::addOption(const std::vector<std::string>& flags,
+    //                               bool allowRedefinitions)
+    //{
+    //    // TODO: check flag
+    //    m_Data->options.emplace_back();
+    //    m_Data->options.back().flags = flags;
+    //    return OptionBuilder(&m_Data->options.back());
+    //}
 
     ParserResult Argos::parse(int argc, char** argv, bool preserveArgParser)
     {
@@ -109,8 +119,8 @@ namespace Argos
         }
         for (auto& o : m_Data->options)
         {
-            auto[internalId, newId] = idMaker.makeNumericId(o.id);
-            o.m_InternalId = internalId;
+            auto[internalId, newId] = idMaker.makeNumericId(o.valueName);
+            o.valueId_ = internalId;
             //if (newId)
             //    m_Data->argumentMap.emplace(o.id, &o);
             //for (auto& flag : o.flags)

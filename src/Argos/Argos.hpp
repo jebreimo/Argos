@@ -33,11 +33,9 @@ namespace Argos
 
         Argos& operator=(const Argos&) = delete;
 
-        ArgumentBuilder addArgument(const std::string& name,
-                                    bool allowRedefinitions = false);
+        void add(ArgumentBuilder builder);
 
-        OptionBuilder addOption(const std::vector<std::string>& flags,
-                                bool allowRedefinitions = false);
+        void add(OptionBuilder builder);
 
         ParserResult parse(int argc, char* argv[], bool preserveArgParser = false);
 

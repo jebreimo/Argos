@@ -6,10 +6,11 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "ArgumentParser.hpp"
-#include "ArgumentIterator.hpp"
+
+#include <cassert>
 #include "ArgosException.hpp"
-#include "StringUtilities.hpp"
 #include "HelpTextWriter.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
@@ -89,14 +90,18 @@ namespace Argos
             OptionTable::value_type key = {arg, nullptr};
             auto it = caseInsensitive ? findOptionCI(options, arg)
                                       : findOptionCS(options, arg);
+            bool equalChar = false;
             if (it == options.end())
             {
                 if (arg.size() > 2 && arg.back() == '=')
                     arg = arg.substr(arg.size() - 1);
                 it = caseInsensitive ? findOptionCI(options, arg)
                                      : findOptionCS(options, arg);
+                equalChar = true;
             }
             if (it == options.end())
+                return nullptr;
+            if (equalChar && it->second->argument.empty())
                 return nullptr;
             if (it->first == arg)
                 return it->second;
@@ -111,22 +116,6 @@ namespace Argos
                 && startsWith(nxt->first, arg, caseInsensitive))
                 return nullptr;
             return it->second;
-        }
-
-        void assign(std::multimap<int, std::string>& map,
-                    int key, const std::string& value)
-        {
-            auto it = map.lower_bound(key);
-            if (it == map.end() || it->first != key)
-            {
-                map.emplace(key, value);
-                return;
-            }
-
-            it->second = value;
-            ++it;
-            while (it != map.end() && it->first == key)
-                map.erase(it++);
         }
 
         bool isOption(const std::string& s, OptionStyle style)
@@ -164,87 +153,202 @@ namespace Argos
 
     std::optional<int> ArgumentParser::next()
     {
-        return next(true);
+        if (!m_ArgumentCounter)
+        {
+            m_ArgumentCounter = ArgumentCounter(m_Data->arguments,
+                                                countArguments());
+        }
+        return nextImpl();
     }
 
-    void ArgumentParser::processOption(const Option& option)
+    int ArgumentParser::processOption(const Option& option, const std::string& flag)
     {
         switch (option.operation)
         {
         case ArgumentOperation::ASSIGN:
             if (!option.value.empty())
             {
-                assign(m_Data->values, option.m_InternalId, option.value);
+                m_ParserResult.assignValue(option.valueId_, option.value);
             }
             else if (auto value = m_ArgumentIterator.nextValue(); value)
             {
-                assign(m_Data->values, option.m_InternalId, *value);
+                m_ParserResult.assignValue(option.valueId_, *value);
             }
             else
             {
-                // TODO: Display error message about missing argument.
+                m_State = State::ERROR;
+                HelpTextWriter(m_Data).writeErrorMessage(
+                        option, flag + ": no value given.");
+                return 2;
             }
             break;
         case ArgumentOperation::APPEND:
             if (!option.value.empty())
             {
-                m_Data->values.emplace(option.m_InternalId, option.value);
+                m_ParserResult.appendValue(option.valueId_, option.value);
             }
             else if (auto value = m_ArgumentIterator.nextValue(); value)
             {
-                m_Data->values.emplace(option.m_InternalId, *value);
+                m_ParserResult.appendValue(option.valueId_, *value);
             }
             else
             {
-                // TODO: Display error message about missing argument.
+                m_State = State::ERROR;
+                HelpTextWriter(m_Data).writeErrorMessage(
+                        option, flag + ": no value given.");
+                return 2;
             }
             break;
         case ArgumentOperation::CLEAR:
-            m_Data->values.erase(option.m_InternalId);
+            m_ParserResult.clearValue(option.valueId_);
             break;
         case ArgumentOperation::NONE:
             break;
         }
-        if (m_ArgumentIterator.hasRemainder())
+
+        switch (option.optionType)
         {
-            // TODO: Display error message about incorrect argument.
+        case OptionType::NORMAL:
+            return 0;
+        case OptionType::HELP:
+            HelpTextWriter(m_Data).writeHelpText();
+            m_State = State::DONE;
+            return 1;
+        case OptionType::BREAK:
+            m_State = State::DONE;
+            return 0;
+        case OptionType::FINAL:
+            m_State = State::ARGUMENTS_ONLY;
+            return 0;
         }
     }
 
-    std::optional<int> ArgumentParser::next(bool requiresArgumentId)
+    std::optional<int> ArgumentParser::nextImpl()
     {
-        auto arg = m_ArgumentIterator.next();
+        if (m_State == State::ERROR)
+            ARGOS_THROW("next() called after error.");
+        if (m_State == State::DONE)
+            return {};
+
+        auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
+                   ? m_ArgumentIterator.next()
+                   : m_ArgumentIterator.nextValue();
         if (!arg)
             return {};
 
-        auto option = findOption(m_Options, *arg,
-                                 m_Data->allowAbbreviatedOptions,
-                                 m_Data->caseInsensitive);
-        if (option)
+        if (m_State == State::ARGUMENTS_AND_OPTIONS)
         {
-            processOption(*option);
-        }
-        else if (isOption(*arg, m_Data->optionStyle))
-        {
-            if (m_Data->ignoreUndefinedArguments && *arg == m_ArgumentIterator.current())
+            auto option = findOption(m_Options, *arg,
+                                     m_Data->allowAbbreviatedOptions,
+                                     m_Data->caseInsensitive);
+            if (option)
             {
-                m_ParserResult.addUnprocessedArgument(*arg);
+                switch (processOption(*option, *arg))
+                {
+                case 1:
+                    if (m_Data->autoExit)
+                        exit(0);
+                    copyRemainingArgumentsToParserResult();
+                    return option->id;
+                case 2:
+                    if (m_Data->autoExit)
+                        exit(1);
+                    copyRemainingArgumentsToParserResult();
+                    return {};
+                default:
+                    return option->id;
+                }
             }
-            else
+            else if (isOption(*arg, m_Data->optionStyle))
             {
-                HelpTextWriter writer(m_Data);
-                writer.writeErrorMessage(
-                        "Invalid option: " + std::string(m_ArgumentIterator.current()));
-            } // TODO Show error and return
+                if (m_Data->ignoreUndefinedArguments && *arg == m_ArgumentIterator.current())
+                {
+                    m_ParserResult.addUnprocessedArgument(*arg);
+                }
+                else
+                {
+                    HelpTextWriter(m_Data).writeErrorMessage(
+                            "Invalid option: " + std::string(m_ArgumentIterator.current()));
+                    m_State = State::ERROR;
+                    if (m_Data->autoExit)
+                        exit(1);
+                    copyRemainingArgumentsToParserResult();
+                    return {};
+                }
+            }
         }
         else if (m_ArgumentCounter)
         {
-
+            if (auto argument = m_ArgumentCounter->nextArgument())
+            {
+                m_ParserResult.addArgument(*arg);
+                m_ParserResult.assignValue(argument->valueId_, *arg);
+                return argument->valueId_;
+            }
+            else if (m_Data->ignoreUndefinedArguments)
+            {
+                m_ParserResult.addUnprocessedArgument(*arg);
+                return {};
+            }
+            else
+            {
+                HelpTextWriter(m_Data).writeErrorMessage(
+                        "Too many arguments, starting with " + *arg);
+                m_State = State::ERROR;
+                if (m_Data->autoExit)
+                    exit(1);
+                copyRemainingArgumentsToParserResult();
+                return {};
+            }
         }
         else
         {
-
+            m_ParserResult.addArgument(*arg);
+            return 0;
         }
         return {};
+    }
+
+    void ArgumentParser::copyRemainingArgumentsToParserResult()
+    {
+        for (auto str : m_ArgumentIterator.remainingArguments())
+            m_ParserResult.addUnprocessedArgument(std::string(str));
+    }
+
+    size_t ArgumentParser::countArguments() const
+    {
+        size_t result = 0;
+        ArgumentIterator it = m_ArgumentIterator;
+        bool argumentsOnly = false;
+        for (auto arg = it.next(); arg && !argumentsOnly; arg = it.next())
+        {
+            auto option = findOption(m_Options, *arg,
+                                     m_Data->allowAbbreviatedOptions,
+                                     m_Data->caseInsensitive);
+            if (option)
+            {
+                if (!option->argument.empty())
+                    it.nextValue();
+                switch (option->optionType)
+                {
+                case OptionType::HELP:
+                case OptionType::BREAK:
+                    return result;
+                case OptionType::FINAL:
+                    argumentsOnly = true;
+                    break;
+                default:
+                    break;
+                }
+            }
+            else if (!isOption(*arg, m_Data->optionStyle))
+            {
+                ++result;
+            }
+        }
+
+        for (auto arg = it.next(); arg; arg = it.next())
+            ++result;
+        return result;
     }
 }

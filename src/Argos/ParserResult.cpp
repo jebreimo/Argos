@@ -27,4 +27,29 @@ namespace Argos
     {
         m_UnprocessedArguments.push_back(arg);
     }
+
+    void ParserResult::assignValue(int valueId, const std::string& value)
+    {
+        auto it = m_Values.lower_bound(valueId);
+        if (it == m_Values.end() || it->first != valueId)
+        {
+            m_Values.emplace(valueId, value);
+            return;
+        }
+
+        it->second = value;
+        ++it;
+        while (it != m_Values.end() && it->first == valueId)
+            m_Values.erase(it++);
+    }
+
+    void ParserResult::appendValue(int valueId, const std::string& value)
+    {
+        m_Values.emplace(valueId, value);
+    }
+
+    void ParserResult::clearValue(int valueId)
+    {
+        m_Values.erase(valueId);
+    }
 }

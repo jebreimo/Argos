@@ -21,13 +21,6 @@ namespace Argos
           m_Pos(0)
     {}
 
-    void ArgumentIterator::setArguments(std::vector<std::string_view> args)
-    {
-        m_Args = move(args);
-        m_ArgsIt = m_Args.begin();
-        m_Pos = 0;
-    }
-
     std::optional<std::string> ArgumentIterator::next()
     {
         if (m_Pos == std::string_view::npos)
@@ -99,21 +92,9 @@ namespace Argos
         return *m_ArgsIt;
     }
 
-    bool ArgumentIterator::hasRemainder() const
+    std::vector<std::string_view> ArgumentIterator::remainingArguments() const
     {
-        return m_ArgsIt != m_Args.end() && m_Pos <= m_ArgsIt->size();
-    }
-
-    std::string_view ArgumentIterator::remainder() const
-    {
-        if (m_ArgsIt == m_Args.end())
-            ARGOS_THROW("There is no current argument.");
-        return m_ArgsIt->substr(m_Pos);
-    }
-
-    void ArgumentIterator::skipRemainder()
-    {
-        if (m_ArgsIt != m_Args.end() && m_Pos != std::string_view::npos)
-            m_Pos = std::string_view::npos;
+        auto it = m_Pos == 0 ? m_ArgsIt : std::next(m_ArgsIt);
+        return std::vector<std::string_view>(it, m_Args.end());
     }
 }

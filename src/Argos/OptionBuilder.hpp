@@ -13,7 +13,7 @@ namespace Argos
     class OptionBuilder
     {
     public:
-        OptionBuilder(Option* option);
+        explicit OptionBuilder(std::vector<std::string> flags);
 
         OptionBuilder& argument(const std::string& name);
 
@@ -23,7 +23,7 @@ namespace Argos
 
         OptionBuilder& section(const std::string& name);
 
-        OptionBuilder& id(const std::string& id);
+        OptionBuilder& valueName(const std::string& id);
 
         OptionBuilder& operation(ArgumentOperation operation);
 
@@ -32,7 +32,11 @@ namespace Argos
         OptionBuilder& mandatory(bool mandatory);
 
         OptionBuilder& hidden(bool hidden);
+
+        OptionBuilder& id(int id);
+
+        Option&& get();
     private:
-        Option* m_Option;
+        Option m_Option;
     };
 }

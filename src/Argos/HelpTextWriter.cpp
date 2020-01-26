@@ -15,8 +15,23 @@ namespace Argos
         : m_Data(move(data))
     {}
 
+    void HelpTextWriter::writeHelpText() const
+    {
+
+    }
+
     void HelpTextWriter::writeErrorMessage(const std::string& msg) const
     {
         std::cerr << msg << "\n";
+    }
+
+    void HelpTextWriter::writeErrorMessage(const Argument& argument, const std::string& msg) const
+    {
+
+    }
+
+    void HelpTextWriter::writeErrorMessage(const Option& option, const std::string& msg) const
+    {
+
     }
 }

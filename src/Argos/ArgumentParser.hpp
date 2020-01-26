@@ -7,12 +7,11 @@
 //****************************************************************************
 #pragma once
 #include <string>
-#include "ArgumentBuilder.hpp"
+#include "ArgumentCounter.hpp"
 #include "ArgumentData.hpp"
 #include "ArgumentIterator.hpp"
 #include "Option.hpp"
 #include "ParserResult.hpp"
-#include "ArgumentCounter.hpp"
 
 namespace Argos
 {
@@ -27,14 +26,26 @@ namespace Argos
 
         std::optional<int> next();
     private:
-        void processOption(const Option& option);
+        int processOption(const Option& option, const std::string& flag);
 
-        std::optional<int> next(bool requiresArgumentId);
+        std::optional<int> nextImpl();
+
+        void copyRemainingArgumentsToParserResult();
+
+        size_t countArguments() const;
 
         std::shared_ptr<ArgumentData> m_Data;
         std::vector<std::pair<std::string_view, const Option*>> m_Options;
         ParserResult m_ParserResult;
         ArgumentIterator m_ArgumentIterator;
         std::optional<ArgumentCounter> m_ArgumentCounter;
+        enum class State
+        {
+            ARGUMENTS_AND_OPTIONS,
+            ARGUMENTS_ONLY,
+            DONE,
+            ERROR
+        };
+        State m_State = State::ARGUMENTS_AND_OPTIONS;
     };
 }

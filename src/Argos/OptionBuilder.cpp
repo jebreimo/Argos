@@ -9,61 +9,73 @@
 
 namespace Argos
 {
-    OptionBuilder::OptionBuilder(Option* option)
-        : m_Option(option)
-    {}
+    OptionBuilder::OptionBuilder(std::vector<std::string> flags)
+    {
+        m_Option.flags = move(flags);
+    }
 
     OptionBuilder& OptionBuilder::argument(const std::string& name)
     {
-        m_Option->argument = name;
+        m_Option.argument = name;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::value(const std::string& value)
     {
-        m_Option->value = value;
+        m_Option.value = value;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::text(const std::string& text)
     {
-        m_Option->text = text;
+        m_Option.text = text;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::section(const std::string& name)
     {
-        m_Option->section = name;
+        m_Option.section = name;
         return *this;
     }
 
-    OptionBuilder& OptionBuilder::id(const std::string& id)
+    OptionBuilder& OptionBuilder::valueName(const std::string& id)
     {
-        m_Option->id = id;
+        m_Option.valueName = id;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::operation(ArgumentOperation operation)
     {
-        m_Option->operation = operation;
+        m_Option.operation = operation;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::type(OptionType type)
     {
-        m_Option->optionType = type;
+        m_Option.optionType = type;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::mandatory(bool mandatory)
     {
-        m_Option->mandatory = mandatory;
+        m_Option.mandatory = mandatory;
         return *this;
     }
 
     OptionBuilder& OptionBuilder::hidden(bool hidden)
     {
-        m_Option->hidden = hidden;
+        m_Option.hidden = hidden;
         return *this;
+    }
+
+    OptionBuilder& OptionBuilder::id(int id)
+    {
+        m_Option.id = id;
+        return *this;
+    }
+
+    Option&& OptionBuilder::get()
+    {
+        return std::move(m_Option);
     }
 }

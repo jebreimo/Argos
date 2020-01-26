@@ -63,9 +63,9 @@ namespace Argos
         return *this;
     }
 
-    ArgumentBuilder& ArgumentBuilder::id(int n)
+    ArgumentBuilder& ArgumentBuilder::id(int id)
     {
-        m_Argument.id = n;
+        m_Argument.id = id;
         return *this;
     }
 

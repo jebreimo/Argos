@@ -21,19 +21,13 @@ namespace Argos
 
         explicit ArgumentIterator(std::vector<std::string_view> args);
 
-        void setArguments(std::vector<std::string_view> args);
-
         std::optional<std::string> next();
 
         std::optional<std::string> nextValue();
 
         std::string_view current() const;
 
-        bool hasRemainder() const;
-
-        std::string_view remainder() const;
-
-        void skipRemainder();
+        std::vector<std::string_view> remainingArguments() const;
     private:
         std::vector<std::string_view> m_Args;
         std::vector<std::string_view>::const_iterator m_ArgsIt;

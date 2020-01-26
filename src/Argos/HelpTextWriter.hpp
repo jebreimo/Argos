@@ -16,7 +16,15 @@ namespace Argos
     public:
         explicit HelpTextWriter(std::shared_ptr<ArgumentData> data);
 
+        void writeHelpText() const;
+
         void writeErrorMessage(const std::string& msg) const;
+
+        void writeErrorMessage(const Argument& argument,
+                               const std::string& msg) const;
+
+        void writeErrorMessage(const Option& option,
+                               const std::string& msg) const;
     private:
         std::shared_ptr<ArgumentData> m_Data;
     };

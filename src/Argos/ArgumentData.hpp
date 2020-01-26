@@ -20,7 +20,6 @@ namespace Argos
         std::vector<Argument> arguments;
         std::vector<Option> options;
         //std::map<std::string, ArgumentVariant> argumentMap;
-        std::multimap<int, std::string> values;
         std::string programName;
 
         OptionStyle optionStyle = OptionStyle::STANDARD;

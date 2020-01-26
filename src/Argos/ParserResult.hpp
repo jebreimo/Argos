@@ -29,7 +29,13 @@ namespace Argos
 
         void addUnprocessedArgument(const std::string& arg);
 
-        std::map<int, std::string_view> m_Values;
+        void assignValue(int valueId, const std::string& value);
+
+        void appendValue(int valueId, const std::string& value);
+
+        void clearValue(int valueId);
+
+        std::multimap<int, std::string> m_Values;
         std::vector<std::string> m_Arguments;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ArgumentData> m_Data;

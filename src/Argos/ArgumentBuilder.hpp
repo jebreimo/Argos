@@ -31,7 +31,7 @@ namespace Argos
 
         ArgumentBuilder& hidden(bool hidden);
 
-        ArgumentBuilder& id(int n);
+        ArgumentBuilder& id(int id);
 
         Argument&& get();
     private:
