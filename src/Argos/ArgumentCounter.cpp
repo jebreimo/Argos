@@ -12,10 +12,10 @@ namespace Argos
 {
     namespace
     {
-        std::vector<std::pair<size_t, const Argument*>>
-        makeArgumentCounters(const std::vector<Argument>& arguments)
+        std::vector<std::pair<size_t, const ArgumentData*>>
+        makeArgumentCounters(const std::vector<ArgumentData>& arguments)
         {
-            std::vector<std::pair<size_t, const Argument*>> result;
+            std::vector<std::pair<size_t, const ArgumentData*>> result;
             for (auto& arg : arguments)
             {
                 if (arg.maxCount != -1)
@@ -27,7 +27,7 @@ namespace Argos
         }
 
         std::pair<size_t, size_t>
-        countArguments(const std::vector<Argument>& arguments)
+        countArguments(const std::vector<ArgumentData>& arguments)
         {
             size_t lo = 0, hi = 0;
             for (auto& arg : arguments)
@@ -44,8 +44,8 @@ namespace Argos
             return {lo, hi};
         }
 
-        std::vector<std::pair<size_t, const Argument*>>
-        makeArgumentCounters(const std::vector<Argument>& arguments, size_t n)
+        std::vector<std::pair<size_t, const ArgumentData*>>
+        makeArgumentCounters(const std::vector<ArgumentData>& arguments, size_t n)
         {
             auto minmax = countArguments(arguments);
             if (n < minmax.first)
@@ -55,7 +55,7 @@ namespace Argos
             else
                 n -= minmax.first;
 
-            std::vector<std::pair<size_t, const Argument*>> result;
+            std::vector<std::pair<size_t, const ArgumentData*>> result;
             for (auto& arg : arguments)
             {
                 if (n == 0 || arg.minCount == arg.maxCount)
@@ -77,18 +77,18 @@ namespace Argos
             return result;
         }
     }
-    ArgumentCounter::ArgumentCounter(const std::vector<Argument>& arguments)
+    ArgumentCounter::ArgumentCounter(const std::vector<ArgumentData>& arguments)
         : m_Counters(makeArgumentCounters(arguments)),
           m_Iterator(m_Counters.begin())
     {}
 
-    ArgumentCounter::ArgumentCounter(const std::vector<Argument>& arguments,
+    ArgumentCounter::ArgumentCounter(const std::vector<ArgumentData>& arguments,
                                      size_t argumentCount)
         : m_Counters(makeArgumentCounters(arguments, argumentCount)),
           m_Iterator(m_Counters.begin())
     {}
 
-    const Argument* ArgumentCounter::nextArgument()
+    const ArgumentData* ArgumentCounter::nextArgument()
     {
         while (m_Iterator != m_Counters.end() && m_Iterator->first == 0)
             ++m_Iterator;
@@ -111,7 +111,7 @@ namespace Argos
     }
 
     bool ArgumentCounter::requiresArgumentCount(
-            const std::vector<Argument>& arguments)
+            const std::vector<ArgumentData>& arguments)
     {
         bool deterministic = true;
         for (auto& arg : arguments)

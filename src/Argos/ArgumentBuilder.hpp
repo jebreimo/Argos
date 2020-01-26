@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "Argument.hpp"
+#include "ArgumentData.hpp"
 
 namespace Argos
 {
@@ -33,8 +33,8 @@ namespace Argos
 
         ArgumentBuilder& id(int id);
 
-        Argument&& get();
+        ArgumentData&& get();
     private:
-        Argument m_Argument;
+        ArgumentData m_Argument;
     };
 }

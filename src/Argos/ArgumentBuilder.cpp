@@ -69,7 +69,7 @@ namespace Argos
         return *this;
     }
 
-    Argument&& ArgumentBuilder::get()
+    ArgumentData&& ArgumentBuilder::get()
     {
         return std::move(m_Argument);
     }

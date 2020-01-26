@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos.hpp"
-#include "ArgumentData.hpp"
+#include "ParserData.hpp"
 
 namespace Argos
 {
@@ -18,7 +18,7 @@ namespace Argos
     {}
 
     Argos::Argos(const std::string& programName)
-        : m_Data(std::make_shared<ArgumentData>())
+        : m_Data(std::make_shared<ParserData>())
     {
         m_Data->programName = programName;
     }
@@ -56,15 +56,15 @@ namespace Argos
     //    return OptionBuilder(&m_Data->options.back());
     //}
 
-    ParserResult Argos::parse(int argc, char** argv, bool preserveArgParser)
+    ParserResultImpl Argos::parse(int argc, char** argv, bool preserveArgParser)
     {
         auto argumentData = m_Data;
         if (preserveArgParser)
-            m_Data = std::make_shared<ArgumentData>(*m_Data);
+            m_Data = std::make_shared<ParserData>(*m_Data);
         finalizeArgumentData(*argumentData);
-        ArgumentParser parser(argc, argv, argumentData);
+        ArgumentIterator parser(argc, argv, argumentData);
         // parser.next(argc, argv, argumentData);
-        return ParserResult(argumentData);
+        return ParserResultImpl(argumentData);
     }
 
     bool Argos::autoExit() const
@@ -87,7 +87,7 @@ namespace Argos
         m_Data->programName = programName;
     }
 
-    void Argos::finalizeArgumentData(const ArgumentData& data) const
+    void Argos::finalizeArgumentData(const ParserData& data) const
     {
         struct InternalIdMaker
         {

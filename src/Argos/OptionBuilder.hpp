@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "Option.hpp"
+#include "OptionData.hpp"
 
 namespace Argos
 {
@@ -35,8 +35,8 @@ namespace Argos
 
         OptionBuilder& id(int id);
 
-        Option&& get();
+        OptionData&& get();
     private:
-        Option m_Option;
+        OptionData m_Option;
     };
 }

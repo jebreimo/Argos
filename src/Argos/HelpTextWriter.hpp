@@ -7,25 +7,25 @@
 //****************************************************************************
 #pragma once
 
-#include "ArgumentData.hpp"
+#include "ParserData.hpp"
 
 namespace Argos
 {
     class HelpTextWriter
     {
     public:
-        explicit HelpTextWriter(std::shared_ptr<ArgumentData> data);
+        explicit HelpTextWriter(std::shared_ptr<ParserData> data);
 
         void writeHelpText() const;
 
         void writeErrorMessage(const std::string& msg) const;
 
-        void writeErrorMessage(const Argument& argument,
+        void writeErrorMessage(const ArgumentData& argument,
                                const std::string& msg) const;
 
-        void writeErrorMessage(const Option& option,
+        void writeErrorMessage(const OptionData& option,
                                const std::string& msg) const;
     private:
-        std::shared_ptr<ArgumentData> m_Data;
+        std::shared_ptr<ParserData> m_Data;
     };
 }

@@ -11,7 +11,7 @@
 
 namespace Argos
 {
-    HelpTextWriter::HelpTextWriter(std::shared_ptr<ArgumentData> data)
+    HelpTextWriter::HelpTextWriter(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
     {}
 
@@ -25,12 +25,12 @@ namespace Argos
         std::cerr << msg << "\n";
     }
 
-    void HelpTextWriter::writeErrorMessage(const Argument& argument, const std::string& msg) const
+    void HelpTextWriter::writeErrorMessage(const ArgumentData& argument, const std::string& msg) const
     {
 
     }
 
-    void HelpTextWriter::writeErrorMessage(const Option& option, const std::string& msg) const
+    void HelpTextWriter::writeErrorMessage(const OptionData& option, const std::string& msg) const
     {
 
     }

@@ -11,16 +11,16 @@
 
 namespace Argos
 {
-    class ArgumentParser;
+    class ArgumentIterator;
 
     class RawArg
     {
     public:
-        RawArg(std::shared_ptr<ArgumentParser> parser, std::string_view value);
+        RawArg(std::shared_ptr<ArgumentIterator> parser, std::string_view value);
 
         bool hasValue() const;
     private:
-        std::shared_ptr<ArgumentParser> m_Parser;
+        std::shared_ptr<ArgumentIterator> m_Parser;
         std::optional<std::string_view> m_Value;
     };
 }

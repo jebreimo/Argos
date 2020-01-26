@@ -7,7 +7,7 @@
 //****************************************************************************
 #pragma once
 #include "ArgumentBuilder.hpp"
-#include "ArgumentParser.hpp"
+#include "ArgumentIterator.hpp"
 #include "OptionBuilder.hpp"
 
 namespace Argos
@@ -19,9 +19,9 @@ namespace Argos
 
         OptionBuilder addOption(const std::string& flag);
 
-        ArgumentParser makeParser() const;
+        ArgumentIterator makeParser() const;
     private:
-        std::vector<Argument> m_Arguments;
-        std::vector<Option> m_Options;
+        std::vector<ArgumentData> m_Arguments;
+        std::vector<OptionData> m_Options;
     };
 }

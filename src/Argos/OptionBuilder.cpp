@@ -74,7 +74,7 @@ namespace Argos
         return *this;
     }
 
-    Option&& OptionBuilder::get()
+    OptionData&& OptionBuilder::get()
     {
         return std::move(m_Option);
     }

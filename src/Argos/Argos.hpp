@@ -10,11 +10,11 @@
 #include <string>
 #include <set>
 #include "ParserBuilder.hpp"
-#include "ParserResult.hpp"
+#include "ParserResultImpl.hpp"
 
 namespace Argos
 {
-    class ArgumentData;
+    class ParserData;
 
     class Argos
     {
@@ -37,7 +37,7 @@ namespace Argos
 
         void add(OptionBuilder builder);
 
-        ParserResult parse(int argc, char* argv[], bool preserveArgParser = false);
+        ParserResultImpl parse(int argc, char* argv[], bool preserveArgParser = false);
 
         bool autoExit() const;
 
@@ -47,9 +47,9 @@ namespace Argos
 
         void setProgramName(const std::string& programName);
     private:
-        void finalizeArgumentData(const ArgumentData& data) const;
+        void finalizeArgumentData(const ParserData& data) const;
 
-        std::shared_ptr<ArgumentData> m_Data;
+        std::shared_ptr<ParserData> m_Data;
         std::set<std::string> m_Names;
         //ParserBuilder m_ParserBuilder;
         //std::string m_ProgramName;

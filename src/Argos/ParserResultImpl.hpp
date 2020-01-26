@@ -7,23 +7,23 @@
 //****************************************************************************
 #pragma once
 #include <map>
-#include "ArgumentData.hpp"
+#include "ParserData.hpp"
 #include "RawArg.hpp"
 
 namespace Argos
 {
-    class ArgumentParser;
+    class ArgumentIterator;
 
-    class ParserResult
+    class ParserResultImpl
     {
     public:
-        ParserResult(std::shared_ptr<ArgumentData> data);
+        ParserResultImpl(std::shared_ptr<ParserData> data);
 
         RawArg get(const std::string& name) const;
 
         const std::vector<std::string>& arguments() const;
     private:
-        friend ArgumentParser;
+        friend ArgumentIterator;
 
         void addArgument(const std::string& arg);
 
@@ -38,6 +38,6 @@ namespace Argos
         std::multimap<int, std::string> m_Values;
         std::vector<std::string> m_Arguments;
         std::vector<std::string> m_UnprocessedArguments;
-        std::shared_ptr<ArgumentData> m_Data;
+        std::shared_ptr<ParserData> m_Data;
     };
 }

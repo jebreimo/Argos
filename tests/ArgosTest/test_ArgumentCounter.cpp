@@ -11,7 +11,7 @@
 
 TEST_CASE("Test non-deterministic counter.")
 {
-    std::vector<Argos::Argument> args {
+    std::vector<Argos::ArgumentData> args {
             Argos::ArgumentBuilder("1").count(0, 1).get(),
             Argos::ArgumentBuilder("2").count(2).get()
     };

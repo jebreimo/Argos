@@ -1,32 +1,27 @@
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-13.
+// Created by Jan Erik Breimo on 2020-01-09.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include <map>
-#include <variant>
-#include "Argument.hpp"
-#include "Option.hpp"
-#include "OptionStyle.hpp"
+#include <string>
+#include "ArgumentOperation.hpp"
 
 namespace Argos
 {
-    //using ArgumentVariant = std::variant<const Argument*, const Option*>;
     struct ArgumentData
     {
-        std::vector<Argument> arguments;
-        std::vector<Option> options;
-        //std::map<std::string, ArgumentVariant> argumentMap;
-        std::string programName;
-
-        OptionStyle optionStyle = OptionStyle::STANDARD;
-        bool autoExit = true;
-        bool allowAbbreviatedOptions = false;
-        bool ignoreUndefinedArguments = false;
-        bool ignoreMissingArguments = false;
-        bool caseInsensitive = false;
+        std::string name;
+        std::string text;
+        std::string section;
+        std::string valueName;
+        ArgumentOperation operation = ArgumentOperation::ASSIGN;
+        int minCount = 1;
+        int maxCount = 1;
+        bool hidden = false;
+        int id = 0;
+        int valueId_ = 0;
     };
 }

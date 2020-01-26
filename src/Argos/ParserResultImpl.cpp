@@ -5,30 +5,30 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "ParserResult.hpp"
+#include "ParserResultImpl.hpp"
 
 namespace Argos
 {
-    ParserResult::ParserResult(std::shared_ptr<ArgumentData> data)
+    ParserResultImpl::ParserResultImpl(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
     {}
 
-    const std::vector<std::string>& ParserResult::arguments() const
+    const std::vector<std::string>& ParserResultImpl::arguments() const
     {
         return m_Arguments;
     }
 
-    void ParserResult::addArgument(const std::string& arg)
+    void ParserResultImpl::addArgument(const std::string& arg)
     {
         m_Arguments.push_back(arg);
     }
 
-    void ParserResult::addUnprocessedArgument(const std::string& arg)
+    void ParserResultImpl::addUnprocessedArgument(const std::string& arg)
     {
         m_UnprocessedArguments.push_back(arg);
     }
 
-    void ParserResult::assignValue(int valueId, const std::string& value)
+    void ParserResultImpl::assignValue(int valueId, const std::string& value)
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
@@ -43,12 +43,12 @@ namespace Argos
             m_Values.erase(it++);
     }
 
-    void ParserResult::appendValue(int valueId, const std::string& value)
+    void ParserResultImpl::appendValue(int valueId, const std::string& value)
     {
         m_Values.emplace(valueId, value);
     }
 
-    void ParserResult::clearValue(int valueId)
+    void ParserResultImpl::clearValue(int valueId)
     {
         m_Values.erase(valueId);
     }

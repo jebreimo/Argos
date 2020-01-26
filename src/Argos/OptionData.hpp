@@ -7,20 +7,31 @@
 //****************************************************************************
 #pragma once
 #include <string>
+#include <vector>
 #include "ArgumentOperation.hpp"
 
 namespace Argos
 {
-    struct Argument
+    enum class OptionType
     {
-        std::string name;
+        NORMAL,
+        HELP,
+        BREAK,
+        FINAL
+    };
+
+    struct OptionData
+    {
+        std::vector<std::string> flags;
         std::string text;
         std::string section;
         std::string valueName;
+        std::string argument;
+        std::string value;
         ArgumentOperation operation = ArgumentOperation::ASSIGN;
-        int minCount = 1;
-        int maxCount = 1;
+        OptionType optionType = OptionType::NORMAL;
         bool hidden = false;
+        bool mandatory = false;
         int id = 0;
         int valueId_ = 0;
     };
