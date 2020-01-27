@@ -55,25 +55,9 @@ namespace Argos
                 o->valueId_ = idMaker.makeNumericId(o->valueName);
         }
 
-        std::string findConflictingFlags(
-                const std::vector<std::shared_ptr<OptionData>>& options)
-        {
-            std::vector<std::string_view> flags;
-            for (auto& o : options)
-            {
-                for (auto& f : o->flags)
-                    flags.emplace_back(f);
-            }
-            sort(flags.begin(), flags.end());
-            auto it = std::adjacent_find(flags.begin(), flags.end());
-            return it == flags.end() ? std::string() : std::string(*it);
-        }
-
         ParsedArguments parseArguments(int argc, char** argv,
                                        std::shared_ptr<ParserData> data)
         {
-            if (auto f = findConflictingFlags(data->options); !f.empty())
-                ARGOS_THROW("Multiple definitions of flag " + f);
             if (argc >= 1 && data->helpSettings.programName.empty())
                 data->helpSettings.programName = argv[0];
             generateInternalIds(*data);

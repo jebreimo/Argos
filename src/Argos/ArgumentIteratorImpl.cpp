@@ -36,8 +36,9 @@ namespace Argos
 
         using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
 
-        OptionTable makeOptionIndex(const std::vector<std::shared_ptr<OptionData>>& options,
-                                    bool caseInsensitive)
+        OptionTable makeOptionIndex(
+                const std::vector<std::shared_ptr<OptionData>>& options,
+                bool caseInsensitive)
         {
             OptionTable index;
             for (auto& option : options)
@@ -45,21 +46,45 @@ namespace Argos
                 for (auto& flag : option->flags)
                     index.emplace_back(flag, option.get());
             }
+            OptionTable::iterator it;
             if (caseInsensitive)
             {
-                std::sort(index.begin(), index.end(), [](auto& a, auto& b)
+                sort(index.begin(), index.end(), [](auto& a, auto& b)
                 {
                     return isLessCI(a.first, b.first);
+                });
+                it = adjacent_find(index.begin(), index.end(),
+                                   [](auto& a, auto& b)
+                {
+                    return areEqualCI(a.first, b.first);
                 });
             }
             else
             {
-                std::sort(index.begin(), index.end(), [](auto& a, auto& b)
+                sort(index.begin(), index.end(), [](auto& a, auto& b)
                 {
                     return a.first < b.first;
                 });
+                it = adjacent_find(index.begin(), index.end(),
+                                   [](auto& a, auto& b)
+                {
+                    return a.first == b.first;
+                });
             }
-            return index;
+            if (it == index.end())
+            {
+                return index;
+            }
+            else if (it->first == next(it)->first)
+            {
+                ARGOS_THROW("Multiple definitions of flag "
+                            + std::string(it->first));
+            }
+            else
+            {
+                ARGOS_THROW("Conflicting flags: " + std::string(it->first)
+                            + " and " + std::string(next(it)->first));
+            }
         }
 
         OptionTable::const_iterator findOptionCS(const OptionTable& options,
