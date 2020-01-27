@@ -11,8 +11,6 @@ project(Argos)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(Argos
-    src/Argos/ArgumentParserImpl.cpp
-    src/Argos/ArgumentParserImpl.hpp
     src/Argos/Argument.cpp
     include/Argos/Argument.hpp
     src/Argos/ParsedArgumentsImpl.cpp
