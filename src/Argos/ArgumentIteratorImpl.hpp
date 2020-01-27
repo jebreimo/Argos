@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <string>
+#include <variant>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
 #include "StandardOptionIterator.hpp"

@@ -58,6 +58,8 @@ namespace Argos
 
         Option& id(int id);
 
+        Option& flag(const std::string& f);
+
         const std::vector<std::string>& flags() const;
 
         Option& flags(std::vector<std::string> f);

@@ -30,7 +30,7 @@ namespace Argos
 
         ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
 
-        std::unique_ptr<const IArgument> next();
+        std::pair<std::unique_ptr<const IArgument>, std::string_view> next();
     private:
         std::unique_ptr<ArgumentIteratorImpl> m_Impl;
     };

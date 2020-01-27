@@ -45,3 +45,15 @@ TEST_CASE("Test basics")
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
 }
+
+TEST_CASE("Conflicting flags")
+{
+    Argos::ArgumentParser argos("test");
+    argos.add(Argos::Option({"-h", "--help"})
+                      .type(Argos::OptionType::HELP)
+                      .text("Show help message."));
+    argos.add(Argos::Option({"-h"})
+                      .text("Output height."));
+    Argv argv{"test", "--help"};
+    REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
+}

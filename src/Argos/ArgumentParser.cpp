@@ -5,9 +5,10 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos/ArgosException.hpp"
 #include "Argos/ArgumentParser.hpp"
 
+#include <algorithm>
+#include "Argos/ArgosException.hpp"
 #include "ArgumentIteratorImpl.hpp"
 #include "ParserData.hpp"
 
@@ -53,6 +54,33 @@ namespace Argos
             for (auto& o : data.options)
                 o->valueId_ = idMaker.makeNumericId(o->valueName);
         }
+
+        std::string findConflictingFlags(
+                const std::vector<std::shared_ptr<OptionData>>& options)
+        {
+            std::vector<std::string_view> flags;
+            for (auto& o : options)
+            {
+                for (auto& f : o->flags)
+                    flags.emplace_back(f);
+            }
+            sort(flags.begin(), flags.end());
+            auto it = std::adjacent_find(flags.begin(), flags.end());
+            return it == flags.end() ? std::string() : std::string(*it);
+        }
+
+        ParsedArguments parseArguments(int argc, char** argv,
+                                       std::shared_ptr<ParserData> data)
+        {
+            if (auto f = findConflictingFlags(data->options); !f.empty())
+                ARGOS_THROW("Multiple definitions of flag " + f);
+            if (argc >= 1 && data->helpSettings.programName.empty())
+                data->helpSettings.programName = argv[0];
+            generateInternalIds(*data);
+            ArgumentIteratorImpl iterator(argc, argv, move(data));
+            iterator.parseAll();
+            return ParsedArguments(iterator.releaseResult());
+        }
     }
     ArgumentParser::ArgumentParser()
         : ArgumentParser(std::string())
@@ -78,32 +106,26 @@ namespace Argos
 
     ArgumentParser& ArgumentParser::add(Option& option)
     {
-        // TODO: check if option is valid
-        // TODO: check if flags are unique
+        // TODO: check that either argument or value is set if operation is ASSIGN or APPEND.
+        // TODO: check if flags have the right prefix (- or /)
+        // TODO: check that short flags are two characters long.
+        // TODO: check if flags contain = anywhere, but the end.
         data().options.push_back(option.release());
         return *this;
     }
 
     ParsedArguments ArgumentParser::parse(int argc, char** argv) const
     {
-        std::shared_ptr<ParserData> d = makeCopy(data());
-        if (argc >= 1 && d->helpSettings.programName.empty())
-            d->helpSettings.programName = argv[0];
-        generateInternalIds(*d);
-        ArgumentIteratorImpl iterator(argc, argv, move(d));
-        iterator.parseAll();
-        return ParsedArguments(iterator.releaseResult());
+        if (!m_Data)
+            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
+        return parseArguments(argc, argv, makeCopy(data()));
     }
 
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        std::shared_ptr<ParserData> d = std::move(m_Data);
-        generateInternalIds(*d);
-        ArgumentIteratorImpl iterator(argc, argv, move(d));
-        iterator.parseAll();
-        return ParsedArguments(iterator.releaseResult());
+        return parseArguments(argc, argv, std::move(m_Data));
     }
 
     bool ArgumentParser::autoExitEnabled() const
