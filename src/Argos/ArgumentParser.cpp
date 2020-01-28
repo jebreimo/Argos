@@ -61,9 +61,8 @@ namespace Argos
             if (argc >= 1 && data->helpSettings.programName.empty())
                 data->helpSettings.programName = argv[0];
             generateInternalIds(*data);
-            ArgumentIteratorImpl iterator(argc, argv, move(data));
-            iterator.parseAll();
-            return ParsedArguments(iterator.releaseResult());
+            return ParsedArguments(
+                    ArgumentIteratorImpl::parse(argc, argv, move(data)));
         }
     }
     ArgumentParser::ArgumentParser()

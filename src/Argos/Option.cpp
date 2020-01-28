@@ -38,23 +38,11 @@ namespace Argos
         return *this;
     }
 
-    const std::string& Option::text() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->text;
-    }
-
     Option& Option::text(const std::string& text)
     {
         CHECK_OPTION_EXISTS();
         m_Option->text = text;
         return *this;
-    }
-
-    const std::string& Option::section() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->section;
     }
 
     Option& Option::section(const std::string& name)
@@ -64,23 +52,11 @@ namespace Argos
         return *this;
     }
 
-    const std::string& Option::valueName() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->valueName;
-    }
-
     Option& Option::valueName(const std::string& id)
     {
         CHECK_OPTION_EXISTS();
         m_Option->valueName = id;
         return *this;
-    }
-
-    ArgumentOperation Option::operation() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->operation;
     }
 
     Option& Option::operation(ArgumentOperation operation)
@@ -90,23 +66,11 @@ namespace Argos
         return *this;
     }
 
-    bool Option::hidden() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->hidden;
-    }
-
     Option& Option::hidden(bool hidden)
     {
         CHECK_OPTION_EXISTS();
         m_Option->hidden = hidden;
         return *this;
-    }
-
-    int Option::id() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->id;
     }
 
     Option& Option::id(int id)
@@ -116,23 +80,11 @@ namespace Argos
         return *this;
     }
 
-    const std::vector<std::string>& Option::flags() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->flags;
-    }
-
     Option& Option::flags(std::vector<std::string> f)
     {
         CHECK_OPTION_EXISTS();
         m_Option->flags = std::move(f);
         return *this;
-    }
-
-    const std::string& Option::argument() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->argument;
     }
 
     Option& Option::argument(const std::string& name)
@@ -142,12 +94,6 @@ namespace Argos
         return *this;
     }
 
-    const std::string& Option::value() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->value;
-    }
-
     Option& Option::value(const std::string& value)
     {
         CHECK_OPTION_EXISTS();
@@ -155,23 +101,11 @@ namespace Argos
         return *this;
     }
 
-    OptionType Option::type() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->optionType;
-    }
-
     Option& Option::type(OptionType type)
     {
         CHECK_OPTION_EXISTS();
         m_Option->optionType = type;
         return *this;
-    }
-
-    bool Option::mandatory() const
-    {
-        CHECK_OPTION_EXISTS();
-        return m_Option->mandatory;
     }
 
     Option& Option::mandatory(bool mandatory)

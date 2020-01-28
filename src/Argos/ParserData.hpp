@@ -19,6 +19,7 @@ namespace Argos
         OptionStyle optionStyle = OptionStyle::STANDARD;
         bool autoExit = true;
         bool allowAbbreviatedOptions = false;
+        bool ignoreUndefinedOptions = false;
         bool ignoreUndefinedArguments = false;
         bool ignoreMissingArguments = false;
         bool caseInsensitive = false;

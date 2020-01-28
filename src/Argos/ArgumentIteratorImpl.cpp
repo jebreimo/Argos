@@ -11,6 +11,7 @@
 #include "Argos/ArgosException.hpp"
 #include "HelpWriter.hpp"
 #include "StringUtilities.hpp"
+#include "VisitorUtilities.hpp"
 
 namespace Argos
 {
@@ -157,7 +158,7 @@ namespace Argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(int argc, char** argv, std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-              m_ParserResult(m_Data),
+              m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
               m_ArgumentIterator(makeStringViewVector(argc, argv, true))
     {
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
@@ -168,31 +169,43 @@ namespace Argos
                                                std::shared_ptr<ParserData> data)
             : m_Data(move(data)),
               m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-              m_ParserResult(m_Data),
+              m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
               m_ArgumentIterator(makeStringViewVector(args))
     {
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter.emplace(m_Data->arguments);
     }
 
-    std::optional<int> ArgumentIteratorImpl::next()
+    IteratorResult ArgumentIteratorImpl::next()
     {
         if (!m_ArgumentCounter)
         {
             m_ArgumentCounter = ArgumentCounter(m_Data->arguments,
                                                 countArguments());
         }
-        return nextImpl();
+        auto result = doNext();
+        while (result.first == IteratorResultCode::UNKNOWN)
+            result = doNext();
+        return result;
     }
 
-    std::unique_ptr<ParsedArgumentsImpl> ArgumentIteratorImpl::releaseResult()
+    std::unique_ptr<ParsedArgumentsImpl>
+    ArgumentIteratorImpl::parse(int argc, char* argv[],
+                                const std::shared_ptr<ParserData>& data)
     {
-        return std::unique_ptr<ParsedArgumentsImpl>();
-    }
+        ArgumentIteratorImpl iterator(argc, argv, data);
+        while (true)
+        {
+            auto code = iterator.doNext().first;
+            if (code == IteratorResultCode::ERROR
+                || code == IteratorResultCode::DONE)
+            {
+                break;
+            }
+        }
 
-    void ArgumentIteratorImpl::parseAll()
-    {
-
+        iterator.postProcessArguments();
+        return std::move(iterator.m_ParsedArgs);
     }
 
     int ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
@@ -202,11 +215,11 @@ namespace Argos
         case ArgumentOperation::ASSIGN:
             if (!option.value.empty())
             {
-                m_ParserResult.assignValue(option.valueId_, option.value);
+                m_ParsedArgs->assignValue(option.valueId_, option.value);
             }
             else if (auto value = m_ArgumentIterator.nextValue(); value)
             {
-                m_ParserResult.assignValue(option.valueId_, *value);
+                m_ParsedArgs->assignValue(option.valueId_, *value);
             }
             else
             {
@@ -219,11 +232,11 @@ namespace Argos
         case ArgumentOperation::APPEND:
             if (!option.value.empty())
             {
-                m_ParserResult.appendValue(option.valueId_, option.value);
+                m_ParsedArgs->appendValue(option.valueId_, option.value);
             }
             else if (auto value = m_ArgumentIterator.nextValue(); value)
             {
-                m_ParserResult.appendValue(option.valueId_, *value);
+                m_ParsedArgs->appendValue(option.valueId_, *value);
             }
             else
             {
@@ -234,7 +247,7 @@ namespace Argos
             }
             break;
         case ArgumentOperation::CLEAR:
-            m_ParserResult.clearValue(option.valueId_);
+            m_ParsedArgs->clearValue(option.valueId_);
             break;
         case ArgumentOperation::NONE:
             break;
@@ -257,18 +270,37 @@ namespace Argos
         }
     }
 
-    std::optional<int> ArgumentIteratorImpl::nextImpl()
+    IteratorResult ArgumentIteratorImpl::doNext()
     {
         if (m_State == State::ERROR)
             ARGOS_THROW("next() called after error.");
         if (m_State == State::DONE)
-            return {};
+            return {IteratorResultCode::DONE, nullptr};
 
         auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
                    ? m_ArgumentIterator.next()
                    : m_ArgumentIterator.nextValue();
         if (!arg)
-            return {};
+        {
+            if (!m_ArgumentCounter || m_ArgumentCounter->isComplete())
+            {
+                m_State = State::DONE;
+                return {IteratorResultCode::DONE, nullptr};
+            }
+            else
+            {
+                auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
+                HelpWriter(m_Data).writeErrorMessage(
+                        (ns.first == ns.second
+                         ? "Too few arguments, expects "
+                         : "Too few arguments, expects at least ")
+                        + std::to_string(ns.first) + ".");
+                if (m_Data->parserSettings.autoExit)
+                    exit(1);
+                m_State = State::ERROR;
+                return {IteratorResultCode::ERROR, nullptr};
+            }
+        }
 
         if (m_State == State::ARGUMENTS_AND_OPTIONS)
         {
@@ -283,22 +315,22 @@ namespace Argos
                     if (m_Data->parserSettings.autoExit)
                         exit(0);
                     copyRemainingArgumentsToParserResult();
-                    return option->id;
+                    return {IteratorResultCode::OPTION, option};
                 case 2:
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
-                    return {};
+                    return {IteratorResultCode::ERROR, option};
                 default:
-                    return option->id;
+                    return {IteratorResultCode::OPTION, option};
                 }
             }
             else if (isOption(*arg, m_Data->parserSettings.optionStyle))
             {
-                if (m_Data->parserSettings.ignoreUndefinedArguments
-                    && *arg == m_ArgumentIterator.current())
+                if (m_Data->parserSettings.ignoreUndefinedOptions
+                    && startsWith(m_ArgumentIterator.current(), *arg))
                 {
-                    m_ParserResult.addUnprocessedArgument(*arg);
+                    m_ParsedArgs->addUnprocessedArgument(*arg);
                 }
                 else
                 {
@@ -308,7 +340,7 @@ namespace Argos
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
-                    return {};
+                    return {IteratorResultCode::ERROR, nullptr};
                 }
             }
         }
@@ -316,14 +348,13 @@ namespace Argos
         {
             if (auto argument = m_ArgumentCounter->nextArgument())
             {
-                m_ParserResult.addArgument(*arg);
-                m_ParserResult.assignValue(argument->valueId_, *arg);
-                return argument->valueId_;
+                m_ParsedArgs->addArgument(*arg);
+                m_ParsedArgs->assignValue(argument->valueId_, *arg);
+                return {IteratorResultCode::ARGUMENT, argument};
             }
             else if (m_Data->parserSettings.ignoreUndefinedArguments)
             {
-                m_ParserResult.addUnprocessedArgument(*arg);
-                return {};
+                m_ParsedArgs->addUnprocessedArgument(*arg);
             }
             else
             {
@@ -333,21 +364,20 @@ namespace Argos
                 if (m_Data->parserSettings.autoExit)
                     exit(1);
                 copyRemainingArgumentsToParserResult();
-                return {};
+                return {IteratorResultCode::ERROR, nullptr};
             }
         }
         else
         {
-            m_ParserResult.addArgument(*arg);
-            return 0;
+            m_InernalArgs.push_back(*arg);
         }
-        return {};
+        return {IteratorResultCode::UNKNOWN, nullptr};
     }
 
     void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()
     {
         for (auto str : m_ArgumentIterator.remainingArguments())
-            m_ParserResult.addUnprocessedArgument(std::string(str));
+            m_ParsedArgs->addUnprocessedArgument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::countArguments() const
@@ -385,5 +415,51 @@ namespace Argos
         for (auto arg = it.next(); arg; arg = it.next())
             ++result;
         return result;
+    }
+
+    void ArgumentIteratorImpl::postProcessArguments()
+    {
+        if (m_ArgumentCounter)
+            return;
+
+        auto& args = m_InernalArgs;
+        ArgumentCounter counter(m_Data->arguments, m_InernalArgs.size());
+        for (auto it = m_InernalArgs.begin(); it != m_InernalArgs.end(); ++it)
+        {
+            if (auto argument = m_ArgumentCounter->nextArgument())
+            {
+                m_ParsedArgs->addArgument(*it);
+                m_ParsedArgs->assignValue(argument->valueId_, *it);
+            }
+            else if (m_Data->parserSettings.ignoreUndefinedArguments)
+            {
+                m_ParsedArgs->addUnprocessedArgument(*it);
+            }
+            else
+            {
+                HelpWriter(m_Data).writeErrorMessage(
+                        "Too many arguments, starting with " + *it);
+                m_State = State::ERROR;
+                if (m_Data->parserSettings.autoExit)
+                    exit(1);
+                for_each(it, m_InernalArgs.end(), [this](auto& v)
+                {
+                    m_ParsedArgs->addUnprocessedArgument(v);
+                });
+                break;
+            }
+        }
+        if (!m_ArgumentCounter->isComplete())
+        {
+            auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
+            HelpWriter(m_Data).writeErrorMessage(
+                    (ns.first == ns.second
+                     ? "Too few arguments, expects "
+                     : "Too few arguments, expects at least ")
+                    + std::to_string(ns.first) + ".");
+            if (m_Data->parserSettings.autoExit)
+                exit(1);
+            m_State = State::ERROR;
+        }
     }
 }

@@ -25,6 +25,9 @@ namespace Argos
 
         bool isComplete() const;
 
+        static std::pair<size_t, size_t> getMinMaxCount(
+                const std::vector<std::shared_ptr<ArgumentData>>& arguments);
+
         static bool requiresArgumentCount(
                 const std::vector<std::shared_ptr<ArgumentData>>& arguments);
     private:

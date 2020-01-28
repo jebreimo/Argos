@@ -7,7 +7,6 @@
 //****************************************************************************
 #pragma once
 #include <string>
-#include <variant>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
 #include "StandardOptionIterator.hpp"
@@ -16,6 +15,17 @@
 
 namespace Argos
 {
+    enum class IteratorResultCode
+    {
+        ARGUMENT,
+        OPTION,
+        DONE,
+        UNKNOWN,
+        ERROR
+    };
+
+    using IteratorResult = std::pair<IteratorResultCode, const void*>;
+
     class ArgumentIteratorImpl
     {
     public:
@@ -25,23 +35,24 @@ namespace Argos
         ArgumentIteratorImpl(const std::vector<std::string>& args,
                              std::shared_ptr<ParserData> data);
 
-        std::optional<int> next();
+        IteratorResult next();
 
-        std::unique_ptr<ParsedArgumentsImpl> releaseResult();
-
-        void parseAll();
+        static std::unique_ptr<ParsedArgumentsImpl>
+        parse(int argc, char* argv[], const std::shared_ptr<ParserData>& data);
     private:
         int processOption(const OptionData& option, const std::string& flag);
 
-        std::optional<int> nextImpl();
+        IteratorResult doNext();
 
         void copyRemainingArgumentsToParserResult();
 
         size_t countArguments() const;
 
+        void postProcessArguments();
+
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
-        ParsedArgumentsImpl m_ParserResult;
+        std::unique_ptr<ParsedArgumentsImpl> m_ParsedArgs;
         StandardOptionIterator m_ArgumentIterator;
         std::optional<ArgumentCounter> m_ArgumentCounter;
         enum class State
@@ -52,5 +63,6 @@ namespace Argos
             ERROR
         };
         State m_State = State::ARGUMENTS_AND_OPTIONS;
+        std::vector<std::string> m_InernalArgs;
     };
 }

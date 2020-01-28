@@ -6,15 +6,16 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "IArgument.hpp"
 
 #include <memory>
+#include <string>
+#include "ArgumentOperation.hpp"
 
 namespace Argos
 {
     struct ArgumentData;
 
-    class Argument : public IArgument
+    class Argument
     {
     public:
         Argument();
@@ -25,45 +26,27 @@ namespace Argos
 
         Argument(Argument&&) noexcept;
 
-        ~Argument() override;
+        ~Argument();
 
         Argument& operator=(const Argument&) = delete;
 
         Argument& operator=(Argument&&) noexcept;
 
-        const std::string& text() const override;
-
         Argument& text(const std::string& text);
-
-        const std::string& section() const override;
 
         Argument& section(const std::string& name);
 
-        const std::string& valueName() const override;
-
         Argument& valueName(const std::string& id);
-
-        ArgumentOperation operation() const override;
 
         Argument& operation(ArgumentOperation operation);
 
-        bool hidden() const override;
-
         Argument& hidden(bool hidden);
-
-        int id() const override;
 
         Argument& id(int id);
 
-        const std::string& name() const;
-
         Argument& name(const std::string& name);
 
-        bool optional() const;
-
         Argument& optional(bool optional);
-
-        std::pair<unsigned, unsigned> count() const;
 
         Argument& count(unsigned n);
 

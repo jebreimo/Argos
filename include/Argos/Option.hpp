@@ -7,17 +7,17 @@
 //****************************************************************************
 #pragma once
 
-#include "IArgument.hpp"
-
 #include <memory>
+#include <string>
 #include <vector>
+#include "ArgumentOperation.hpp"
 #include "OptionType.hpp"
 
 namespace Argos
 {
     class OptionData;
 
-    class Option : public IArgument
+    class Option
     {
     public:
         Option();
@@ -28,55 +28,39 @@ namespace Argos
 
         Option(Option&&) noexcept;
 
-        ~Option() override;
+        ~Option();
 
         Option& operator=(const Option&) = delete;
 
         Option& operator=(Option&&) noexcept;
 
-        const std::string& text() const override;
-
         Option& text(const std::string& text);
-
-        const std::string& section() const override;
 
         Option& section(const std::string& name);
 
-        const std::string& valueName() const override;
-
         Option& valueName(const std::string& id);
-
-        ArgumentOperation operation() const override;
 
         Option& operation(ArgumentOperation operation);
 
-        bool hidden() const override;
-
         Option& hidden(bool hidden);
-
-        int id() const override;
 
         Option& id(int id);
 
         Option& flag(const std::string& f);
 
-        const std::vector<std::string>& flags() const;
-
         Option& flags(std::vector<std::string> f);
-
-        const std::string& argument() const;
 
         Option& argument(const std::string& name);
 
-        const std::string& value() const;
-
         Option& value(const std::string& value);
 
-        OptionType type() const;
+        Option& value(bool value);
+
+        Option& value(int value);
+
+        Option& value(double value);
 
         Option& type(OptionType type);
-
-        bool mandatory() const;
 
         Option& mandatory(bool mandatory);
 

@@ -22,29 +22,11 @@ namespace Argos
             return result;
         }
 
-        std::pair<size_t, size_t>
-        countArguments(const std::vector<std::shared_ptr<ArgumentData>>& arguments)
-        {
-            size_t lo = 0, hi = 0;
-            for (auto& arg : arguments)
-            {
-                lo += arg->minCount;
-                if (hi != SIZE_MAX)
-                {
-                    if (arg->maxCount > SIZE_MAX - hi)
-                        hi = SIZE_MAX;
-                    else
-                        hi += arg->maxCount;
-                }
-            }
-            return {lo, hi};
-        }
-
         std::vector<std::pair<size_t, const ArgumentData*>>
         makeArgumentCounters(const std::vector<std::shared_ptr<ArgumentData>>& arguments,
                              size_t n)
         {
-            auto minmax = countArguments(arguments);
+            auto minmax = ArgumentCounter::getMinMaxCount(arguments);
             if (n < minmax.first)
                 n = 0;
             else if (n > minmax.second)
@@ -104,6 +86,24 @@ namespace Argos
                 return false;
         }
         return true;
+    }
+
+    std::pair<size_t, size_t>
+    ArgumentCounter::getMinMaxCount(const std::vector<std::shared_ptr<ArgumentData>>& arguments)
+    {
+        size_t lo = 0, hi = 0;
+        for (auto& arg : arguments)
+        {
+            lo += arg->minCount;
+            if (hi != SIZE_MAX)
+            {
+                if (arg->maxCount > SIZE_MAX - hi)
+                    hi = SIZE_MAX;
+                else
+                    hi += arg->maxCount;
+            }
+        }
+        return {lo, hi};
     }
 
     bool ArgumentCounter::requiresArgumentCount(

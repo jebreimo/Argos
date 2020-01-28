@@ -12,10 +12,10 @@
 
 namespace Argos
 {
-    class IArgument
+    class IArgumentView
     {
     public:
-        virtual ~IArgument() = default;
+        virtual ~IArgumentView() = default;
 
         virtual const std::string& text() const = 0;
 

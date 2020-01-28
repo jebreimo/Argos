@@ -40,7 +40,7 @@ add_library(Argos
     src/Argos/ArgumentParser.cpp
     include/Argos/ArgumentParser.hpp
     src/Argos/ArgumentIterator.cpp
-    include/Argos/ArgumentIterator.hpp include/Argos/IArgument.hpp src/Argos/ParsedArguments.cpp include/Argos/ParsedArguments.hpp)
+    include/Argos/ArgumentIterator.hpp include/Argos/IArgumentView.hpp src/Argos/ParsedArguments.cpp include/Argos/ParsedArguments.hpp src/Argos/ArgumentView.cpp include/Argos/ArgumentView.hpp src/Argos/OptionView.cpp include/Argos/OptionView.hpp)
 
 target_include_directories(Argos
     PUBLIC
