@@ -44,6 +44,7 @@ TEST_CASE("Test basics")
             .text("Show help message."));
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
+    REQUIRE(result.has("--help"));
 }
 
 TEST_CASE("Conflicting flags")

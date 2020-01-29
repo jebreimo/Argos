@@ -29,6 +29,7 @@ namespace Argos
 
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        bool has(const std::string& name) const;
     private:
         std::unique_ptr<ParsedArgumentsImpl> m_Impl;
     };

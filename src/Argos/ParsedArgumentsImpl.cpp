@@ -7,11 +7,60 @@
 //****************************************************************************
 #include "ParsedArgumentsImpl.hpp"
 
+#include "Argos/ArgosException.hpp"
+
 namespace Argos
 {
+    namespace
+    {
+        template <typename It, typename Value, typename IsLess>
+        It lowerBound(It begin, It end, Value&& v, IsLess isLess)
+        {
+            while (begin != end)
+            {
+                auto offset = std::distance(begin, end) / 2;
+                auto mid = begin + offset;
+                if (isLess(*mid, v))
+                    begin = mid + 1;
+                else
+                    end = mid;
+            }
+            return begin;
+        }
+
+    }
+
     ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
-    {}
+    {
+        assert(m_Data);
+        for (auto& a : m_Data->arguments)
+        {
+            m_ValueIds.emplace_back(a->name, a->valueId_);
+            if (!a->valueName.empty())
+                m_ValueIds.emplace_back(a->valueName, a->valueId_);
+        }
+        for (auto& o : m_Data->options)
+        {
+            for (auto& f : o->flags)
+                m_ValueIds.emplace_back(f, o->valueId_);
+            if (!o->valueName.empty())
+                m_ValueIds.emplace_back(o->valueName, o->valueId_);
+        }
+        sort(m_ValueIds.begin(), m_ValueIds.end());
+        m_ValueIds.erase(unique(m_ValueIds.begin(), m_ValueIds.end()),
+                         m_ValueIds.end());
+    }
+
+    bool ParsedArgumentsImpl::has(const std::string& name) const
+    {
+        auto idIt = lowerBound(m_ValueIds.begin(), m_ValueIds.end(), name,
+                               [](auto& p, auto& s) {return p.first < s;});
+        if (idIt == m_ValueIds.end() || idIt->first != name)
+            ARGOS_THROW("Unknown value: " + name);
+        auto valIt = m_Values.lower_bound(idIt->second);
+        return valIt != m_Values.end() && valIt->first == idIt->second;
+    }
 
     const std::vector<std::string>& ParsedArgumentsImpl::arguments() const
     {

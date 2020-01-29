@@ -19,6 +19,8 @@ namespace Argos
     public:
         ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
+        bool has(const std::string& name) const;
+
         RawArg get(const std::string& name) const;
 
         const std::vector<std::string>& arguments() const;
@@ -36,6 +38,7 @@ namespace Argos
         void clearValue(int valueId);
 
         std::multimap<int, std::string> m_Values;
+        std::vector<std::pair<std::string_view, int>> m_ValueIds;
         std::vector<std::string> m_Arguments;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;

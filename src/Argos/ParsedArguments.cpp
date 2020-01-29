@@ -28,4 +28,9 @@ namespace Argos
         m_Impl = move(rhs.m_Impl);
         return *this;
     }
+
+    bool ParsedArguments::has(const std::string& name) const
+    {
+        return m_Impl->has(name);
+    }
 }

@@ -30,7 +30,7 @@ namespace Argos
             return result;
         }
 
-        void generateInternalIds(const ParserData& data)
+        void generateValueIds(const ParserData& data)
         {
             struct InternalIdMaker
             {
@@ -60,7 +60,7 @@ namespace Argos
         {
             if (argc >= 1 && data->helpSettings.programName.empty())
                 data->helpSettings.programName = argv[0];
-            generateInternalIds(*data);
+            generateValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(argc, argv, move(data)));
         }
@@ -89,11 +89,31 @@ namespace Argos
 
     ArgumentParser& ArgumentParser::add(Option& option)
     {
-        // TODO: check that either argument or value is set if operation is ASSIGN or APPEND.
+        auto od = option.release();
+        if (od->flags.empty())
+            ARGOS_THROW("Option must have one or more flags.");
         // TODO: check if flags have the right prefix (- or /)
         // TODO: check that short flags are two characters long.
         // TODO: check if flags contain = anywhere, but the end.
-        data().options.push_back(option.release());
+        if (!od->argument.empty() && !od->value.empty())
+            ARGOS_THROW("Option cannot have both argument and value set.");
+        switch (od->operation)
+        {
+        case ArgumentOperation::NONE:
+            break;
+        case ArgumentOperation::ASSIGN:
+        case ArgumentOperation::APPEND:
+            if (od->argument.empty() && od->value.empty())
+                od->value = "1";
+            break;
+        case ArgumentOperation::CLEAR:
+            if (!od->argument.empty() ||!od->value.empty())
+                od->value = "1";
+            if (od->valueName.empty())
+                ARGOS_THROW("Options with operation CLEAR must specify valueName.");
+            break;
+        }
+        data().options.push_back(move(od));
         return *this;
     }
 
