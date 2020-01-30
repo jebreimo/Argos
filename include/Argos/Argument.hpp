@@ -9,7 +9,7 @@
 
 #include <memory>
 #include <string>
-#include "ArgumentOperation.hpp"
+#include "ArgosEnums.hpp"
 
 namespace Argos
 {

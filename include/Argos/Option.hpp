@@ -7,15 +7,16 @@
 //****************************************************************************
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include "ArgumentOperation.hpp"
-#include "OptionType.hpp"
+#include "OptionView.hpp"
+#include "ParsedArgumentsBuilder.hpp"
 
 namespace Argos
 {
-    class OptionData;
+    using OptionCallback = std::function<bool(OptionView, std::string_view, ParsedArgumentsBuilder)>;
 
     class Option
     {

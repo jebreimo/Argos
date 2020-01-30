@@ -41,10 +41,13 @@ TEST_CASE("Test basics")
 
     argos.add(Argos::Option({"-h", "--help"})
             .type(Argos::OptionType::HELP)
-            .text("Show help message."));
+            .text("Show help message.")
+            .id(10));
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
     REQUIRE(result.has("--help"));
+    REQUIRE(result.resultCode() == Argos::ParserResultCode::SPECIAL_OPTION);
+    REQUIRE(result.specialOption().id() == 10);
 }
 
 TEST_CASE("Conflicting flags")

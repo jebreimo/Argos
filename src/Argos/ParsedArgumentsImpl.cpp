@@ -58,8 +58,12 @@ namespace Argos
                                [](auto& p, auto& s) {return p.first < s;});
         if (idIt == m_ValueIds.end() || idIt->first != name)
             ARGOS_THROW("Unknown value: " + name);
-        auto valIt = m_Values.lower_bound(idIt->second);
-        return valIt != m_Values.end() && valIt->first == idIt->second;
+        return has(idIt->second);
+    }
+
+    bool ParsedArgumentsImpl::has(int valueId) const
+    {
+        return m_Values.find(valueId) != m_Values.end();
     }
 
     const std::vector<std::string>& ParsedArgumentsImpl::arguments() const
@@ -100,5 +104,26 @@ namespace Argos
     void ParsedArgumentsImpl::clearValue(int valueId)
     {
         m_Values.erase(valueId);
+    }
+
+    ParserResultCode ParsedArgumentsImpl::resultCode() const
+    {
+        return m_ResultCode;
+    }
+
+    void ParsedArgumentsImpl::setResultCode(ParserResultCode resultCode)
+    {
+        m_ResultCode = resultCode;
+    }
+
+    const OptionData* ParsedArgumentsImpl::specialOption() const
+    {
+        return m_SpecialOption;
+    }
+
+    void ParsedArgumentsImpl::setSpecialOption(const OptionData* option)
+    {
+        m_ResultCode = ParserResultCode::SPECIAL_OPTION;
+        m_SpecialOption = option;
     }
 }

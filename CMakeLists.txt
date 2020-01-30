@@ -21,18 +21,16 @@ add_library(Argos
     src/Argos/RawArg.hpp
     src/Argos/ArgumentData.hpp
     src/Argos/OptionData.hpp
-    include/Argos/ArgumentOperation.hpp
     src/Argos/StandardOptionIterator.cpp
     src/Argos/StandardOptionIterator.hpp
     src/Argos/Option.cpp
     include/Argos/Option.hpp
-    include/Argos/OptionType.hpp
     src/Argos/ParserData.hpp
     include/Argos/ArgosException.hpp
     src/Argos/StringUtilities.hpp
     src/Argos/StringUtilities.cpp
     src/Argos/VisitorUtilities.hpp
-    include/Argos/OptionStyle.hpp
+    include/Argos/ArgosEnums.hpp
     src/Argos/HelpWriter.cpp
     src/Argos/HelpWriter.hpp
     src/Argos/ArgumentCounter.cpp
@@ -40,7 +38,7 @@ add_library(Argos
     src/Argos/ArgumentParser.cpp
     include/Argos/ArgumentParser.hpp
     src/Argos/ArgumentIterator.cpp
-    include/Argos/ArgumentIterator.hpp include/Argos/IArgumentView.hpp src/Argos/ParsedArguments.cpp include/Argos/ParsedArguments.hpp src/Argos/ArgumentView.cpp include/Argos/ArgumentView.hpp src/Argos/OptionView.cpp include/Argos/OptionView.hpp)
+    include/Argos/ArgumentIterator.hpp include/Argos/IArgumentView.hpp src/Argos/ParsedArguments.cpp include/Argos/ParsedArguments.hpp src/Argos/ArgumentView.cpp include/Argos/ArgumentView.hpp src/Argos/OptionView.cpp include/Argos/OptionView.hpp src/Argos/ParsedArgumentsBuilder.cpp include/Argos/ParsedArgumentsBuilder.hpp)
 
 target_include_directories(Argos
     PUBLIC

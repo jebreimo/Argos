@@ -9,6 +9,14 @@
 
 namespace Argos
 {
+    enum class ArgumentOperation
+    {
+        NONE,
+        ASSIGN,
+        APPEND,
+        CLEAR
+    };
+
     enum class OptionStyle
     {
         /**
@@ -24,11 +32,27 @@ namespace Argos
          * @brief Options starts with a slash (`/`) followed by one or more
          * characters.
          */
-        WINDOWS,
+        SLASH,
         /**
          * @brief Optons starts with a dash (`-`) followed by one or more
          *  characters.
          */
         DASH
+    };
+
+    enum class OptionType
+    {
+        NORMAL,
+        HELP,
+        BREAK,
+        FINAL
+    };
+
+    enum class ParserResultCode
+    {
+        NONE,
+        NORMAL,
+        SPECIAL_OPTION,
+        ERROR
     };
 }

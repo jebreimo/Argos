@@ -7,7 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <string>
-#include "Argos/ArgumentOperation.hpp"
+#include "Argos/ArgosEnums.hpp"
 
 namespace Argos
 {

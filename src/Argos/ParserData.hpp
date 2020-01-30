@@ -10,7 +10,7 @@
 #include <variant>
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
-#include "Argos/OptionStyle.hpp"
+#include "Argos/ArgosEnums.hpp"
 
 namespace Argos
 {

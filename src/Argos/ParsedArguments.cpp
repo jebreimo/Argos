@@ -5,6 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <Argos/ArgosException.hpp>
 #include "Argos/ParsedArguments.hpp"
 
 #include "ParsedArgumentsImpl.hpp"
@@ -32,5 +33,18 @@ namespace Argos
     bool ParsedArguments::has(const std::string& name) const
     {
         return m_Impl->has(name);
+    }
+
+    ParserResultCode ParsedArguments::resultCode() const
+    {
+        return m_Impl->resultCode();
+    }
+
+    OptionView ParsedArguments::specialOption() const
+    {
+        auto option = m_Impl->specialOption();
+        if (!option)
+            ARGOS_THROW("There is no special option.");
+        return OptionView(option);
     }
 }

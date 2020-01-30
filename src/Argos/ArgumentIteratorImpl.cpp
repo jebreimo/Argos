@@ -148,7 +148,7 @@ namespace Argos
             if (s.size() < 2)
                 return false;
 
-            if (style == OptionStyle::WINDOWS)
+            if (style == OptionStyle::SLASH)
                 return s[0] == '/';
             else
                 return s[0] == '-';
@@ -224,6 +224,7 @@ namespace Argos
             else
             {
                 m_State = State::ERROR;
+                m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
                 return 2;
@@ -241,6 +242,7 @@ namespace Argos
             else
             {
                 m_State = State::ERROR;
+                m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
                 return 2;
@@ -260,9 +262,11 @@ namespace Argos
         case OptionType::HELP:
             HelpWriter(m_Data).writeHelpText();
             m_State = State::DONE;
+            m_ParsedArgs->setSpecialOption(&option);
             return 1;
         case OptionType::BREAK:
             m_State = State::DONE;
+            m_ParsedArgs->setSpecialOption(&option);
             return 0;
         case OptionType::FINAL:
             m_State = State::ARGUMENTS_ONLY;
@@ -285,6 +289,7 @@ namespace Argos
             if (!m_ArgumentCounter || m_ArgumentCounter->isComplete())
             {
                 m_State = State::DONE;
+                m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
                 return {IteratorResultCode::DONE, nullptr};
             }
             else
@@ -297,6 +302,7 @@ namespace Argos
                         + std::to_string(ns.first) + ".");
                 if (m_Data->parserSettings.autoExit)
                     exit(1);
+                m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 m_State = State::ERROR;
                 return {IteratorResultCode::ERROR, nullptr};
             }
@@ -340,6 +346,7 @@ namespace Argos
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
+                    m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                     return {IteratorResultCode::ERROR, nullptr};
                 }
             }
@@ -364,6 +371,7 @@ namespace Argos
                 if (m_Data->parserSettings.autoExit)
                     exit(1);
                 copyRemainingArgumentsToParserResult();
+                m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 return {IteratorResultCode::ERROR, nullptr};
             }
         }

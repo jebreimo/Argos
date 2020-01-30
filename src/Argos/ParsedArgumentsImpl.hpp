@@ -21,11 +21,11 @@ namespace Argos
 
         bool has(const std::string& name) const;
 
+        bool has(int valueId) const;
+
         RawArg get(const std::string& name) const;
 
         const std::vector<std::string>& arguments() const;
-    private:
-        friend ArgumentIteratorImpl;
 
         void addArgument(const std::string& arg);
 
@@ -37,10 +37,20 @@ namespace Argos
 
         void clearValue(int valueId);
 
+        ParserResultCode resultCode() const;
+
+        void setResultCode(ParserResultCode resultCode);
+
+        const OptionData* specialOption() const;
+
+        void setSpecialOption(const OptionData* option);
+    private:
         std::multimap<int, std::string> m_Values;
         std::vector<std::pair<std::string_view, int>> m_ValueIds;
         std::vector<std::string> m_Arguments;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
+        ParserResultCode m_ResultCode = ParserResultCode::NONE;
+        const OptionData* m_SpecialOption = nullptr;
     };
 }

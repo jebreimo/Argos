@@ -10,7 +10,6 @@
 #include "IArgumentView.hpp"
 
 #include <vector>
-#include "OptionType.hpp"
 
 namespace Argos
 {
