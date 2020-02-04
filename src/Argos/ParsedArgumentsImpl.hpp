@@ -8,7 +8,7 @@
 #pragma once
 #include <map>
 #include "ParserData.hpp"
-#include "RawArg.hpp"
+#include "Argos/RawArgumentValue.hpp"
 
 namespace Argos
 {
@@ -19,11 +19,7 @@ namespace Argos
     public:
         ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
-        bool has(const std::string& name) const;
-
         bool has(int valueId) const;
-
-        RawArg get(const std::string& name) const;
 
         const std::vector<std::string>& arguments() const;
 
@@ -36,6 +32,14 @@ namespace Argos
         void appendValue(int valueId, const std::string& value);
 
         void clearValue(int valueId);
+
+        int getValueId(std::string_view valueName) const;
+
+        std::optional<std::string_view> getValue(int valueId) const;
+
+        std::vector<std::string_view> getValues(int valueId) const;
+
+        const std::shared_ptr<ParserData>& parserData() const;
 
         ParserResultCode resultCode() const;
 

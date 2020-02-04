@@ -11,34 +11,44 @@ project(Argos)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(Argos
-    src/Argos/Argument.cpp
     include/Argos/Argument.hpp
+    include/Argos/Option.hpp
+    include/Argos/ArgosException.hpp
+    include/Argos/ArgosEnums.hpp
+    include/Argos/ArgumentParser.hpp
+    include/Argos/ArgumentIterator.hpp
+    include/Argos/IArgumentView.hpp
+    include/Argos/ParsedArguments.hpp
+    include/Argos/ArgumentView.hpp
+    include/Argos/OptionView.hpp
+    include/Argos/ParsedArgumentsBuilder.hpp
+    src/Argos/Argument.cpp
     src/Argos/ParsedArgumentsImpl.cpp
     src/Argos/ParsedArgumentsImpl.hpp
     src/Argos/ArgumentIteratorImpl.cpp
     src/Argos/ArgumentIteratorImpl.hpp
-    src/Argos/RawArg.cpp
-    src/Argos/RawArg.hpp
+    src/Argos/RawArgumentValue.cpp
+    include/Argos/RawArgumentValue.hpp
     src/Argos/ArgumentData.hpp
     src/Argos/OptionData.hpp
     src/Argos/StandardOptionIterator.cpp
     src/Argos/StandardOptionIterator.hpp
     src/Argos/Option.cpp
-    include/Argos/Option.hpp
     src/Argos/ParserData.hpp
-    include/Argos/ArgosException.hpp
     src/Argos/StringUtilities.hpp
     src/Argos/StringUtilities.cpp
     src/Argos/VisitorUtilities.hpp
-    include/Argos/ArgosEnums.hpp
     src/Argos/HelpWriter.cpp
     src/Argos/HelpWriter.hpp
     src/Argos/ArgumentCounter.cpp
     src/Argos/ArgumentCounter.hpp
     src/Argos/ArgumentParser.cpp
-    include/Argos/ArgumentParser.hpp
     src/Argos/ArgumentIterator.cpp
-    include/Argos/ArgumentIterator.hpp include/Argos/IArgumentView.hpp src/Argos/ParsedArguments.cpp include/Argos/ParsedArguments.hpp src/Argos/ArgumentView.cpp include/Argos/ArgumentView.hpp src/Argos/OptionView.cpp include/Argos/OptionView.hpp src/Argos/ParsedArgumentsBuilder.cpp include/Argos/ParsedArgumentsBuilder.hpp)
+    src/Argos/ParsedArguments.cpp
+    src/Argos/ArgumentView.cpp
+    src/Argos/OptionView.cpp
+    src/Argos/ParsedArgumentsBuilder.cpp
+    include/Argos/ParseValue.hpp src/Argos/ArgumentValueRef.cpp include/Argos/ArgumentValueRef.hpp include/Argos/ParseInteger.hpp)
 
 target_include_directories(Argos
     PUBLIC

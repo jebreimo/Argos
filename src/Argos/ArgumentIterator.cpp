@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/ArgumentIterator.hpp"
+
 #include "ArgumentIteratorImpl.hpp"
 
 namespace Argos

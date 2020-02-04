@@ -5,16 +5,16 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "RawArg.hpp"
+#include "Argos/RawArgumentValue.hpp"
 
 namespace Argos
 {
-    RawArg::RawArg(std::shared_ptr<ArgumentIteratorImpl> parser, std::string_view value)
+    RawArgumentValue::RawArgumentValue(std::shared_ptr<ParserData> parser, std::string_view value)
     {
 
     }
 
-    bool RawArg::hasValue() const
+    bool RawArgumentValue::hasValue() const
     {
         return false;
     }

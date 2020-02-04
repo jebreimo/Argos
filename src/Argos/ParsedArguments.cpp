@@ -9,6 +9,7 @@
 #include "Argos/ParsedArguments.hpp"
 
 #include "ParsedArgumentsImpl.hpp"
+#include "Argos/ParseValue.hpp"
 
 namespace Argos
 {
@@ -30,9 +31,18 @@ namespace Argos
         return *this;
     }
 
+    bool ParsedArguments::getBool(const std::string& name, bool defaultValue) const
+    {
+        auto id = m_Impl->getValueId(name);
+        auto value = m_Impl->getValue(id);
+        if (!value)
+            return defaultValue;
+        return parseValue<int>({*value, ArgumentValueRef(m_Impl->parserData(), id)}).first;
+    }
+
     bool ParsedArguments::has(const std::string& name) const
     {
-        return m_Impl->has(name);
+        return m_Impl->has(m_Impl->getValueId(name));
     }
 
     ParserResultCode ParsedArguments::resultCode() const

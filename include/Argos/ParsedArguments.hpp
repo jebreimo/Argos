@@ -8,6 +8,7 @@
 #pragma once
 #include <memory>
 #include "OptionView.hpp"
+#include "RawArgumentValue.hpp"
 
 namespace Argos
 {
@@ -31,6 +32,8 @@ namespace Argos
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
         bool has(const std::string& name) const;
+
+        bool getBool(const std::string& name, bool defaultValue = false) const;
 
         ParserResultCode resultCode() const;
 

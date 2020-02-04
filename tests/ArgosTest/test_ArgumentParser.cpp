@@ -33,7 +33,7 @@ struct Argv
     std::vector<char*> argv;
 };
 
-TEST_CASE("Test basics")
+TEST_CASE("Test help flag")
 {
     Argos::ArgumentParser argos("test");
     argos.autoExitEnabled(false);
@@ -48,6 +48,7 @@ TEST_CASE("Test basics")
     REQUIRE(result.has("--help"));
     REQUIRE(result.resultCode() == Argos::ParserResultCode::SPECIAL_OPTION);
     REQUIRE(result.specialOption().id() == 10);
+    REQUIRE(result.getBool("--help"));
 }
 
 TEST_CASE("Conflicting flags")
