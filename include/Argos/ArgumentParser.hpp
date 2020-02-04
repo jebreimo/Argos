@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <iosfwd>
 #include <memory>
 #include "Argument.hpp"
 #include "ArgumentIterator.hpp"
@@ -48,6 +49,10 @@ namespace Argos
         bool autoExitEnabled() const;
 
         ArgumentParser& autoExitEnabled(bool value);
+
+        std::ostream* outputStream() const;
+
+        ArgumentParser& outputStream(std::ostream* stream);
 
         const std::string& programName() const;
 

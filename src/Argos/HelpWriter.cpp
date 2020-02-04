@@ -22,7 +22,7 @@ namespace Argos
 
     void HelpWriter::writeErrorMessage(const std::string& msg) const
     {
-        std::cerr << msg << "\n";
+        outStream() << msg << "\n";
     }
 
     void HelpWriter::writeErrorMessage(const ArgumentData& argument, const std::string& msg) const
@@ -33,5 +33,17 @@ namespace Argos
     void HelpWriter::writeErrorMessage(const OptionData& option, const std::string& msg) const
     {
 
+    }
+
+    std::ostream& HelpWriter::outStream() const
+    {
+        return m_Data->helpSettings.stream ? *m_Data->helpSettings.stream
+                                           : std::cout;
+    }
+
+    std::ostream& HelpWriter::errStream() const
+    {
+        return m_Data->helpSettings.stream ? *m_Data->helpSettings.stream
+                                           : std::cerr;
     }
 }

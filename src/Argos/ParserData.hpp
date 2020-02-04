@@ -21,12 +21,12 @@ namespace Argos
         bool allowAbbreviatedOptions = false;
         bool ignoreUndefinedOptions = false;
         bool ignoreUndefinedArguments = false;
-        bool ignoreMissingArguments = false;
         bool caseInsensitive = false;
     };
 
     struct HelpSettings
     {
+        std::ostream* stream = nullptr;
         std::string programName;
     };
 

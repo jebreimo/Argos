@@ -8,6 +8,7 @@
 #include <catch2/catch.hpp>
 #include "Argos/ArgumentParser.hpp"
 
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -36,7 +37,8 @@ struct Argv
 TEST_CASE("Test help flag")
 {
     Argos::ArgumentParser argos("test");
-    argos.autoExitEnabled(false);
+    std::stringstream ss;
+    argos.autoExitEnabled(false).outputStream(&ss);
     REQUIRE(argos.programName() == "test");
 
     argos.add(Argos::Option({"-h", "--help"})

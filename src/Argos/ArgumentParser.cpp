@@ -142,6 +142,17 @@ namespace Argos
         return *this;
     }
 
+    std::ostream* ArgumentParser::outputStream() const
+    {
+        return m_Data->helpSettings.stream;
+    }
+
+    ArgumentParser& ArgumentParser::outputStream(std::ostream* stream)
+    {
+        m_Data->helpSettings.stream = stream;
+        return *this;
+    }
+
     const std::string& ArgumentParser::programName() const
     {
         return data().helpSettings.programName;

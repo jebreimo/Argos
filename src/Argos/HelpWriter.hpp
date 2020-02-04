@@ -26,6 +26,10 @@ namespace Argos
         void writeErrorMessage(const OptionData& option,
                                const std::string& msg) const;
     private:
+        std::ostream& outStream() const;
+
+        std::ostream& errStream() const;
+
         std::shared_ptr<ParserData> m_Data;
     };
 }
