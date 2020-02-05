@@ -26,6 +26,12 @@ namespace Argos
         void writeErrorMessage(const OptionData& option,
                                const std::string& msg) const;
     private:
+        void writeUsage() const;
+
+        void writeBriefUsage() const;
+
+        std::string generateUsage() const;
+
         std::ostream& outStream() const;
 
         std::ostream& errStream() const;

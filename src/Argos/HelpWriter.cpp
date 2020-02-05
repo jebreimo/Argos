@@ -25,14 +25,16 @@ namespace Argos
         outStream() << msg << "\n";
     }
 
-    void HelpWriter::writeErrorMessage(const ArgumentData& argument, const std::string& msg) const
+    void HelpWriter::writeErrorMessage(const ArgumentData& argument,
+                                       const std::string& msg) const
     {
-
+        writeErrorMessage(msg);
     }
 
-    void HelpWriter::writeErrorMessage(const OptionData& option, const std::string& msg) const
+    void HelpWriter::writeErrorMessage(const OptionData& option,
+                                       const std::string& msg) const
     {
-
+        writeErrorMessage(msg);
     }
 
     std::ostream& HelpWriter::outStream() const

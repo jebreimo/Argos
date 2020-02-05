@@ -48,7 +48,11 @@ add_library(Argos
     src/Argos/ArgumentView.cpp
     src/Argos/OptionView.cpp
     src/Argos/ParsedArgumentsBuilder.cpp
-    include/Argos/ParseValue.hpp src/Argos/ArgumentValueRef.cpp include/Argos/ArgumentValueRef.hpp include/Argos/ParseInteger.hpp)
+    include/Argos/ParseValue.hpp
+    src/Argos/ArgumentValueRef.cpp
+    include/Argos/ArgumentValueRef.hpp
+    include/Argos/ParseInteger.hpp
+    )
 
 target_include_directories(Argos
     PUBLIC
@@ -56,3 +60,4 @@ target_include_directories(Argos
     )
 
 add_subdirectory(tests/ArgosTest)
+add_subdirectory(tests/ArgosTestApp)
