@@ -64,3 +64,14 @@ TEST_CASE("Conflicting flags")
     Argv argv{"test", "--help"};
     REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
 }
+
+TEST_CASE("String arguments")
+{
+    using namespace Argos;
+    Argv argv{"test", "test_file.txt"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("file"))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.getString("file") == "test_file.txt");
+}

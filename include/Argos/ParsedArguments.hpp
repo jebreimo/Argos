@@ -33,12 +33,28 @@ namespace Argos
 
         bool has(const std::string& name) const;
 
-        bool getBool(const std::string& name, bool defaultValue = false) const;
+        bool getBool(const std::string& name,
+                     bool defaultValue = false) const;
+
+        int32_t getInt32(const std::string& name,
+                         int32_t defaultValue = {}) const;
+
+        int64_t getInt64(const std::string& name,
+                         int64_t defaultValue = {}) const;
+
+        double getDouble(const std::string& name,
+                         double defaultValue = {}) const;
+
+        std::string getString(const std::string& name,
+                              const std::string& defaultValue = {}) const;
 
         ParserResultCode resultCode() const;
 
         OptionView specialOption() const;
     private:
+        template <typename T>
+        T getValue(const std::string& name, const T& defaultValue) const;
+
         std::unique_ptr<ParsedArgumentsImpl> m_Impl;
     };
 }

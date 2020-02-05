@@ -308,7 +308,8 @@ namespace Argos
             }
         }
 
-        if (m_State == State::ARGUMENTS_AND_OPTIONS)
+        if (m_State == State::ARGUMENTS_AND_OPTIONS
+            && isOption(*arg, m_Data->parserSettings.optionStyle))
         {
             auto option = findOption(m_Options, *arg,
                                      m_Data->parserSettings.allowAbbreviatedOptions,
@@ -331,7 +332,7 @@ namespace Argos
                     return {IteratorResultCode::OPTION, option};
                 }
             }
-            else if (isOption(*arg, m_Data->parserSettings.optionStyle))
+            else
             {
                 if (m_Data->parserSettings.ignoreUndefinedOptions
                     && startsWith(m_ArgumentIterator.current(), *arg))
