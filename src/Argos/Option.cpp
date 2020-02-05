@@ -17,11 +17,17 @@
 namespace Argos
 {
     Option::Option()
-        : m_Option(std::make_shared<OptionData>())
+        : m_Option(std::make_unique<OptionData>())
+    {}
+
+    Option::Option(const Option& rhs)
+        : m_Option(rhs.m_Option
+                   ? std::make_unique<OptionData>(*rhs.m_Option)
+                   : std::unique_ptr<OptionData>())
     {}
 
     Option::Option(std::vector<std::string> flags)
-        : m_Option(std::make_shared<OptionData>())
+        : m_Option(std::make_unique<OptionData>())
     {
         m_Option->flags = move(flags);
     }
@@ -31,6 +37,18 @@ namespace Argos
     {}
 
     Option::~Option() = default;
+
+    Option& Option::operator=(const Option& rhs)
+    {
+        if (this != &rhs)
+        {
+            if (rhs.m_Option)
+                m_Option = std::make_unique<OptionData>(*rhs.m_Option);
+            else
+                m_Option = {};
+        }
+        return *this;
+    }
 
     Option& Option::operator=(Option&& rhs) noexcept
     {
@@ -115,7 +133,13 @@ namespace Argos
         return *this;
     }
 
-    std::shared_ptr<OptionData> Option::release()
+    const OptionData& Option::data() const
+    {
+        CHECK_OPTION_EXISTS();
+        return *m_Option;
+    }
+
+    std::unique_ptr<OptionData> Option::release()
     {
         CHECK_OPTION_EXISTS();
         return std::move(m_Option);

@@ -21,7 +21,11 @@ endif ()
 add_executable(ArgosTest
     ArgosTestMain.cpp
     test_ArgumentParser.cpp
-    test_StandardOptionIterator.cpp test_StringUtilities.cpp test_ArgumentCounter.cpp test_ParseInteger.cpp)
+    test_StandardOptionIterator.cpp
+    test_StringUtilities.cpp
+    test_ArgumentCounter.cpp
+    test_ParseInteger.cpp
+    )
 
 target_link_libraries(ArgosTest
     PRIVATE

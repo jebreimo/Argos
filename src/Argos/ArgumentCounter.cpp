@@ -13,7 +13,7 @@ namespace Argos
     namespace
     {
         std::vector<std::pair<size_t, const ArgumentData*>>
-        makeArgumentCounters(const std::vector<std::shared_ptr<ArgumentData>>& arguments)
+        makeArgumentCounters(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
         {
             std::vector<std::pair<size_t, const ArgumentData*>> result;
             result.reserve(arguments.size());
@@ -23,7 +23,7 @@ namespace Argos
         }
 
         std::vector<std::pair<size_t, const ArgumentData*>>
-        makeArgumentCounters(const std::vector<std::shared_ptr<ArgumentData>>& arguments,
+        makeArgumentCounters(const std::vector<std::unique_ptr<ArgumentData>>& arguments,
                              size_t n)
         {
             auto minmax = ArgumentCounter::getMinMaxCount(arguments);
@@ -55,12 +55,12 @@ namespace Argos
             return result;
         }
     }
-    ArgumentCounter::ArgumentCounter(const std::vector<std::shared_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::ArgumentCounter(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
         : m_Counters(makeArgumentCounters(arguments)),
           m_Iterator(m_Counters.begin())
     {}
 
-    ArgumentCounter::ArgumentCounter(const std::vector<std::shared_ptr<ArgumentData>>& arguments,
+    ArgumentCounter::ArgumentCounter(const std::vector<std::unique_ptr<ArgumentData>>& arguments,
                                      size_t argumentCount)
         : m_Counters(makeArgumentCounters(arguments, argumentCount)),
           m_Iterator(m_Counters.begin())
@@ -89,7 +89,7 @@ namespace Argos
     }
 
     std::pair<size_t, size_t>
-    ArgumentCounter::getMinMaxCount(const std::vector<std::shared_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::getMinMaxCount(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
         size_t lo = 0, hi = 0;
         for (auto& arg : arguments)
@@ -107,7 +107,7 @@ namespace Argos
     }
 
     bool ArgumentCounter::requiresArgumentCount(
-            const std::vector<std::shared_ptr<ArgumentData>>& arguments)
+            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
         bool deterministic = true;
         for (auto& arg : arguments)

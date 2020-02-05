@@ -24,16 +24,29 @@ namespace Argos
         bool caseInsensitive = false;
     };
 
+    enum class TextId
+    {
+        USAGE_TITLE,
+        USAGE,
+        USAGE_DESCRIPTION,
+        ARGUMENTS_TITLE,
+        ARGUMENTS,
+        OPTIONS_TITLE,
+        OPTIONS,
+        END_TEXT
+    };
+
     struct HelpSettings
     {
         std::ostream* stream = nullptr;
         std::string programName;
+        std::map<TextId, std::string> m_Texts;
     };
 
     struct ParserData
     {
-        std::vector<std::shared_ptr<ArgumentData>> arguments;
-        std::vector<std::shared_ptr<OptionData>> options;
+        std::vector<std::unique_ptr<ArgumentData>> arguments;
+        std::vector<std::unique_ptr<OptionData>> options;
 
         ParserSettings parserSettings;
         HelpSettings helpSettings;

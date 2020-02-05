@@ -17,20 +17,38 @@
 namespace Argos
 {
     Argument::Argument()
-        : m_Argument(std::make_shared<ArgumentData>())
+        : m_Argument(std::make_unique<ArgumentData>())
     {}
 
     Argument::Argument(const std::string& name)
-        : m_Argument(std::make_shared<ArgumentData>())
+        : m_Argument(std::make_unique<ArgumentData>())
     {
         m_Argument->name = name;
     }
+
+    Argument::Argument(const Argument& rhs)
+        : m_Argument(rhs.m_Argument
+                     ? std::make_unique<ArgumentData>(*rhs.m_Argument)
+                     : std::unique_ptr<ArgumentData>())
+    {}
 
     Argument::Argument(Argument&& rhs) noexcept
         : m_Argument(std::move(rhs.m_Argument))
     {}
 
     Argument::~Argument() = default;
+
+    Argument& Argument::operator=(const Argument& rhs)
+    {
+        if (this != &rhs)
+        {
+            if (rhs.m_Argument)
+                m_Argument = std::make_unique<ArgumentData>(*rhs.m_Argument);
+            else
+                m_Argument = {};
+        }
+        return *this;
+    }
 
     Argument& Argument::operator=(Argument&& rhs) noexcept
     {
@@ -115,7 +133,7 @@ namespace Argos
         return *this;
     }
 
-    std::shared_ptr<ArgumentData> Argument::release()
+    std::unique_ptr<ArgumentData> Argument::release()
     {
         CHECK_ARGUMENT_EXISTS();
         return std::move(m_Argument);

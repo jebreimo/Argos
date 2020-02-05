@@ -11,10 +11,9 @@
 
 TEST_CASE("Test non-deterministic counter.")
 {
-    std::vector<std::shared_ptr<Argos::ArgumentData>> args {
-            Argos::Argument("1").count(0, 1).release(),
-            Argos::Argument("2").count(2).release()
-    };
+    std::vector<std::unique_ptr<Argos::ArgumentData>> args;
+    args.push_back(Argos::Argument("1").count(0, 1).release());
+    args.push_back(Argos::Argument("2").count(2).release());
 
     REQUIRE(Argos::ArgumentCounter::requiresArgumentCount(args));
 

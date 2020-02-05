@@ -34,9 +34,9 @@ namespace Argos
 
         ArgumentParser& operator=(const ArgumentParser&) = delete;
 
-        ArgumentParser& add(Argument& argument);
+        ArgumentParser& add(Argument argument);
 
-        ArgumentParser& add(Option& option);
+        ArgumentParser& add(Option option);
 
         ParsedArguments parse(int argc, char* argv[]);
 

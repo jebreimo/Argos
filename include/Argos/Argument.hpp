@@ -22,13 +22,13 @@ namespace Argos
 
         explicit Argument(const std::string& name);
 
-        Argument(const Argument&) = delete;
+        Argument(const Argument&);
 
         Argument(Argument&&) noexcept;
 
         ~Argument();
 
-        Argument& operator=(const Argument&) = delete;
+        Argument& operator=(const Argument&);
 
         Argument& operator=(Argument&&) noexcept;
 
@@ -52,8 +52,8 @@ namespace Argos
 
         Argument& count(unsigned minCount, unsigned maxCount);
 
-        std::shared_ptr<ArgumentData> release();
+        std::unique_ptr<ArgumentData> release();
     private:
-        std::shared_ptr<ArgumentData> m_Argument;
+        std::unique_ptr<ArgumentData> m_Argument;
     };
 }

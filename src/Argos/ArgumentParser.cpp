@@ -23,10 +23,10 @@ namespace Argos
             result->helpSettings = data.helpSettings;
             result->arguments.reserve(data.arguments.size());
             for (auto& a : data.arguments)
-                result->arguments.push_back(std::make_shared<ArgumentData>(*a));
+                result->arguments.push_back(std::make_unique<ArgumentData>(*a));
             result->options.reserve(data.options.size());
             for (auto& o : data.options)
-                result->options.push_back(std::make_shared<OptionData>(*o));
+                result->options.push_back(std::make_unique<OptionData>(*o));
             return result;
         }
 
@@ -87,14 +87,21 @@ namespace Argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Option& option)
+    ArgumentParser& ArgumentParser::add(Argument argument)
+    {
+        auto ad = argument.release();
+        data().arguments.emplace_back(move(ad));
+        return *this;
+    }
+
+    ArgumentParser& ArgumentParser::add(Option option)
     {
         auto od = option.release();
         if (od->flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
         // TODO: check if flags have the right prefix (- or /)
         // TODO: check that short flags are two characters long.
-        // TODO: check if flags contain = anywhere, but the end.
+        // TODO: check if flags contain '=' anywhere, but the end.
         if (!od->argument.empty() && !od->value.empty())
             ARGOS_THROW("Option cannot have both argument and value set.");
         switch (od->operation)

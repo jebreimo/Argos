@@ -38,7 +38,7 @@ namespace Argos
         using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
 
         OptionTable makeOptionIndex(
-                const std::vector<std::shared_ptr<OptionData>>& options,
+                const std::vector<std::unique_ptr<OptionData>>& options,
                 bool caseInsensitive)
         {
             OptionTable index;

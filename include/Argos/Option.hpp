@@ -25,13 +25,13 @@ namespace Argos
 
         explicit Option(std::vector<std::string> flags);
 
-        Option(const Option&) = delete;
+        Option(const Option&);
 
         Option(Option&&) noexcept;
 
         ~Option();
 
-        Option& operator=(const Option&) = delete;
+        Option& operator=(const Option&);
 
         Option& operator=(Option&&) noexcept;
 
@@ -65,8 +65,10 @@ namespace Argos
 
         Option& mandatory(bool mandatory);
 
-        std::shared_ptr<OptionData> release();
+        const OptionData& data() const;
+
+        std::unique_ptr<OptionData> release();
     private:
-        std::shared_ptr<OptionData> m_Option;
+        std::unique_ptr<OptionData> m_Option;
     };
 }
