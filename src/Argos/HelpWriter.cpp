@@ -17,7 +17,9 @@ namespace Argos
 
     void HelpWriter::writeHelpText() const
     {
-
+        writeUsage();
+        writeArgumentSections();
+        writeEndText();
     }
 
     void HelpWriter::writeErrorMessage(const std::string& msg) const
@@ -35,6 +37,33 @@ namespace Argos
                                        const std::string& msg) const
     {
         writeErrorMessage(msg);
+    }
+
+    void HelpWriter::writeUsage() const
+    {
+        writeBriefUsage();
+        auto it = m_Data->helpSettings.m_Texts.find(TextId::USAGE_TITLE);
+        //if (it->)
+    }
+
+    void HelpWriter::writeBriefUsage() const
+    {
+
+    }
+
+    std::string HelpWriter::generateUsage() const
+    {
+        return {};
+    }
+
+    void HelpWriter::writeArgumentSections() const
+    {
+
+    }
+
+    void HelpWriter::writeEndText() const
+    {
+
     }
 
     std::ostream& HelpWriter::outStream() const

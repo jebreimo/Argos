@@ -32,6 +32,10 @@ namespace Argos
 
         std::string generateUsage() const;
 
+        void writeArgumentSections() const;
+
+        void writeEndText() const;
+
         std::ostream& outStream() const;
 
         std::ostream& errStream() const;

@@ -5,7 +5,6 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-
 #include <catch2/catch.hpp>
 #include "Argos/StringUtilities.hpp"
 

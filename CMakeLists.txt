@@ -22,13 +22,16 @@ add_library(Argos
     include/Argos/ArgumentView.hpp
     include/Argos/OptionView.hpp
     include/Argos/ParsedArgumentsBuilder.hpp
+    include/Argos/ArgumentValueRef.hpp
+    include/Argos/ParseInteger.hpp
+    include/Argos/ParseValue.hpp
+    include/Argos/RawArgumentValue.hpp
     src/Argos/Argument.cpp
     src/Argos/ParsedArgumentsImpl.cpp
     src/Argos/ParsedArgumentsImpl.hpp
     src/Argos/ArgumentIteratorImpl.cpp
     src/Argos/ArgumentIteratorImpl.hpp
     src/Argos/RawArgumentValue.cpp
-    include/Argos/RawArgumentValue.hpp
     src/Argos/ArgumentData.hpp
     src/Argos/OptionData.hpp
     src/Argos/StandardOptionIterator.cpp
@@ -48,11 +51,10 @@ add_library(Argos
     src/Argos/ArgumentView.cpp
     src/Argos/OptionView.cpp
     src/Argos/ParsedArgumentsBuilder.cpp
-    include/Argos/ParseValue.hpp
     src/Argos/ArgumentValueRef.cpp
-    include/Argos/ArgumentValueRef.hpp
-    include/Argos/ParseInteger.hpp
-    )
+    src/Argos/TextFormatter.cpp
+    src/Argos/TextFormatter.hpp
+    src/Argos/WordSplitter.cpp src/Argos/WordSplitter.hpp)
 
 target_include_directories(Argos
     PUBLIC

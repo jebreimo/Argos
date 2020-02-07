@@ -11,10 +11,10 @@
 int main(int argc, char* argv[])
 {
     using namespace Argos;
-    ArgumentParser parser;
-    parser.add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
-            .add(Argument("<file>").text(""));
-    auto args = parser.parse(argc, argv);
-    //std::cout << "<file>: " << args.getString("<file>") << "\n";
+    auto args = ArgumentParser()
+            .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
+            .add(Argument("file").text("A file of some kind."))
+            .parse(argc, argv);
+    std::cout << "file: " << args.getString("file") << "\n";
     return 0;
 }
