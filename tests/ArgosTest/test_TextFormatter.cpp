@@ -15,7 +15,6 @@ TEST_CASE("Basic test of TextFormatter")
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 0, 40);
     formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
-    // TODO Enable test.
-    //REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur");
+    formatter.flush();
+    REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
 }
-

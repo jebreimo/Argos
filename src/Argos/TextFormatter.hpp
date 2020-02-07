@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "WordSplitter.hpp"
 
 namespace Argos
 {
@@ -37,5 +38,6 @@ namespace Argos
         std::ostream* m_Stream;
         std::vector<std::pair<size_t, size_t>> m_Indents;
         std::string m_Line;
+        WordSplitter m_WordSplitter;
     };
 }

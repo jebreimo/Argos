@@ -70,38 +70,34 @@ namespace Argos
         if (text.empty())
             return;
 
-        while (true)
+        while (!text.empty())
         {
             auto [word, sep, rem] = nextWord(text);
-            if (!word.empty())
-                appendWord(word);
-            //{
-            //    if (m_Line.empty())
-            //        indent();
-            //
-            //}
-            //newline();
-            //else if ()
-            if (!sep)
+            if (word.empty())
                 break;
+
+            appendWord(word);
             text = rem;
         }
     }
 
     void TextFormatter::newline()
     {
-
+        m_Line.push_back('\n');
+        flush();
     }
 
     void TextFormatter::flush()
     {
         if (!m_Line.empty())
+        {
             m_Stream->write(m_Line.data(), m_Line.size());
+            m_Line.clear();
+        }
     }
 
     void TextFormatter::indent()
     {
-
     }
 
     void TextFormatter::appendWord(std::string_view word)
@@ -132,7 +128,21 @@ namespace Argos
             }
             else
             {
-                break;
+                auto [w, s, r] = m_WordSplitter.split(
+                        word,
+                        word.size() - remainder.size(),
+                        length,
+                        mustWrite);
+                if (!w.empty())
+                {
+                    if (addSpace)
+                        m_Line.push_back(' ');
+                    m_Line.append(w);
+                    if (s)
+                        m_Line.push_back(s);
+                }
+                newline();
+                remainder = r;
             }
         }
     }
