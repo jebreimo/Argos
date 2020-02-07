@@ -49,6 +49,7 @@ namespace Argos
         : m_Stream(stream)
     {
         m_Indents.emplace_back(indent, width);
+        m_Spaces.fill(' ');
     }
 
     void TextFormatter::pushIndentation(size_t indent, size_t width)
@@ -98,6 +99,7 @@ namespace Argos
 
     void TextFormatter::indent()
     {
+        m_Line.assign(m_Indents.back().first, ' ');
     }
 
     void TextFormatter::appendWord(std::string_view word)

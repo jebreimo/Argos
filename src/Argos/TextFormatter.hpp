@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <array>
 #include <iosfwd>
 #include <string>
 #include <string_view>
@@ -38,6 +39,7 @@ namespace Argos
         std::ostream* m_Stream;
         std::vector<std::pair<size_t, size_t>> m_Indents;
         std::string m_Line;
+        std::array<char, 16> m_Spaces;
         WordSplitter m_WordSplitter;
     };
 }

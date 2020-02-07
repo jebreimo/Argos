@@ -54,4 +54,6 @@ TEST_CASE("Check splitter")
 {
     Argos::WordSplitter splitter;
     testSplit("ono mato poe ti con", 2, 8, {"omato", '-', "poeticon"});
+    testSplit("ono mato poe ti con", 0, 8, {"onomato", '-', "poeticon"});
+    testSplit("ono mato poe ti con", 0, 7, {"ono", '-', "matopoeticon"});
 }

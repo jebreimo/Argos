@@ -10,11 +10,29 @@
 #include <sstream>
 #include <catch2/catch.hpp>
 
-TEST_CASE("Basic test of TextFormatter")
+//TEST_CASE("Basic test of TextFormatter")
+//{
+//    std::stringstream ss;
+//    Argos::TextFormatter formatter(&ss, 0, 40);
+//    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+//    formatter.flush();
+//    REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
+//}
+
+TEST_CASE("Test TextFormatter with indentation")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 0, 40);
     formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.pushIndentation(15);
+    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.popIndentation();
+    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
-    REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
+    REQUIRE(ss.str() == R"*(Lorem ipsum dolor sit amet, consectetur
+adipiscing elit. Lorem ipsum dolor sit
+               amet, consectetur
+               adipiscing elit. Lorem
+ipsum dolor sit amet, consectetur
+adipiscing elit.)*");
 }
