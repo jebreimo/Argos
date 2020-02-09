@@ -144,6 +144,17 @@ namespace Argos
         return parseArguments(argc, argv, std::move(m_Data));
     }
 
+    bool ArgumentParser::allowAbbreviatedOptions() const
+    {
+        return data().parserSettings.allowAbbreviatedOptions;
+    }
+
+    ArgumentParser& ArgumentParser::allowAbbreviatedOptions(bool value)
+    {
+        data().parserSettings.allowAbbreviatedOptions = value;
+        return *this;
+    }
+
     bool ArgumentParser::autoExitEnabled() const
     {
         return data().parserSettings.autoExit;

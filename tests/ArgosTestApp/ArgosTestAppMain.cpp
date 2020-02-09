@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
 {
     using namespace Argos;
     auto args = ArgumentParser()
+            .allowAbbreviatedOptions(true)
             .add(Argument("file").text("A file of some kind."))
             .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
             .add(Option({"-r", "--resolution"}).argument("HOR,VER").text("Set screen resolution."))

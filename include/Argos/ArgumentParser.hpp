@@ -46,6 +46,10 @@ namespace Argos
 
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
 
+        bool allowAbbreviatedOptions() const;
+
+        ArgumentParser& allowAbbreviatedOptions(bool value);
+
         bool autoExitEnabled() const;
 
         ArgumentParser& autoExitEnabled(bool value);
