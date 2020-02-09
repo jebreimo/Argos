@@ -12,8 +12,13 @@ int main(int argc, char* argv[])
 {
     using namespace Argos;
     auto args = ArgumentParser()
-            .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
             .add(Argument("file").text("A file of some kind."))
+            .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
+            .add(Option({"-r", "--resolution"}).argument("HOR,VER").text("Set screen resolution."))
+            .add(Option({"--fullscreen"}).value(1).text("Run in fullscreen mode."))
+            .add(Option({"--windowed"}).valueName("--fullscreen").value(0).text("Run in windowed mode."))
+            .add(Option({"--list-interfaces"}).type(OptionType::BREAK).text("Display list of available graphics interfaces."))
+            .add(Option({"--"}).type(OptionType::FINAL).text("Mark end of options. Allows arguments starting with '-'."))
             .parse(argc, argv);
     std::cout << "file: " << args.getString("file") << "\n";
     return 0;

@@ -11,6 +11,59 @@
 
 namespace Argos
 {
+    namespace
+    {
+        std::string getArgumentName(const ArgumentData& arg)
+        {
+            if (arg.name[0] == '<' || arg.name[0] == '[')
+                return arg.name;
+            else if (arg.minCount == 0)
+                return "[<" + arg.name + ">]";
+            else
+                return "<" + arg.name + ">";
+        }
+
+        std::string getBriefOptionName(const OptionData& opt)
+        {
+            auto flag = min_element(opt.flags.begin(), opt.flags.end(),
+                                    [](auto& a, auto& b)
+                                    {return a.size() < b.size();});
+            std::string optTxt;
+            if (!opt.mandatory)
+                optTxt.push_back('[');
+            optTxt += *flag;
+            if (!opt.argument.empty())
+            {
+                optTxt += " <";
+                optTxt += opt.argument;
+                optTxt.push_back('>');
+            }
+            if (!opt.mandatory)
+                optTxt.push_back(']');
+            return optTxt;
+        }
+
+        std::string getLongOptionName(const OptionData& opt)
+        {
+            std::string optTxt;
+            for (auto& flag : opt.flags)
+            {
+                if (!optTxt.empty())
+                    optTxt.append(", ");
+                optTxt += flag;
+                if (!opt.argument.empty())
+                {
+                    if (flag.back() != '=')
+                        optTxt.push_back(' ');
+                    optTxt.push_back('<');
+                    optTxt += opt.argument;
+                    optTxt.push_back('>');
+                }
+            }
+            return optTxt;
+        }
+    }
+
     HelpWriter::HelpWriter(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
     {}
@@ -51,35 +104,22 @@ namespace Argos
         m_Data->textFormatter.writeText(title ? *title : "USAGE\n");
         m_Data->textFormatter.pushIndentation(2);
         m_Data->textFormatter.writeText(m_Data->helpSettings.programName);
+        m_Data->textFormatter.writeFormattedText(" ", false, false);
+        m_Data->textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
         for (auto& opt : m_Data->options)
         {
             if (opt->hidden)
                 continue;
 
-            auto flag = min_element(opt->flags.begin(), opt->flags.end(),
-                                    [](auto& a, auto& b)
-                                    {return a.size() < b.size();});
-            auto optTxt = "[" + *flag;
-            if (!opt->argument.empty())
-            {
-                optTxt += " <";
-                optTxt += opt->argument;
-                optTxt.push_back('>');
-            }
-            optTxt.push_back(']');
-            m_Data->textFormatter.writeFormattedText(optTxt, true, true);
+            m_Data->textFormatter.writeFormattedText(getBriefOptionName(*opt), true, true);
         }
         for (auto& arg : m_Data->arguments)
         {
             if (arg->hidden)
                 continue;
-            if (arg->name[0] == '<' || arg->name[0] == '[')
-                m_Data->textFormatter.writeFormattedText(arg->name, true, true);
-            else if (arg->minCount == 0)
-                m_Data->textFormatter.writeFormattedText("[<" + arg->name + ">]", true, true);
-            else
-                m_Data->textFormatter.writeFormattedText("<" + arg->name + ">", true, true);
+            m_Data->textFormatter.writeFormattedText(getArgumentName(*arg), true, true);
         }
+        m_Data->textFormatter.popIndentation();
         m_Data->textFormatter.newline();
         m_Data->textFormatter.popIndentation();
     }
@@ -92,7 +132,46 @@ namespace Argos
 
     void HelpWriter::writeArgumentSections() const
     {
+        std::multimap<std::string_view, std::pair<std::string, std::string_view>> sections;
+        auto argSection = getCustomText(TextId::ARGUMENTS_SECTION);
+        if (!argSection)
+            argSection = "ARGUMENTS";
+        for (auto& arg : m_Data->arguments)
+        {
+            if (arg->hidden)
+                continue;
+            auto& section = arg->section.empty() ? *argSection : arg->section;
+            sections.insert({section, {getArgumentName(*arg), arg->text}});
+        }
+        auto optSection = getCustomText(TextId::OPTIONS_SECTION);
+        if (!optSection)
+            optSection = "OPTIONS";
+        for (auto& opt : m_Data->options)
+        {
+            if (opt->hidden)
+                continue;
+            auto& section = opt->section.empty() ? *optSection : opt->section;
+            sections.insert({section, {getLongOptionName(*opt), opt->text}});
+        }
 
+        std::string_view section;
+        m_Data->textFormatter.pushIndentation(2);
+        for (auto& [sec, txts] : sections)
+        {
+            if (sec != section)
+            {
+                section = sec;
+                m_Data->textFormatter.popIndentation();
+                m_Data->textFormatter.writeText(section);
+                m_Data->textFormatter.newline();
+                m_Data->textFormatter.pushIndentation(2);
+            }
+            m_Data->textFormatter.writeText(txts.first);
+            m_Data->textFormatter.writeFormattedText(" ", false, false);
+            m_Data->textFormatter.writeText(txts.second);
+            m_Data->textFormatter.newline();
+        }
+        m_Data->textFormatter.popIndentation();
     }
 
     void HelpWriter::writeEndText() const

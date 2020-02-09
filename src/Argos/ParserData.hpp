@@ -30,9 +30,9 @@ namespace Argos
         USAGE_TITLE,
         USAGE,
         USAGE_DESCRIPTION,
-        ARGUMENTS_TITLE,
+        ARGUMENTS_SECTION,
         ARGUMENTS,
-        OPTIONS_TITLE,
+        OPTIONS_SECTION,
         OPTIONS,
         END_TEXT
     };

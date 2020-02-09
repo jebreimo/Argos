@@ -28,9 +28,9 @@ namespace Argos
 
         void setStream(std::ostream* stream);
 
-        void pushIndentation(size_t indent, size_t width = 0);
+        static constexpr size_t CURRENT_COLUMN = SIZE_MAX;
 
-        void pushIndentation();
+        void pushIndentation(size_t indent, size_t width = 0);
 
         void popIndentation();
 

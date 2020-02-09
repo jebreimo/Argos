@@ -119,6 +119,18 @@ namespace Argos
         return *this;
     }
 
+    Option& Option::value(bool value)
+    {
+        return this->value(value ? 1 : 0);
+    }
+
+    Option& Option::value(int value)
+    {
+        CHECK_OPTION_EXISTS();
+        m_Option->value = std::to_string(value);
+        return *this;
+    }
+
     Option& Option::type(OptionType type)
     {
         CHECK_OPTION_EXISTS();

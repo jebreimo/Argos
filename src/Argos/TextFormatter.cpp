@@ -81,8 +81,11 @@ namespace Argos
 
     void TextFormatter::pushIndentation(size_t indent, size_t width)
     {
+        if (indent == CURRENT_COLUMN)
+            indent = m_Line.size();
         if (width == 0)
             width = m_Indents.back().second;
+        indent = std::min(indent, 2 * width / 3);
         m_Indents.emplace_back(indent, width);
     }
 
@@ -122,7 +125,7 @@ namespace Argos
                 {
                     auto length = m_Indents.back().second - m_Line.size()
                                   - (m_Line.back() != ' ' ? 1 : 0);
-                    if (lin.size() > m_Line.size())
+                    if (lin.size() > length)
                         newline();
                     else if (m_Line.back() != ' ')
                         m_Line.push_back(' ');
