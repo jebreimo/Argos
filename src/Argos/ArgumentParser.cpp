@@ -16,6 +16,12 @@ namespace Argos
 {
     namespace
     {
+        std::string_view getBaseName(std::string_view path)
+        {
+            auto i = path.find_last_of("/\\");
+            return i == std::string_view::npos ? path : path.substr(i + 1);
+        }
+
         std::unique_ptr<ParserData> makeCopy(const ParserData& data)
         {
             auto result = std::make_unique<ParserData>();
@@ -56,13 +62,13 @@ namespace Argos
         }
 
         ParsedArguments parseArguments(int argc, char** argv,
-                                       std::shared_ptr<ParserData> data)
+                                       const std::shared_ptr<ParserData>& data)
         {
             if (argc >= 1 && data->helpSettings.programName.empty())
-                data->helpSettings.programName = argv[0];
+                data->helpSettings.programName = getBaseName(argv[0]);
             generateValueIds(*data);
             return ParsedArguments(
-                    ArgumentIteratorImpl::parse(argc, argv, move(data)));
+                    ArgumentIteratorImpl::parse(argc, argv, data));
         }
     }
     ArgumentParser::ArgumentParser()
