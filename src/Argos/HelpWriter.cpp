@@ -24,7 +24,8 @@ namespace Argos
 
     void HelpWriter::writeErrorMessage(const std::string& msg) const
     {
-        outStream() << msg << "\n";
+        m_Data->textFormatter.writeText(msg);
+        m_Data->textFormatter.newline();
     }
 
     void HelpWriter::writeErrorMessage(const ArgumentData& argument,
@@ -42,17 +43,50 @@ namespace Argos
     void HelpWriter::writeUsage() const
     {
         writeBriefUsage();
-        auto it = m_Data->helpSettings.m_Texts.find(TextId::USAGE_TITLE);
-        //if (it->)
     }
 
     void HelpWriter::writeBriefUsage() const
     {
+        auto title = getCustomText(TextId::USAGE_TITLE);
+        m_Data->textFormatter.writeText(title ? *title : "USAGE\n");
+        m_Data->textFormatter.pushIndentation(2);
+        m_Data->textFormatter.writeText(m_Data->helpSettings.programName);
+        for (auto& opt : m_Data->options)
+        {
+            if (opt->hidden)
+                continue;
 
+            auto flag = min_element(opt->flags.begin(), opt->flags.end(),
+                                    [](auto& a, auto& b)
+                                    {return a.size() < b.size();});
+            auto optTxt = "[" + *flag;
+            if (!opt->argument.empty())
+            {
+                optTxt += " <";
+                optTxt += opt->argument;
+                optTxt.push_back('>');
+            }
+            optTxt.push_back(']');
+            m_Data->textFormatter.writeFormattedText(optTxt, true, true);
+        }
+        for (auto& arg : m_Data->arguments)
+        {
+            if (arg->hidden)
+                continue;
+            if (arg->name[0] == '<' || arg->name[0] == '[')
+                m_Data->textFormatter.writeFormattedText(arg->name, true, true);
+            else if (arg->minCount == 0)
+                m_Data->textFormatter.writeFormattedText("[<" + arg->name + ">]", true, true);
+            else
+                m_Data->textFormatter.writeFormattedText("<" + arg->name + ">", true, true);
+        }
+        m_Data->textFormatter.newline();
+        m_Data->textFormatter.popIndentation();
     }
 
     std::string HelpWriter::generateUsage() const
     {
+
         return {};
     }
 
@@ -66,15 +100,11 @@ namespace Argos
 
     }
 
-    std::ostream& HelpWriter::outStream() const
+    std::optional<std::string> HelpWriter::getCustomText(TextId textId) const
     {
-        return m_Data->helpSettings.stream ? *m_Data->helpSettings.stream
-                                           : std::cout;
-    }
-
-    std::ostream& HelpWriter::errStream() const
-    {
-        return m_Data->helpSettings.stream ? *m_Data->helpSettings.stream
-                                           : std::cerr;
+        auto it = m_Data->helpSettings.texts.find(textId);
+        if (it != m_Data->helpSettings.texts.end())
+            return it->second;
+        return {};
     }
 }

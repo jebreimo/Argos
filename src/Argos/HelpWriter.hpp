@@ -36,9 +36,7 @@ namespace Argos
 
         void writeEndText() const;
 
-        std::ostream& outStream() const;
-
-        std::ostream& errStream() const;
+        std::optional<std::string> getCustomText(TextId textId) const;
 
         std::shared_ptr<ParserData> m_Data;
     };

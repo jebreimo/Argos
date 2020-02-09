@@ -10,14 +10,14 @@
 #include <sstream>
 #include <catch2/catch.hpp>
 
-//TEST_CASE("Basic test of TextFormatter")
-//{
-//    std::stringstream ss;
-//    Argos::TextFormatter formatter(&ss, 0, 40);
-//    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
-//    formatter.flush();
-//    REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
-//}
+TEST_CASE("Basic test of TextFormatter")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 0, 40);
+    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.flush();
+    REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
+}
 
 TEST_CASE("Test TextFormatter with indentation")
 {
@@ -35,4 +35,13 @@ adipiscing elit. Lorem ipsum dolor sit
                adipiscing elit. Lorem
 ipsum dolor sit amet, consectetur
 adipiscing elit.)*");
+}
+
+TEST_CASE("Text with newlines")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 0, 40);
+    formatter.writeText("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
+    formatter.flush();
+    REQUIRE(ss.str() == "Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
 }

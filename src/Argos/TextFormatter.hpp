@@ -18,15 +18,27 @@ namespace Argos
     class TextFormatter
     {
     public:
+        TextFormatter();
+
         TextFormatter(size_t indent, size_t width);
 
         explicit TextFormatter(std::ostream* stream, size_t indent, size_t width);
 
+        std::ostream* stream() const;
+
+        void setStream(std::ostream* stream);
+
         void pushIndentation(size_t indent, size_t width = 0);
+
+        void pushIndentation();
 
         void popIndentation();
 
         void writeText(std::string_view text);
+
+        void writeFormattedText(std::string_view text,
+                                bool useIndentation,
+                                bool fitFirstLine);
 
         void newline();
 
@@ -39,7 +51,6 @@ namespace Argos
         std::ostream* m_Stream;
         std::vector<std::pair<size_t, size_t>> m_Indents;
         std::string m_Line;
-        std::array<char, 16> m_Spaces;
         WordSplitter m_WordSplitter;
     };
 }

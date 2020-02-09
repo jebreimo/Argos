@@ -23,6 +23,20 @@ namespace Argos
             return text;
         }
 
+        std::pair<std::string_view, std::string_view>
+        nextLine(std::string_view text)
+        {
+            auto pos = text.find_first_of("\n\r");
+            if (pos == std::string_view::npos)
+                return {text, {}};
+            if (text[pos] == '\n'
+                || (pos + 1 != text.size() && text[pos + 1] != '\n'))
+            {
+                return {text.substr(0, pos), text.substr(pos + 1)};
+            }
+            return {text.substr(0, pos), text.substr(pos + 2)};
+        }
+
         std::tuple<std::string_view, char, std::string_view>
         nextWord(std::string_view text)
         {
@@ -41,6 +55,10 @@ namespace Argos
         }
     }
 
+    TextFormatter::TextFormatter()
+            : TextFormatter(&std::cout, 0, 80)
+    {}
+
     TextFormatter::TextFormatter(size_t indent, size_t width)
         : TextFormatter(&std::cout, indent, width)
     {}
@@ -49,7 +67,16 @@ namespace Argos
         : m_Stream(stream)
     {
         m_Indents.emplace_back(indent, width);
-        m_Spaces.fill(' ');
+    }
+
+    std::ostream* TextFormatter::stream() const
+    {
+        return m_Stream;
+    }
+
+    void TextFormatter::setStream(std::ostream* stream)
+    {
+        m_Stream = stream;
     }
 
     void TextFormatter::pushIndentation(size_t indent, size_t width)
@@ -68,9 +95,6 @@ namespace Argos
 
     void TextFormatter::writeText(std::string_view text)
     {
-        if (text.empty())
-            return;
-
         while (!text.empty())
         {
             auto [word, sep, rem] = nextWord(text);
@@ -78,8 +102,41 @@ namespace Argos
                 break;
 
             appendWord(word);
+            if (sep == '\n')
+                newline();
             text = rem;
         }
+    }
+
+    void TextFormatter::writeFormattedText(std::string_view text,
+                                           bool useIndentation,
+                                           bool fitFirstLine)
+    {
+        auto remainder = text;
+        while (!remainder.empty())
+        {
+            auto [lin, rem] = nextLine(remainder);
+            if (!lin.empty())
+            {
+                if (!m_Line.empty() && fitFirstLine)
+                {
+                    auto length = m_Indents.back().second - m_Line.size()
+                                  - (m_Line.back() != ' ' ? 1 : 0);
+                    if (lin.size() > m_Line.size())
+                        newline();
+                    else if (m_Line.back() != ' ')
+                        m_Line.push_back(' ');
+                }
+                if (m_Line.empty() && useIndentation)
+                    indent();
+                m_Line.append(lin);
+            }
+            if (!rem.empty())
+                newline();
+            remainder = rem;
+        }
+        if (!text.empty() && (text.back() == '\n' || text.back() == '\r'))
+            newline();
     }
 
     void TextFormatter::newline()

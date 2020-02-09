@@ -8,9 +8,10 @@
 #pragma once
 #include <map>
 #include <variant>
+#include "Argos/ArgosEnums.hpp"
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
-#include "Argos/ArgosEnums.hpp"
+#include "TextFormatter.hpp"
 
 namespace Argos
 {
@@ -38,9 +39,8 @@ namespace Argos
 
     struct HelpSettings
     {
-        std::ostream* stream = nullptr;
         std::string programName;
-        std::map<TextId, std::string> m_Texts;
+        std::map<TextId, std::string> texts;
     };
 
     struct ParserData
@@ -51,6 +51,7 @@ namespace Argos
         ParserSettings parserSettings;
         HelpSettings helpSettings;
 
+        TextFormatter textFormatter;
         //std::string programName;
         //
         //OptionStyle optionStyle = OptionStyle::STANDARD;
