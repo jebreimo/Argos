@@ -297,8 +297,8 @@ namespace Argos
                 auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
                 HelpWriter(m_Data).writeErrorMessage(
                         (ns.first == ns.second
-                         ? "Too few arguments, expects "
-                         : "Too few arguments, expects at least ")
+                         ? "Too few arguments, expected "
+                         : "Too few arguments, expected at least ")
                         + std::to_string(ns.first) + ".");
                 if (m_Data->parserSettings.autoExit)
                     exit(1);
@@ -463,8 +463,8 @@ namespace Argos
             auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
             HelpWriter(m_Data).writeErrorMessage(
                     (ns.first == ns.second
-                     ? "Too few arguments, expects "
-                     : "Too few arguments, expects at least ")
+                     ? "Too few arguments, expected "
+                     : "Too few arguments, expected at least ")
                     + std::to_string(ns.first) + ".");
             if (m_Data->parserSettings.autoExit)
                 exit(1);

@@ -77,8 +77,10 @@ namespace Argos
 
     void HelpWriter::writeErrorMessage(const std::string& msg) const
     {
+        m_Data->textFormatter.writeText(m_Data->helpSettings.programName + ":");
         m_Data->textFormatter.writeText(msg);
         m_Data->textFormatter.newline();
+        writeBriefUsage();
     }
 
     void HelpWriter::writeErrorMessage(const ArgumentData& argument,
