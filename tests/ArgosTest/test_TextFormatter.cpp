@@ -61,9 +61,9 @@ TEST_CASE("Indentation change with preformatted text")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 0, 40);
-    formatter.writeFormattedText("ABCDEFGHIJ", true, true);
+    formatter.writePreformattedText("ABCDEFGHIJ");
     formatter.pushIndentation(20);
-    formatter.writeFormattedText("ABCDEFGHIJ", true, true);
+    formatter.writePreformattedText("ABCDEFGHIJ");
     formatter.flush();
     REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
 }

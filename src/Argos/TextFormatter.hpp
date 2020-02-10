@@ -36,9 +36,7 @@ namespace Argos
 
         void writeText(std::string_view text);
 
-        void writeFormattedText(std::string_view text,
-                                bool useIndentation,
-                                bool fitFirstLine);
+        void writePreformattedText(std::string_view text);
 
         void newline();
 

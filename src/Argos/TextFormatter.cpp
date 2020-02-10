@@ -104,9 +104,7 @@ namespace Argos
         }
     }
 
-    void TextFormatter::writeFormattedText(std::string_view text,
-                                           bool useIndentation,
-                                           bool fitFirstLine)
+    void TextFormatter::writePreformattedText(std::string_view text)
     {
         auto remainder = text;
         while (!remainder.empty())
@@ -114,10 +112,10 @@ namespace Argos
             auto [lin, rem] = nextLine(remainder);
             if (!lin.empty())
             {
-                if (!m_Line.empty() && fitFirstLine)
+                if (!m_Line.empty())
                 {
                     size_t spaces = 0;
-                    if (m_Line.size() >= m_Indents.back().first || !useIndentation)
+                    if (m_Line.size() >= m_Indents.back().first)
                         spaces = m_Line.back() != ' ' ? 1 : 0;
                     else
                         spaces = m_Indents.back().first - m_Line.size();
@@ -128,7 +126,7 @@ namespace Argos
                     else if (m_Line.back() != ' ')
                         m_Line.append(spaces, ' ');
                 }
-                if (m_Line.empty() && useIndentation)
+                if (m_Line.empty())
                     indent();
                 m_Line.append(lin);
             }

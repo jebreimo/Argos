@@ -106,20 +106,19 @@ namespace Argos
         m_Data->textFormatter.writeText(title ? *title : "USAGE\n");
         m_Data->textFormatter.pushIndentation(2);
         m_Data->textFormatter.writeText(m_Data->helpSettings.programName);
-        m_Data->textFormatter.writeFormattedText(" ", false, false);
         m_Data->textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
         for (auto& opt : m_Data->options)
         {
             if (opt->hidden)
                 continue;
 
-            m_Data->textFormatter.writeFormattedText(getBriefOptionName(*opt), true, true);
+            m_Data->textFormatter.writePreformattedText(getBriefOptionName(*opt));
         }
         for (auto& arg : m_Data->arguments)
         {
             if (arg->hidden)
                 continue;
-            m_Data->textFormatter.writeFormattedText(getArgumentName(*arg), true, true);
+            m_Data->textFormatter.writePreformattedText(getArgumentName(*arg));
         }
         m_Data->textFormatter.popIndentation();
         m_Data->textFormatter.newline();
@@ -169,7 +168,6 @@ namespace Argos
                 m_Data->textFormatter.pushIndentation(2);
             }
             m_Data->textFormatter.writeText(txts.first);
-            //m_Data->textFormatter.writeFormattedText(" ", false, false);
             m_Data->textFormatter.pushIndentation(20);
             m_Data->textFormatter.writeText(txts.second);
             m_Data->textFormatter.popIndentation();
