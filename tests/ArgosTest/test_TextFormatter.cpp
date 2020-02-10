@@ -13,7 +13,7 @@
 TEST_CASE("Basic test of TextFormatter")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 0, 40);
+    Argos::TextFormatter formatter(&ss, 40);
     formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
@@ -22,7 +22,7 @@ TEST_CASE("Basic test of TextFormatter")
 TEST_CASE("Test TextFormatter with indentation")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 0, 40);
+    Argos::TextFormatter formatter(&ss, 40);
     formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.pushIndentation(15);
     formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
@@ -40,7 +40,7 @@ adipiscing elit.)*");
 TEST_CASE("Text with newlines")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 0, 40);
+    Argos::TextFormatter formatter(&ss, 40);
     formatter.writeText("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
@@ -49,7 +49,7 @@ TEST_CASE("Text with newlines")
 TEST_CASE("Indentation change")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 0, 40);
+    Argos::TextFormatter formatter(&ss, 40);
     formatter.writeText("ABCDEFGHIJ");
     formatter.pushIndentation(20);
     formatter.writeText("ABCDEFGHIJ");
@@ -60,7 +60,7 @@ TEST_CASE("Indentation change")
 TEST_CASE("Indentation change with preformatted text")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 0, 40);
+    Argos::TextFormatter formatter(&ss, 40);
     formatter.writePreformattedText("ABCDEFGHIJ");
     formatter.pushIndentation(20);
     formatter.writePreformattedText("ABCDEFGHIJ");

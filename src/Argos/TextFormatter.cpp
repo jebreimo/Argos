@@ -49,14 +49,15 @@ namespace Argos
     }
 
     TextFormatter::TextFormatter()
-        : TextFormatter(&std::cout, 0, 80)
+        : TextFormatter(&std::cout, 80)
     {}
 
-    TextFormatter::TextFormatter(size_t indent, size_t width)
-        : TextFormatter(&std::cout, indent, width)
+    TextFormatter::TextFormatter(size_t lineWidth, size_t indent)
+        : TextFormatter(&std::cout, lineWidth, indent)
     {}
 
-    TextFormatter::TextFormatter(std::ostream* stream, size_t indent, size_t lineWidth)
+    TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth,
+                                 size_t indent)
         : m_Stream(stream),
           m_LineWidth(lineWidth)
     {
