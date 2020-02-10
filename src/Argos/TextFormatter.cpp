@@ -16,13 +16,6 @@ namespace Argos
     {
         constexpr auto SEPARATORS = " \n\r";
 
-        std::string_view skipWhitespace(std::string_view text)
-        {
-            while (!text.empty() && text[0] == ' ')
-                text = text.substr(1);
-            return text;
-        }
-
         std::pair<std::string_view, std::string_view>
         nextLine(std::string_view text)
         {
@@ -56,7 +49,7 @@ namespace Argos
     }
 
     TextFormatter::TextFormatter()
-            : TextFormatter(&std::cout, 0, 80)
+        : TextFormatter(&std::cout, 0, 80)
     {}
 
     TextFormatter::TextFormatter(size_t indent, size_t width)
@@ -123,12 +116,17 @@ namespace Argos
             {
                 if (!m_Line.empty() && fitFirstLine)
                 {
+                    size_t spaces = 0;
+                    if (m_Line.size() >= m_Indents.back().first || !useIndentation)
+                        spaces = m_Line.back() != ' ' ? 1 : 0;
+                    else
+                        spaces = m_Indents.back().first - m_Line.size();
                     auto length = m_Indents.back().second - m_Line.size()
-                                  - (m_Line.back() != ' ' ? 1 : 0);
+                                  - spaces;
                     if (lin.size() > length)
                         newline();
                     else if (m_Line.back() != ' ')
-                        m_Line.push_back(' ');
+                        m_Line.append(spaces, ' ');
                 }
                 if (m_Line.empty() && useIndentation)
                     indent();
@@ -168,7 +166,7 @@ namespace Argos
         while (!remainder.empty())
         {
             bool mustWrite = false;
-            bool addSpace = false;
+            size_t spaces = 0;
             size_t length;
             if (m_Line.empty())
             {
@@ -178,14 +176,17 @@ namespace Argos
             }
             else
             {
-                addSpace = true;
-                length = m_Indents.back().second - m_Line.size() - 1;
+                if (m_Line.size() >= m_Indents.back().first)
+                    spaces = m_Line.back() != ' ' ? 1 : 0;
+                else
+                    spaces = m_Indents.back().first - m_Line.size();
+                length = m_Indents.back().second - m_Line.size() - spaces;
             }
             if (remainder.size() <= length)
             {
-                if (addSpace)
-                    m_Line.push_back(' ');
-                m_Line.append(remainder.begin(), remainder.end());
+                if (spaces)
+                    m_Line.append(spaces, ' ');
+                m_Line.append(remainder);
                 remainder = {};
             }
             else
@@ -197,8 +198,8 @@ namespace Argos
                         mustWrite);
                 if (!w.empty())
                 {
-                    if (addSpace)
-                        m_Line.push_back(' ');
+                    if (spaces)
+                        m_Line.append(spaces, ' ');
                     m_Line.append(w);
                     if (s)
                         m_Line.push_back(s);

@@ -169,8 +169,10 @@ namespace Argos
                 m_Data->textFormatter.pushIndentation(2);
             }
             m_Data->textFormatter.writeText(txts.first);
-            m_Data->textFormatter.writeFormattedText(" ", false, false);
+            //m_Data->textFormatter.writeFormattedText(" ", false, false);
+            m_Data->textFormatter.pushIndentation(20);
             m_Data->textFormatter.writeText(txts.second);
+            m_Data->textFormatter.popIndentation();
             m_Data->textFormatter.newline();
         }
         m_Data->textFormatter.popIndentation();

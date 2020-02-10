@@ -45,3 +45,25 @@ TEST_CASE("Text with newlines")
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
 }
+
+TEST_CASE("Indentation change")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 0, 40);
+    formatter.writeText("ABCDEFGHIJ");
+    formatter.pushIndentation(20);
+    formatter.writeText("ABCDEFGHIJ");
+    formatter.flush();
+    REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
+}
+
+TEST_CASE("Indentation change with preformatted text")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 0, 40);
+    formatter.writeFormattedText("ABCDEFGHIJ", true, true);
+    formatter.pushIndentation(20);
+    formatter.writeFormattedText("ABCDEFGHIJ", true, true);
+    formatter.flush();
+    REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
+}
