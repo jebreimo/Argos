@@ -54,7 +54,11 @@ add_library(Argos
     src/Argos/ArgumentValueRef.cpp
     src/Argos/TextFormatter.cpp
     src/Argos/TextFormatter.hpp
-    src/Argos/WordSplitter.cpp src/Argos/WordSplitter.hpp)
+    src/Argos/WordSplitter.cpp
+    src/Argos/WordSplitter.hpp
+    src/Argos/ConsoleWidth.cpp
+    src/Argos/ConsoleWidth.hpp
+    )
 
 target_include_directories(Argos
     PUBLIC

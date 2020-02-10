@@ -22,15 +22,19 @@ namespace Argos
 
         TextFormatter(size_t indent, size_t width);
 
-        explicit TextFormatter(std::ostream* stream, size_t indent, size_t width);
+        explicit TextFormatter(std::ostream* stream, size_t indent, size_t lineWidth);
 
         std::ostream* stream() const;
 
         void setStream(std::ostream* stream);
 
+        size_t lineWidth() const;
+
+        void setLineWidth(size_t lineWidth);
+
         static constexpr size_t CURRENT_COLUMN = SIZE_MAX;
 
-        void pushIndentation(size_t indent, size_t width = 0);
+        void pushIndentation(size_t indent);
 
         void popIndentation();
 
@@ -47,7 +51,8 @@ namespace Argos
         void appendWord(std::string_view word);
 
         std::ostream* m_Stream;
-        std::vector<std::pair<size_t, size_t>> m_Indents;
+        std::vector<size_t> m_Indents;
+        size_t m_LineWidth;
         std::string m_Line;
         WordSplitter m_WordSplitter;
     };

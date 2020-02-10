@@ -56,10 +56,13 @@ namespace Argos
         : TextFormatter(&std::cout, indent, width)
     {}
 
-    TextFormatter::TextFormatter(std::ostream* stream, size_t indent, size_t width)
-        : m_Stream(stream)
+    TextFormatter::TextFormatter(std::ostream* stream, size_t indent, size_t lineWidth)
+        : m_Stream(stream),
+          m_LineWidth(lineWidth)
     {
-        m_Indents.emplace_back(indent, width);
+        if (lineWidth <= 2)
+            ARGOS_THROW("Line width must be greater than 2.");
+        m_Indents.push_back(indent);
     }
 
     std::ostream* TextFormatter::stream() const
@@ -72,14 +75,16 @@ namespace Argos
         m_Stream = stream;
     }
 
-    void TextFormatter::pushIndentation(size_t indent, size_t width)
+    void TextFormatter::pushIndentation(size_t indent)
     {
         if (indent == CURRENT_COLUMN)
+        {
             indent = m_Line.size();
-        if (width == 0)
-            width = m_Indents.back().second;
-        indent = std::min(indent, 2 * width / 3);
-        m_Indents.emplace_back(indent, width);
+            if (indent != 0 && m_Line.back() != ' ')
+                ++indent;
+        }
+        indent = std::min(indent, 2 * m_LineWidth / 3);
+        m_Indents.push_back(indent);
     }
 
     void TextFormatter::popIndentation()
@@ -115,12 +120,11 @@ namespace Argos
                 if (!m_Line.empty())
                 {
                     size_t spaces = 0;
-                    if (m_Line.size() >= m_Indents.back().first)
+                    if (m_Line.size() >= m_Indents.back())
                         spaces = m_Line.back() != ' ' ? 1 : 0;
                     else
-                        spaces = m_Indents.back().first - m_Line.size();
-                    auto length = m_Indents.back().second - m_Line.size()
-                                  - spaces;
+                        spaces = m_Indents.back() - m_Line.size();
+                    auto length = m_LineWidth - m_Line.size() - spaces;
                     if (lin.size() > length)
                         newline();
                     else if (m_Line.back() != ' ')
@@ -155,7 +159,7 @@ namespace Argos
 
     void TextFormatter::indent()
     {
-        m_Line.assign(m_Indents.back().first, ' ');
+        m_Line.assign(m_Indents.back(), ' ');
     }
 
     void TextFormatter::appendWord(std::string_view word)
@@ -170,15 +174,15 @@ namespace Argos
             {
                 indent();
                 mustWrite = true;
-                length = m_Indents.back().second - m_Line.size();
+                length = m_LineWidth - m_Line.size();
             }
             else
             {
-                if (m_Line.size() >= m_Indents.back().first)
+                if (m_Line.size() >= m_Indents.back())
                     spaces = m_Line.back() != ' ' ? 1 : 0;
                 else
-                    spaces = m_Indents.back().first - m_Line.size();
-                length = m_Indents.back().second - m_Line.size() - spaces;
+                    spaces = m_Indents.back() - m_Line.size();
+                length = m_LineWidth - m_Line.size() - spaces;
             }
             if (remainder.size() <= length)
             {
@@ -206,5 +210,17 @@ namespace Argos
                 remainder = r;
             }
         }
+    }
+
+    size_t TextFormatter::lineWidth() const
+    {
+        return m_LineWidth;
+    }
+
+    void TextFormatter::setLineWidth(size_t lineWidth)
+    {
+        if (lineWidth <= 2)
+            ARGOS_THROW("Line width must be greater than 2.");
+        m_LineWidth = lineWidth;
     }
 }

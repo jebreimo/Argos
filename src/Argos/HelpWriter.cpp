@@ -7,7 +7,7 @@
 //****************************************************************************
 #include "HelpWriter.hpp"
 
-#include <iostream>
+#include "ConsoleWidth.hpp"
 
 namespace Argos
 {
@@ -66,7 +66,9 @@ namespace Argos
 
     HelpWriter::HelpWriter(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
-    {}
+    {
+        m_Data->textFormatter.setLineWidth(getConsoleWidth(80));
+    }
 
     void HelpWriter::writeHelpText() const
     {
