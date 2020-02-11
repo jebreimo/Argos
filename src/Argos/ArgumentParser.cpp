@@ -188,6 +188,12 @@ namespace Argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
+    {
+        data().helpSettings.texts[textId] = move(text);
+        return *this;
+    }
+
     const ParserData& ArgumentParser::data() const
     {
         if (!m_Data)

@@ -99,7 +99,11 @@ namespace Argos
 
     void HelpWriter::writeUsage() const
     {
-        writeBriefUsage();
+        auto usage = getCustomText(TextId::USAGE);
+        if (!usage)
+            writeBriefUsage();
+        else if (!usage->empty())
+            m_Data->textFormatter.writePreformattedText(*usage);
     }
 
     void HelpWriter::writeBriefUsage() const
@@ -134,7 +138,22 @@ namespace Argos
 
     void HelpWriter::writeArgumentSections() const
     {
-        std::multimap<std::string_view, std::pair<std::string, std::string_view>> sections;
+        using HelpText = std::pair<std::string, std::string_view>;
+        using HelpTextVector = std::vector<HelpText>;
+        using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
+        std::vector<SectionHelpTexts> sections;
+        auto addHelpText = [&](std::string_view s, std::string a, std::string_view b)
+        {
+            auto it = find_if(sections.begin(), sections.end(),
+                              [&](auto& t) {return t.first == s;});
+            if (it == sections.end())
+            {
+                sections.push_back({s, {}});
+                it = std::prev(sections.end());
+            }
+            it->second.emplace_back(std::move(a), b);
+        };
+
         auto argSection = getCustomText(TextId::ARGUMENTS_SECTION);
         if (!argSection)
             argSection = "ARGUMENTS";
@@ -143,7 +162,15 @@ namespace Argos
             if (arg->hidden)
                 continue;
             auto& section = arg->section.empty() ? *argSection : arg->section;
-            sections.insert({section, {getArgumentName(*arg), arg->text}});
+            addHelpText(section, getArgumentName(*arg), arg->text);
+            //auto it = find_if(sections.begin(), sections.end(),
+            //                  [&](auto& t){return t.first == section;});
+            //if (it == sections.end())
+            //{
+            //    sections.push_back({section, {}});
+            //    it = std::prev(sections.end());
+            //}
+            //it->second.emplace_back(getArgumentName(*arg), arg->text);
         }
         auto optSection = getCustomText(TextId::OPTIONS_SECTION);
         if (!optSection)
@@ -153,7 +180,7 @@ namespace Argos
             if (opt->hidden)
                 continue;
             auto& section = opt->section.empty() ? *optSection : opt->section;
-            sections.insert({section, {getLongOptionName(*opt), opt->text}});
+            addHelpText(section, getLongOptionName(*opt), opt->text);
         }
 
         if (sections.empty())
@@ -163,8 +190,11 @@ namespace Argos
         std::vector<size_t> textWidths;
         for (auto&[sec, txts] : sections)
         {
-            nameWidths.push_back(txts.first.size());
-            textWidths.push_back(txts.second.size());
+            for (auto&[name, txt] : txts)
+            {
+                nameWidths.push_back(name.size());
+                textWidths.push_back(txt.size());
+            }
         }
 
         std::sort(nameWidths.begin(), nameWidths.end());
@@ -177,26 +207,21 @@ namespace Argos
             if (nameWidth + textWidths[index75] > m_Data->textFormatter.lineWidth())
                 nameWidth = m_Data->textFormatter.lineWidth() / 4;
         }
-        printf("%lu %lu\n", nameWidth, m_Data->textFormatter.lineWidth());
-        std::string_view section;
-        m_Data->textFormatter.pushIndentation(2);
-        for (auto& [sec, txts] : sections)
+        for (auto& [section, txts] : sections)
         {
-            if (sec != section)
-            {
-                section = sec;
-                m_Data->textFormatter.popIndentation();
-                m_Data->textFormatter.writeText(section);
-                m_Data->textFormatter.newline();
-                m_Data->textFormatter.pushIndentation(2);
-            }
-            m_Data->textFormatter.writeText(txts.first);
-            m_Data->textFormatter.pushIndentation(nameWidth);
-            m_Data->textFormatter.writeText(txts.second);
-            m_Data->textFormatter.popIndentation();
+            m_Data->textFormatter.writeText(section);
             m_Data->textFormatter.newline();
+            m_Data->textFormatter.pushIndentation(2);
+            for (auto& [name, text] : txts)
+            {
+                m_Data->textFormatter.writeText(name);
+                m_Data->textFormatter.pushIndentation(nameWidth);
+                m_Data->textFormatter.writeText(text);
+                m_Data->textFormatter.popIndentation();
+                m_Data->textFormatter.newline();
+            }
+            m_Data->textFormatter.popIndentation();
         }
-        m_Data->textFormatter.popIndentation();
     }
 
     void HelpWriter::writeEndText() const

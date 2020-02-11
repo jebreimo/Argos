@@ -55,4 +55,16 @@ namespace Argos
         SPECIAL_OPTION,
         ERROR
     };
+
+    enum class TextId
+    {
+        USAGE_TITLE,
+        USAGE,
+        USAGE_DESCRIPTION,
+        ARGUMENTS_SECTION,
+        ARGUMENTS,
+        OPTIONS_SECTION,
+        OPTIONS,
+        END_TEXT
+    };
 }

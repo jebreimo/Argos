@@ -14,8 +14,6 @@ namespace Argos
 {
     namespace
     {
-        constexpr auto SEPARATORS = " \n\r";
-
         std::pair<std::string_view, std::string_view>
         nextLine(std::string_view text)
         {
@@ -36,7 +34,7 @@ namespace Argos
             auto pos = text.find_first_not_of(" ");
             if (pos != 0)
                 text = text.substr(pos);
-            pos = text.find_first_of(SEPARATORS);
+            pos = text.find_first_of(" \n\r");
             if (pos == std::string_view::npos)
                 return {text, '\0', std::string_view()};
             auto nxt = pos + 1;

@@ -75,3 +75,20 @@ TEST_CASE("String arguments")
             .parse(argv.size(), argv.data());
     REQUIRE(args.getString("file") == "test_file.txt");
 }
+
+TEST_CASE("Section order in help text")
+{
+    using namespace Argos;
+    Argv argv{"test", "-h"};
+    std::stringstream ss;
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("file").section("Z"))
+            .add(Option({"-h"}).section("A").type(OptionType::HELP))
+            .add(Option({"-s"}).section("Z"))
+            .add(Argument("device").section("A"))
+            .outputStream(&ss)
+            .text(TextId::USAGE, "")
+            .parse(argv.size(), argv.data());
+    REQUIRE(ss.str() == "Z\n  <file>\n  -s\nA\n  <device>\n  -h\n");
+}

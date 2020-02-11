@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
             .add(Option({"--windowed"}).valueName("--fullscreen").value(0).text("Run in windowed mode."))
             .add(Option({"--list-interfaces"}).type(OptionType::BREAK).text("Display list of available graphics interfaces."))
             .add(Option({"--"}).type(OptionType::FINAL).text("Mark end of options. Allows arguments starting with '-'."))
+            .add(Option({"-a", "--anonymous"}))
             .parse(argc, argv);
     std::cout << "file: " << args.getString("file") << "\n";
     return 0;
