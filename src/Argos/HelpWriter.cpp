@@ -67,7 +67,7 @@ namespace Argos
     HelpWriter::HelpWriter(std::shared_ptr<ParserData> data)
         : m_Data(move(data))
     {
-        m_Data->textFormatter.setLineWidth(getConsoleWidth(80));
+        m_Data->textFormatter.setLineWidth(getConsoleWidth(20, 80));
     }
 
     void HelpWriter::writeHelpText() const
@@ -129,7 +129,6 @@ namespace Argos
 
     std::string HelpWriter::generateUsage() const
     {
-
         return {};
     }
 
@@ -157,6 +156,28 @@ namespace Argos
             sections.insert({section, {getLongOptionName(*opt), opt->text}});
         }
 
+        if (sections.empty())
+            return;
+
+        std::vector<size_t> nameWidths;
+        std::vector<size_t> textWidths;
+        for (auto&[sec, txts] : sections)
+        {
+            nameWidths.push_back(txts.first.size());
+            textWidths.push_back(txts.second.size());
+        }
+
+        std::sort(nameWidths.begin(), nameWidths.end());
+        std::sort(textWidths.begin(), textWidths.end());
+        auto nameWidth = nameWidths.back() + 3;
+        if (nameWidth + textWidths.back() > m_Data->textFormatter.lineWidth())
+        {
+            auto index75 = 3 * nameWidths.size() / 4;
+            nameWidth = nameWidths[index75] + 3;
+            if (nameWidth + textWidths[index75] > m_Data->textFormatter.lineWidth())
+                nameWidth = m_Data->textFormatter.lineWidth() / 4;
+        }
+        printf("%lu %lu\n", nameWidth, m_Data->textFormatter.lineWidth());
         std::string_view section;
         m_Data->textFormatter.pushIndentation(2);
         for (auto& [sec, txts] : sections)
@@ -170,7 +191,7 @@ namespace Argos
                 m_Data->textFormatter.pushIndentation(2);
             }
             m_Data->textFormatter.writeText(txts.first);
-            m_Data->textFormatter.pushIndentation(20);
+            m_Data->textFormatter.pushIndentation(nameWidth);
             m_Data->textFormatter.writeText(txts.second);
             m_Data->textFormatter.popIndentation();
             m_Data->textFormatter.newline();

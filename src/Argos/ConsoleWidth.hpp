@@ -9,5 +9,7 @@
 
 namespace Argos
 {
-    unsigned getConsoleWidth(unsigned defaultWidth = 80);
+    unsigned getConsoleWidth();
+
+    unsigned getConsoleWidth(unsigned minWidth, unsigned defaultWidth = 80);
 }
