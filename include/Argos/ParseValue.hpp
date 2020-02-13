@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include "ArgumentValueRef.hpp"
+#include "ParseFloatingPoint.hpp"
 #include "ParseInteger.hpp"
 #include "ArgosException.hpp"
 
@@ -18,7 +19,13 @@ namespace Argos
         return parseInteger<T>(s);
     }
 
-    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    std::optional<T> parseSingleValue(std::string_view s)
+    {
+        return parseFloatingPoint<T>(std::string(s));
+    }
+
+    template <typename T>
     std::pair<T, ArgumentValueRef>
     parseValue(std::pair<std::string_view, ArgumentValueRef> value)
     {

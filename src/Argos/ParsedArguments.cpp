@@ -48,6 +48,11 @@ namespace Argos
         return getValue<int64_t>(name, defaultValue);
     }
 
+    double ParsedArguments::getDouble(const std::string& name, double defaultValue) const
+    {
+        return getValue<double>(name, defaultValue);
+    }
+
     std::string ParsedArguments::getString(
             const std::string& name,
             const std::string& defaultValue) const
@@ -85,6 +90,8 @@ namespace Argos
         auto value = m_Impl->getValue(id);
         if (!value)
             return defaultValue;
-        return parseValue<T>({*value, ArgumentValueRef(m_Impl->parserData(), id)}).first;
+        return parseValue<T>({*value,
+                              ArgumentValueRef(m_Impl->parserData(), id)
+                             }).first;
     }
 }
