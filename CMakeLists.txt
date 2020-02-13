@@ -58,7 +58,7 @@ add_library(Argos
     src/Argos/WordSplitter.hpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
-    )
+    include/Argos/ParseFloatingPoint.hpp)
 
 target_include_directories(Argos
     PUBLIC
