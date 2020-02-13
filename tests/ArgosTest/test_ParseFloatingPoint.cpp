@@ -11,8 +11,8 @@
 
 TEST_CASE("Parse doubles")
 {
-    REQUIRE(Argos::parseFloatingPoint2<double>("0") == 0.0);
-    REQUIRE(Argos::parseFloatingPoint2<double>("-1.234") == -1.234);
-    REQUIRE(Argos::parseFloatingPoint2<double>("1.234") == 1.234);
-    REQUIRE(Argos::parseFloatingPoint2<double>(std::to_string(DBL_MAX)) == DBL_MAX);
+    REQUIRE(Argos::parseFloatingPoint<double>("0") == 0.0);
+    REQUIRE(Argos::parseFloatingPoint<double>("-1.234") == -1.234);
+    REQUIRE(Argos::parseFloatingPoint<double>("1.234") == 1.234);
+    REQUIRE(Argos::parseFloatingPoint<double>(std::to_string(DBL_MAX)) == DBL_MAX);
 }
