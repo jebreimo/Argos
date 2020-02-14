@@ -90,7 +90,7 @@ namespace Argos
         auto value = m_Impl->getValue(id);
         if (!value)
             return defaultValue;
-        return parseValue<T>({*value,
+        return parseValue<T>({std::string(*value),
                               ArgumentValueRef(m_Impl->parserData(), id)
                              }).first;
     }

@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <memory>
+#include "ArgumentValueRef.hpp"
 #include "OptionView.hpp"
 #include "RawArgumentValue.hpp"
 

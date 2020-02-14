@@ -29,6 +29,7 @@ namespace Argos
 
     void ArgumentValueRef::error(const std::string& message) const
     {
+        // TODO: find argument or option and pass it to HelpWriter.
         HelpWriter(m_Data).writeErrorMessage(message);
         if (m_Data->parserSettings.autoExit)
             exit(1);

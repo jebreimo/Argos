@@ -14,24 +14,25 @@
 namespace Argos
 {
     template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-    std::optional<T> parseSingleValue(std::string_view s)
+    std::optional<T> parseSingleValue(std::string s)
     {
         return parseInteger<T>(s);
     }
 
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-    std::optional<T> parseSingleValue(std::string_view s)
+    std::optional<T> parseSingleValue(std::string s)
     {
         return parseFloatingPoint<T>(std::string(s));
     }
 
     template <typename T>
     std::pair<T, ArgumentValueRef>
-    parseValue(std::pair<std::string_view, ArgumentValueRef> value)
+    parseValue(std::pair<std::string, ArgumentValueRef> value)
     {
         auto v = parseSingleValue<T>(value.first);
         if (!v)
         {
+            // TODO: use ArgumentValueRef's error function.
             auto msg = "Invalid value: '" + std::string(value.first) + "'.";
             value.second.error(msg);
             ARGOS_THROW(msg);
