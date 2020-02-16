@@ -6,6 +6,8 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <cerrno>
+#include <cinttypes>
 #include <optional>
 #include <string_view>
 #include <type_traits>
@@ -214,5 +216,88 @@ namespace Argos
         if (str == "true")
             return 1;
         return {};
+    }
+
+    template <typename IntT>
+    std::optional<IntT> parseInteger2Impl(const std::string& str, int base)
+    {
+        char* end;
+        errno = 0;
+        IntT value;
+        if constexpr (std::is_unsigned<IntT>())
+        {
+            auto n = strtoumax(str.c_str(), &end, base);
+            if (n > std::numeric_limits<IntT>::max())
+                return {};
+            value = static_cast<IntT>(n);
+        }
+        else
+        {
+            auto n = strtoimax(str.c_str(), &end, base);
+            if (n < std::numeric_limits<IntT>::min()
+                || n > std::numeric_limits<IntT>::max())
+                return {};
+            value = static_cast<IntT>(n);
+        }
+        if (end != str.c_str() + str.size() || errno != 0)
+            return {};
+
+        return value;
+    }
+
+    template <typename IntT>
+    std::optional<IntT> parseInteger2(std::string_view str)
+    {
+        static_assert(std::is_integral<IntT>());
+
+        if (str.empty())
+            return {};
+
+        bool negative = false;
+        auto tmp = str;
+        if (tmp[0] == '-' || tmp[0] == '+')
+        {
+            negative = tmp[0] == '-';
+            tmp = tmp.substr(1);
+        }
+
+        if (tmp.empty())
+            return {};
+
+        int base = 10;
+        if (tmp.size() > 2 && tmp[0] == 0)
+        {
+            switch (uint8_t(tmp[1]) | 0x20u)
+            {
+            case 'x':
+                base = 16;
+                break;
+            case 'o':
+                base = 8;
+                break;
+            case 'b':
+                base = 2;
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (base == 10)
+        {
+            if (auto result = parseInteger2Impl<IntT>(std::string(str), 10))
+                return result;
+            if (str == "false")
+                return 0;
+            if (str == "true")
+                return 1;
+            return {};
+        }
+
+        std::string numStr;
+        if (negative)
+            numStr.push_back('-');
+        numStr.append(tmp);
+        return parseInteger2Impl<IntT>(numStr, base);
     }
 }

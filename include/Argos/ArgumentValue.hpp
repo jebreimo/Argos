@@ -14,13 +14,13 @@
 
 namespace Argos
 {
-    class ParserData;
+    class ParsedArgumentsImpl;
 
     class ArgumentValue
     {
     public:
         ArgumentValue(std::optional<std::string_view> value,
-                      std::shared_ptr<ParserData> data,
+                      std::shared_ptr<ParsedArgumentsImpl> args,
                       int valueId);
 
         ArgumentValue(const ArgumentValue&);
@@ -39,19 +39,45 @@ namespace Argos
 
         std::optional<std::string_view> value() const;
 
-        std::string stringValue(const std::string& defaultValue) const;
+        bool boolValue(bool defaultValue = false) const;
+
+        int8_t int8Value(int8_t defaultValue = 0) const;
+
+        int16_t int16Value(int16_t defaultValue = 0) const;
+
+        int32_t int32Value(int32_t defaultValue = 0) const;
+
+        int64_t int64Value(int64_t defaultValue = 0) const;
+
+        uint8_t uint8Value(uint8_t defaultValue = 0) const;
+
+        uint16_t uint16Value(uint16_t defaultValue = 0) const;
+
+        uint32_t uint32Value(uint32_t defaultValue = 0) const;
+
+        uint64_t uint64Value(uint64_t defaultValue = 0) const;
+
+        float floatValue(float defaultValue = 0) const;
+
+        double doubleValue(double defaultValue = 0) const;
+
+        long double longDoubleValue(long double defaultValue = 0) const;
+
+        std::string stringValue(const std::string& defaultValue = {}) const;
 
         void error(const std::string& message) const;
     private:
         std::optional<std::string_view> m_Value;
-        std::shared_ptr<ParserData> m_Data;
+        std::shared_ptr<ParsedArgumentsImpl> m_Args;
         int m_ValueId;
     };
 
     class ArgumentValues
     {
     public:
-        ArgumentValues(std::shared_ptr<ParserData> data, int valueId);
+        ArgumentValues(std::vector<std::string_view> value,
+                       std::shared_ptr<ParsedArgumentsImpl> args,
+                       int valueId);
 
         ArgumentValues(const ArgumentValues&);
 
@@ -68,7 +94,7 @@ namespace Argos
         void error(const std::string& message) const;
     private:
         std::vector<std::string_view> m_Values;
-        std::shared_ptr<ParserData> m_Data;
+        std::shared_ptr<ParsedArgumentsImpl> m_Args;
         int m_ValueId;
     };
 }

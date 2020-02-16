@@ -9,7 +9,6 @@
 #include <memory>
 #include "ArgumentValue.hpp"
 #include "OptionView.hpp"
-#include "RawArgumentValue.hpp"
 
 namespace Argos
 {
@@ -68,6 +67,6 @@ namespace Argos
         template <typename T>
         T getValue(const std::string& name, const T& defaultValue) const;
 
-        std::unique_ptr<ParsedArgumentsImpl> m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
 }

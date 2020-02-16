@@ -7,16 +7,16 @@
 //****************************************************************************
 #include "Argos/ArgumentValue.hpp"
 
-#include "ParserData.hpp"
+#include "ParsedArgumentsImpl.hpp"
 #include "HelpWriter.hpp"
 
 namespace Argos
 {
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
-                                 std::shared_ptr<ParserData> data,
+                                 std::shared_ptr<ParsedArgumentsImpl> args,
                                  int valueId)
         : m_Value(value),
-          m_Data(std::move(data)),
+          m_Args(std::move(args)),
           m_ValueId(valueId)
     {}
 
@@ -52,9 +52,6 @@ namespace Argos
 
     void ArgumentValue::error(const std::string& message) const
     {
-        // TODO: use ParsedArgumentsImpl::error().
-        HelpWriter(m_Data).writeErrorMessage(message);
-        if (m_Data->parserSettings.autoExit)
-            exit(1);
+        m_Args->error(message, m_ValueId);
     }
 }

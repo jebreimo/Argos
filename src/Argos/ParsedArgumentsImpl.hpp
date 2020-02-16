@@ -8,7 +8,6 @@
 #pragma once
 #include <map>
 #include "ParserData.hpp"
-#include "Argos/RawArgumentValue.hpp"
 
 namespace Argos
 {

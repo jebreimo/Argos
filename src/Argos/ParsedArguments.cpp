@@ -83,7 +83,7 @@ namespace Argos
     {
         auto id = m_Impl->getValueId(name);
         auto value = m_Impl->getValue(id);
-        return {value, m_Impl->parserData(), id};
+        return {value, m_Impl, id};
     }
 
     //std::pair<std::vector<std::string>, ArgumentValue>

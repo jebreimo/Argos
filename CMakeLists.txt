@@ -25,13 +25,11 @@ add_library(Argos
     include/Argos/ArgumentValue.hpp
     include/Argos/ParseInteger.hpp
     include/Argos/ParseValue.hpp
-    include/Argos/RawArgumentValue.hpp
     src/Argos/Argument.cpp
     src/Argos/ParsedArgumentsImpl.cpp
     src/Argos/ParsedArgumentsImpl.hpp
     src/Argos/ArgumentIteratorImpl.cpp
     src/Argos/ArgumentIteratorImpl.hpp
-    src/Argos/RawArgumentValue.cpp
     src/Argos/ArgumentData.hpp
     src/Argos/OptionData.hpp
     src/Argos/StandardOptionIterator.cpp
