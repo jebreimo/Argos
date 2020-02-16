@@ -92,3 +92,16 @@ TEST_CASE("Section order in help text")
             .parse(argv.size(), argv.data());
     REQUIRE(ss.str() == "Z\n  <file>\n  -s\nA\n  <device>\n  -h\n");
 }
+
+TEST_CASE("Two argument")
+{
+    using namespace Argos;
+    Argv argv{"test", "foo", "bar"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("arg1"))
+            .add(Argument("arg2"))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.getString("arg1") == "foo");
+    REQUIRE(args.getString("arg2") == "bar");
+}

@@ -45,7 +45,7 @@ namespace Argos
 
                 int makeNumericId(const std::string& stringId)
                 {
-                    if (!stringId.empty())
+                    if (stringId.empty())
                         return n++;
 
                     auto it = explicitIds.find(stringId);

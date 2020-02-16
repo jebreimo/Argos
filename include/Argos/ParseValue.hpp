@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "ArgumentValueRef.hpp"
+#include "ArgumentValue.hpp"
 #include "ParseFloatingPoint.hpp"
 #include "ParseInteger.hpp"
 #include "ArgosException.hpp"
@@ -26,8 +26,8 @@ namespace Argos
     }
 
     template <typename T>
-    std::pair<T, ArgumentValueRef>
-    parseValue(std::pair<std::string, ArgumentValueRef> value)
+    std::pair<T, ArgumentValue>
+    parseValue(std::pair<std::string, ArgumentValue> value)
     {
         auto v = parseSingleValue<T>(value.first);
         if (!v)
@@ -39,4 +39,11 @@ namespace Argos
         }
         return {std::move(*v), std::move(value.second)};
     }
+
+    //template <typename ...T>
+    //std::pair<std::tuple<T...>, ArgumentValueRef>
+    //parseTuple(std::pair<std::string, ArgumentValueRef> value, char separator)
+    //{
+    //
+    //}
 }

@@ -8,6 +8,7 @@
 #include "ParsedArgumentsImpl.hpp"
 
 #include "Argos/ArgosException.hpp"
+#include "HelpWriter.hpp"
 
 namespace Argos
 {
@@ -151,5 +152,23 @@ namespace Argos
     {
         m_ResultCode = ParserResultCode::SPECIAL_OPTION;
         m_SpecialOption = option;
+    }
+
+    void ParsedArgumentsImpl::error(const std::string& message)
+    {
+        HelpWriter(m_Data).writeErrorMessage(message);
+        if (m_Data->parserSettings.autoExit)
+            exit(1);
+        else
+            ARGOS_THROW("Error while parsing arguments.");
+    }
+
+    void ParsedArgumentsImpl::error(const std::string& message, int valueId)
+    {
+        HelpWriter(m_Data).writeErrorMessage(message);
+        if (m_Data->parserSettings.autoExit)
+            exit(1);
+        else
+            ARGOS_THROW("Error while parsing arguments.");
     }
 }

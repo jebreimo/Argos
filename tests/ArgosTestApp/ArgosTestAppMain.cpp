@@ -7,6 +7,45 @@
 //****************************************************************************
 #include <Argos/ArgumentParser.hpp>
 #include <iostream>
+#include <Argos/ParseInteger.hpp>
+
+struct Rectangle
+{
+    int width = 0;
+    int height = 0;
+};
+
+std::vector<std::string_view> splitString(std::string_view s, char delimiter)
+{
+    std::vector<std::string_view> result;
+    size_t pos = 0;
+    while (true)
+    {
+        auto nextPos = s.find(delimiter, pos);
+        result.push_back(s.substr(pos, nextPos - pos));
+        if (nextPos == std::string_view::npos)
+            break;
+        pos = nextPos + 1;
+    }
+    return result;
+}
+
+Rectangle parseResolution(const Argos::ArgumentValue& v)
+{
+    auto s = v.value();
+    if (!s)
+        return {640, 480};
+    auto parts = splitString(*s, ',');
+    if (parts.size() != 2)
+        v.error("Resolution must be two comma-separated integers.");
+    auto hor = Argos::parseInteger<int>(parts[0]);
+    auto ver = Argos::parseInteger<int>(parts[1]);
+    if (!hor || *hor < 640)
+        v.error("Horizontal resolution must be at least 640");
+    if (!ver || *ver < 480)
+        v.error("Vertical resolution must be at least 480");
+    return {*hor, *ver};
+}
 
 int main(int argc, char* argv[])
 {
@@ -16,12 +55,16 @@ int main(int argc, char* argv[])
             .add(Argument("file").text("A file of some kind."))
             .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
             .add(Option({"-r", "--resolution"}).argument("HOR,VER").text("Set screen resolution."))
-            .add(Option({"--fullscreen"}).value(1).text("Run in fullscreen mode."))
-            .add(Option({"--windowed"}).valueName("--fullscreen").value(0).text("Run in windowed mode."))
+            .add(Option({"--fullscreen"}).value(true).text("Run in fullscreen mode."))
+            .add(Option({"--windowed"}).valueName("--fullscreen").value(false).text("Run in windowed mode."))
             .add(Option({"--list-interfaces"}).type(OptionType::BREAK).text("Display list of available graphics interfaces."))
             .add(Option({"--"}).type(OptionType::FINAL).text("Mark end of options. Allows arguments starting with '-'."))
             .add(Option({"-a", "--anonymous"}))
             .parse(argc, argv);
     std::cout << "file: " << args.getString("file") << "\n";
+
+    auto res = parseResolution(args.value("--resolution"));
+    std::cout << "resolution: " << res.width << 'x' << res.height << '\n';
+
     return 0;
 }

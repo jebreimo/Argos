@@ -48,6 +48,10 @@ namespace Argos
         const OptionData* specialOption() const;
 
         void setSpecialOption(const OptionData* option);
+
+        void error(const std::string& message);
+
+        void error(const std::string& message, int valueId);
     private:
         std::multimap<int, std::string> m_Values;
         std::vector<std::pair<std::string_view, int>> m_ValueIds;

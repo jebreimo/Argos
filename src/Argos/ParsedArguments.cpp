@@ -10,6 +10,7 @@
 
 #include "ParsedArgumentsImpl.hpp"
 #include "Argos/ParseValue.hpp"
+#include "HelpWriter.hpp"
 
 namespace Argos
 {
@@ -64,6 +65,42 @@ namespace Argos
         return std::string(*value);
     }
 
+    std::vector<std::string> ParsedArguments::getStrings(
+            const std::string& name,
+            const std::vector<std::string>& defaultValue) const
+    {
+        auto id = m_Impl->getValueId(name);
+        auto values = m_Impl->getValues(id);
+        if (values.empty())
+            return defaultValue;
+        std::vector<std::string> result;
+        for (auto sv : values)
+            result.emplace_back(sv);
+        return result;
+    }
+
+    ArgumentValue ParsedArguments::value(const std::string& name) const
+    {
+        auto id = m_Impl->getValueId(name);
+        auto value = m_Impl->getValue(id);
+        return {value, m_Impl->parserData(), id};
+    }
+
+    //std::pair<std::vector<std::string>, ArgumentValue>
+    //ParsedArguments::getVector(const std::string& name,
+    //                           const std::vector<std::string>& defaultValue) const
+    //{
+    //    auto id = m_Impl->getValueId(name);
+    //    auto values = m_Impl->getValues(id);
+    //    if (values.empty())
+    //        return {defaultValue, ArgumentValue(m_Impl->parserData(), id)};
+    //    std::pair result(std::vector<std::string>(),
+    //                     ArgumentValue(m_Impl->parserData(), id));
+    //    for (auto sv : values)
+    //        result.first.emplace_back(sv);
+    //    return result;
+    //}
+
     bool ParsedArguments::has(const std::string& name) const
     {
         return m_Impl->has(m_Impl->getValueId(name));
@@ -90,8 +127,9 @@ namespace Argos
         auto value = m_Impl->getValue(id);
         if (!value)
             return defaultValue;
-        return parseValue<T>({std::string(*value),
-                              ArgumentValueRef(m_Impl->parserData(), id)
-                             }).first;
+        auto v = parseSingleValue<T>(std::string(*value));
+        if (!v)
+            m_Impl->error("Invalid value: " + std::string(*value) + ".", id);
+        return *v;
     }
 }

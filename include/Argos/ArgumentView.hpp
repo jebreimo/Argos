@@ -13,7 +13,7 @@ namespace Argos
 {
     struct ArgumentData;
 
-    class ArgumentView : IArgumentView
+    class ArgumentView : public IArgumentView
     {
     public:
         explicit ArgumentView(const ArgumentData* data);
@@ -35,8 +35,6 @@ namespace Argos
         bool optional() const;
 
         std::pair<unsigned, unsigned> count() const;
-
-        std::shared_ptr<ArgumentData> release();
     private:
         const ArgumentData* m_Argument;
     };

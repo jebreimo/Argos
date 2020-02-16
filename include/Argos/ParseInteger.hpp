@@ -179,7 +179,7 @@ namespace Argos
         if (str[i] == '0')
         {
             if (++i == str.size())
-                return {0};
+                return 0;
             auto str2 = str.substr(i + 1);
             switch (uint8_t(str[i]) | 0x20u)
             {
@@ -208,11 +208,11 @@ namespace Argos
                             : parseNegativeIntegerImpl<IntT, 10>(str2);
         }
         if (str == "false")
-            return {0};
+            return 0;
         if (str == "null")
-            return {0};
+            return 0;
         if (str == "true")
-            return {1};
+            return 1;
         return {};
     }
 }

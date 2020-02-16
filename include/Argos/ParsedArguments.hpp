@@ -7,7 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <memory>
-#include "ArgumentValueRef.hpp"
+#include "ArgumentValue.hpp"
 #include "OptionView.hpp"
 #include "RawArgumentValue.hpp"
 
@@ -48,6 +48,18 @@ namespace Argos
 
         std::string getString(const std::string& name,
                               const std::string& defaultValue = {}) const;
+
+        std::vector<std::string>
+        getStrings(const std::string& name,
+                   const std::vector<std::string>& defaultValue = {}) const;
+
+        ArgumentValue value(const std::string& name) const;
+
+        ArgumentValues values(const std::string& name) const;
+        //
+        //std::pair<std::vector<std::string>, ArgumentValue>
+        //getVector(const std::string& name,
+        //          const std::vector<std::string>& defaultValue = {}) const;
 
         ParserResultCode resultCode() const;
 
