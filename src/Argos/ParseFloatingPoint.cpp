@@ -7,15 +7,18 @@
 //****************************************************************************
 
 #include "Argos/ParseFloatingPoint.hpp"
+
 #include <cerrno>
 #include <cstdlib>
+#include <string>
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
     namespace
     {
         template <typename T, typename Func>
-        std::optional<T> parseFloatingPointImpl(const std::string& str, Func func)
+        std::optional<T> parseFloatingPointImpl(std::string str, Func func)
         {
             char* endp = nullptr;
             errno = 0;
@@ -27,43 +30,27 @@ namespace Argos
                 return {};
             }
 
-            std::string tmp;
-            bool underscore = true;
-            for (auto c : str)
-            {
-                if (c != '_')
-                {
-                    tmp.push_back(c);
-                    underscore = false;
-                }
-                else if (!underscore)
-                {
-                    underscore = true;
-                }
-                else
-                {
-                    return {};
-                }
-            }
-            return parseFloatingPointImpl<T>(tmp, func);
+            if (!removeUnderscoresFromNumber(str))
+                return false;
+            return parseFloatingPointImpl<T>(std::move(str), func);
         }
     }
 
     template <>
-    std::optional<float> parseFloatingPoint(const std::string& str)
+    std::optional<float> parseFloatingPoint(const std::string_view& str)
     {
-        return parseFloatingPointImpl<float>(str, strtof);
+        return parseFloatingPointImpl<float>(std::string(str), strtof);
     }
 
     template <>
-    std::optional<double> parseFloatingPoint(const std::string& str)
+    std::optional<double> parseFloatingPoint(const std::string_view& str)
     {
-        return parseFloatingPointImpl<double>(str, strtod);
+        return parseFloatingPointImpl<double>(std::string(str), strtod);
     }
 
     template <>
-    std::optional<long double> parseFloatingPoint(const std::string& str)
+    std::optional<long double> parseFloatingPoint(const std::string_view& str)
     {
-        return parseFloatingPointImpl<long double>(str, strtold);
+        return parseFloatingPointImpl<long double>(std::string(str), strtold);
     }
 }

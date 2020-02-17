@@ -29,7 +29,7 @@ namespace Argos
         }
 
         template <typename T, T Base>
-        constexpr T maxPrecedingDigitsNegative()
+        constexpr T maxPrecedingValueNegative()
         {
             if constexpr (std::is_signed<T>::value)
             {
@@ -57,7 +57,7 @@ namespace Argos
         }
 
         template <typename T, T Base>
-        constexpr T maxPrecedingDigitsPositive()
+        constexpr T maxPrecedingValuePositive()
         {
             if constexpr (std::is_signed<T>::value)
             {
@@ -96,8 +96,8 @@ namespace Argos
             {
                 auto digit = fromDigit<IntT>(str[i]);
                 if (digit < Base
-                    && (value < maxPrecedingDigitsPositive<IntT, Base>()
-                        || (value == maxPrecedingDigitsPositive<IntT, Base>()
+                    && (value < maxPrecedingValuePositive<IntT, Base>()
+                        || (value == maxPrecedingValuePositive<IntT, Base>()
                             && digit <= maxFinalDigitPositive<IntT, Base>())))
                 {
                     value *= Base;
@@ -126,8 +126,8 @@ namespace Argos
                 {
                     auto digit = fromDigit<IntT>(str[i]);
                     if (digit < Base
-                        && (value < maxPrecedingDigitsNegative<IntT, Base>()
-                            || (value == maxPrecedingDigitsNegative<IntT, Base>()
+                        && (value < maxPrecedingValueNegative<IntT, Base>()
+                            || (value == maxPrecedingValueNegative<IntT, Base>()
                                 && digit <= maxFinalDigitNegative<IntT, Base>())))
                     {
                         value *= Base;
@@ -157,33 +157,30 @@ namespace Argos
     }
 
     template <typename IntT>
-    std::optional<IntT> parseInteger(std::string_view str)
+    std::optional<IntT> parseInteger(std::string_view num)
     {
-        if (str.empty())
+        if (num.empty())
             return {};
 
+        auto str = num;
         bool positive = true;
-        size_t i = 0;
         if (str[0] == '-')
         {
             positive = false;
-            if (str.size() == 1)
-                return {};
-            i = 1;
+            str = str.substr(1);
         }
         else if (str[0] == '+')
         {
-            if (str.size() == 1)
-                return {};
-            i = 1;
+            str = str.substr(1);
         }
 
-        if (str[i] == '0')
+        if (str.empty())
+            return {};
+
+        if (str[0] == '0' && str.size() >= 3)
         {
-            if (++i == str.size())
-                return 0;
-            auto str2 = str.substr(i + 1);
-            switch (uint8_t(str[i]) | 0x20u)
+            auto str2 = str.substr(2);
+            switch (uint8_t(str[1]) | 0x20u)
             {
             case 'b':
                 return positive ? parsePositiveIntegerImpl<IntT, 2>(str2)
@@ -194,110 +191,19 @@ namespace Argos
             case 'x':
                 return positive ? parsePositiveIntegerImpl<IntT, 16>(str2)
                                 : parseNegativeIntegerImpl<IntT, 16>(str2);
-            case '_':
-                if (str2.empty())
-                    return {};
-                [[fallthrough]];
             default:
-                return positive ? parsePositiveIntegerImpl<IntT, 10>(str)
-                                : parseNegativeIntegerImpl<IntT, 10>(str);
+                break;
             }
         }
-        if ('0' <= str[i] && str[i] <= '9')
+        if ('0' <= str[0] && str[0] <= '9')
         {
-            auto str2 = str.substr(i);
-            return positive ? parsePositiveIntegerImpl<IntT, 10>(str2)
-                            : parseNegativeIntegerImpl<IntT, 10>(str2);
+            return positive ? parsePositiveIntegerImpl<IntT, 10>(str)
+                            : parseNegativeIntegerImpl<IntT, 10>(str);
         }
-        if (str == "false")
+        if (num == "false")
             return 0;
-        if (str == "null")
-            return 0;
-        if (str == "true")
+        if (num == "true")
             return 1;
         return {};
-    }
-
-    template <typename IntT>
-    std::optional<IntT> parseInteger2Impl(const std::string& str, int base)
-    {
-        char* end;
-        errno = 0;
-        IntT value;
-        if constexpr (std::is_unsigned<IntT>())
-        {
-            auto n = strtoumax(str.c_str(), &end, base);
-            if (n > std::numeric_limits<IntT>::max())
-                return {};
-            value = static_cast<IntT>(n);
-        }
-        else
-        {
-            auto n = strtoimax(str.c_str(), &end, base);
-            if (n < std::numeric_limits<IntT>::min()
-                || n > std::numeric_limits<IntT>::max())
-                return {};
-            value = static_cast<IntT>(n);
-        }
-        if (end != str.c_str() + str.size() || errno != 0)
-            return {};
-
-        return value;
-    }
-
-    template <typename IntT>
-    std::optional<IntT> parseInteger2(std::string_view str)
-    {
-        static_assert(std::is_integral<IntT>());
-
-        if (str.empty())
-            return {};
-
-        bool negative = false;
-        auto tmp = str;
-        if (tmp[0] == '-' || tmp[0] == '+')
-        {
-            negative = tmp[0] == '-';
-            tmp = tmp.substr(1);
-        }
-
-        if (tmp.empty())
-            return {};
-
-        int base = 10;
-        if (tmp.size() > 2 && tmp[0] == 0)
-        {
-            switch (uint8_t(tmp[1]) | 0x20u)
-            {
-            case 'x':
-                base = 16;
-                break;
-            case 'o':
-                base = 8;
-                break;
-            case 'b':
-                base = 2;
-                break;
-            default:
-                break;
-            }
-        }
-
-        if (base == 10)
-        {
-            if (auto result = parseInteger2Impl<IntT>(std::string(str), 10))
-                return result;
-            if (str == "false")
-                return 0;
-            if (str == "true")
-                return 1;
-            return {};
-        }
-
-        std::string numStr;
-        if (negative)
-            numStr.push_back('-');
-        numStr.append(tmp);
-        return parseInteger2Impl<IntT>(numStr, base);
     }
 }

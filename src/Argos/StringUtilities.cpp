@@ -9,6 +9,7 @@
 #include "StringUtilities.hpp"
 
 #include <algorithm>
+#include <string>
 
 namespace Argos
 {
@@ -85,5 +86,35 @@ namespace Argos
         if (caseInsensitive)
             return isLessCI(str1, str2);
         return str1 < str2;
+    }
+
+    bool removeUnderscoresFromNumber(std::string& num)
+    {
+        auto inIx = num.find('_');
+        if (inIx == 0 || inIx == std::string::npos)
+            return false;
+        if (inIx == 1 && !isalnum(num[0]))
+            return false;
+
+        auto outIx = inIx;
+        bool underscore = true;
+        for (++inIx; inIx < num.size(); ++inIx)
+        {
+            if (num[inIx] != '_')
+            {
+                num[outIx++] = num[inIx];
+                underscore = false;
+            }
+            else if (!underscore)
+            {
+                underscore = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        num.erase(outIx);
+        return !underscore;
     }
 }

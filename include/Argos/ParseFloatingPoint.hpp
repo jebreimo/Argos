@@ -8,19 +8,19 @@
 #pragma once
 
 #include <optional>
-#include <string>
+#include <string_view>
 
 namespace Argos
 {
     template <typename T>
-    std::optional<T> parseFloatingPoint(const std::string& str);
+    std::optional<T> parseFloatingPoint(const std::string_view& str);
 
     template <>
-    std::optional<float> parseFloatingPoint(const std::string& str);
+    std::optional<float> parseFloatingPoint(const std::string_view& str);
 
     template <>
-    std::optional<double> parseFloatingPoint(const std::string& str);
+    std::optional<double> parseFloatingPoint(const std::string_view& str);
 
     template <>
-    std::optional<long double> parseFloatingPoint(const std::string& str);
+    std::optional<long double> parseFloatingPoint(const std::string_view& str);
 }
