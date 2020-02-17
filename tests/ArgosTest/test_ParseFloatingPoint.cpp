@@ -7,13 +7,13 @@
 //****************************************************************************
 #include <catch2/catch.hpp>
 #include <cfloat>
-#include "Argos/ParseFloatingPoint.hpp"
+#include "Argos/ParseValue.hpp"
 
 TEST_CASE("Parse doubles")
 {
-    REQUIRE(Argos::parseFloatingPoint<double>("0") == 0.0);
-    REQUIRE(Argos::parseFloatingPoint<double>("-1.234") == -1.234);
-    REQUIRE(Argos::parseFloatingPoint<double>("1.234") == 1.234);
-    REQUIRE(Argos::parseFloatingPoint<double>(std::to_string(DBL_MAX)) == DBL_MAX);
-    REQUIRE(Argos::parseFloatingPoint<double>("-123_456.123_456") == -123456.123456);
+    REQUIRE(Argos::parseValue<double>("0") == 0.0);
+    REQUIRE(Argos::parseValue<double>("-1.234") == -1.234);
+    REQUIRE(Argos::parseValue<double>("1.234") == 1.234);
+    REQUIRE(Argos::parseValue<double>(std::to_string(DBL_MAX)) == DBL_MAX);
+    REQUIRE(Argos::parseValue<double>("-123_456.123_456") == -123456.123456);
 }

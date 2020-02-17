@@ -127,7 +127,7 @@ namespace Argos
         auto value = m_Impl->getValue(id);
         if (!value)
             return defaultValue;
-        auto v = parseSingleValue<T>(std::string(*value));
+        auto v = parseValue<T>(*value);
         if (!v)
             m_Impl->error("Invalid value: " + std::string(*value) + ".", id);
         return *v;

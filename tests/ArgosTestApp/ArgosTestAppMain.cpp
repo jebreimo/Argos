@@ -7,7 +7,7 @@
 //****************************************************************************
 #include <Argos/ArgumentParser.hpp>
 #include <iostream>
-#include <Argos/ParseInteger.hpp>
+#include <Argos/ParseValue.hpp>
 
 struct Rectangle
 {
@@ -38,8 +38,8 @@ Rectangle parseResolution(const Argos::ArgumentValue& v)
     auto parts = splitString(*s, ',');
     if (parts.size() != 2)
         v.error("Resolution must be two comma-separated integers.");
-    auto hor = Argos::parseInteger<int>(parts[0]);
-    auto ver = Argos::parseInteger<int>(parts[1]);
+    auto hor = Argos::parseValue<int>(parts[0]);
+    auto ver = Argos::parseValue<int>(parts[1]);
     if (!hor || *hor < 640)
         v.error("Horizontal resolution must be at least 640");
     if (!ver || *ver < 480)

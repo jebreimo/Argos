@@ -23,7 +23,6 @@ add_library(Argos
     include/Argos/OptionView.hpp
     include/Argos/ParsedArgumentsBuilder.hpp
     include/Argos/ArgumentValue.hpp
-    include/Argos/ParseInteger.hpp
     include/Argos/ParseValue.hpp
     src/Argos/Argument.cpp
     src/Argos/ParsedArgumentsImpl.cpp
@@ -56,7 +55,7 @@ add_library(Argos
     src/Argos/WordSplitter.hpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
-    include/Argos/ParseFloatingPoint.hpp src/Argos/ParseFloatingPoint.cpp)
+    src/Argos/ParseValue.cpp)
 
 target_include_directories(Argos
     PUBLIC

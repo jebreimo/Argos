@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 
-#include "Argos/ParseFloatingPoint.hpp"
+#include "Argos/ParseValue.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -37,19 +37,19 @@ namespace Argos
     }
 
     template <>
-    std::optional<float> parseFloatingPoint(const std::string_view& str)
+    std::optional<float> parseValue<float>(std::string_view str)
     {
         return parseFloatingPointImpl<float>(std::string(str), strtof);
     }
 
     template <>
-    std::optional<double> parseFloatingPoint(const std::string_view& str)
+    std::optional<double> parseValue(std::string_view str)
     {
         return parseFloatingPointImpl<double>(std::string(str), strtod);
     }
 
     template <>
-    std::optional<long double> parseFloatingPoint(const std::string_view& str)
+    std::optional<long double> parseValue(std::string_view str)
     {
         return parseFloatingPointImpl<long double>(std::string(str), strtold);
     }
