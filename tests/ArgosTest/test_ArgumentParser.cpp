@@ -124,8 +124,12 @@ TEST_CASE("List argument")
                          .operation(ArgumentOperation::APPEND)
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
-    auto numbers = args.values("-n");
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    auto numbers = args.values("-n").int32Values();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
+    REQUIRE(numbers[0] == 12);
+    REQUIRE(numbers[1] == 20);
+    REQUIRE(numbers[2] == 6);
+    REQUIRE(numbers[3] == 15);
 }

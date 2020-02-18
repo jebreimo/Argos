@@ -6,6 +6,8 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/ArgumentValues.hpp"
+
+#include "Argos/ParseValue.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
 namespace Argos
@@ -54,5 +56,100 @@ namespace Argos
     const std::vector<std::string_view>& ArgumentValues::values() const
     {
         return m_Values;
+    }
+
+    std::vector<int8_t> ArgumentValues::int8Values(const std::vector<int8_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<int16_t> ArgumentValues::int16Values(const std::vector<int16_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<int32_t> ArgumentValues::int32Values(
+            const std::vector<int32_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<int64_t> ArgumentValues::int64Values(const std::vector<int64_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<uint8_t> ArgumentValues::uint8Values(const std::vector<uint8_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<uint16_t>
+    ArgumentValues::uint16Values(const std::vector<uint16_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<uint32_t>
+    ArgumentValues::uint32Values(const std::vector<uint32_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<uint64_t>
+    ArgumentValues::uint64Values(const std::vector<uint64_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<float> ArgumentValues::floatValues(const std::vector<float>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<double> ArgumentValues::doubleValues(const std::vector<double>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<long double>
+    ArgumentValues::longDoubleValues(const std::vector<long double>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<std::string>
+    ArgumentValues::stringValues(const std::vector<std::string>& defaultValue) const
+    {
+        if (m_Values.empty())
+            return defaultValue;
+
+        std::vector<std::string> result;
+        result.reserve(m_Values.size());
+        for (auto& v : m_Values)
+            result.emplace_back(v);
+        return result;
+    }
+
+    template <typename T>
+    std::vector<T> ArgumentValues::getValues(
+            const std::vector<T>& defaultValue) const
+    {
+        if (m_Values.empty())
+            return defaultValue;
+
+        std::vector<T> result;
+        result.reserve(m_Values.size());
+        for (auto& v : m_Values)
+        {
+            auto value = parseValue<T>(v);
+            if (!value)
+            {
+                m_Args->error("Invalid value: " + std::string(v) + ".",
+                              m_ValueId);
+            }
+            result.push_back(*value);
+        }
+        return result;
     }
 }

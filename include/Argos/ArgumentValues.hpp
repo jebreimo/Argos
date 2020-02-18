@@ -41,7 +41,46 @@ namespace Argos
         size_t size() const;
 
         const std::vector<std::string_view>& values() const;
+
+        std::vector<int8_t> int8Values(
+                const std::vector<int8_t>& defaultValue = {}) const;
+
+        std::vector<int16_t> int16Values(
+                const std::vector<int16_t>& defaultValue = {}) const;
+
+        std::vector<int32_t> int32Values(
+                const std::vector<int32_t>& defaultValue = {}) const;
+
+        std::vector<int64_t> int64Values(
+                const std::vector<int64_t>& defaultValue = {}) const;
+
+        std::vector<uint8_t> uint8Values(
+                const std::vector<uint8_t>& defaultValue = {}) const;
+
+        std::vector<uint16_t> uint16Values(
+                const std::vector<uint16_t>& defaultValue = {}) const;
+
+        std::vector<uint32_t> uint32Values(
+                const std::vector<uint32_t>& defaultValue = {}) const;
+
+        std::vector<uint64_t> uint64Values(
+                const std::vector<uint64_t>& defaultValue = {}) const;
+
+        std::vector<float> floatValues(
+                const std::vector<float>& defaultValue = {}) const;
+
+        std::vector<double> doubleValues(
+                const std::vector<double>& defaultValue = {}) const;
+
+        std::vector<long double> longDoubleValues(
+                const std::vector<long double>& defaultValue = {}) const;
+
+        std::vector<std::string> stringValues(
+                const std::vector<std::string>& defaultValue = {}) const;
     private:
+        template <typename T>
+        std::vector<T> getValues(const std::vector<T>& defaultValue) const;
+
         std::vector<std::string_view> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         int m_ValueId;
