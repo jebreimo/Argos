@@ -33,7 +33,7 @@ namespace Argos
 
         ArgumentValue& operator=(ArgumentValue&&) noexcept;
 
-        std::unique_ptr<IArgumentView> argument() const;
+        std::vector<std::unique_ptr<IArgumentView>> arguments() const;
 
         bool hasValue() const;
 
@@ -67,33 +67,10 @@ namespace Argos
 
         void error(const std::string& message) const;
     private:
+        template <typename T>
+        T getValue(const T& defaultValue) const;
+
         std::optional<std::string_view> m_Value;
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        int m_ValueId;
-    };
-
-    class ArgumentValues
-    {
-    public:
-        ArgumentValues(std::vector<std::string_view> value,
-                       std::shared_ptr<ParsedArgumentsImpl> args,
-                       int valueId);
-
-        ArgumentValues(const ArgumentValues&);
-
-        ArgumentValues(ArgumentValues&&) noexcept;
-
-        ~ArgumentValues();
-
-        ArgumentValues& operator=(const ArgumentValues&);
-
-        ArgumentValues& operator=(ArgumentValues&&) noexcept;
-
-        std::unique_ptr<IArgumentView> argument() const;
-
-        void error(const std::string& message) const;
-    private:
-        std::vector<std::string_view> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         int m_ValueId;
     };

@@ -115,9 +115,12 @@ namespace Argos
         case ArgumentOperation::NONE:
             break;
         case ArgumentOperation::ASSIGN:
-        case ArgumentOperation::APPEND:
             if (od->argument.empty() && od->value.empty())
                 od->value = "1";
+            break;
+        case ArgumentOperation::APPEND:
+            if (od->argument.empty() && od->value.empty())
+                ARGOS_THROW("Options that appends must have either value or argument set.");
             break;
         case ArgumentOperation::CLEAR:
             if (!od->argument.empty() ||!od->value.empty())

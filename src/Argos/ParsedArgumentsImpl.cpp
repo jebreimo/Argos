@@ -5,6 +5,8 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <Argos/ArgumentView.hpp>
+#include <Argos/OptionView.hpp>
 #include "ParsedArgumentsImpl.hpp"
 
 #include "Argos/ArgosException.hpp"
@@ -108,7 +110,8 @@ namespace Argos
         return idIt->second;
     }
 
-    std::optional<std::string_view> ParsedArgumentsImpl::getValue(int valueId) const
+    std::optional<std::string_view>
+    ParsedArgumentsImpl::getValue(int valueId) const
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
@@ -119,12 +122,30 @@ namespace Argos
         return it->second;
     }
 
-    std::vector<std::string_view> ParsedArgumentsImpl::getValues(int valueId) const
+    std::vector<std::string_view>
+    ParsedArgumentsImpl::getValues(int valueId) const
     {
         std::vector<std::string_view> result;
         auto it = m_Values.lower_bound(valueId);
         for (; it != m_Values.end() && it->first == valueId; ++it)
             result.emplace_back(it->second);
+        return result;
+    }
+
+    std::vector<std::unique_ptr<IArgumentView>>
+    ParsedArgumentsImpl::getArgumentViews(int valueId) const
+    {
+        std::vector<std::unique_ptr<IArgumentView>> result;
+        for (auto& a : m_Data->arguments)
+        {
+            if (a->valueId_ == valueId)
+                result.emplace_back(std::make_unique<ArgumentView>(a.get()));
+        }
+        for (auto& o : m_Data->options)
+        {
+            if (o->valueId_ == valueId)
+                result.emplace_back(std::make_unique<OptionView>(o.get()));
+        }
         return result;
     }
 
@@ -143,12 +164,12 @@ namespace Argos
         m_ResultCode = resultCode;
     }
 
-    const OptionData* ParsedArgumentsImpl::specialOption() const
+    const OptionData* ParsedArgumentsImpl::breakingOption() const
     {
         return m_SpecialOption;
     }
 
-    void ParsedArgumentsImpl::setSpecialOption(const OptionData* option)
+    void ParsedArgumentsImpl::setBreakingOption(const OptionData* option)
     {
         m_ResultCode = ParserResultCode::SPECIAL_OPTION;
         m_SpecialOption = option;

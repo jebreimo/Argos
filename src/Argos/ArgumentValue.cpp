@@ -8,7 +8,7 @@
 #include "Argos/ArgumentValue.hpp"
 
 #include "ParsedArgumentsImpl.hpp"
-#include "HelpWriter.hpp"
+#include "Argos/ParseValue.hpp"
 
 namespace Argos
 {
@@ -26,13 +26,16 @@ namespace Argos
 
     ArgumentValue::~ArgumentValue() = default;
 
-    ArgumentValue& ArgumentValue::operator=(const ArgumentValue&) = default;
+    ArgumentValue&
+    ArgumentValue::operator=(const ArgumentValue&) = default;
 
-    ArgumentValue& ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
+    ArgumentValue&
+    ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
 
-    std::unique_ptr<IArgumentView> ArgumentValue::argument() const
+    std::vector<std::unique_ptr<IArgumentView>>
+    ArgumentValue::arguments() const
     {
-        return std::unique_ptr<IArgumentView>();
+        return m_Args->getArgumentViews(m_ValueId);
     }
 
     bool ArgumentValue::hasValue() const
@@ -45,7 +48,68 @@ namespace Argos
         return m_Value;
     }
 
-    std::string ArgumentValue::stringValue(const std::string& defaultValue) const
+    bool ArgumentValue::boolValue(bool defaultValue) const
+    {
+        return getValue(defaultValue ? 1 : 0);
+    }
+
+    int8_t ArgumentValue::int8Value(int8_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    int16_t ArgumentValue::int16Value(int16_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    int32_t ArgumentValue::int32Value(int32_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    int64_t ArgumentValue::int64Value(int64_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    uint8_t ArgumentValue::uint8Value(uint8_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    uint16_t ArgumentValue::uint16Value(uint16_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    uint32_t ArgumentValue::uint32Value(uint32_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    uint64_t ArgumentValue::uint64Value(uint64_t defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    float ArgumentValue::floatValue(float defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    double ArgumentValue::doubleValue(double defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    long double ArgumentValue::longDoubleValue(long double defaultValue) const
+    {
+        return getValue(defaultValue);
+    }
+
+    std::string
+    ArgumentValue::stringValue(const std::string& defaultValue) const
     {
         return m_Value ? std::string(*m_Value) : defaultValue;
     }
@@ -53,5 +117,17 @@ namespace Argos
     void ArgumentValue::error(const std::string& message) const
     {
         m_Args->error(message, m_ValueId);
+    }
+
+    template <typename T>
+    T ArgumentValue::getValue(const T& defaultValue) const
+    {
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseValue<T>(*m_Value);
+        if (!v)
+            m_Args->error("Invalid value: " + std::string(*m_Value) + ".",
+                          m_ValueId);
+        return *v;
     }
 }

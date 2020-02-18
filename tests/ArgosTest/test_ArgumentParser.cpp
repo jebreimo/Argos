@@ -49,8 +49,8 @@ TEST_CASE("Test help flag")
     auto result = argos.parse(argv.size(), argv.data());
     REQUIRE(result.has("--help"));
     REQUIRE(result.resultCode() == Argos::ParserResultCode::SPECIAL_OPTION);
-    REQUIRE(result.specialOption().id() == 10);
-    REQUIRE(result.getBool("--help"));
+    REQUIRE(result.breakingOption().id() == 10);
+    REQUIRE(result.value("--help").boolValue());
 }
 
 TEST_CASE("Conflicting flags")
@@ -73,7 +73,7 @@ TEST_CASE("String arguments")
             .autoExitEnabled(false)
             .add(Argument("file"))
             .parse(argv.size(), argv.data());
-    REQUIRE(args.getString("file") == "test_file.txt");
+    REQUIRE(args.value("file").stringValue() == "test_file.txt");
 }
 
 TEST_CASE("Section order in help text")
@@ -102,6 +102,30 @@ TEST_CASE("Two argument")
             .add(Argument("arg1"))
             .add(Argument("arg2"))
             .parse(argv.size(), argv.data());
-    REQUIRE(args.getString("arg1") == "foo");
-    REQUIRE(args.getString("arg2") == "bar");
+    REQUIRE(args.value("arg1").stringValue() == "foo");
+    REQUIRE(args.value("arg2").stringValue() == "bar");
+}
+
+TEST_CASE("Option that appends must have argument or value")
+{
+    using namespace Argos;
+    ArgumentParser parser("test");
+    REQUIRE_THROWS(parser.add(Option({"-a"})
+                                      .operation(ArgumentOperation::APPEND)));
+}
+
+TEST_CASE("List argument")
+{
+    using namespace Argos;
+    Argv argv{"test", "-n", "12", "--number", "20", "--number=6", "-n15"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Option({"-n", "--number"})
+                         .operation(ArgumentOperation::APPEND)
+                         .argument("NUM"))
+            .parse(argv.size(), argv.data());
+    auto numbers = args.values("-n");
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    REQUIRE(!numbers.empty());
+    REQUIRE(numbers.size() == 4);
 }

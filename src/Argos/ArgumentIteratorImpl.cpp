@@ -30,6 +30,7 @@ namespace Argos
                 const std::vector<std::string>& strings)
         {
             std::vector<std::string_view> result;
+            result.reserve(strings.size());
             for (auto& s : strings)
                 result.emplace_back(s);
             return result;
@@ -108,25 +109,14 @@ namespace Argos
                     [&](auto& a, auto& b) {return isLessCI(a.first, b.first);});
         }
 
-        const OptionData* findOption(const OptionTable& options,
-                                     std::string_view arg,
-                                     bool allowAbbreviations,
-                                     bool caseInsensitive)
+        const OptionData* findOptionImpl(const OptionTable& options,
+                                         std::string_view arg,
+                                         bool allowAbbreviations,
+                                         bool caseInsensitive)
         {
             auto it = caseInsensitive ? findOptionCI(options, arg)
                                       : findOptionCS(options, arg);
-            bool equalChar = false;
             if (it == options.end())
-            {
-                if (arg.size() > 2 && arg.back() == '=')
-                    arg = arg.substr(arg.size() - 1);
-                it = caseInsensitive ? findOptionCI(options, arg)
-                                     : findOptionCS(options, arg);
-                equalChar = true;
-            }
-            if (it == options.end())
-                return nullptr;
-            if (equalChar && it->second->argument.empty())
                 return nullptr;
             if (it->first == arg)
                 return it->second;
@@ -141,6 +131,24 @@ namespace Argos
                 && startsWith(nxt->first, arg, caseInsensitive))
                 return nullptr;
             return it->second;
+        }
+
+        const OptionData* findOption(const OptionTable& options,
+                                     std::string_view arg,
+                                     bool allowAbbreviations,
+                                     bool caseInsensitive)
+        {
+            auto opt = findOptionImpl(options, arg, allowAbbreviations,
+                                      caseInsensitive);
+            if (opt == nullptr && arg.size() > 2 && arg.back() == '=')
+            {
+                arg = arg.substr(0, arg.size() - 1);
+                opt = findOptionImpl(options, arg, allowAbbreviations,
+                                     caseInsensitive);
+                if (opt && opt->argument.empty())
+                    opt = nullptr;
+            }
+            return opt;
         }
 
         bool isOption(const std::string& s, OptionStyle style)
@@ -262,11 +270,11 @@ namespace Argos
         case OptionType::HELP:
             HelpWriter(m_Data).writeHelpText();
             m_State = State::DONE;
-            m_ParsedArgs->setSpecialOption(&option);
+            m_ParsedArgs->setBreakingOption(&option);
             return 1;
         case OptionType::BREAK:
             m_State = State::DONE;
-            m_ParsedArgs->setSpecialOption(&option);
+            m_ParsedArgs->setBreakingOption(&option);
             return 0;
         case OptionType::FINAL:
             m_State = State::ARGUMENTS_ONLY;

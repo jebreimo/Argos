@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <map>
+#include <Argos/IArgumentView.hpp>
 #include "ParserData.hpp"
 
 namespace Argos
@@ -38,15 +39,18 @@ namespace Argos
 
         std::vector<std::string_view> getValues(int valueId) const;
 
+        std::vector<std::unique_ptr<IArgumentView>>
+        getArgumentViews(int valueId) const;
+
         const std::shared_ptr<ParserData>& parserData() const;
 
         ParserResultCode resultCode() const;
 
         void setResultCode(ParserResultCode resultCode);
 
-        const OptionData* specialOption() const;
+        const OptionData* breakingOption() const;
 
-        void setSpecialOption(const OptionData* option);
+        void setBreakingOption(const OptionData* option);
 
         void error(const std::string& message);
 

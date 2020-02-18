@@ -8,6 +8,7 @@
 #pragma once
 #include <memory>
 #include "ArgumentValue.hpp"
+#include "ArgumentValues.hpp"
 #include "OptionView.hpp"
 
 namespace Argos
@@ -33,21 +34,6 @@ namespace Argos
 
         bool has(const std::string& name) const;
 
-        bool getBool(const std::string& name,
-                     bool defaultValue = false) const;
-
-        int32_t getInt32(const std::string& name,
-                         int32_t defaultValue = {}) const;
-
-        int64_t getInt64(const std::string& name,
-                         int64_t defaultValue = {}) const;
-
-        double getDouble(const std::string& name,
-                         double defaultValue = {}) const;
-
-        std::string getString(const std::string& name,
-                              const std::string& defaultValue = {}) const;
-
         std::vector<std::string>
         getStrings(const std::string& name,
                    const std::vector<std::string>& defaultValue = {}) const;
@@ -55,18 +41,11 @@ namespace Argos
         ArgumentValue value(const std::string& name) const;
 
         ArgumentValues values(const std::string& name) const;
-        //
-        //std::pair<std::vector<std::string>, ArgumentValue>
-        //getVector(const std::string& name,
-        //          const std::vector<std::string>& defaultValue = {}) const;
 
         ParserResultCode resultCode() const;
 
-        OptionView specialOption() const;
+        OptionView breakingOption() const;
     private:
-        template <typename T>
-        T getValue(const std::string& name, const T& defaultValue) const;
-
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
 }
