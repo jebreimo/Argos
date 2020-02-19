@@ -194,3 +194,14 @@ TEST_CASE("Test incorrect slash option")
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
+
+TEST_CASE("Can't change option style after options have been added.")
+{
+    using namespace Argos;
+    ArgumentParser parser("test");
+    parser.add(Argument("file"));
+    REQUIRE_NOTHROW(parser.optionStyle(OptionStyle::DASH));
+    parser.add(Option({"-p"}));
+    REQUIRE_NOTHROW(parser.optionStyle(OptionStyle::DASH));
+    REQUIRE_THROWS(parser.optionStyle(OptionStyle::STANDARD));
+}
