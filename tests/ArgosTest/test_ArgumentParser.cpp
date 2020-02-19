@@ -133,3 +133,64 @@ TEST_CASE("List argument")
     REQUIRE(numbers[2] == 6);
     REQUIRE(numbers[3] == 15);
 }
+
+TEST_CASE("Incorrect standard options")
+{
+    using namespace Argos;
+    REQUIRE_THROWS(ArgumentParser().add(Option({"a"})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"-a"})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"--"})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"-="})));
+    REQUIRE_THROWS(ArgumentParser().add(Option({"-ab"})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"--="})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"--a"})));
+    REQUIRE_NOTHROW(ArgumentParser().add(Option({"--a="})));
+    REQUIRE_THROWS(ArgumentParser().add(Option({"--a=b"})));
+}
+
+TEST_CASE("Tet dash options")
+{
+    using namespace Argos;
+    Argv argv{"test", "-number", "12", "-number", "20", "-number=6", "-number", "15"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .optionStyle(OptionStyle::DASH)
+            .add(Option({"-number"})
+                         .operation(ArgumentOperation::APPEND)
+                         .argument("NUM"))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    auto numbers = args.values("-number").int32Values();
+    REQUIRE(!numbers.empty());
+    REQUIRE(numbers.size() == 4);
+}
+
+TEST_CASE("Tet slash options")
+{
+    using namespace Argos;
+    Argv argv{"test", "/number", "12", "/number", "20", "/number=6", "/number", "15"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .optionStyle(OptionStyle::SLASH)
+            .add(Option({"/number"})
+                         .operation(ArgumentOperation::APPEND)
+                         .argument("NUM"))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    auto numbers = args.values("/number").int32Values();
+    REQUIRE(!numbers.empty());
+    REQUIRE(numbers.size() == 4);
+}
+
+TEST_CASE("Test incorrect slash option")
+{
+    using namespace Argos;
+    Argv argv{"test", "/benny"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .optionStyle(OptionStyle::SLASH)
+            .add(Option({"/bill"}))
+            .add(Argument({"file"}))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::ERROR);
+}

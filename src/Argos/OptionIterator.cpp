@@ -1,55 +1,40 @@
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-09.
+// Created by Jan Erik Breimo on 2020-02-18.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "StandardOptionIterator.hpp"
+#include "OptionIterator.hpp"
 #include "Argos/ArgosException.hpp"
 
 namespace Argos
 {
-    StandardOptionIterator::StandardOptionIterator()
-        : m_ArgsIt(m_Args.end()),
-          m_Pos(0)
+    OptionIterator::OptionIterator()
+        : m_ArgsIt(m_Args.begin())
     {}
 
-    StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
+    OptionIterator::OptionIterator(std::vector<std::string_view> args, char prefix)
         : m_Args(move(args)),
           m_ArgsIt(m_Args.begin()),
-          m_Pos(0)
+          m_Prefix(prefix)
     {}
 
-    std::optional<std::string> StandardOptionIterator::next()
+    std::optional<std::string> OptionIterator::next()
     {
-        if (m_Pos == std::string_view::npos)
+        if (m_Pos != 0)
         {
             m_Pos = 0;
             ++m_ArgsIt;
-        }
-        else if (m_Pos != 0)
-        {
-            if (m_Pos < m_ArgsIt->size() && (*m_ArgsIt)[1] != '-')
-                return std::string{'-', (*m_ArgsIt)[m_Pos++]};
-
-            ++m_ArgsIt;
-            m_Pos = 0;
         }
 
         if (m_ArgsIt == m_Args.end())
             return {};
 
-        if (m_ArgsIt->size() <= 2 || (*m_ArgsIt)[0] != '-')
+        if (m_ArgsIt->size() <= 2 || (*m_ArgsIt)[0] != m_Prefix)
         {
             m_Pos = std::string_view::npos;
             return std::string(*m_ArgsIt);
-        }
-
-        if ((*m_ArgsIt)[1] != '-')
-        {
-            m_Pos = 2;
-            return std::string(m_ArgsIt->substr(0, 2));
         }
 
         auto eq = m_ArgsIt->find('=');
@@ -63,7 +48,7 @@ namespace Argos
         return std::string(m_ArgsIt->substr(0, m_Pos));
     }
 
-    std::optional<std::string> StandardOptionIterator::nextValue()
+    std::optional<std::string> OptionIterator::nextValue()
     {
         if (m_ArgsIt == m_Args.end())
             return {};
@@ -85,21 +70,21 @@ namespace Argos
         return std::string(*m_ArgsIt);
     }
 
-    std::string_view StandardOptionIterator::current() const
+    std::string_view OptionIterator::current() const
     {
         if (m_ArgsIt == m_Args.end())
             ARGOS_THROW("There is no current argument.");
         return *m_ArgsIt;
     }
 
-    std::vector<std::string_view> StandardOptionIterator::remainingArguments() const
+    std::vector<std::string_view> OptionIterator::remainingArguments() const
     {
         auto it = m_Pos == 0 ? m_ArgsIt : std::next(m_ArgsIt);
         return std::vector<std::string_view>(it, m_Args.end());
     }
 
-    IOptionIterator* StandardOptionIterator::clone() const
+    OptionIterator* OptionIterator::clone() const
     {
-        return new StandardOptionIterator(*this);
+        return new OptionIterator(*this);
     }
 }

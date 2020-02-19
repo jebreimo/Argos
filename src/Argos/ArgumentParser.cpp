@@ -16,6 +16,28 @@ namespace Argos
 {
     namespace
     {
+        bool checkStandardFlag(const std::string& flag)
+        {
+            if (flag.size() < 2)
+                return false;
+            if (flag[0] != '-')
+                return false;
+            if (flag.size() == 2)
+                return true;
+            if (flag[1] != '-')
+                return false;
+            auto eqPos = flag.find('=');
+            return eqPos == std::string::npos || eqPos == flag.size() - 1;
+        }
+
+        bool checkFlag(const std::string& flag, char prefix)
+        {
+            if (flag.size() < 2 || flag[0] != prefix)
+                return false;
+            auto eqPos = flag.find('=');
+            return eqPos == std::string::npos || eqPos == flag.size() - 1;
+        }
+
         std::string_view getBaseName(std::string_view path)
         {
             auto i = path.find_last_of("/\\");
@@ -103,11 +125,31 @@ namespace Argos
     ArgumentParser& ArgumentParser::add(Option option)
     {
         auto od = option.release();
+
         if (od->flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
-        // TODO: check if flags have the right prefix (- or /)
-        // TODO: check that short flags are two characters long.
-        // TODO: check if flags contain '=' anywhere, but the end.
+        for (auto& flag : od->flags)
+        {
+            bool ok;
+            switch (data().parserSettings.optionStyle)
+            {
+            case OptionStyle::STANDARD:
+                ok = checkStandardFlag(flag);
+                break;
+            case OptionStyle::SLASH:
+                ok = checkFlag(flag, '/');
+                break;
+            case OptionStyle::DASH:
+                ok = checkFlag(flag, '-');
+                break;
+            default:
+                ok = false;
+                break;
+            }
+            if (!ok)
+                ARGOS_THROW("Invalid flag: '" + flag + "'.");
+        }
+
         if (!od->argument.empty() && !od->value.empty())
             ARGOS_THROW("Option cannot have both argument and value set.");
         switch (od->operation)
@@ -166,6 +208,17 @@ namespace Argos
     ArgumentParser& ArgumentParser::autoExitEnabled(bool value)
     {
         data().parserSettings.autoExit = value;
+        return *this;
+    }
+
+    OptionStyle ArgumentParser::optionStyle() const
+    {
+        return data().parserSettings.optionStyle;
+    }
+
+    ArgumentParser& ArgumentParser::optionStyle(OptionStyle value)
+    {
+        data().parserSettings.optionStyle = value;
         return *this;
     }
 

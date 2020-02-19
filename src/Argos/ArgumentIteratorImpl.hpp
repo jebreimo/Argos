@@ -53,7 +53,7 @@ namespace Argos
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
         std::unique_ptr<ParsedArgumentsImpl> m_ParsedArgs;
-        StandardOptionIterator m_ArgumentIterator;
+        std::unique_ptr<IOptionIterator> m_Iterator;
         std::optional<ArgumentCounter> m_ArgumentCounter;
         enum class State
         {

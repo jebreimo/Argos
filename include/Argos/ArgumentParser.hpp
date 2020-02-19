@@ -54,6 +54,10 @@ namespace Argos
 
         ArgumentParser& autoExitEnabled(bool value);
 
+        OptionStyle optionStyle() const;
+
+        ArgumentParser& optionStyle(OptionStyle value);
+
         std::ostream* outputStream() const;
 
         ArgumentParser& outputStream(std::ostream* stream);

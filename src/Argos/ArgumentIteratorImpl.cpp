@@ -12,6 +12,7 @@
 #include "HelpWriter.hpp"
 #include "StringUtilities.hpp"
 #include "VisitorUtilities.hpp"
+#include "OptionIterator.hpp"
 
 namespace Argos
 {
@@ -161,24 +162,44 @@ namespace Argos
             else
                 return s[0] == '-';
         }
+
+        std::unique_ptr<IOptionIterator> makeOptionIterator(
+                OptionStyle style,
+                std::vector<std::string_view> args)
+        {
+            switch (style)
+            {
+            case OptionStyle::STANDARD:
+                return std::make_unique<StandardOptionIterator>(move(args));
+            case OptionStyle::SLASH:
+                return std::make_unique<OptionIterator>(move(args), '/');
+            case OptionStyle::DASH:
+                return std::make_unique<OptionIterator>(move(args), '-');
+            }
+        }
     }
 
-    ArgumentIteratorImpl::ArgumentIteratorImpl(int argc, char** argv, std::shared_ptr<ParserData> data)
-            : m_Data(move(data)),
-              m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-              m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
-              m_ArgumentIterator(makeStringViewVector(argc, argv, true))
+    ArgumentIteratorImpl::ArgumentIteratorImpl(
+            int argc, char** argv,
+            std::shared_ptr<ParserData> data)
+        : m_Data(move(data)),
+          m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
+          m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
+          m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle,
+                                        makeStringViewVector(argc, argv, true)))
     {
+        auto args = makeStringViewVector(argc, argv, true);
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter.emplace(m_Data->arguments);
     }
 
     ArgumentIteratorImpl::ArgumentIteratorImpl(const std::vector<std::string>& args,
                                                std::shared_ptr<ParserData> data)
-            : m_Data(move(data)),
-              m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-              m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
-              m_ArgumentIterator(makeStringViewVector(args))
+        : m_Data(move(data)),
+          m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
+          m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
+          m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle,
+                                        makeStringViewVector(args)))
     {
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter.emplace(m_Data->arguments);
@@ -225,7 +246,7 @@ namespace Argos
             {
                 m_ParsedArgs->assignValue(option.valueId_, option.value);
             }
-            else if (auto value = m_ArgumentIterator.nextValue(); value)
+            else if (auto value = m_Iterator->nextValue(); value)
             {
                 m_ParsedArgs->assignValue(option.valueId_, *value);
             }
@@ -243,7 +264,7 @@ namespace Argos
             {
                 m_ParsedArgs->appendValue(option.valueId_, option.value);
             }
-            else if (auto value = m_ArgumentIterator.nextValue(); value)
+            else if (auto value = m_Iterator->nextValue(); value)
             {
                 m_ParsedArgs->appendValue(option.valueId_, *value);
             }
@@ -290,8 +311,8 @@ namespace Argos
             return {IteratorResultCode::DONE, nullptr};
 
         auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
-                   ? m_ArgumentIterator.next()
-                   : m_ArgumentIterator.nextValue();
+                   ? m_Iterator->next()
+                   : m_Iterator->nextValue();
         if (!arg)
         {
             if (!m_ArgumentCounter || m_ArgumentCounter->isComplete())
@@ -343,14 +364,14 @@ namespace Argos
             else
             {
                 if (m_Data->parserSettings.ignoreUndefinedOptions
-                    && startsWith(m_ArgumentIterator.current(), *arg))
+                    && startsWith(m_Iterator->current(), *arg))
                 {
                     m_ParsedArgs->addUnprocessedArgument(*arg);
                 }
                 else
                 {
                     HelpWriter(m_Data).writeErrorMessage(
-                            "Invalid option: " + std::string(m_ArgumentIterator.current()));
+                            "Invalid option: " + std::string(m_Iterator->current()));
                     m_State = State::ERROR;
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
@@ -393,16 +414,16 @@ namespace Argos
 
     void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()
     {
-        for (auto str : m_ArgumentIterator.remainingArguments())
+        for (auto str : m_Iterator->remainingArguments())
             m_ParsedArgs->addUnprocessedArgument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::countArguments() const
     {
         size_t result = 0;
-        StandardOptionIterator it = m_ArgumentIterator;
+        std::unique_ptr<IOptionIterator> it(m_Iterator->clone());
         bool argumentsOnly = false;
-        for (auto arg = it.next(); arg && !argumentsOnly; arg = it.next())
+        for (auto arg = it->next(); arg && !argumentsOnly; arg = it->next())
         {
             auto option = findOption(m_Options, *arg,
                                      m_Data->parserSettings.allowAbbreviatedOptions,
@@ -410,7 +431,7 @@ namespace Argos
             if (option)
             {
                 if (!option->argument.empty())
-                    it.nextValue();
+                    it->nextValue();
                 switch (option->optionType)
                 {
                 case OptionType::HELP:
@@ -429,7 +450,7 @@ namespace Argos
             }
         }
 
-        for (auto arg = it.next(); arg; arg = it.next())
+        for (auto arg = it->next(); arg; arg = it->next())
             ++result;
         return result;
     }

@@ -55,7 +55,7 @@ add_library(Argos
     src/Argos/WordSplitter.hpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
-    src/Argos/ParseValue.cpp src/Argos/ArgumentValues.cpp include/Argos/ArgumentValues.hpp)
+    src/Argos/ParseValue.cpp src/Argos/ArgumentValues.cpp include/Argos/ArgumentValues.hpp src/Argos/OptionIterator.cpp src/Argos/OptionIterator.hpp src/Argos/IOptionIterator.hpp)
 
 target_include_directories(Argos
     PUBLIC
