@@ -48,7 +48,7 @@ TEST_CASE("Test help flag")
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
     REQUIRE(result.has("--help"));
-    REQUIRE(result.resultCode() == Argos::ParserResultCode::SPECIAL_OPTION);
+    REQUIRE(result.resultCode() == Argos::ParserResultCode::STOP);
     REQUIRE(result.breakingOption().id() == 10);
     REQUIRE(result.value("--help").boolValue());
 }
@@ -204,4 +204,45 @@ TEST_CASE("Can't change option style after options have been added.")
     parser.add(Option({"-p"}));
     REQUIRE_NOTHROW(parser.optionStyle(OptionStyle::DASH));
     REQUIRE_THROWS(parser.optionStyle(OptionStyle::STANDARD));
+}
+
+TEST_CASE("Test argument iterator")
+{
+    using namespace Argos;
+    Argv argv{"test", "foo", "bar", "baz"};
+    auto it = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("arg1").count(0, 9).id(1))
+            .add(Argument("arg2").id(2))
+            .makeIterator(argv.size(), argv.data());
+    std::unique_ptr<IArgumentView> arg;
+    std::string_view value;
+
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg);
+    REQUIRE(arg->id() == 1);
+    auto argumentView = dynamic_cast<const ArgumentView*>(arg.get());
+    REQUIRE(argumentView);
+    REQUIRE(argumentView->name() == "arg1");
+    REQUIRE(value == "foo");
+
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg);
+    REQUIRE(arg->id() == 1);
+    argumentView = dynamic_cast<const ArgumentView*>(arg.get());
+    REQUIRE(argumentView);
+    REQUIRE(argumentView->name() == "arg1");
+    REQUIRE(value == "bar");
+
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg);
+    REQUIRE(arg->id() == 2);
+    argumentView = dynamic_cast<const ArgumentView*>(arg.get());
+    REQUIRE(argumentView);
+    REQUIRE(argumentView->name() == "arg2");
+    REQUIRE(value == "baz");
+
+    REQUIRE_FALSE(it.next(arg, value));
+    REQUIRE(!arg);
+    REQUIRE(value.empty());
 }

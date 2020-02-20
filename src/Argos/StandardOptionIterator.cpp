@@ -21,6 +21,12 @@ namespace Argos
           m_Pos(0)
     {}
 
+    StandardOptionIterator::StandardOptionIterator(const StandardOptionIterator& rhs)
+        : m_Args(rhs.m_Args),
+          m_ArgsIt(m_Args.begin() + std::distance(rhs.m_Args.begin(), rhs.m_ArgsIt)),
+          m_Pos(rhs.m_Pos)
+    {}
+
     std::optional<std::string> StandardOptionIterator::next()
     {
         if (m_Pos == std::string_view::npos)

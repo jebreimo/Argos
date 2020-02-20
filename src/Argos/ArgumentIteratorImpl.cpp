@@ -11,15 +11,14 @@
 #include "Argos/ArgosException.hpp"
 #include "HelpWriter.hpp"
 #include "StringUtilities.hpp"
-#include "VisitorUtilities.hpp"
 #include "OptionIterator.hpp"
 
 namespace Argos
 {
     namespace
     {
-        std::vector<std::string_view> makeStringViewVector(
-                int count, char** strings, bool ignoreFirst)
+        std::vector<std::string_view>
+        makeStringViewVector(int count, char** strings, bool ignoreFirst)
         {
             std::vector<std::string_view> result;
             for (int i = ignoreFirst ? 1 : 0; i < count; ++i)
@@ -213,7 +212,7 @@ namespace Argos
                                                 countArguments());
         }
         auto result = doNext();
-        while (result.first == IteratorResultCode::UNKNOWN)
+        while (std::get<0>(result) == IteratorResultCode::UNKNOWN)
             result = doNext();
         return result;
     }
@@ -225,7 +224,7 @@ namespace Argos
         ArgumentIteratorImpl iterator(argc, argv, data);
         while (true)
         {
-            auto code = iterator.doNext().first;
+            auto code = std::get<0>(iterator.doNext());
             if (code == IteratorResultCode::ERROR
                 || code == IteratorResultCode::DONE)
             {
@@ -237,8 +236,10 @@ namespace Argos
         return std::move(iterator.m_ParsedArgs);
     }
 
-    int ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
+    std::pair<int, std::string_view>
+    ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
     {
+        std::string_view arg;
         switch (option.operation)
         {
         case ArgumentOperation::ASSIGN:
@@ -248,7 +249,7 @@ namespace Argos
             }
             else if (auto value = m_Iterator->nextValue(); value)
             {
-                m_ParsedArgs->assignValue(option.valueId_, *value);
+                arg = m_ParsedArgs->assignValue(option.valueId_, *value);
             }
             else
             {
@@ -256,7 +257,7 @@ namespace Argos
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
-                return 2;
+                return {2, {}};
             }
             break;
         case ArgumentOperation::APPEND:
@@ -266,7 +267,7 @@ namespace Argos
             }
             else if (auto value = m_Iterator->nextValue(); value)
             {
-                m_ParsedArgs->appendValue(option.valueId_, *value);
+                arg = m_ParsedArgs->appendValue(option.valueId_, *value);
             }
             else
             {
@@ -274,7 +275,7 @@ namespace Argos
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
-                return 2;
+                return {2, {}};
             }
             break;
         case ArgumentOperation::CLEAR:
@@ -287,19 +288,23 @@ namespace Argos
         switch (option.optionType)
         {
         case OptionType::NORMAL:
-            return 0;
+            return {0, arg};
         case OptionType::HELP:
             HelpWriter(m_Data).writeHelpText();
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
-            return 1;
-        case OptionType::BREAK:
+            return {1, arg};
+        case OptionType::STOP:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
-            return 0;
-        case OptionType::FINAL:
+            return {0, arg};
+        case OptionType::LAST_ARGUMENT:
+            m_State = State::DONE;
+            m_ParsedArgs->setBreakingOption(&option);
+            return {0, arg};
+        case OptionType::LAST_OPTION:
             m_State = State::ARGUMENTS_ONLY;
-            return 0;
+            return {0, arg};
         }
     }
 
@@ -308,7 +313,7 @@ namespace Argos
         if (m_State == State::ERROR)
             ARGOS_THROW("next() called after error.");
         if (m_State == State::DONE)
-            return {IteratorResultCode::DONE, nullptr};
+            return {IteratorResultCode::DONE, nullptr, {}};
 
         auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
                    ? m_Iterator->next()
@@ -319,7 +324,7 @@ namespace Argos
             {
                 m_State = State::DONE;
                 m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
-                return {IteratorResultCode::DONE, nullptr};
+                return {IteratorResultCode::DONE, nullptr, {}};
             }
             else
             {
@@ -333,7 +338,7 @@ namespace Argos
                     exit(1);
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 m_State = State::ERROR;
-                return {IteratorResultCode::ERROR, nullptr};
+                return {IteratorResultCode::ERROR, nullptr, {}};
             }
         }
 
@@ -345,20 +350,21 @@ namespace Argos
                                      m_Data->parserSettings.caseInsensitive);
             if (option)
             {
-                switch (processOption(*option, *arg))
+                auto optRes = processOption(*option, *arg);
+                switch (optRes.first)
                 {
                 case 1:
                     if (m_Data->parserSettings.autoExit)
                         exit(0);
                     copyRemainingArgumentsToParserResult();
-                    return {IteratorResultCode::OPTION, option};
+                    return {IteratorResultCode::OPTION, option, optRes.second};
                 case 2:
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
-                    return {IteratorResultCode::ERROR, option};
+                    return {IteratorResultCode::ERROR, option, {}};
                 default:
-                    return {IteratorResultCode::OPTION, option};
+                    return {IteratorResultCode::OPTION, option, optRes.second};
                 }
             }
             else
@@ -377,7 +383,7 @@ namespace Argos
                         exit(1);
                     copyRemainingArgumentsToParserResult();
                     m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
-                    return {IteratorResultCode::ERROR, nullptr};
+                    return {IteratorResultCode::ERROR, nullptr, {}};
                 }
             }
         }
@@ -386,8 +392,12 @@ namespace Argos
             if (auto argument = m_ArgumentCounter->nextArgument())
             {
                 m_ParsedArgs->addArgument(*arg);
-                m_ParsedArgs->assignValue(argument->valueId_, *arg);
-                return {IteratorResultCode::ARGUMENT, argument};
+                std::string_view s;
+                if (argument->operation == ArgumentOperation::ASSIGN)
+                    s = m_ParsedArgs->assignValue(argument->valueId_, *arg);
+                else if (argument->operation == ArgumentOperation::APPEND)
+                    s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
+                return {IteratorResultCode::ARGUMENT, argument, s};
             }
             else if (m_Data->parserSettings.ignoreUndefinedArguments)
             {
@@ -402,14 +412,14 @@ namespace Argos
                     exit(1);
                 copyRemainingArgumentsToParserResult();
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
-                return {IteratorResultCode::ERROR, nullptr};
+                return {IteratorResultCode::ERROR, nullptr, {}};
             }
         }
         else
         {
             m_InernalArgs.push_back(*arg);
         }
-        return {IteratorResultCode::UNKNOWN, nullptr};
+        return {IteratorResultCode::UNKNOWN, nullptr, {}};
     }
 
     void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()
@@ -435,9 +445,10 @@ namespace Argos
                 switch (option->optionType)
                 {
                 case OptionType::HELP:
-                case OptionType::BREAK:
+                case OptionType::LAST_ARGUMENT:
+                case OptionType::STOP:
                     return result;
-                case OptionType::FINAL:
+                case OptionType::LAST_OPTION:
                     argumentsOnly = true;
                     break;
                 default:

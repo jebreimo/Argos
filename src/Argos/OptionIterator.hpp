@@ -18,6 +18,8 @@ namespace Argos
         explicit OptionIterator(std::vector<std::string_view> args,
                                 char prefix);
 
+        OptionIterator(const OptionIterator& rhs);
+
         std::optional<std::string> next() override;
 
         std::optional<std::string> nextValue() override;

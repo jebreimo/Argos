@@ -30,7 +30,6 @@ namespace Argos
             }
             return begin;
         }
-
     }
 
     ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
@@ -75,24 +74,22 @@ namespace Argos
         m_UnprocessedArguments.push_back(arg);
     }
 
-    void ParsedArgumentsImpl::assignValue(int valueId, const std::string& value)
+    std::string_view ParsedArgumentsImpl::assignValue(int valueId, const std::string& value)
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
-        {
-            m_Values.emplace(valueId, value);
-            return;
-        }
+            return m_Values.emplace(valueId, value)->second;
 
         it->second = value;
-        ++it;
-        while (it != m_Values.end() && it->first == valueId)
-            m_Values.erase(it++);
+        auto nxt = next(it);
+        while (nxt != m_Values.end() && nxt->first == valueId)
+            m_Values.erase(nxt++);
+        return it->second;
     }
 
-    void ParsedArgumentsImpl::appendValue(int valueId, const std::string& value)
+    std::string_view ParsedArgumentsImpl::appendValue(int valueId, const std::string& value)
     {
-        m_Values.emplace(valueId, value);
+        return m_Values.emplace(valueId, value)->second;
     }
 
     void ParsedArgumentsImpl::clearValue(int valueId)
@@ -171,7 +168,7 @@ namespace Argos
 
     void ParsedArgumentsImpl::setBreakingOption(const OptionData* option)
     {
-        m_ResultCode = ParserResultCode::SPECIAL_OPTION;
+        m_ResultCode = ParserResultCode::STOP;
         m_SpecialOption = option;
     }
 

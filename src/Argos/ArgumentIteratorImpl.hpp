@@ -24,7 +24,10 @@ namespace Argos
         ERROR
     };
 
-    using IteratorResult = std::pair<IteratorResultCode, const void*>;
+    using IteratorResult = std::tuple<
+            IteratorResultCode,
+            const void*,
+            std::string_view>;
 
     class ArgumentIteratorImpl
     {
@@ -40,7 +43,8 @@ namespace Argos
         static std::unique_ptr<ParsedArgumentsImpl>
         parse(int argc, char* argv[], const std::shared_ptr<ParserData>& data);
     private:
-        int processOption(const OptionData& option, const std::string& flag);
+        std::pair<int, std::string_view>
+        processOption(const OptionData& option, const std::string& flag);
 
         IteratorResult doNext();
 

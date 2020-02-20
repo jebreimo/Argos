@@ -20,6 +20,13 @@ namespace Argos
           m_Prefix(prefix)
     {}
 
+    OptionIterator::OptionIterator(const OptionIterator& rhs)
+        : m_Args(rhs.m_Args),
+          m_ArgsIt(m_Args.begin() + std::distance(rhs.m_Args.begin(), rhs.m_ArgsIt)),
+          m_Pos(rhs.m_Pos),
+          m_Prefix(rhs.m_Prefix)
+    {}
+
     std::optional<std::string> OptionIterator::next()
     {
         if (m_Pos != 0)

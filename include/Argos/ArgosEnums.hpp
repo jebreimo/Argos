@@ -44,15 +44,46 @@ namespace Argos
     {
         NORMAL,
         HELP,
-        BREAK,
-        FINAL
+        /**
+         * @brief The last argument that will be treated as a normal
+         *  argument or option.
+         *
+         * Missing arguments and mandatory options will not be treated
+         * as errors if this option is given. An example of how this option
+         * type is used is for instance a "--version" option where the program
+         * displays its version and ignores all other arguments.
+         *
+         * All remaining arguments and options on the command line are
+         * available in unprocessed arguments.
+         */
+        STOP,
+        /**
+         * @brief The last argument that will be treated as a normal
+         *  argument or option.
+         *
+         * Unlike STOP, missing arguments and mandatory options will be
+         * treated when this option type is used.
+         *
+         * All remaining arguments and options on the command line are
+         * available in unprocessed arguments. The flag for this option
+         * type is typically '--'.
+         */
+        LAST_ARGUMENT,
+        /**
+         * @brief The last argument that will be treated as an option.
+         *
+         * Subsequent arguments will not be considered options even if they
+         * start with a '-' (or '/' when using SLASH options). The flag for
+         * this option type is typically '--'.
+         */
+        LAST_OPTION
     };
 
     enum class ParserResultCode
     {
         NONE,
         NORMAL,
-        SPECIAL_OPTION,
+        STOP,
         ERROR
     };
 

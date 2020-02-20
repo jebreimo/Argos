@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
             .add(Option({"-r", "--resolution"}).argument("HOR,VER").text("Set screen resolution."))
             .add(Option({"--fullscreen"}).value(true).text("Run in fullscreen mode."))
             .add(Option({"--windowed"}).valueName("--fullscreen").value(false).text("Run in windowed mode."))
-            .add(Option({"--list-interfaces"}).type(OptionType::BREAK).text("Display list of available graphics interfaces."))
-            .add(Option({"--"}).type(OptionType::FINAL).text("Mark end of options. Allows arguments starting with '-'."))
+            .add(Option({"--list-interfaces"}).type(OptionType::LAST_ARGUMENT).text("Display list of available graphics interfaces."))
+            .add(Option({"--"}).type(OptionType::LAST_OPTION).text("Mark end of options. Allows arguments starting with '-'."))
             .add(Option({"-a", "--anonymous"}))
             .parse(argc, argv);
     std::cout << "file: " << args.value("file").stringValue() << "\n";

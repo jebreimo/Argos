@@ -7,7 +7,9 @@
 //****************************************************************************
 #pragma once
 
-#include "IArgumentView.hpp"
+#include "ArgumentView.hpp"
+#include "ArgosException.hpp"
+#include "OptionView.hpp"
 
 namespace Argos
 {
@@ -30,8 +32,11 @@ namespace Argos
 
         ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
 
-        std::pair<std::unique_ptr<const IArgumentView>, std::string_view> next();
+        bool next(std::unique_ptr<IArgumentView>& arg,
+                  std::string_view& value);
     private:
+        ArgumentIteratorImpl& impl();
+
         std::unique_ptr<ArgumentIteratorImpl> m_Impl;
     };
 }

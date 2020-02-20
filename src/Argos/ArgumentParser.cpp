@@ -189,6 +189,16 @@ namespace Argos
         return parseArguments(argc, argv, std::move(m_Data));
     }
 
+    ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv)
+    {
+        return ArgumentIterator(argc, argv, std::move(m_Data));
+    }
+
+    ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv) const
+    {
+        return ArgumentIterator(argc, argv, makeCopy(data()));
+    }
+
     bool ArgumentParser::allowAbbreviatedOptions() const
     {
         return data().parserSettings.allowAbbreviatedOptions;
