@@ -275,3 +275,19 @@ TEST_CASE("LAST_ARGUMENT option")
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
+
+TEST_CASE("LAST_OPTION option")
+{
+    using namespace Argos;
+    Argv argv{"test", "--bar", "--", "--bar"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("arg"))
+            .add(Option({"--bar"}))
+            .add(Option({"--"}).type(OptionType::LAST_OPTION))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    REQUIRE(args.value("--bar").boolValue());
+    REQUIRE(args.value("--").boolValue());
+    REQUIRE(args.value("arg").stringValue() == "--bar");
+}

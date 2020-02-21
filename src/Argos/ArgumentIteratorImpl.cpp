@@ -395,7 +395,8 @@ namespace Argos
             else
             {
                 HelpWriter(m_Data).writeErrorMessage(
-                        "Too many arguments, starting with " + *arg);
+                        "Too many arguments, starting with \"" + *arg
+                        + "\"");
                 m_State = State::ERROR;
                 if (m_Data->parserSettings.autoExit)
                     exit(1);

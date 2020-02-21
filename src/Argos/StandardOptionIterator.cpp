@@ -87,7 +87,6 @@ namespace Argos
             return {};
         }
 
-        m_Pos = m_ArgsIt->size();
         return std::string(*m_ArgsIt);
     }
 
