@@ -46,8 +46,6 @@ namespace Argos
 
         OptionView stopOption() const;
 
-        const std::vector<std::string>& arguments() const;
-
         const std::vector<std::string>& unprocessedArguments() const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;

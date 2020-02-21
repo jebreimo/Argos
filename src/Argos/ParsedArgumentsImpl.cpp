@@ -59,16 +59,6 @@ namespace Argos
         return m_Values.find(valueId) != m_Values.end();
     }
 
-    const std::vector<std::string>& ParsedArgumentsImpl::arguments() const
-    {
-        return m_Arguments;
-    }
-
-    void ParsedArgumentsImpl::addArgument(const std::string& arg)
-    {
-        m_Arguments.push_back(arg);
-    }
-
     const std::vector<std::string>& ParsedArgumentsImpl::unprocessedArguments() const
     {
         return m_UnprocessedArguments;

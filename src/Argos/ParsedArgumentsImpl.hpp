@@ -21,10 +21,6 @@ namespace Argos
 
         bool has(int valueId) const;
 
-        const std::vector<std::string>& arguments() const;
-
-        void addArgument(const std::string& arg);
-
         const std::vector<std::string>& unprocessedArguments() const;
 
         void addUnprocessedArgument(const std::string& arg);
@@ -60,7 +56,6 @@ namespace Argos
     private:
         std::multimap<int, std::string> m_Values;
         std::vector<std::pair<std::string_view, int>> m_ValueIds;
-        std::vector<std::string> m_Arguments;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
         ParserResultCode m_ResultCode = ParserResultCode::NONE;

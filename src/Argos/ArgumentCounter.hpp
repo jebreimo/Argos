@@ -25,6 +25,8 @@ namespace Argos
 
         const ArgumentData* nextArgument();
 
+        size_t count() const;
+
         bool isComplete() const;
 
         static std::pair<size_t, size_t> getMinMaxCount(
@@ -37,6 +39,6 @@ namespace Argos
         std::vector<Counter> m_Counters;
         size_t m_Index = 0;
         size_t m_FirstOptional = 0;
-        //std::vector<Counter>::iterator m_Iterator;
+        size_t m_Counter = 0;
     };
 }

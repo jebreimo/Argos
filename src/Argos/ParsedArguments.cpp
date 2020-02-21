@@ -78,11 +78,6 @@ namespace Argos
         return OptionView(option);
     }
 
-    const std::vector<std::string>& ParsedArguments::arguments() const
-    {
-        return m_Impl->arguments();
-    }
-
     const std::vector<std::string>& ParsedArguments::unprocessedArguments() const
     {
         return m_Impl->unprocessedArguments();

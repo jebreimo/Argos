@@ -102,8 +102,14 @@ namespace Argos
         if (m_Index == m_Counters.size())
             return nullptr;
 
+        ++m_Counter;
         --m_Counters[m_Index].first;
         return m_Counters[m_Index].second;
+    }
+
+    size_t ArgumentCounter::count() const
+    {
+        return m_Counter;
     }
 
     bool ArgumentCounter::isComplete() const

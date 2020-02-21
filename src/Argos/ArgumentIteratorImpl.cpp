@@ -380,7 +380,6 @@ namespace Argos
         {
             if (auto argument = m_ArgumentCounter.nextArgument())
             {
-                m_ParsedArgs->addArgument(*arg);
                 std::string_view s;
                 if (argument->operation == ArgumentOperation::ASSIGN)
                     s = m_ParsedArgs->assignValue(argument->valueId_, *arg);
@@ -468,7 +467,7 @@ namespace Argos
                      ? "Too few arguments. Expected "
                      : "Too few arguments. Expected at least ")
                     + std::to_string(ns.first) + ", received "
-                    + std::to_string(m_ParsedArgs->arguments().size()) + ".");
+                    + std::to_string(m_ArgumentCounter.count()) + ".");
             if (m_Data->parserSettings.autoExit)
                 exit(1);
             m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
