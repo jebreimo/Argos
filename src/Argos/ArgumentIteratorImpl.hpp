@@ -52,13 +52,11 @@ namespace Argos
 
         size_t countArguments() const;
 
-        void postProcessArguments();
-
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
         std::unique_ptr<ParsedArgumentsImpl> m_ParsedArgs;
         std::unique_ptr<IOptionIterator> m_Iterator;
-        std::optional<ArgumentCounter> m_ArgumentCounter;
+        ArgumentCounter m_ArgumentCounter;
         enum class State
         {
             ARGUMENTS_AND_OPTIONS,
