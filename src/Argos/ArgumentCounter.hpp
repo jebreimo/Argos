@@ -35,6 +35,8 @@ namespace Argos
     private:
         using Counter = std::pair<size_t, const ArgumentData*>;
         std::vector<Counter> m_Counters;
-        std::vector<Counter>::iterator m_Iterator;
+        size_t m_Index = 0;
+        size_t m_FirstOptional = 0;
+        //std::vector<Counter>::iterator m_Iterator;
     };
 }

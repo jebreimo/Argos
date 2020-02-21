@@ -17,7 +17,7 @@ namespace Argos
         std::string text;
         std::string section;
         std::string valueName;
-        ArgumentOperation operation = ArgumentOperation::ASSIGN;
+        ArgumentOperation operation = ArgumentOperation::APPEND;
         unsigned minCount = 1;
         unsigned maxCount = 1;
         bool hidden = false;

@@ -291,3 +291,35 @@ TEST_CASE("LAST_OPTION option")
     REQUIRE(args.value("--").boolValue());
     REQUIRE(args.value("arg").stringValue() == "--bar");
 }
+
+TEST_CASE("Argument with variable count")
+{
+    using namespace Argos;
+    Argv argv{"test", "ab", "cd", "ef", "gh"};
+    SECTION("Variable count first")
+    {
+        auto args = Argos::ArgumentParser("test")
+                .autoExitEnabled(false)
+                .add(Argument("arg1").count(1, 4))
+                .add(Argument("arg2").count(2))
+                .parse(argv.size(), argv.data());
+        REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+        auto arg1 = args.values("arg1").stringValues();
+        REQUIRE(arg1 == std::vector<std::string>{"ab", "cd"});
+        auto arg2 = args.values("arg2").stringValues();
+        REQUIRE(arg2 == std::vector<std::string>{"ef", "gh"});
+    }
+    SECTION("Variable count last")
+    {
+        auto args = Argos::ArgumentParser("test")
+                .autoExitEnabled(false)
+                .add(Argument("arg1").count(2))
+                .add(Argument("arg2").count(1, 4))
+                .parse(argv.size(), argv.data());
+        REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+        auto arg1 = args.values("arg1").stringValues();
+        REQUIRE(arg1 == std::vector<std::string>{"ab", "cd"});
+        auto arg2 = args.values("arg2").stringValues();
+        REQUIRE(arg2 == std::vector<std::string>{"ef", "gh"});
+    }
+}
