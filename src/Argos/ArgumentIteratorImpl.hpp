@@ -40,8 +40,10 @@ namespace Argos
 
         IteratorResult next();
 
-        static std::unique_ptr<ParsedArgumentsImpl>
+        static std::shared_ptr<ParsedArgumentsImpl>
         parse(int argc, char* argv[], const std::shared_ptr<ParserData>& data);
+
+        const std::shared_ptr<ParsedArgumentsImpl>& parsedArguments() const;
     private:
         enum class OptionResult
         {
@@ -64,7 +66,7 @@ namespace Argos
 
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
-        std::unique_ptr<ParsedArgumentsImpl> m_ParsedArgs;
+        std::shared_ptr<ParsedArgumentsImpl> m_ParsedArgs;
         std::unique_ptr<IOptionIterator> m_Iterator;
         ArgumentCounter m_ArgumentCounter;
         enum class State

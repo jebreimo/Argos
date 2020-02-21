@@ -54,7 +54,19 @@ namespace Argos
         }
     }
 
+    ParsedArguments ArgumentIterator::parsedArguments() const
+    {
+        return ParsedArguments(impl().parsedArguments());
+    }
+
     ArgumentIteratorImpl& ArgumentIterator::impl()
+    {
+        if (!m_Impl)
+            ARGOS_THROW("This ArgumentIterator has been moved from.");
+        return *m_Impl;
+    }
+
+    const ArgumentIteratorImpl& ArgumentIterator::impl() const
     {
         if (!m_Impl)
             ARGOS_THROW("This ArgumentIterator has been moved from.");

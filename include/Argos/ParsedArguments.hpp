@@ -20,7 +20,7 @@ namespace Argos
     public:
         ParsedArguments();
 
-        ParsedArguments(std::unique_ptr<ParsedArgumentsImpl> impl);
+        ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
 
         ParsedArguments(const ParsedArguments&) = delete;
 

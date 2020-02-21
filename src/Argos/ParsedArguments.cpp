@@ -16,7 +16,7 @@ namespace Argos
 {
     ParsedArguments::ParsedArguments() = default;
 
-    ParsedArguments::ParsedArguments(std::unique_ptr<ParsedArgumentsImpl> impl)
+    ParsedArguments::ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl)
         : m_Impl(move(impl))
     {}
 

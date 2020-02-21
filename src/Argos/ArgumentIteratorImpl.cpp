@@ -183,7 +183,7 @@ namespace Argos
             std::shared_ptr<ParserData> data)
         : m_Data(move(data)),
           m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-          m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
+          m_ParsedArgs(std::make_shared<ParsedArgumentsImpl>(m_Data)),
           m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle,
                                         makeStringViewVector(argc, argv, true)))
     {
@@ -199,7 +199,7 @@ namespace Argos
                                                std::shared_ptr<ParserData> data)
         : m_Data(move(data)),
           m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
-          m_ParsedArgs(std::make_unique<ParsedArgumentsImpl>(m_Data)),
+          m_ParsedArgs(std::make_shared<ParsedArgumentsImpl>(m_Data)),
           m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle,
                                         makeStringViewVector(args)))
     {
@@ -218,7 +218,7 @@ namespace Argos
         return result;
     }
 
-    std::unique_ptr<ParsedArgumentsImpl>
+    std::shared_ptr<ParsedArgumentsImpl>
     ArgumentIteratorImpl::parse(int argc, char* argv[],
                                 const std::shared_ptr<ParserData>& data)
     {
@@ -232,7 +232,12 @@ namespace Argos
                 break;
             }
         }
-        return std::move(iterator.m_ParsedArgs);
+        return iterator.m_ParsedArgs;
+    }
+
+    const std::shared_ptr<ParsedArgumentsImpl>& ArgumentIteratorImpl::parsedArguments() const
+    {
+        return m_ParsedArgs;
     }
 
     std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>

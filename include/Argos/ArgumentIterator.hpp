@@ -9,7 +9,7 @@
 
 #include "ArgumentView.hpp"
 #include "ArgosException.hpp"
-#include "OptionView.hpp"
+#include "ParsedArguments.hpp"
 
 namespace Argos
 {
@@ -34,8 +34,12 @@ namespace Argos
 
         bool next(std::unique_ptr<IArgumentView>& arg,
                   std::string_view& value);
+
+        ParsedArguments parsedArguments() const;
     private:
         ArgumentIteratorImpl& impl();
+
+        const ArgumentIteratorImpl& impl() const;
 
         std::unique_ptr<ArgumentIteratorImpl> m_Impl;
     };

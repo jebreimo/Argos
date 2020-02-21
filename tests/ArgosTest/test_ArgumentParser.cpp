@@ -323,3 +323,33 @@ TEST_CASE("Argument with variable count")
         REQUIRE(arg2 == std::vector<std::string>{"ef", "gh"});
     }
 }
+
+TEST_CASE("CLEAR option")
+{
+    using namespace Argos;
+    Argv argv{"test", "--bar=12", "--bar", "34", "--ben"};
+    auto it = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Option({"--bar"}).argument("N")
+                         .operation(OptionOperation::APPEND)
+                         .id(1))
+            .add(Option({"--ben"})
+                         .valueName("--bar")
+                         .operation(OptionOperation::CLEAR)
+                         .id(2))
+            .makeIterator(argv.size(), argv.data());
+    std::unique_ptr<IArgumentView> arg;
+    std::string_view value;
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg->id() == 1);
+    REQUIRE(value == "12");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg->id() == 1);
+    REQUIRE(value == "34");
+    auto bars = it.parsedArguments().values("--bar").int32Values();
+    REQUIRE(bars == std::vector<int32_t>{12, 34});
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg->id() == 2);
+    bars = it.parsedArguments().values("--bar").int32Values();
+    REQUIRE(bars.empty());
+}
