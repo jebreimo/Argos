@@ -241,7 +241,7 @@ namespace Argos
         std::string_view arg;
         switch (option.operation)
         {
-        case ArgumentOperation::ASSIGN:
+        case OptionOperation::ASSIGN:
             if (!option.value.empty())
             {
                 m_ParsedArgs->assignValue(option.valueId_, option.value);
@@ -259,7 +259,7 @@ namespace Argos
                 return {OptionResult::ERROR, {}};
             }
             break;
-        case ArgumentOperation::APPEND:
+        case OptionOperation::APPEND:
             if (!option.value.empty())
             {
                 m_ParsedArgs->appendValue(option.valueId_, option.value);
@@ -277,10 +277,10 @@ namespace Argos
                 return {OptionResult::ERROR, {}};
             }
             break;
-        case ArgumentOperation::CLEAR:
+        case OptionOperation::CLEAR:
             m_ParsedArgs->clearValue(option.valueId_);
             break;
-        case ArgumentOperation::NONE:
+        case OptionOperation::NONE:
             break;
         }
 

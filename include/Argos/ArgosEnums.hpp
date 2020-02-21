@@ -11,6 +11,12 @@ namespace Argos
 {
     enum class ArgumentOperation
     {
+        ASSIGN,
+        APPEND
+    };
+
+    enum class OptionOperation
+    {
         NONE,
         ASSIGN,
         APPEND,

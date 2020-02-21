@@ -30,7 +30,7 @@ namespace Argos
         return m_Option->valueName;
     }
 
-    ArgumentOperation OptionView::operation() const
+    OptionOperation OptionView::operation() const
     {
         return m_Option->operation;
     }

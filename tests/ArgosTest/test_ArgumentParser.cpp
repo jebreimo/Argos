@@ -111,7 +111,7 @@ TEST_CASE("Option that appends must have argument or value")
     using namespace Argos;
     ArgumentParser parser("test");
     REQUIRE_THROWS(parser.add(Option({"-a"})
-                                      .operation(ArgumentOperation::APPEND)));
+                                      .operation(OptionOperation::APPEND)));
 }
 
 TEST_CASE("List argument")
@@ -121,7 +121,7 @@ TEST_CASE("List argument")
     auto args = Argos::ArgumentParser("test")
             .autoExitEnabled(false)
             .add(Option({"-n", "--number"})
-                         .operation(ArgumentOperation::APPEND)
+                         .operation(OptionOperation::APPEND)
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
@@ -156,7 +156,7 @@ TEST_CASE("Tet dash options")
             .autoExitEnabled(false)
             .optionStyle(OptionStyle::DASH)
             .add(Option({"-number"})
-                         .operation(ArgumentOperation::APPEND)
+                         .operation(OptionOperation::APPEND)
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
@@ -173,7 +173,7 @@ TEST_CASE("Tet slash options")
             .autoExitEnabled(false)
             .optionStyle(OptionStyle::SLASH)
             .add(Option({"/number"})
-                         .operation(ArgumentOperation::APPEND)
+                         .operation(OptionOperation::APPEND)
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);

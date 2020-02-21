@@ -23,8 +23,6 @@ namespace Argos
 
         virtual const std::string& valueName() const = 0;
 
-        virtual ArgumentOperation operation() const = 0;
-
         virtual bool hidden() const = 0;
 
         virtual int id() const = 0;

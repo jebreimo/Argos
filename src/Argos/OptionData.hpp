@@ -20,7 +20,7 @@ namespace Argos
         std::string valueName;
         std::string argument;
         std::string value;
-        ArgumentOperation operation = ArgumentOperation::ASSIGN;
+        OptionOperation operation = OptionOperation::ASSIGN;
         OptionType optionType = OptionType::NORMAL;
         bool hidden = false;
         bool mandatory = false;

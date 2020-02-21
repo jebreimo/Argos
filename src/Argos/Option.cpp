@@ -77,7 +77,7 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::operation(ArgumentOperation operation)
+    Option& Option::operation(OptionOperation operation)
     {
         CHECK_OPTION_EXISTS();
         m_Option->operation = operation;

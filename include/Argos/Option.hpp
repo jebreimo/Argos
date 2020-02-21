@@ -41,7 +41,7 @@ namespace Argos
 
         Option& valueName(const std::string& id);
 
-        Option& operation(ArgumentOperation operation);
+        Option& operation(OptionOperation operation);
 
         Option& hidden(bool hidden);
 

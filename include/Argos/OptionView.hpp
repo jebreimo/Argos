@@ -26,7 +26,7 @@ namespace Argos
 
         const std::string& valueName() const override;
 
-        ArgumentOperation operation() const override;
+        OptionOperation operation() const;
 
         bool hidden() const override;
 

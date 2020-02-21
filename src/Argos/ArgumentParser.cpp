@@ -154,17 +154,17 @@ namespace Argos
             ARGOS_THROW("Option cannot have both argument and value set.");
         switch (od->operation)
         {
-        case ArgumentOperation::NONE:
+        case OptionOperation::NONE:
             break;
-        case ArgumentOperation::ASSIGN:
+        case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->value.empty())
                 od->value = "1";
             break;
-        case ArgumentOperation::APPEND:
+        case OptionOperation::APPEND:
             if (od->argument.empty() && od->value.empty())
                 ARGOS_THROW("Options that appends must have either value or argument set.");
             break;
-        case ArgumentOperation::CLEAR:
+        case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->value.empty())
                 od->value = "1";
             if (od->valueName.empty())
