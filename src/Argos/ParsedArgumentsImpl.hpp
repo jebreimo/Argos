@@ -25,6 +25,8 @@ namespace Argos
 
         void addArgument(const std::string& arg);
 
+        const std::vector<std::string>& unprocessedArguments() const;
+
         void addUnprocessedArgument(const std::string& arg);
 
         std::string_view assignValue(int valueId, const std::string& value);

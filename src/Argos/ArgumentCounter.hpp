@@ -14,6 +14,8 @@ namespace Argos
     class ArgumentCounter
     {
     public:
+        ArgumentCounter();
+
         explicit ArgumentCounter(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments);
 

@@ -49,7 +49,7 @@ TEST_CASE("Test help flag")
     auto result = argos.parse(argv.size(), argv.data());
     REQUIRE(result.has("--help"));
     REQUIRE(result.resultCode() == Argos::ParserResultCode::STOP);
-    REQUIRE(result.breakingOption().id() == 10);
+    REQUIRE(result.stopOption().id() == 10);
     REQUIRE(result.value("--help").boolValue());
 }
 
@@ -245,4 +245,33 @@ TEST_CASE("Test argument iterator")
     REQUIRE_FALSE(it.next(arg, value));
     REQUIRE(!arg);
     REQUIRE(value.empty());
+}
+
+TEST_CASE("STOP option")
+{
+    using namespace Argos;
+    Argv argv{"test", "--version", "arg 1", "arg 2"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("arg"))
+            .add(Option({"--version"}).type(OptionType::STOP))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::STOP);
+    auto option = args.stopOption();
+    REQUIRE(option.flags().front() == "--version");
+    REQUIRE(args.unprocessedArguments().size() == 2);
+    REQUIRE(args.unprocessedArguments()[0] == "arg 1");
+    REQUIRE(args.unprocessedArguments()[1] == "arg 2");
+}
+
+TEST_CASE("LAST_ARGUMENT option")
+{
+    using namespace Argos;
+    Argv argv{"test", "--", "arg 1"};
+    auto args = Argos::ArgumentParser("test")
+            .autoExitEnabled(false)
+            .add(Argument("arg"))
+            .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }

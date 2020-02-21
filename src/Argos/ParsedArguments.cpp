@@ -70,11 +70,21 @@ namespace Argos
         return m_Impl->resultCode();
     }
 
-    OptionView ParsedArguments::breakingOption() const
+    OptionView ParsedArguments::stopOption() const
     {
         auto option = m_Impl->breakingOption();
         if (!option)
             ARGOS_THROW("There is no special option.");
         return OptionView(option);
+    }
+
+    const std::vector<std::string>& ParsedArguments::arguments() const
+    {
+        return m_Impl->arguments();
+    }
+
+    const std::vector<std::string>& ParsedArguments::unprocessedArguments() const
+    {
+        return m_Impl->unprocessedArguments();
     }
 }

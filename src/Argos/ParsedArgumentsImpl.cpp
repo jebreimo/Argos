@@ -69,6 +69,11 @@ namespace Argos
         m_Arguments.push_back(arg);
     }
 
+    const std::vector<std::string>& ParsedArgumentsImpl::unprocessedArguments() const
+    {
+        return m_UnprocessedArguments;
+    }
+
     void ParsedArgumentsImpl::addUnprocessedArgument(const std::string& arg)
     {
         m_UnprocessedArguments.push_back(arg);

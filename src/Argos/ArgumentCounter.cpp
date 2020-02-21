@@ -55,6 +55,12 @@ namespace Argos
             return result;
         }
     }
+
+    ArgumentCounter::ArgumentCounter()
+        : m_Counters(),
+          m_Iterator(m_Counters.end())
+    {}
+
     ArgumentCounter::ArgumentCounter(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
         : m_Counters(makeArgumentCounters(arguments)),
           m_Iterator(m_Counters.begin())

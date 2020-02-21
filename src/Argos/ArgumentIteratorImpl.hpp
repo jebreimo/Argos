@@ -43,7 +43,15 @@ namespace Argos
         static std::unique_ptr<ParsedArgumentsImpl>
         parse(int argc, char* argv[], const std::shared_ptr<ParserData>& data);
     private:
-        std::pair<int, std::string_view>
+        enum class OptionResult
+        {
+            NORMAL,
+            LAST_ARGUMENT,
+            STOP,
+            HELP,
+            ERROR
+        };
+        std::pair<OptionResult, std::string_view>
         processOption(const OptionData& option, const std::string& flag);
 
         IteratorResult doNext();
@@ -51,6 +59,8 @@ namespace Argos
         void copyRemainingArgumentsToParserResult();
 
         size_t countArguments() const;
+
+        bool checkArgumentCounter();
 
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;

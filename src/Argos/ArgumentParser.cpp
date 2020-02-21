@@ -231,7 +231,7 @@ namespace Argos
         if (value != data().parserSettings.optionStyle)
         {
             if (!data().options.empty())
-                ARGOS_THROW("Can't change option style when one or more"
+                ARGOS_THROW("Can't change option style after"
                             " options have been added.");
             data().parserSettings.optionStyle = value;
         }

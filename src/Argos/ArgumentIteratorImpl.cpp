@@ -235,7 +235,7 @@ namespace Argos
         return std::move(iterator.m_ParsedArgs);
     }
 
-    std::pair<int, std::string_view>
+    std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
     ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
     {
         std::string_view arg;
@@ -256,7 +256,7 @@ namespace Argos
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
-                return {2, {}};
+                return {OptionResult::ERROR, {}};
             }
             break;
         case ArgumentOperation::APPEND:
@@ -274,7 +274,7 @@ namespace Argos
                 m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
                 HelpWriter(m_Data).writeErrorMessage(
                         option, flag + ": no value given.");
-                return {2, {}};
+                return {OptionResult::ERROR, {}};
             }
             break;
         case ArgumentOperation::CLEAR:
@@ -287,23 +287,22 @@ namespace Argos
         switch (option.optionType)
         {
         case OptionType::NORMAL:
-            return {0, arg};
+            return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
             HelpWriter(m_Data).writeHelpText();
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
-            return {1, arg};
+            return {OptionResult::HELP, arg};
         case OptionType::STOP:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
-            return {0, arg};
+            return {OptionResult::STOP, arg};
         case OptionType::LAST_ARGUMENT:
             m_State = State::DONE;
-            m_ParsedArgs->setBreakingOption(&option);
-            return {0, arg};
+            return {OptionResult::LAST_ARGUMENT, arg};
         case OptionType::LAST_OPTION:
             m_State = State::ARGUMENTS_ONLY;
-            return {0, arg};
+            return {OptionResult::NORMAL, arg};
         }
     }
 
@@ -319,26 +318,10 @@ namespace Argos
                    : m_Iterator->nextValue();
         if (!arg)
         {
-            if (m_ArgumentCounter.isComplete())
-            {
-                m_State = State::DONE;
-                m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
+            if (checkArgumentCounter())
                 return {IteratorResultCode::DONE, nullptr, {}};
-            }
             else
-            {
-                auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
-                HelpWriter(m_Data).writeErrorMessage(
-                        (ns.first == ns.second
-                         ? "Too few arguments, expected "
-                         : "Too few arguments, expected at least ")
-                        + std::to_string(ns.first) + ".");
-                if (m_Data->parserSettings.autoExit)
-                    exit(1);
-                m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
-                m_State = State::ERROR;
                 return {IteratorResultCode::ERROR, nullptr, {}};
-            }
         }
 
         if (m_State == State::ARGUMENTS_AND_OPTIONS
@@ -352,16 +335,23 @@ namespace Argos
                 auto optRes = processOption(*option, *arg);
                 switch (optRes.first)
                 {
-                case 1:
+                case OptionResult::HELP:
                     if (m_Data->parserSettings.autoExit)
                         exit(0);
                     copyRemainingArgumentsToParserResult();
                     return {IteratorResultCode::OPTION, option, optRes.second};
-                case 2:
+                case OptionResult::ERROR:
                     if (m_Data->parserSettings.autoExit)
                         exit(1);
                     copyRemainingArgumentsToParserResult();
                     return {IteratorResultCode::ERROR, option, {}};
+                case OptionResult::LAST_ARGUMENT:
+                    if (!checkArgumentCounter())
+                        return {IteratorResultCode::ERROR, nullptr, {}};
+                    [[fallthrough]];
+                case OptionResult::STOP:
+                    copyRemainingArgumentsToParserResult();
+                    [[fallthrough]];
                 default:
                     return {IteratorResultCode::OPTION, option, optRes.second};
                 }
@@ -459,5 +449,30 @@ namespace Argos
         for (auto arg = it->next(); arg; arg = it->next())
             ++result;
         return result;
+    }
+
+    bool ArgumentIteratorImpl::checkArgumentCounter()
+    {
+        if (m_ArgumentCounter.isComplete())
+        {
+            m_State = State::DONE;
+            m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
+            return true;
+        }
+        else
+        {
+            auto ns = ArgumentCounter::getMinMaxCount(m_Data->arguments);
+            HelpWriter(m_Data).writeErrorMessage(
+                    (ns.first == ns.second
+                     ? "Too few arguments. Expected "
+                     : "Too few arguments. Expected at least ")
+                    + std::to_string(ns.first) + ", received "
+                    + std::to_string(m_ParsedArgs->arguments().size()) + ".");
+            if (m_Data->parserSettings.autoExit)
+                exit(1);
+            m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
+            m_State = State::ERROR;
+            return false;
+        }
     }
 }
