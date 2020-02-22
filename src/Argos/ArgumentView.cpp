@@ -29,11 +29,6 @@ namespace Argos
         return m_Argument->valueName;
     }
 
-    ArgumentOperation ArgumentView::operation() const
-    {
-        return m_Argument->operation;
-    }
-
     bool ArgumentView::hidden() const
     {
         return m_Argument->hidden;

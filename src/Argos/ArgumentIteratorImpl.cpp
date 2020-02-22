@@ -385,11 +385,7 @@ namespace Argos
         {
             if (auto argument = m_ArgumentCounter.nextArgument())
             {
-                std::string_view s;
-                if (argument->operation == ArgumentOperation::ASSIGN)
-                    s = m_ParsedArgs->assignValue(argument->valueId_, *arg);
-                else if (argument->operation == ArgumentOperation::APPEND)
-                    s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
+                auto s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
                 return {IteratorResultCode::ARGUMENT, argument, s};
             }
             else if (m_Data->parserSettings.ignoreUndefinedArguments)

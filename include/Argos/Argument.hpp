@@ -38,8 +38,6 @@ namespace Argos
 
         Argument& valueName(const std::string& id);
 
-        Argument& operation(ArgumentOperation operation);
-
         Argument& hidden(bool hidden);
 
         Argument& id(int id);

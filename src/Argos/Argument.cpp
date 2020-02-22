@@ -77,13 +77,6 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::operation(ArgumentOperation operation)
-    {
-        CHECK_ARGUMENT_EXISTS();
-        m_Argument->operation = operation;
-        return *this;
-    }
-
     Argument& Argument::hidden(bool hidden)
     {
         CHECK_ARGUMENT_EXISTS();
