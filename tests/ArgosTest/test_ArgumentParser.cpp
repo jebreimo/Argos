@@ -377,6 +377,43 @@ TEST_CASE("Case-insensitive options")
             .add(Argos::Option({"/penny"}))
             .add(Argos::Option({"/lane"}))
             .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
     REQUIRE(args.value("/penny").boolValue());
     REQUIRE(!args.value("/lane").boolValue());
+}
+
+TEST_CASE("Abbreviated options")
+{
+    using namespace Argos;
+    ArgumentParser parser("test");
+    parser.autoExit(false)
+            .allowAbbreviatedOptions(true)
+            .caseInsensitive(true)
+            .optionStyle(OptionStyle::SLASH)
+            .add(Argos::Option({"/penny"}))
+            .add(Argos::Option({"/pentagram"}));
+    SECTION("Valid flag 1")
+    {
+        Argv argv{"test", "/PenN"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+        REQUIRE(args.value("/penny").boolValue());
+        REQUIRE(!args.value("/pentagram").boolValue());
+    }
+    SECTION("Valid flag 2")
+    {
+        Argv argv{"test", "/peNT"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+        REQUIRE(!args.value("/penny").boolValue());
+        REQUIRE(args.value("/pentagram").boolValue());
+    }
+    SECTION("Invalid flag")
+    {
+        Argv argv{"test", "/peN"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.resultCode() == ParserResultCode::ERROR);
+        REQUIRE(!args.value("/penny").boolValue());
+        REQUIRE(!args.value("/pentagram").boolValue());
+    }
 }
