@@ -50,9 +50,13 @@ namespace Argos
 
         ArgumentParser& allowAbbreviatedOptions(bool value);
 
-        bool autoExitEnabled() const;
+        bool autoExit() const;
 
-        ArgumentParser& autoExitEnabled(bool value);
+        ArgumentParser& autoExit(bool value);
+
+        bool caseInsensitive() const;
+
+        ArgumentParser& caseInsensitive(bool value);
 
         OptionStyle optionStyle() const;
 

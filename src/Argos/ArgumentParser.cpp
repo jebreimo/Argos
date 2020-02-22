@@ -210,14 +210,25 @@ namespace Argos
         return *this;
     }
 
-    bool ArgumentParser::autoExitEnabled() const
+    bool ArgumentParser::autoExit() const
     {
         return data().parserSettings.autoExit;
     }
 
-    ArgumentParser& ArgumentParser::autoExitEnabled(bool value)
+    ArgumentParser& ArgumentParser::autoExit(bool value)
     {
         data().parserSettings.autoExit = value;
+        return *this;
+    }
+
+    bool ArgumentParser::caseInsensitive() const
+    {
+        return data().parserSettings.caseInsensitive;
+    }
+
+    ArgumentParser& ArgumentParser::caseInsensitive(bool value)
+    {
+        data().parserSettings.caseInsensitive = value;
         return *this;
     }
 

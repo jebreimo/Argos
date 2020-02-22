@@ -38,7 +38,7 @@ TEST_CASE("Test help flag")
 {
     Argos::ArgumentParser argos("test");
     std::stringstream ss;
-    argos.autoExitEnabled(false).outputStream(&ss);
+    argos.autoExit(false).outputStream(&ss);
     REQUIRE(argos.programName() == "test");
 
     argos.add(Argos::Option({"-h", "--help"})
@@ -70,7 +70,7 @@ TEST_CASE("String arguments")
     using namespace Argos;
     Argv argv{"test", "test_file.txt"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("file"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.value("file").stringValue() == "test_file.txt");
@@ -82,7 +82,7 @@ TEST_CASE("Section order in help text")
     Argv argv{"test", "-h"};
     std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("file").section("Z"))
             .add(Option({"-h"}).section("A").type(OptionType::HELP))
             .add(Option({"-s"}).section("Z"))
@@ -98,7 +98,7 @@ TEST_CASE("Two argument")
     using namespace Argos;
     Argv argv{"test", "foo", "bar"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("arg1"))
             .add(Argument("arg2"))
             .parse(argv.size(), argv.data());
@@ -119,7 +119,7 @@ TEST_CASE("List argument")
     using namespace Argos;
     Argv argv{"test", "-n", "12", "--number", "20", "--number=6", "-n15"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Option({"-n", "--number"})
                          .operation(OptionOperation::APPEND)
                          .argument("NUM"))
@@ -153,7 +153,7 @@ TEST_CASE("Tet dash options")
     using namespace Argos;
     Argv argv{"test", "-number", "12", "-number", "20", "-number=6", "-number", "15"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .optionStyle(OptionStyle::DASH)
             .add(Option({"-number"})
                          .operation(OptionOperation::APPEND)
@@ -170,7 +170,7 @@ TEST_CASE("Tet slash options")
     using namespace Argos;
     Argv argv{"test", "/number", "12", "/number", "20", "/number=6", "/number", "15"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .optionStyle(OptionStyle::SLASH)
             .add(Option({"/number"})
                          .operation(OptionOperation::APPEND)
@@ -187,7 +187,7 @@ TEST_CASE("Test incorrect slash option")
     using namespace Argos;
     Argv argv{"test", "/benny"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .optionStyle(OptionStyle::SLASH)
             .add(Option({"/bill"}))
             .add(Argument({"file"}))
@@ -211,7 +211,7 @@ TEST_CASE("Test argument iterator")
     using namespace Argos;
     Argv argv{"test", "foo", "bar", "baz"};
     auto it = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("arg1").count(0, 9).id(1))
             .add(Argument("arg2").id(2))
             .makeIterator(argv.size(), argv.data());
@@ -252,7 +252,7 @@ TEST_CASE("STOP option")
     using namespace Argos;
     Argv argv{"test", "--version", "arg 1", "arg 2"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("arg"))
             .add(Option({"--version"}).type(OptionType::STOP))
             .parse(argv.size(), argv.data());
@@ -269,7 +269,7 @@ TEST_CASE("LAST_ARGUMENT option")
     using namespace Argos;
     Argv argv{"test", "--", "arg 1"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("arg"))
             .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
             .parse(argv.size(), argv.data());
@@ -281,7 +281,7 @@ TEST_CASE("LAST_OPTION option")
     using namespace Argos;
     Argv argv{"test", "--bar", "--", "--bar"};
     auto args = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Argument("arg"))
             .add(Option({"--bar"}))
             .add(Option({"--"}).type(OptionType::LAST_OPTION))
@@ -299,7 +299,7 @@ TEST_CASE("Argument with variable count")
     SECTION("Variable count first")
     {
         auto args = Argos::ArgumentParser("test")
-                .autoExitEnabled(false)
+                .autoExit(false)
                 .add(Argument("arg1").count(1, 4))
                 .add(Argument("arg2").count(2))
                 .parse(argv.size(), argv.data());
@@ -312,7 +312,7 @@ TEST_CASE("Argument with variable count")
     SECTION("Variable count last")
     {
         auto args = Argos::ArgumentParser("test")
-                .autoExitEnabled(false)
+                .autoExit(false)
                 .add(Argument("arg1").count(2))
                 .add(Argument("arg2").count(1, 4))
                 .parse(argv.size(), argv.data());
@@ -329,7 +329,7 @@ TEST_CASE("CLEAR option")
     using namespace Argos;
     Argv argv{"test", "--bar=12", "--bar", "34", "--ben"};
     auto it = Argos::ArgumentParser("test")
-            .autoExitEnabled(false)
+            .autoExit(false)
             .add(Option({"--bar"}).argument("N")
                          .operation(OptionOperation::APPEND)
                          .id(1))
@@ -352,4 +352,31 @@ TEST_CASE("CLEAR option")
     REQUIRE(arg->id() == 2);
     bars = it.parsedArguments().values("--bar").int32Values();
     REQUIRE(bars.empty());
+}
+
+TEST_CASE("Conflicting case-insensitive options")
+{
+    Argos::ArgumentParser argos("test");
+    argos.caseInsensitive(true)
+            .add(Argos::Option({"-h", "--help"})
+                         .type(Argos::OptionType::HELP)
+                         .text("Show help message."))
+            .add(Argos::Option({"-H"})
+                         .text("Output height."));
+    Argv argv{"test", "--help"};
+    REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
+}
+
+TEST_CASE("Case-insensitive options")
+{
+    using namespace Argos;
+    Argv argv{"test", "/PEnnY"};
+    auto args = ArgumentParser("test")
+            .caseInsensitive(true)
+            .optionStyle(OptionStyle::SLASH)
+            .add(Argos::Option({"/penny"}))
+            .add(Argos::Option({"/lane"}))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.value("/penny").boolValue());
+    REQUIRE(!args.value("/lane").boolValue());
 }
