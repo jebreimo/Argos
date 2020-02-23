@@ -38,6 +38,9 @@ namespace Argos
         ArgumentIteratorImpl(const std::vector<std::string>& args,
                              std::shared_ptr<ParserData> data);
 
+        ArgumentIteratorImpl(const std::vector<std::string_view>& args,
+                             std::shared_ptr<ParserData> data);
+
         IteratorResult next();
 
         static std::shared_ptr<ParsedArgumentsImpl>
@@ -63,6 +66,8 @@ namespace Argos
         size_t countArguments() const;
 
         bool checkArgumentCounter();
+
+        void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_Data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
