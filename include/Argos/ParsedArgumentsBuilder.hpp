@@ -35,13 +35,13 @@ namespace Argos
 
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
-        std::optional<std::string> get(const std::string& name);
+        std::optional<std::string_view> value(const std::string& name);
 
-        std::optional<std::string> get(const IArgumentView& arg);
+        std::optional<std::string_view> value(const IArgumentView& arg);
 
-        std::vector<std::string> getVector(const std::string& name);
+        std::vector<std::string_view> values(const std::string& name);
 
-        std::vector<std::string> getVector(const IArgumentView& arg);
+        std::vector<std::string_view> values(const IArgumentView& arg);
 
         bool has(const std::string& name);
 
