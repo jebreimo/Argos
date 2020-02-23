@@ -424,10 +424,10 @@ TEST_CASE("Test option callback")
     Argv argv{"test", "-a"};
     ArgumentParser parser("test");
     auto args = parser.autoExit(false)
-            .add(Argos::Option({"-b"}))
-            .add(Argos::Option({"-c"}))
-            .add(Argos::Option({"-a"}).callback(
-                    [](auto arg, auto val, auto builder) -> bool
+            .add(Option({"-b"}))
+            .add(Option({"-c"}))
+            .add(Option({"-a"}).callback(
+                    [](auto opt, auto val, auto builder) -> bool
                     {
                         builder.assign("-b", "true").assign("-c", "true");
                         return true;
@@ -437,4 +437,23 @@ TEST_CASE("Test option callback")
     REQUIRE(args.value("-a").boolValue());
     REQUIRE(args.value("-b").boolValue());
     REQUIRE(args.value("-c").boolValue());
+}
+
+TEST_CASE("Test argument callback")
+{
+    using namespace Argos;
+    Argv argv{"test", "-b", "abcd"};
+    ArgumentParser parser("test");
+    auto args = parser.autoExit(false)
+            .add(Option({"-b"}))
+            .add(Argument({"arg"}).callback(
+                    [](auto arg, auto val, auto builder) -> bool
+                    {
+                        builder.assign("-b", "false");
+                        return true;
+                    }))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    REQUIRE(!args.value("-b").boolValue());
+    REQUIRE(args.value("arg").stringValue() == "abcd");
 }
