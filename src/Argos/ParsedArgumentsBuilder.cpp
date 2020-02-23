@@ -14,4 +14,13 @@ namespace Argos
     ParsedArgumentsBuilder::ParsedArgumentsBuilder(ParsedArgumentsImpl* impl)
         : m_Impl(impl)
     {}
+
+    ParsedArgumentsBuilder&
+    ParsedArgumentsBuilder::assign(const std::string& name,
+                                   const std::string& value)
+    {
+        auto id = m_Impl->getValueId(name);
+        m_Impl->assignValue(id, value);
+        return *this;
+    }
 }

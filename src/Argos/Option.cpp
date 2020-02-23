@@ -98,6 +98,13 @@ namespace Argos
         return *this;
     }
 
+    Option& Option::flag(const std::string& f)
+    {
+        CHECK_OPTION_EXISTS();
+        m_Option->flags = {f};
+        return *this;
+    }
+
     Option& Option::flags(std::vector<std::string> f)
     {
         CHECK_OPTION_EXISTS();
@@ -128,6 +135,20 @@ namespace Argos
     {
         CHECK_OPTION_EXISTS();
         m_Option->value = std::to_string(value);
+        return *this;
+    }
+
+    Option& Option::value(double value)
+    {
+        CHECK_OPTION_EXISTS();
+        m_Option->value = std::to_string(value);
+        return *this;
+    }
+
+    Option& Option::callback(OptionCallback callback)
+    {
+        CHECK_OPTION_EXISTS();
+        m_Option->callback = move(callback);
         return *this;
     }
 

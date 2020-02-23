@@ -7,16 +7,15 @@
 //****************************************************************************
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include "OptionView.hpp"
-#include "ParsedArgumentsBuilder.hpp"
+#include "Callbacks.hpp"
+#include "Enums.hpp"
 
 namespace Argos
 {
-    using OptionCallback = std::function<bool(OptionView, std::string_view, ParsedArgumentsBuilder)>;
+    class OptionData;
 
     class Option
     {
@@ -40,6 +39,8 @@ namespace Argos
         Option& section(const std::string& name);
 
         Option& valueName(const std::string& id);
+
+        Option& callback(OptionCallback callback);
 
         Option& operation(OptionOperation operation);
 

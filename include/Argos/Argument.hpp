@@ -9,7 +9,8 @@
 
 #include <memory>
 #include <string>
-#include "ArgosEnums.hpp"
+#include "Callbacks.hpp"
+#include "Enums.hpp"
 
 namespace Argos
 {
@@ -37,6 +38,8 @@ namespace Argos
         Argument& section(const std::string& name);
 
         Argument& valueName(const std::string& id);
+
+        Argument& callback(ArgumentCallback callback);
 
         Argument& hidden(bool hidden);
 

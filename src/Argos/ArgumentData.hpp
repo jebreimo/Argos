@@ -7,7 +7,8 @@
 //****************************************************************************
 #pragma once
 #include <string>
-#include "Argos/ArgosEnums.hpp"
+#include "Argos/Callbacks.hpp"
+#include "Argos/Enums.hpp"
 
 namespace Argos
 {
@@ -17,6 +18,7 @@ namespace Argos
         std::string text;
         std::string section;
         std::string valueName;
+        ArgumentCallback callback;
         unsigned minCount = 1;
         unsigned maxCount = 1;
         bool hidden = false;

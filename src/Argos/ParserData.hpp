@@ -8,7 +8,7 @@
 #pragma once
 #include <map>
 #include <variant>
-#include "Argos/ArgosEnums.hpp"
+#include "Argos/Enums.hpp"
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
 #include "TextFormatter.hpp"

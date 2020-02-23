@@ -46,6 +46,8 @@ namespace Argos
         bool has(const std::string& name);
 
         bool has(const IArgumentView& arg);
+
+        void error(const std::string& errorMessage);
     private:
         ParsedArgumentsImpl* m_Impl;
     };

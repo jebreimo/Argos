@@ -14,7 +14,7 @@ add_library(Argos
     include/Argos/Argument.hpp
     include/Argos/Option.hpp
     include/Argos/ArgosException.hpp
-    include/Argos/ArgosEnums.hpp
+    include/Argos/Enums.hpp
     include/Argos/ArgumentParser.hpp
     include/Argos/ArgumentIterator.hpp
     include/Argos/IArgumentView.hpp
@@ -55,7 +55,7 @@ add_library(Argos
     src/Argos/WordSplitter.hpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
-    src/Argos/ParseValue.cpp src/Argos/ArgumentValues.cpp include/Argos/ArgumentValues.hpp src/Argos/OptionIterator.cpp src/Argos/OptionIterator.hpp src/Argos/IOptionIterator.hpp)
+    src/Argos/ParseValue.cpp src/Argos/ArgumentValues.cpp include/Argos/ArgumentValues.hpp src/Argos/OptionIterator.cpp src/Argos/OptionIterator.hpp src/Argos/IOptionIterator.hpp include/Argos/Callbacks.hpp)
 
 target_include_directories(Argos
     PUBLIC

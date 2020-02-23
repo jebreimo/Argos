@@ -8,7 +8,8 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "Argos/ArgosEnums.hpp"
+#include "Argos/Callbacks.hpp"
+#include "Argos/Enums.hpp"
 
 namespace Argos
 {
@@ -20,6 +21,7 @@ namespace Argos
         std::string valueName;
         std::string argument;
         std::string value;
+        OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType optionType = OptionType::NORMAL;
         bool hidden = false;

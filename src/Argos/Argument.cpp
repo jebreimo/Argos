@@ -77,6 +77,13 @@ namespace Argos
         return *this;
     }
 
+    Argument& Argument::callback(ArgumentCallback callback)
+    {
+        CHECK_ARGUMENT_EXISTS();
+        m_Argument->callback = callback;
+        return *this;
+    }
+
     Argument& Argument::hidden(bool hidden)
     {
         CHECK_ARGUMENT_EXISTS();

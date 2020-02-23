@@ -8,7 +8,7 @@
 #pragma once
 
 #include <string>
-#include "ArgosEnums.hpp"
+#include "Enums.hpp"
 
 namespace Argos
 {

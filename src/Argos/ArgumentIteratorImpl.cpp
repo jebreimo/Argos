@@ -289,6 +289,12 @@ namespace Argos
             break;
         }
 
+        if (option.callback)
+        {
+            if (!option.callback(OptionView(&option), arg, ParsedArgumentsBuilder(m_ParsedArgs.get())))
+                return {OptionResult::ERROR, {}};
+        }
+
         switch (option.optionType)
         {
         case OptionType::NORMAL:
@@ -386,6 +392,20 @@ namespace Argos
             if (auto argument = m_ArgumentCounter.nextArgument())
             {
                 auto s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
+                if (argument->callback)
+                {
+                    if (!argument->callback(ArgumentView(argument),
+                                            s,
+                                            ParsedArgumentsBuilder(m_ParsedArgs.get())))
+                    {
+                        m_State = State::ERROR;
+                        if (m_Data->parserSettings.autoExit)
+                            exit(1);
+                        copyRemainingArgumentsToParserResult();
+                        m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
+                        return {IteratorResultCode::ERROR, nullptr, {}};
+                    }
+                }
                 return {IteratorResultCode::ARGUMENT, argument, s};
             }
             else if (m_Data->parserSettings.ignoreUndefinedArguments)

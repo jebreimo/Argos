@@ -417,3 +417,24 @@ TEST_CASE("Abbreviated options")
         REQUIRE(!args.value("/pentagram").boolValue());
     }
 }
+
+TEST_CASE("Test option callback")
+{
+    using namespace Argos;
+    Argv argv{"test", "-a"};
+    ArgumentParser parser("test");
+    auto args = parser.autoExit(false)
+            .add(Argos::Option({"-b"}))
+            .add(Argos::Option({"-c"}))
+            .add(Argos::Option({"-a"}).callback(
+                    [](auto arg, auto val, auto builder) -> bool
+                    {
+                        builder.assign("-b", "true").assign("-c", "true");
+                        return true;
+                    }))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    REQUIRE(args.value("-a").boolValue());
+    REQUIRE(args.value("-b").boolValue());
+    REQUIRE(args.value("-c").boolValue());
+}
