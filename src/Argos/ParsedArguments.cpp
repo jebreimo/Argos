@@ -9,8 +9,6 @@
 #include "Argos/ParsedArguments.hpp"
 
 #include "ParsedArgumentsImpl.hpp"
-#include "Argos/ParseValue.hpp"
-#include "HelpWriter.hpp"
 
 namespace Argos
 {
@@ -30,20 +28,6 @@ namespace Argos
     {
         m_Impl = move(rhs.m_Impl);
         return *this;
-    }
-
-    std::vector<std::string> ParsedArguments::getStrings(
-            const std::string& name,
-            const std::vector<std::string>& defaultValue) const
-    {
-        auto id = m_Impl->getValueId(name);
-        auto values = m_Impl->getValues(id);
-        if (values.empty())
-            return defaultValue;
-        std::vector<std::string> result;
-        for (auto sv : values)
-            result.emplace_back(sv);
-        return result;
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const

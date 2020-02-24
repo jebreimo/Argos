@@ -34,10 +34,6 @@ namespace Argos
 
         bool has(const std::string& name) const;
 
-        std::vector<std::string>
-        getStrings(const std::string& name,
-                   const std::vector<std::string>& defaultValue = {}) const;
-
         ArgumentValue value(const std::string& name) const;
 
         ArgumentValues values(const std::string& name) const;
