@@ -19,7 +19,7 @@ namespace Argos
     class ArgumentIterator
     {
     public:
-        ArgumentIterator(int argc, char* argv[],
+        ArgumentIterator(std::vector<std::string_view> args,
                          std::shared_ptr<ParserData> parserData);
 
         ArgumentIterator(const ArgumentIterator&) = delete;

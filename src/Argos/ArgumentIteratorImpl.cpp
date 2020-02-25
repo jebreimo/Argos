@@ -17,25 +17,6 @@ namespace Argos
 {
     namespace
     {
-        std::vector<std::string_view>
-        makeStringViewVector(int count, char** strings, bool ignoreFirst)
-        {
-            std::vector<std::string_view> result;
-            for (int i = ignoreFirst ? 1 : 0; i < count; ++i)
-                result.emplace_back(strings[i]);
-            return result;
-        }
-
-        std::vector<std::string_view> makeStringViewVector(
-                const std::vector<std::string>& strings)
-        {
-            std::vector<std::string_view> result;
-            result.reserve(strings.size());
-            for (auto& s : strings)
-                result.emplace_back(s);
-            return result;
-        }
-
         using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
 
         OptionTable makeOptionIndex(
@@ -174,23 +155,12 @@ namespace Argos
         }
     }
 
-    ArgumentIteratorImpl::ArgumentIteratorImpl(
-            int argc, char** argv,
-            std::shared_ptr<ParserData> data)
-        : ArgumentIteratorImpl(makeStringViewVector(argc, argv, true), move(data))
-    {}
-
-    ArgumentIteratorImpl::ArgumentIteratorImpl(const std::vector<std::string>& args,
-                                               std::shared_ptr<ParserData> data)
-        : ArgumentIteratorImpl(makeStringViewVector(args), move(data))
-    {}
-
-    ArgumentIteratorImpl::ArgumentIteratorImpl(const std::vector<std::string_view>& args,
+    ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_Data(move(data)),
           m_Options(makeOptionIndex(m_Data->options, m_Data->parserSettings.caseInsensitive)),
           m_ParsedArgs(std::make_shared<ParsedArgumentsImpl>(m_Data)),
-          m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle, args))
+          m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle, move(args)))
     {
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter = ArgumentCounter(m_Data->arguments);
@@ -208,10 +178,10 @@ namespace Argos
     }
 
     std::shared_ptr<ParsedArgumentsImpl>
-    ArgumentIteratorImpl::parse(int argc, char* argv[],
+    ArgumentIteratorImpl::parse(std::vector<std::string_view> args,
                                 const std::shared_ptr<ParserData>& data)
     {
-        ArgumentIteratorImpl iterator(argc, argv, data);
+        ArgumentIteratorImpl iterator(move(args), data);
         while (true)
         {
             auto code = std::get<0>(iterator.doNext());

@@ -32,19 +32,14 @@ namespace Argos
     class ArgumentIteratorImpl
     {
     public:
-        ArgumentIteratorImpl(int argc, char* argv[],
-                             std::shared_ptr<ParserData> data);
-
-        ArgumentIteratorImpl(const std::vector<std::string>& args,
-                             std::shared_ptr<ParserData> data);
-
-        ArgumentIteratorImpl(const std::vector<std::string_view>& args,
+        ArgumentIteratorImpl(std::vector<std::string_view> args,
                              std::shared_ptr<ParserData> data);
 
         IteratorResult next();
 
         static std::shared_ptr<ParsedArgumentsImpl>
-        parse(int argc, char* argv[], const std::shared_ptr<ParserData>& data);
+        parse(std::vector<std::string_view> args,
+              const std::shared_ptr<ParserData>& data);
 
         const std::shared_ptr<ParsedArgumentsImpl>& parsedArguments() const;
     private:
@@ -56,6 +51,7 @@ namespace Argos
             HELP,
             ERROR
         };
+
         std::pair<OptionResult, std::string_view>
         processOption(const OptionData& option, const std::string& flag);
 
@@ -82,6 +78,5 @@ namespace Argos
             ERROR
         };
         State m_State = State::ARGUMENTS_AND_OPTIONS;
-        std::vector<std::string> m_InernalArgs;
     };
 }

@@ -42,9 +42,17 @@ namespace Argos
 
         ParsedArguments parse(int argc, char* argv[]) const;
 
+        ParsedArguments parse(std::vector<std::string_view> args);
+
+        ParsedArguments parse(std::vector<std::string_view> args) const;
+
         ArgumentIterator makeIterator(int argc, char* argv[]);
 
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
+
+        ArgumentIterator makeIterator(std::vector<std::string_view> args);
+
+        ArgumentIterator makeIterator(std::vector<std::string_view> args) const;
 
         bool allowAbbreviatedOptions() const;
 

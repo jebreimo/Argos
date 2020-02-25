@@ -11,9 +11,9 @@
 
 namespace Argos
 {
-    ArgumentIterator::ArgumentIterator(int argc, char* argv[],
+    ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args,
                                        std::shared_ptr<ParserData> parserData)
-        : m_Impl(std::make_unique<ArgumentIteratorImpl>(argc, argv,
+        : m_Impl(std::make_unique<ArgumentIteratorImpl>(move(args),
                                                         move(parserData)))
     {}
 

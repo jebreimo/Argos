@@ -78,33 +78,87 @@ namespace Argos
             };
             InternalIdMaker idMaker;
             for (auto& a : data.arguments)
-                a->valueId_ = idMaker.makeNumericId(a->valueName);
+            {
+                if (!a->valueName.empty())
+                {
+                    a->valueId_ = idMaker.makeNumericId(a->valueName);
+                    idMaker.explicitIds.emplace(a->name, a->valueId_);
+                }
+                else
+                {
+                    a->valueId_ = idMaker.makeNumericId(a->name);
+                }
+            }
             for (auto& o : data.options)
+            {
                 o->valueId_ = idMaker.makeNumericId(o->valueName);
+                for (auto& f : o->flags)
+                    idMaker.explicitIds.emplace(f, o->valueId_);
+            }
         }
 
-        ParsedArguments parseArguments(int argc, char** argv,
-                                       const std::shared_ptr<ParserData>& data)
+        std::vector<std::string_view>
+        makeStringViewVector(int count, char** strings)
         {
-            if (argc >= 1 && data->helpSettings.programName.empty())
-                data->helpSettings.programName = getBaseName(argv[0]);
+            std::vector<std::string_view> result;
+            for (int i = 0; i < count; ++i)
+                result.emplace_back(strings[i]);
+            return result;
+        }
+
+        void checkProgramName(int argc, char* argv[],
+                              const std::shared_ptr<ParserData>& data)
+        {
+            if (argc <= 0)
+                ARGOS_THROW("argc and argv must least contain the command name.");
+            else if (data->helpSettings.programName.empty())
+                data->helpSettings.programName = argv[0];
+        }
+
+        ParsedArguments parseImpl(std::vector<std::string_view> args,
+                                  const std::shared_ptr<ParserData>& data)
+        {
             generateValueIds(*data);
             return ParsedArguments(
-                    ArgumentIteratorImpl::parse(argc, argv, data));
+                    ArgumentIteratorImpl::parse(move(args), data));
+        }
+
+        ParsedArguments parseImpl(int argc, char* argv[],
+                                  const std::shared_ptr<ParserData>& data)
+        {
+            checkProgramName(argc, argv, data);
+            return parseImpl(makeStringViewVector(argc - 1, argv + 1), data);
+        }
+
+        ArgumentIterator
+        makeIteratorImpl(std::vector<std::string_view> args,
+                         const std::shared_ptr<ParserData>& data)
+        {
+            generateValueIds(*data);
+            return ArgumentIterator(move(args), data);
+        }
+
+        ArgumentIterator
+        makeIteratorImpl(int argc, char* argv[],
+                         const std::shared_ptr<ParserData>& data)
+        {
+            checkProgramName(argc, argv, data);
+            return makeIteratorImpl(makeStringViewVector(argc - 1, argv + 1), data);
         }
     }
+
     ArgumentParser::ArgumentParser()
-        : ArgumentParser(std::string())
+            : ArgumentParser(std::string())
     {}
 
     ArgumentParser::ArgumentParser(const std::string& programName)
-        : m_Data(std::make_unique<ParserData>())
+            : m_Data(std::make_unique<ParserData>())
     {
         data().helpSettings.programName = programName;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
-        : m_Data(move(rhs.m_Data))
+            : m_Data(move(rhs.m_Data))
     {}
 
     ArgumentParser::~ArgumentParser() = default;
@@ -175,28 +229,53 @@ namespace Argos
         return *this;
     }
 
-    ParsedArguments ArgumentParser::parse(int argc, char** argv) const
-    {
-        if (!m_Data)
-            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return parseArguments(argc, argv, makeCopy(data()));
-    }
-
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return parseArguments(argc, argv, std::move(m_Data));
+        return parseImpl(argc, argv, std::move(m_Data));
+    }
+
+    ParsedArguments ArgumentParser::parse(int argc, char** argv) const
+    {
+       return parseImpl(argc, argv, makeCopy(data()));
+    }
+
+    ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args)
+    {
+        if (!m_Data)
+            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
+        return parseImpl(move(args), std::move(m_Data));
+    }
+
+    ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args) const
+    {
+        return parseImpl(move(args), makeCopy(data()));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv)
     {
-        return ArgumentIterator(argc, argv, std::move(m_Data));
+        if (!m_Data)
+            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
+        return makeIteratorImpl(argc, argv, std::move(m_Data));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv) const
     {
-        return ArgumentIterator(argc, argv, makeCopy(data()));
+        return makeIteratorImpl(argc, argv, makeCopy(data()));
+    }
+
+    ArgumentIterator ArgumentParser::makeIterator(
+            std::vector<std::string_view> args)
+    {
+        if (!m_Data)
+            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
+        return makeIteratorImpl(move(args), std::move(m_Data));
+    }
+
+    ArgumentIterator ArgumentParser::makeIterator(std::vector<std::string_view> args) const
+    {
+        return makeIteratorImpl(move(args), makeCopy(data()));
     }
 
     bool ArgumentParser::allowAbbreviatedOptions() const

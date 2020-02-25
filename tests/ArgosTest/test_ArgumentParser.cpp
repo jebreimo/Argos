@@ -327,7 +327,7 @@ TEST_CASE("Argument with variable count")
 TEST_CASE("CLEAR option")
 {
     using namespace Argos;
-    Argv argv{"test", "--bar=12", "--bar", "34", "--ben"};
+    Argv argv{"test", "--bar=12", "--bud", "--bar", "34", "--ben"};
     auto it = Argos::ArgumentParser("test")
             .autoExit(false)
             .add(Option({"--bar"}).argument("N")
@@ -337,12 +337,17 @@ TEST_CASE("CLEAR option")
                          .valueName("--bar")
                          .operation(OptionOperation::CLEAR)
                          .id(2))
+            .add(Option({"--bud"})
+                         .id(3))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 1);
     REQUIRE(value == "12");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg->id() == 3);
+    REQUIRE(value.empty());
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 1);
     REQUIRE(value == "34");
@@ -352,6 +357,7 @@ TEST_CASE("CLEAR option")
     REQUIRE(arg->id() == 2);
     bars = it.parsedArguments().values("--bar").int32Values();
     REQUIRE(bars.empty());
+    REQUIRE(it.parsedArguments().value("--bud").boolValue());
 }
 
 TEST_CASE("Conflicting case-insensitive options")
@@ -446,7 +452,7 @@ TEST_CASE("Test argument callback")
     ArgumentParser parser("test");
     auto args = parser.autoExit(false)
             .add(Option({"-b"}))
-            .add(Argument({"arg"}).callback(
+            .add(Argument("arg").callback(
                     [](auto arg, auto val, auto builder) -> bool
                     {
                         builder.assign("-b", "false");
@@ -456,4 +462,21 @@ TEST_CASE("Test argument callback")
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
     REQUIRE(!args.value("-b").boolValue());
     REQUIRE(args.value("arg").stringValue() == "abcd");
+}
+
+TEST_CASE("Two arguments with the same name")
+{
+    using namespace Argos;
+    Argv argv{"test", "aa", "bb", "cc"};
+    ArgumentParser parser("test");
+    auto args = parser.autoExit(false)
+            .add(Argument("arg"))
+            .add(Argument("arg").count(0, 10))
+            .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
+    auto vals = args.values("arg").stringValues();
+    REQUIRE(vals.size() == 3);
+    REQUIRE(vals[0] == "aa");
+    REQUIRE(vals[1] == "bb");
+    REQUIRE(vals[2] == "cc");
 }
