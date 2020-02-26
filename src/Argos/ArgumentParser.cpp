@@ -38,12 +38,6 @@ namespace Argos
             return eqPos == std::string::npos || eqPos == flag.size() - 1;
         }
 
-        std::string_view getBaseName(std::string_view path)
-        {
-            auto i = path.find_last_of("/\\");
-            return i == std::string_view::npos ? path : path.substr(i + 1);
-        }
-
         std::unique_ptr<ParserData> makeCopy(const ParserData& data)
         {
             auto result = std::make_unique<ParserData>();
@@ -97,37 +91,12 @@ namespace Argos
             }
         }
 
-        std::vector<std::string_view>
-        makeStringViewVector(int count, char** strings)
-        {
-            std::vector<std::string_view> result;
-            for (int i = 0; i < count; ++i)
-                result.emplace_back(strings[i]);
-            return result;
-        }
-
-        void checkProgramName(int argc, char* argv[],
-                              const std::shared_ptr<ParserData>& data)
-        {
-            if (argc <= 0)
-                ARGOS_THROW("argc and argv must least contain the command name.");
-            else if (data->helpSettings.programName.empty())
-                data->helpSettings.programName = argv[0];
-        }
-
         ParsedArguments parseImpl(std::vector<std::string_view> args,
                                   const std::shared_ptr<ParserData>& data)
         {
             generateValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(move(args), data));
-        }
-
-        ParsedArguments parseImpl(int argc, char* argv[],
-                                  const std::shared_ptr<ParserData>& data)
-        {
-            checkProgramName(argc, argv, data);
-            return parseImpl(makeStringViewVector(argc - 1, argv + 1), data);
         }
 
         ArgumentIterator
@@ -137,18 +106,10 @@ namespace Argos
             generateValueIds(*data);
             return ArgumentIterator(move(args), data);
         }
-
-        ArgumentIterator
-        makeIteratorImpl(int argc, char* argv[],
-                         const std::shared_ptr<ParserData>& data)
-        {
-            checkProgramName(argc, argv, data);
-            return makeIteratorImpl(makeStringViewVector(argc - 1, argv + 1), data);
-        }
     }
 
     ArgumentParser::ArgumentParser()
-            : ArgumentParser(std::string())
+            : ArgumentParser("UNINITIALIZED")
     {}
 
     ArgumentParser::ArgumentParser(const std::string& programName)
@@ -231,14 +192,16 @@ namespace Argos
 
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
-        if (!m_Data)
-            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return parseImpl(argc, argv, std::move(m_Data));
+        if (argc <= 0)
+            ARGOS_THROW("argc and argv must at least contain the command name.");
+        return parse(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 
     ParsedArguments ArgumentParser::parse(int argc, char** argv) const
     {
-       return parseImpl(argc, argv, makeCopy(data()));
+        if (argc <= 0)
+            ARGOS_THROW("argc and argv must at least contain the command name.");
+        return parse(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 
     ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args)
@@ -255,14 +218,16 @@ namespace Argos
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv)
     {
-        if (!m_Data)
-            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return makeIteratorImpl(argc, argv, std::move(m_Data));
+        if (argc <= 0)
+            ARGOS_THROW("argc and argv must at least contain the command name.");
+        return makeIterator(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv) const
     {
-        return makeIteratorImpl(argc, argv, makeCopy(data()));
+        if (argc <= 0)
+            ARGOS_THROW("argc and argv must at least contain the command name.");
+        return makeIterator(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(

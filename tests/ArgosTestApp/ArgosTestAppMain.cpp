@@ -50,7 +50,7 @@ Rectangle parseResolution(const Argos::ArgumentValue& v)
 int main(int argc, char* argv[])
 {
     using namespace Argos;
-    auto args = ArgumentParser()
+    auto args = ArgumentParser("ArgosTestApp")
             .allowAbbreviatedOptions(true)
             .add(Argument("file").text("A file of some kind."))
             .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
