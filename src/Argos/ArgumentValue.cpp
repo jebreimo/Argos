@@ -48,68 +48,68 @@ namespace Argos
         return m_Value;
     }
 
-    bool ArgumentValue::boolValue(bool defaultValue) const
+    bool ArgumentValue::asBool(bool defaultValue) const
     {
         return getValue(defaultValue ? 1 : 0);
     }
 
-    int8_t ArgumentValue::int8Value(int8_t defaultValue) const
+    int8_t ArgumentValue::asInt8(int8_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    int16_t ArgumentValue::int16Value(int16_t defaultValue) const
+    int16_t ArgumentValue::asInt16(int16_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    int32_t ArgumentValue::int32Value(int32_t defaultValue) const
+    int32_t ArgumentValue::asInt32(int32_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    int64_t ArgumentValue::int64Value(int64_t defaultValue) const
+    int64_t ArgumentValue::asInt64(int64_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    uint8_t ArgumentValue::uint8Value(uint8_t defaultValue) const
+    uint8_t ArgumentValue::asUint8(uint8_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    uint16_t ArgumentValue::uint16Value(uint16_t defaultValue) const
+    uint16_t ArgumentValue::asUint16(uint16_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    uint32_t ArgumentValue::uint32Value(uint32_t defaultValue) const
+    uint32_t ArgumentValue::asUint32(uint32_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    uint64_t ArgumentValue::uint64Value(uint64_t defaultValue) const
+    uint64_t ArgumentValue::asUint64(uint64_t defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    float ArgumentValue::floatValue(float defaultValue) const
+    float ArgumentValue::asFloat(float defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    double ArgumentValue::doubleValue(double defaultValue) const
+    double ArgumentValue::asDouble(double defaultValue) const
     {
         return getValue(defaultValue);
     }
 
-    long double ArgumentValue::longDoubleValue(long double defaultValue) const
+    long double ArgumentValue::asLongDouble(long double defaultValue) const
     {
         return getValue(defaultValue);
     }
 
     std::string
-    ArgumentValue::stringValue(const std::string& defaultValue) const
+    ArgumentValue::asString(const std::string& defaultValue) const
     {
         return m_Value ? std::string(*m_Value) : defaultValue;
     }

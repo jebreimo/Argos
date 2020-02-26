@@ -58,68 +58,68 @@ namespace Argos
         return m_Values;
     }
 
-    std::vector<int8_t> ArgumentValues::int8Values(const std::vector<int8_t>& defaultValue) const
+    std::vector<int8_t> ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int16_t> ArgumentValues::int16Values(const std::vector<int16_t>& defaultValue) const
+    std::vector<int16_t> ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int32_t> ArgumentValues::int32Values(
+    std::vector<int32_t> ArgumentValues::asInt32s(
             const std::vector<int32_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int64_t> ArgumentValues::int64Values(const std::vector<int64_t>& defaultValue) const
+    std::vector<int64_t> ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<uint8_t> ArgumentValues::uint8Values(const std::vector<uint8_t>& defaultValue) const
+    std::vector<uint8_t> ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
     std::vector<uint16_t>
-    ArgumentValues::uint16Values(const std::vector<uint16_t>& defaultValue) const
+    ArgumentValues::asUint16s(const std::vector<uint16_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
     std::vector<uint32_t>
-    ArgumentValues::uint32Values(const std::vector<uint32_t>& defaultValue) const
+    ArgumentValues::asUint32s(const std::vector<uint32_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
     std::vector<uint64_t>
-    ArgumentValues::uint64Values(const std::vector<uint64_t>& defaultValue) const
+    ArgumentValues::asUint64s(const std::vector<uint64_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<float> ArgumentValues::floatValues(const std::vector<float>& defaultValue) const
+    std::vector<float> ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<double> ArgumentValues::doubleValues(const std::vector<double>& defaultValue) const
+    std::vector<double> ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
     std::vector<long double>
-    ArgumentValues::longDoubleValues(const std::vector<long double>& defaultValue) const
+    ArgumentValues::asLongDoubles(const std::vector<long double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
     std::vector<std::string>
-    ArgumentValues::stringValues(const std::vector<std::string>& defaultValue) const
+    ArgumentValues::asStrings(const std::vector<std::string>& defaultValue) const
     {
         if (m_Values.empty())
             return defaultValue;

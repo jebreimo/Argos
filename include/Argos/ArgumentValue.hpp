@@ -39,31 +39,31 @@ namespace Argos
 
         std::optional<std::string_view> value() const;
 
-        bool boolValue(bool defaultValue = false) const;
+        bool asBool(bool defaultValue = false) const;
 
-        int8_t int8Value(int8_t defaultValue = 0) const;
+        int8_t asInt8(int8_t defaultValue = 0) const;
 
-        int16_t int16Value(int16_t defaultValue = 0) const;
+        int16_t asInt16(int16_t defaultValue = 0) const;
 
-        int32_t int32Value(int32_t defaultValue = 0) const;
+        int32_t asInt32(int32_t defaultValue = 0) const;
 
-        int64_t int64Value(int64_t defaultValue = 0) const;
+        int64_t asInt64(int64_t defaultValue = 0) const;
 
-        uint8_t uint8Value(uint8_t defaultValue = 0) const;
+        uint8_t asUint8(uint8_t defaultValue = 0) const;
 
-        uint16_t uint16Value(uint16_t defaultValue = 0) const;
+        uint16_t asUint16(uint16_t defaultValue = 0) const;
 
-        uint32_t uint32Value(uint32_t defaultValue = 0) const;
+        uint32_t asUint32(uint32_t defaultValue = 0) const;
 
-        uint64_t uint64Value(uint64_t defaultValue = 0) const;
+        uint64_t asUint64(uint64_t defaultValue = 0) const;
 
-        float floatValue(float defaultValue = 0) const;
+        float asFloat(float defaultValue = 0) const;
 
-        double doubleValue(double defaultValue = 0) const;
+        double asDouble(double defaultValue = 0) const;
 
-        long double longDoubleValue(long double defaultValue = 0) const;
+        long double asLongDouble(long double defaultValue = 0) const;
 
-        std::string stringValue(const std::string& defaultValue = {}) const;
+        std::string asString(const std::string& defaultValue = {}) const;
 
         void error(const std::string& message) const;
     private:

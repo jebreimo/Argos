@@ -42,40 +42,40 @@ namespace Argos
 
         const std::vector<std::string_view>& values() const;
 
-        std::vector<int8_t> int8Values(
+        std::vector<int8_t> asInt8s(
                 const std::vector<int8_t>& defaultValue = {}) const;
 
-        std::vector<int16_t> int16Values(
+        std::vector<int16_t> asInt16s(
                 const std::vector<int16_t>& defaultValue = {}) const;
 
-        std::vector<int32_t> int32Values(
+        std::vector<int32_t> asInt32s(
                 const std::vector<int32_t>& defaultValue = {}) const;
 
-        std::vector<int64_t> int64Values(
+        std::vector<int64_t> asInt64s(
                 const std::vector<int64_t>& defaultValue = {}) const;
 
-        std::vector<uint8_t> uint8Values(
+        std::vector<uint8_t> asUint8s(
                 const std::vector<uint8_t>& defaultValue = {}) const;
 
-        std::vector<uint16_t> uint16Values(
+        std::vector<uint16_t> asUint16s(
                 const std::vector<uint16_t>& defaultValue = {}) const;
 
-        std::vector<uint32_t> uint32Values(
+        std::vector<uint32_t> asUint32s(
                 const std::vector<uint32_t>& defaultValue = {}) const;
 
-        std::vector<uint64_t> uint64Values(
+        std::vector<uint64_t> asUint64s(
                 const std::vector<uint64_t>& defaultValue = {}) const;
 
-        std::vector<float> floatValues(
+        std::vector<float> asFloats(
                 const std::vector<float>& defaultValue = {}) const;
 
-        std::vector<double> doubleValues(
+        std::vector<double> asDoubles(
                 const std::vector<double>& defaultValue = {}) const;
 
-        std::vector<long double> longDoubleValues(
+        std::vector<long double> asLongDoubles(
                 const std::vector<long double>& defaultValue = {}) const;
 
-        std::vector<std::string> stringValues(
+        std::vector<std::string> asStrings(
                 const std::vector<std::string>& defaultValue = {}) const;
     private:
         template <typename T>

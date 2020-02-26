@@ -50,7 +50,7 @@ TEST_CASE("Test help flag")
     REQUIRE(result.has("--help"));
     REQUIRE(result.resultCode() == Argos::ParserResultCode::STOP);
     REQUIRE(result.stopOption().id() == 10);
-    REQUIRE(result.value("--help").boolValue());
+    REQUIRE(result.value("--help").asBool());
 }
 
 TEST_CASE("Conflicting flags")
@@ -73,7 +73,7 @@ TEST_CASE("String arguments")
             .autoExit(false)
             .add(Argument("file"))
             .parse(argv.size(), argv.data());
-    REQUIRE(args.value("file").stringValue() == "test_file.txt");
+    REQUIRE(args.value("file").asString() == "test_file.txt");
 }
 
 TEST_CASE("Section order in help text")
@@ -102,8 +102,8 @@ TEST_CASE("Two argument")
             .add(Argument("arg1"))
             .add(Argument("arg2"))
             .parse(argv.size(), argv.data());
-    REQUIRE(args.value("arg1").stringValue() == "foo");
-    REQUIRE(args.value("arg2").stringValue() == "bar");
+    REQUIRE(args.value("arg1").asString() == "foo");
+    REQUIRE(args.value("arg2").asString() == "bar");
 }
 
 TEST_CASE("Option that appends must have argument or value")
@@ -125,7 +125,7 @@ TEST_CASE("List argument")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    auto numbers = args.values("-n").int32Values();
+    auto numbers = args.values("-n").asInt32s();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
     REQUIRE(numbers[0] == 12);
@@ -160,7 +160,7 @@ TEST_CASE("Tet dash options")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    auto numbers = args.values("-number").int32Values();
+    auto numbers = args.values("-number").asInt32s();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
 }
@@ -177,7 +177,7 @@ TEST_CASE("Tet slash options")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    auto numbers = args.values("/number").int32Values();
+    auto numbers = args.values("/number").asInt32s();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
 }
@@ -287,9 +287,9 @@ TEST_CASE("LAST_OPTION option")
             .add(Option({"--"}).type(OptionType::LAST_OPTION))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    REQUIRE(args.value("--bar").boolValue());
-    REQUIRE(args.value("--").boolValue());
-    REQUIRE(args.value("arg").stringValue() == "--bar");
+    REQUIRE(args.value("--bar").asBool());
+    REQUIRE(args.value("--").asBool());
+    REQUIRE(args.value("arg").asString() == "--bar");
 }
 
 TEST_CASE("Argument with variable count")
@@ -304,9 +304,9 @@ TEST_CASE("Argument with variable count")
                 .add(Argument("arg2").count(2))
                 .parse(argv.size(), argv.data());
         REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-        auto arg1 = args.values("arg1").stringValues();
+        auto arg1 = args.values("arg1").asStrings();
         REQUIRE(arg1 == std::vector<std::string>{"ab", "cd"});
-        auto arg2 = args.values("arg2").stringValues();
+        auto arg2 = args.values("arg2").asStrings();
         REQUIRE(arg2 == std::vector<std::string>{"ef", "gh"});
     }
     SECTION("Variable count last")
@@ -317,9 +317,9 @@ TEST_CASE("Argument with variable count")
                 .add(Argument("arg2").count(1, 4))
                 .parse(argv.size(), argv.data());
         REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-        auto arg1 = args.values("arg1").stringValues();
+        auto arg1 = args.values("arg1").asStrings();
         REQUIRE(arg1 == std::vector<std::string>{"ab", "cd"});
-        auto arg2 = args.values("arg2").stringValues();
+        auto arg2 = args.values("arg2").asStrings();
         REQUIRE(arg2 == std::vector<std::string>{"ef", "gh"});
     }
 }
@@ -351,13 +351,13 @@ TEST_CASE("CLEAR option")
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 1);
     REQUIRE(value == "34");
-    auto bars = it.parsedArguments().values("--bar").int32Values();
+    auto bars = it.parsedArguments().values("--bar").asInt32s();
     REQUIRE(bars == std::vector<int32_t>{12, 34});
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 2);
-    bars = it.parsedArguments().values("--bar").int32Values();
+    bars = it.parsedArguments().values("--bar").asInt32s();
     REQUIRE(bars.empty());
-    REQUIRE(it.parsedArguments().value("--bud").boolValue());
+    REQUIRE(it.parsedArguments().value("--bud").asBool());
 }
 
 TEST_CASE("Conflicting case-insensitive options")
@@ -384,8 +384,8 @@ TEST_CASE("Case-insensitive options")
             .add(Argos::Option({"/lane"}))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    REQUIRE(args.value("/penny").boolValue());
-    REQUIRE(!args.value("/lane").boolValue());
+    REQUIRE(args.value("/penny").asBool());
+    REQUIRE(!args.value("/lane").asBool());
 }
 
 TEST_CASE("Abbreviated options")
@@ -403,24 +403,24 @@ TEST_CASE("Abbreviated options")
         Argv argv{"test", "/PenN"};
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-        REQUIRE(args.value("/penny").boolValue());
-        REQUIRE(!args.value("/pentagram").boolValue());
+        REQUIRE(args.value("/penny").asBool());
+        REQUIRE(!args.value("/pentagram").asBool());
     }
     SECTION("Valid flag 2")
     {
         Argv argv{"test", "/peNT"};
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-        REQUIRE(!args.value("/penny").boolValue());
-        REQUIRE(args.value("/pentagram").boolValue());
+        REQUIRE(!args.value("/penny").asBool());
+        REQUIRE(args.value("/pentagram").asBool());
     }
     SECTION("Invalid flag")
     {
         Argv argv{"test", "/peN"};
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.resultCode() == ParserResultCode::ERROR);
-        REQUIRE(!args.value("/penny").boolValue());
-        REQUIRE(!args.value("/pentagram").boolValue());
+        REQUIRE(!args.value("/penny").asBool());
+        REQUIRE(!args.value("/pentagram").asBool());
     }
 }
 
@@ -440,9 +440,9 @@ TEST_CASE("Test option callback")
                     }))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    REQUIRE(args.value("-a").boolValue());
-    REQUIRE(args.value("-b").boolValue());
-    REQUIRE(args.value("-c").boolValue());
+    REQUIRE(args.value("-a").asBool());
+    REQUIRE(args.value("-b").asBool());
+    REQUIRE(args.value("-c").asBool());
 }
 
 TEST_CASE("Test argument callback")
@@ -460,8 +460,8 @@ TEST_CASE("Test argument callback")
                     }))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    REQUIRE(!args.value("-b").boolValue());
-    REQUIRE(args.value("arg").stringValue() == "abcd");
+    REQUIRE(!args.value("-b").asBool());
+    REQUIRE(args.value("arg").asString() == "abcd");
 }
 
 TEST_CASE("Two arguments with the same name")
@@ -474,7 +474,7 @@ TEST_CASE("Two arguments with the same name")
             .add(Argument("arg").count(0, 10))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::NORMAL);
-    auto vals = args.values("arg").stringValues();
+    auto vals = args.values("arg").asStrings();
     REQUIRE(vals.size() == 3);
     REQUIRE(vals[0] == "aa");
     REQUIRE(vals[1] == "bb");

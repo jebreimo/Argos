@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
             .add(Option({"--"}).type(OptionType::LAST_OPTION).text("Mark end of options. Allows arguments starting with '-'."))
             .add(Option({"-a", "--anonymous"}))
             .parse(argc, argv);
-    std::cout << "file: " << args.value("file").stringValue() << "\n";
+    std::cout << "file: " << args.value("file").asString() << "\n";
 
     auto res = parseResolution(args.value("--resolution"));
     std::cout << "resolution: " << res.width << 'x' << res.height << '\n';
