@@ -20,17 +20,17 @@ namespace Argos
     public:
         explicit OptionView(const OptionData* data);
 
-        const std::string& text() const override;
+        const std::string& text() const final;
 
-        const std::string& section() const override;
+        const std::string& section() const final;
 
-        const std::string& valueName() const override;
+        const std::string& valueName() const final;
 
         OptionOperation operation() const;
 
-        bool hidden() const override;
+        bool hidden() const final;
 
-        int id() const override;
+        int id() const final;
 
         const std::vector<std::string>& flags() const;
 

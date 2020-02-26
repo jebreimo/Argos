@@ -20,15 +20,15 @@ namespace Argos
 
         OptionIterator(const OptionIterator& rhs);
 
-        std::optional<std::string> next() override;
+        std::optional<std::string> next() final;
 
-        std::optional<std::string> nextValue() override;
+        std::optional<std::string> nextValue() final;
 
-        std::string_view current() const override;
+        std::string_view current() const final;
 
-        std::vector<std::string_view> remainingArguments() const override;
+        std::vector<std::string_view> remainingArguments() const final;
 
-        OptionIterator* clone() const override;
+        OptionIterator* clone() const final;
     private:
         std::vector<std::string_view> m_Args;
         std::vector<std::string_view>::const_iterator m_ArgsIt;

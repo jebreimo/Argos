@@ -18,15 +18,15 @@ namespace Argos
     public:
         explicit ArgumentView(const ArgumentData* data);
 
-        const std::string& text() const override;
+        const std::string& text() const final;
 
-        const std::string& section() const override;
+        const std::string& section() const final;
 
-        const std::string& valueName() const override;
+        const std::string& valueName() const final;
 
-        bool hidden() const override;
+        bool hidden() const final;
 
-        int id() const override;
+        int id() const final;
 
         const std::string& name() const;
 
