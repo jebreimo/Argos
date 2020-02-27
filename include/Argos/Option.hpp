@@ -44,7 +44,7 @@ namespace Argos
 
         Option& operation(OptionOperation operation);
 
-        Option& hidden(bool hidden);
+        Option& visibility(Visibility visibility);
 
         Option& id(int id);
 

@@ -84,10 +84,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::hidden(bool hidden)
+    Option& Option::visibility(Visibility visibility)
     {
         CHECK_OPTION_EXISTS();
-        m_Option->hidden = hidden;
+        m_Option->visibility = visibility;
         return *this;
     }
 

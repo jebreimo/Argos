@@ -35,9 +35,9 @@ namespace Argos
         return m_Option->operation;
     }
 
-    bool OptionView::hidden() const
+    Visibility OptionView::visibility() const
     {
-        return m_Option->hidden;
+        return m_Option->visibility;
     }
 
     int OptionView::id() const

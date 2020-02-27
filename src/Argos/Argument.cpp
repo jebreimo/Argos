@@ -84,10 +84,10 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::hidden(bool hidden)
+    Argument& Argument::visibility(Visibility visibility)
     {
         CHECK_ARGUMENT_EXISTS();
-        m_Argument->hidden = hidden;
+        m_Argument->visibility = visibility;
         return *this;
     }
 

@@ -28,7 +28,7 @@ namespace Argos
 
         OptionOperation operation() const;
 
-        bool hidden() const final;
+        Visibility visibility() const final;
 
         int id() const final;
 

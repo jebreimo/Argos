@@ -24,7 +24,7 @@ namespace Argos
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType optionType = OptionType::NORMAL;
-        bool hidden = false;
+        Visibility visibility = Visibility::NORMAL;
         bool mandatory = false;
         int id = 0;
         int valueId_ = 0;

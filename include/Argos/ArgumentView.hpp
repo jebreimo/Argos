@@ -24,7 +24,7 @@ namespace Argos
 
         const std::string& valueName() const final;
 
-        bool hidden() const final;
+        Visibility visibility() const final;
 
         int id() const final;
 

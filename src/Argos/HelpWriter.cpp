@@ -115,14 +115,14 @@ namespace Argos
         m_Data->textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
         for (auto& opt : m_Data->options)
         {
-            if (opt->hidden)
+            if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                 continue;
 
             m_Data->textFormatter.writePreformattedText(getBriefOptionName(*opt));
         }
         for (auto& arg : m_Data->arguments)
         {
-            if (arg->hidden)
+            if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                 continue;
             m_Data->textFormatter.writePreformattedText(getArgumentName(*arg));
         }
@@ -159,7 +159,7 @@ namespace Argos
             argSection = "ARGUMENTS";
         for (auto& arg : m_Data->arguments)
         {
-            if (arg->hidden)
+            if ((arg->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
             auto& section = arg->section.empty() ? *argSection : arg->section;
             addHelpText(section, getArgumentName(*arg), arg->text);
@@ -177,7 +177,7 @@ namespace Argos
             optSection = "OPTIONS";
         for (auto& opt : m_Data->options)
         {
-            if (opt->hidden)
+            if ((opt->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
             auto& section = opt->section.empty() ? *optSection : opt->section;
             addHelpText(section, getLongOptionName(*opt), opt->text);

@@ -98,4 +98,17 @@ namespace Argos
         OPTIONS,
         END_TEXT
     };
+
+    enum class Visibility : unsigned
+    {
+        HIDDEN,
+        USAGE,
+        TEXT,
+        NORMAL
+    };
+
+    constexpr Visibility operator&(Visibility a, Visibility b)
+    {
+        return Visibility(unsigned(a) & unsigned(b));
+    }
 }

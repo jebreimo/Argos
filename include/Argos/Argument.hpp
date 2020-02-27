@@ -41,7 +41,7 @@ namespace Argos
 
         Argument& callback(ArgumentCallback callback);
 
-        Argument& hidden(bool hidden);
+        Argument& visibility(Visibility visibility);
 
         Argument& id(int id);
 

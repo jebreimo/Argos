@@ -29,9 +29,9 @@ namespace Argos
         return m_Argument->valueName;
     }
 
-    bool ArgumentView::hidden() const
+    Visibility ArgumentView::visibility() const
     {
-        return m_Argument->hidden;
+        return m_Argument->visibility;
     }
 
     int ArgumentView::id() const

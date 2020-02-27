@@ -23,7 +23,7 @@ namespace Argos
 
         virtual const std::string& valueName() const = 0;
 
-        virtual bool hidden() const = 0;
+        virtual Visibility visibility() const = 0;
 
         virtual int id() const = 0;
     };

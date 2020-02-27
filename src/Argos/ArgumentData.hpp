@@ -21,7 +21,7 @@ namespace Argos
         ArgumentCallback callback;
         unsigned minCount = 1;
         unsigned maxCount = 1;
-        bool hidden = false;
+        Visibility visibility = Visibility::NORMAL;
         int id = 0;
         int valueId_ = 0;
     };
