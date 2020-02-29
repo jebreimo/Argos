@@ -25,7 +25,7 @@ add_executable(ArgosTest
     test_StringUtilities.cpp
     test_ArgumentCounter.cpp
     test_ParseInteger.cpp
-    test_TextFormatter.cpp test_WordSplitter.cpp test_ParseFloatingPoint.cpp)
+    test_TextFormatter.cpp test_WordSplitter.cpp test_ParseFloatingPoint.cpp test_TextWriter.cpp)
 
 target_link_libraries(ArgosTest
     PRIVATE

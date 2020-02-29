@@ -44,46 +44,71 @@ namespace Argos
                 ++nxt;
             return {text.substr(0, pos), '\n', text.substr(nxt)};
         }
+
+        std::tuple<char, std::string_view, std::string_view>
+        nextToken(std::string_view text)
+        {
+            if (text.empty())
+                return {'0', text, {}};
+
+            switch (text[0])
+            {
+            case '\t':
+                return {'\t', text.substr(0, 1), text.substr(1)};
+            case '\r':
+                if (text.size() > 1 || text[1] == '\n')
+                    return {'\n', text.substr(0, 2), text.substr(2)};
+                [[fallthrough]];
+            case '\n':
+                return {'\n', text.substr(0, 1), text.substr(1)};
+            case ' ':
+                if (auto n = text.find_first_not_of(' '); n != std::string_view::npos)
+                    return {' ', text.substr(0, n), text.substr(n)};
+                else
+                    return {' ', text, {}};
+            default:
+                if (auto n = text.find_first_of("\t\r\n "); n != std::string_view::npos)
+                    return {'A', text.substr(0, n), text.substr(n)};
+                else
+                    return {'A', text, {}};
+            }
+        }
     }
 
     TextFormatter::TextFormatter()
-        : TextFormatter(&std::cout, 80)
+            : TextFormatter(&std::cout, 80)
     {}
 
     TextFormatter::TextFormatter(size_t lineWidth, size_t indent)
-        : TextFormatter(&std::cout, lineWidth, indent)
+            : TextFormatter(&std::cout, lineWidth, indent)
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth,
                                  size_t indent)
-        : m_Stream(stream),
-          m_LineWidth(lineWidth)
+            : m_Writer(lineWidth)
     {
         if (lineWidth <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
+        m_Writer.setStream(stream);
         m_Indents.push_back(indent);
     }
 
     std::ostream* TextFormatter::stream() const
     {
-        return m_Stream;
+        return m_Writer.stream();
     }
 
     void TextFormatter::setStream(std::ostream* stream)
     {
-        m_Stream = stream;
+        m_Writer.setStream(stream);
     }
 
     void TextFormatter::pushIndentation(size_t indent)
     {
         if (indent == CURRENT_COLUMN)
-        {
-            indent = m_Line.size();
-            if (indent != 0 && m_Line.back() != ' ')
-                ++indent;
-        }
-        indent = std::min(indent, 2 * m_LineWidth / 3);
+            indent = m_Writer.currentWidth();
         m_Indents.push_back(indent);
+        m_Writer.setIndentation(indent);
     }
 
     void TextFormatter::popIndentation()
@@ -91,20 +116,30 @@ namespace Argos
         if (m_Indents.size() == 1)
             ARGOS_THROW("No more indentations to pop.");
         m_Indents.pop_back();
+        m_Writer.setIndentation(m_Indents.back());
     }
 
     void TextFormatter::writeText(std::string_view text)
     {
         while (!text.empty())
         {
-            auto [word, sep, rem] = nextWord(text);
-            if (word.empty())
+            auto [type, token, remainder] = nextToken(text);
+            switch (type)
+            {
+            case '\t':
+                m_Writer.tab();
                 break;
-
-            appendWord(word);
-            if (sep == '\n')
-                newline();
-            text = rem;
+            case '\n':
+                m_Writer.newline();
+                break;
+            case ' ':
+                m_Writer.setSpaces(token.size());
+                break;
+            default:
+                appendWord(token);
+                break;
+            }
+            text = remainder;
         }
     }
 
@@ -115,24 +150,27 @@ namespace Argos
         {
             auto [lin, rem] = nextLine(remainder);
             if (!lin.empty())
-            {
-                if (!m_Line.empty())
-                {
-                    size_t spaces = 0;
-                    if (m_Line.size() >= m_Indents.back())
-                        spaces = m_Line.back() != ' ' ? 1 : 0;
-                    else
-                        spaces = m_Indents.back() - m_Line.size();
-                    auto length = m_LineWidth - m_Line.size() - spaces;
-                    if (lin.size() > length)
-                        newline();
-                    else if (m_Line.back() != ' ')
-                        m_Line.append(spaces, ' ');
-                }
-                if (m_Line.empty())
-                    indent();
-                m_Line.append(lin);
-            }
+                m_Writer.write(lin, true);
+
+            //if (!lin.empty())
+            //{
+            //    if (!m_Line.empty())
+            //    {
+            //        size_t spaces = 0;
+            //        if (m_Line.size() >= m_Indents.back())
+            //            spaces = m_Line.back() != ' ' ? 1 : 0;
+            //        else
+            //            spaces = m_Indents.back() - m_Line.size();
+            //        auto length = m_LineWidth - m_Line.size() - spaces;
+            //        if (lin.size() > length)
+            //            newline();
+            //        else if (m_Line.back() != ' ')
+            //            m_Line.append(spaces, ' ');
+            //    }
+            //    if (m_Line.empty())
+            //        indent();
+            //    m_Line.append(lin);
+            //}
             if (!rem.empty())
                 newline();
             remainder = rem;
@@ -143,83 +181,63 @@ namespace Argos
 
     void TextFormatter::newline()
     {
-        m_Line.push_back('\n');
-        flush();
+        m_Writer.newline();
+        m_Writer.setSpaces(0);
     }
 
     void TextFormatter::flush()
     {
-        if (!m_Line.empty())
-        {
-            m_Stream->write(m_Line.data(), m_Line.size());
-            m_Line.clear();
-        }
-    }
-
-    void TextFormatter::indent()
-    {
-        m_Line.assign(m_Indents.back(), ' ');
+        m_Writer.flush();
     }
 
     void TextFormatter::appendWord(std::string_view word)
     {
         auto remainder = word;
-        while (!remainder.empty())
+        while (!m_Writer.write(remainder))
         {
-            bool mustWrite = false;
-            size_t spaces = 0;
-            size_t length;
-            if (m_Line.empty())
+            auto width = m_Writer.remainingWidth();
+            auto [w, s, r] = m_WordSplitter.split(
+                    word,
+                    word.size() - remainder.size(),
+                    width,
+                    m_Writer.empty());
+            if (!w.empty())
             {
-                indent();
-                mustWrite = true;
-                length = m_LineWidth - m_Line.size();
-            }
-            else
-            {
-                if (m_Line.size() >= m_Indents.back())
-                    spaces = m_Line.back() != ' ' ? 1 : 0;
-                else
-                    spaces = m_Indents.back() - m_Line.size();
-                length = m_LineWidth - m_Line.size() - spaces;
-            }
-            if (remainder.size() <= length)
-            {
-                if (spaces)
-                    m_Line.append(spaces, ' ');
-                m_Line.append(remainder);
-                remainder = {};
-            }
-            else
-            {
-                auto [w, s, r] = m_WordSplitter.split(
-                        word,
-                        word.size() - remainder.size(),
-                        length,
-                        mustWrite);
-                if (!w.empty())
-                {
-                    if (spaces)
-                        m_Line.append(spaces, ' ');
-                    m_Line.append(w);
-                    if (s)
-                        m_Line.push_back(s);
-                }
+                m_Writer.write(w);
+                if (s)
+                    m_Writer.write(std::string_view(&s, 1));
                 newline();
                 remainder = r;
+            }
+            else if (m_Writer.empty())
+            {
+                if (m_Writer.spaces() != 0)
+                {
+                    m_Writer.setSpaces(0);
+                }
+                else
+                {
+                    m_Writer.write(remainder, true);
+                    return;
+                }
+            }
+            else
+            {
+                newline();
+                m_Writer.setSpaces(0);
             }
         }
     }
 
     size_t TextFormatter::lineWidth() const
     {
-        return m_LineWidth;
+        return m_Writer.lineWidth();
     }
 
     void TextFormatter::setLineWidth(size_t lineWidth)
     {
         if (lineWidth <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
-        m_LineWidth = lineWidth;
+        m_Writer.setLineWidth(lineWidth);
     }
 }

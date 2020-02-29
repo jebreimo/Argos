@@ -6,12 +6,12 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include <array>
 #include <iosfwd>
 #include <string>
 #include <string_view>
 #include <vector>
 #include "WordSplitter.hpp"
+#include "TextWriter.hpp"
 
 namespace Argos
 {
@@ -46,14 +46,10 @@ namespace Argos
 
         void flush();
     private:
-        void indent();
-
         void appendWord(std::string_view word);
 
-        std::ostream* m_Stream;
+        TextWriter m_Writer;
         std::vector<size_t> m_Indents;
-        size_t m_LineWidth;
-        std::string m_Line;
         WordSplitter m_WordSplitter;
     };
 }
