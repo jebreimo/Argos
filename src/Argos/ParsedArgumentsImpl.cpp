@@ -169,7 +169,7 @@ namespace Argos
 
     void ParsedArgumentsImpl::error(const std::string& message)
     {
-        HelpWriter(m_Data).writeErrorMessage(message);
+        HelpWriter().writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         else
@@ -178,7 +178,7 @@ namespace Argos
 
     void ParsedArgumentsImpl::error(const std::string& message, int valueId)
     {
-        HelpWriter(m_Data).writeErrorMessage(message);
+        HelpWriter().writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         else

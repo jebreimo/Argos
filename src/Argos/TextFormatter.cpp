@@ -106,7 +106,10 @@ namespace Argos
     void TextFormatter::pushIndentation(size_t indent)
     {
         if (indent == CURRENT_COLUMN)
+        {
             indent = m_Writer.currentWidth();
+            m_Writer.setSpaces(0);
+        }
         m_Indents.push_back(indent);
         m_Writer.setIndentation(indent);
     }
@@ -151,26 +154,6 @@ namespace Argos
             auto [lin, rem] = nextLine(remainder);
             if (!lin.empty())
                 m_Writer.write(lin, true);
-
-            //if (!lin.empty())
-            //{
-            //    if (!m_Line.empty())
-            //    {
-            //        size_t spaces = 0;
-            //        if (m_Line.size() >= m_Indents.back())
-            //            spaces = m_Line.back() != ' ' ? 1 : 0;
-            //        else
-            //            spaces = m_Indents.back() - m_Line.size();
-            //        auto length = m_LineWidth - m_Line.size() - spaces;
-            //        if (lin.size() > length)
-            //            newline();
-            //        else if (m_Line.back() != ' ')
-            //            m_Line.append(spaces, ' ');
-            //    }
-            //    if (m_Line.empty())
-            //        indent();
-            //    m_Line.append(lin);
-            //}
             if (!rem.empty())
                 newline();
             remainder = rem;

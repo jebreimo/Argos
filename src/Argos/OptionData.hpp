@@ -23,7 +23,7 @@ namespace Argos
         std::string value;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
-        OptionType optionType = OptionType::NORMAL;
+        OptionType type = OptionType::NORMAL;
         Visibility visibility = Visibility::NORMAL;
         bool mandatory = false;
         int id = 0;

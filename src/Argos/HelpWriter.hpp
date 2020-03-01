@@ -14,30 +14,24 @@ namespace Argos
     class HelpWriter
     {
     public:
-        explicit HelpWriter(std::shared_ptr<ParserData> data);
+        HelpWriter();
 
-        void writeHelpText() const;
+        void writeHelpText(ParserData& data) const;
 
-        void writeErrorMessage(const std::string& msg) const;
-
-        void writeErrorMessage(const ArgumentData& argument,
-                               const std::string& msg) const;
-
-        void writeErrorMessage(const OptionData& option,
+        void writeErrorMessage(ParserData& data,
                                const std::string& msg) const;
     private:
-        void writeUsage() const;
+        void writeUsage(ParserData& data) const;
 
-        void writeBriefUsage() const;
+        void writeBriefUsage(ParserData& data) const;
 
-        std::string generateUsage() const;
+        void writeStopAndHelpUsage(ParserData& data) const;
 
-        void writeArgumentSections() const;
+        void writeArgumentSections(ParserData& data) const;
 
-        void writeEndText() const;
+        void writeEndText(ParserData& data) const;
 
-        std::optional<std::string> getCustomText(TextId textId) const;
-
-        std::shared_ptr<ParserData> m_Data;
+        std::optional<std::string> getCustomText(ParserData& data,
+                                                 TextId textId) const;
     };
 }

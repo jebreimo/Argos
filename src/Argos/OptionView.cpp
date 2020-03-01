@@ -62,7 +62,7 @@ namespace Argos
 
     OptionType OptionView::type() const
     {
-        return m_Option->optionType;
+        return m_Option->type;
     }
 
     bool OptionView::mandatory() const

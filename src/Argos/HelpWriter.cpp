@@ -29,16 +29,21 @@ namespace Argos
                                     [](auto& a, auto& b)
                                     {return a.size() < b.size();});
             std::string optTxt;
-            if (!opt.mandatory)
+            bool braces = !opt.mandatory
+                          && opt.type != OptionType::STOP
+                          && opt.type != OptionType::HELP;
+            if (braces)
                 optTxt.push_back('[');
             optTxt += *flag;
             if (!opt.argument.empty())
             {
-                optTxt += " <";
+                if (flag->back() != '=')
+                    optTxt += " ";
+                optTxt += "<";
                 optTxt += opt.argument;
                 optTxt.push_back('>');
             }
-            if (!opt.mandatory)
+            if (braces)
                 optTxt.push_back(']');
             return optTxt;
         }
@@ -64,79 +69,88 @@ namespace Argos
         }
     }
 
-    HelpWriter::HelpWriter(std::shared_ptr<ParserData> data)
-        : m_Data(move(data))
+    HelpWriter::HelpWriter() = default;
+
+    void HelpWriter::writeHelpText(ParserData& data) const
     {
-        m_Data->textFormatter.setLineWidth(getConsoleWidth(20, 80));
+        writeUsage(data);
+        writeArgumentSections(data);
+        writeEndText(data);
     }
 
-    void HelpWriter::writeHelpText() const
-    {
-        writeUsage();
-        writeArgumentSections();
-        writeEndText();
-    }
-
-    void HelpWriter::writeErrorMessage(const std::string& msg) const
-    {
-        m_Data->textFormatter.writeText(m_Data->helpSettings.programName + ":");
-        m_Data->textFormatter.writeText(msg);
-        m_Data->textFormatter.newline();
-        writeBriefUsage();
-    }
-
-    void HelpWriter::writeErrorMessage(const ArgumentData& argument,
+    void HelpWriter::writeErrorMessage(ParserData& data,
                                        const std::string& msg) const
     {
-        writeErrorMessage(msg);
+        data.textFormatter.writeText(data.helpSettings.programName + ":");
+        data.textFormatter.writeText(msg);
+        data.textFormatter.newline();
+        writeBriefUsage(data);
     }
 
-    void HelpWriter::writeErrorMessage(const OptionData& option,
-                                       const std::string& msg) const
+    void HelpWriter::writeUsage(ParserData& data) const
     {
-        writeErrorMessage(msg);
-    }
-
-    void HelpWriter::writeUsage() const
-    {
-        auto usage = getCustomText(TextId::USAGE);
+        auto usage = getCustomText(data, TextId::USAGE);
         if (!usage)
-            writeBriefUsage();
+            writeBriefUsage(data);
         else if (!usage->empty())
-            m_Data->textFormatter.writePreformattedText(*usage);
+            data.textFormatter.writePreformattedText(*usage);
     }
 
-    void HelpWriter::writeBriefUsage() const
+    void HelpWriter::writeBriefUsage(ParserData& data) const
     {
-        auto title = getCustomText(TextId::USAGE_TITLE);
-        m_Data->textFormatter.writeText(title ? *title : "USAGE\n");
-        m_Data->textFormatter.pushIndentation(2);
-        m_Data->textFormatter.writeText(m_Data->helpSettings.programName);
-        m_Data->textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
-        for (auto& opt : m_Data->options)
+        auto title = getCustomText(data, TextId::USAGE_TITLE);
+        data.textFormatter.writeText(title ? *title : "USAGE\n");
+        data.textFormatter.pushIndentation(2);
+
+        writeStopAndHelpUsage(data);
+
+        data.textFormatter.writeText(data.helpSettings.programName);
+        data.textFormatter.writeText(" ");
+        data.textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
+        for (auto& opt : data.options)
         {
             if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                 continue;
+            if (opt->type == OptionType::HELP
+                || opt->type == OptionType::STOP)
+                continue;
 
-            m_Data->textFormatter.writePreformattedText(getBriefOptionName(*opt));
+            data.textFormatter.writePreformattedText(getBriefOptionName(*opt));
+            data.textFormatter.writeText(" ");
         }
-        for (auto& arg : m_Data->arguments)
+        for (auto& arg : data.arguments)
         {
             if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                 continue;
-            m_Data->textFormatter.writePreformattedText(getArgumentName(*arg));
+            data.textFormatter.writePreformattedText(getArgumentName(*arg));
+            data.textFormatter.writeText(" ");
         }
-        m_Data->textFormatter.popIndentation();
-        m_Data->textFormatter.newline();
-        m_Data->textFormatter.popIndentation();
+        data.textFormatter.popIndentation();
+        data.textFormatter.newline();
+        data.textFormatter.popIndentation();
     }
 
-    std::string HelpWriter::generateUsage() const
+    void HelpWriter::writeStopAndHelpUsage(ParserData& data) const
     {
-        return {};
+        for (auto& opt : data.options)
+        {
+            if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                continue;
+            if (opt->type != OptionType::HELP
+                && opt->type != OptionType::STOP)
+                continue;
+
+            data.textFormatter.writeText(data.helpSettings.programName);
+            data.textFormatter.writeText(" ");
+            data.textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
+            data.textFormatter.writePreformattedText(getBriefOptionName(*opt));
+            data.textFormatter.writeText(" ");
+            data.textFormatter.popIndentation();
+            data.textFormatter.newline();
+        }
     }
 
-    void HelpWriter::writeArgumentSections() const
+    void HelpWriter::writeArgumentSections(ParserData& data) const
     {
         using HelpText = std::pair<std::string, std::string_view>;
         using HelpTextVector = std::vector<HelpText>;
@@ -154,10 +168,10 @@ namespace Argos
             it->second.emplace_back(std::move(a), b);
         };
 
-        auto argSection = getCustomText(TextId::ARGUMENTS_SECTION);
+        auto argSection = getCustomText(data, TextId::ARGUMENTS_SECTION);
         if (!argSection)
             argSection = "ARGUMENTS";
-        for (auto& arg : m_Data->arguments)
+        for (auto& arg : data.arguments)
         {
             if ((arg->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
@@ -172,10 +186,10 @@ namespace Argos
             //}
             //it->second.emplace_back(getArgumentName(*arg), arg->text);
         }
-        auto optSection = getCustomText(TextId::OPTIONS_SECTION);
+        auto optSection = getCustomText(data, TextId::OPTIONS_SECTION);
         if (!optSection)
             optSection = "OPTIONS";
-        for (auto& opt : m_Data->options)
+        for (auto& opt : data.options)
         {
             if ((opt->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
@@ -200,39 +214,39 @@ namespace Argos
         std::sort(nameWidths.begin(), nameWidths.end());
         std::sort(textWidths.begin(), textWidths.end());
         auto nameWidth = nameWidths.back() + 3;
-        if (nameWidth + textWidths.back() > m_Data->textFormatter.lineWidth())
+        if (nameWidth + textWidths.back() > data.textFormatter.lineWidth())
         {
             auto index75 = 3 * nameWidths.size() / 4;
             nameWidth = nameWidths[index75] + 3;
-            if (nameWidth + textWidths[index75] > m_Data->textFormatter.lineWidth())
-                nameWidth = m_Data->textFormatter.lineWidth() / 4;
+            if (nameWidth + textWidths[index75] > data.textFormatter.lineWidth())
+                nameWidth = data.textFormatter.lineWidth() / 4;
         }
         for (auto& [section, txts] : sections)
         {
-            m_Data->textFormatter.writeText(section);
-            m_Data->textFormatter.newline();
-            m_Data->textFormatter.pushIndentation(2);
+            data.textFormatter.writeText(section);
+            data.textFormatter.newline();
+            data.textFormatter.pushIndentation(2);
             for (auto& [name, text] : txts)
             {
-                m_Data->textFormatter.writeText(name);
-                m_Data->textFormatter.pushIndentation(nameWidth);
-                m_Data->textFormatter.writeText(text);
-                m_Data->textFormatter.popIndentation();
-                m_Data->textFormatter.newline();
+                data.textFormatter.writeText(name);
+                data.textFormatter.pushIndentation(nameWidth);
+                data.textFormatter.writeText(text);
+                data.textFormatter.popIndentation();
+                data.textFormatter.newline();
             }
-            m_Data->textFormatter.popIndentation();
+            data.textFormatter.popIndentation();
         }
     }
 
-    void HelpWriter::writeEndText() const
+    void HelpWriter::writeEndText(ParserData& data) const
     {
-
     }
 
-    std::optional<std::string> HelpWriter::getCustomText(TextId textId) const
+    std::optional<std::string>
+    HelpWriter::getCustomText(ParserData& data, TextId textId) const
     {
-        auto it = m_Data->helpSettings.texts.find(textId);
-        if (it != m_Data->helpSettings.texts.end())
+        auto it = data.helpSettings.texts.find(textId);
+        if (it != data.helpSettings.texts.end())
             return it->second;
         return {};
     }

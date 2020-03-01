@@ -79,6 +79,10 @@ namespace Argos
         ArgumentParser& programName(const std::string& name);
 
         ArgumentParser& text(TextId textId, std::string text);
+
+        ArgumentParser&& move();
+
+        void writeHelpText();
     private:
         const ParserData& data() const;
 

@@ -250,12 +250,12 @@ namespace Argos
             return {OptionResult::ERROR, {}};
         }
 
-        switch (option.optionType)
+        switch (option.type)
         {
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            HelpWriter(m_Data).writeHelpText();
+            HelpWriter().writeHelpText(*m_Data);
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
             return {OptionResult::HELP, arg};
@@ -377,7 +377,7 @@ namespace Argos
             {
                 if (!option->argument.empty())
                     it->nextValue();
-                switch (option->optionType)
+                switch (option->type)
                 {
                 case OptionType::HELP:
                 case OptionType::LAST_ARGUMENT:
@@ -424,7 +424,7 @@ namespace Argos
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            HelpWriter(m_Data).writeErrorMessage(message);
+            HelpWriter().writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         copyRemainingArgumentsToParserResult();

@@ -155,7 +155,7 @@ namespace Argos
     Option& Option::type(OptionType type)
     {
         CHECK_OPTION_EXISTS();
-        m_Option->optionType = type;
+        m_Option->type = type;
         return *this;
     }
 

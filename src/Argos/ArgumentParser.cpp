@@ -11,6 +11,7 @@
 #include "Argos/ArgosException.hpp"
 #include "ArgumentIteratorImpl.hpp"
 #include "ParserData.hpp"
+#include "HelpWriter.hpp"
 
 namespace Argos
 {
@@ -96,7 +97,7 @@ namespace Argos
         {
             generateValueIds(*data);
             return ParsedArguments(
-                    ArgumentIteratorImpl::parse(move(args), data));
+                    ArgumentIteratorImpl::parse(std::move(args), data));
         }
 
         ArgumentIterator
@@ -104,7 +105,7 @@ namespace Argos
                          const std::shared_ptr<ParserData>& data)
         {
             generateValueIds(*data);
-            return ArgumentIterator(move(args), data);
+            return ArgumentIterator(std::move(args), data);
         }
     }
 
@@ -119,21 +120,21 @@ namespace Argos
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
-            : m_Data(move(rhs.m_Data))
+            : m_Data(std::move(rhs.m_Data))
     {}
 
     ArgumentParser::~ArgumentParser() = default;
 
     ArgumentParser& ArgumentParser::operator=(ArgumentParser&& rhs) noexcept
     {
-        m_Data = move(rhs.m_Data);
+        m_Data = std::move(rhs.m_Data);
         return *this;
     }
 
     ArgumentParser& ArgumentParser::add(Argument argument)
     {
         auto ad = argument.release();
-        data().arguments.emplace_back(move(ad));
+        data().arguments.emplace_back(std::move(ad));
         return *this;
     }
 
@@ -186,7 +187,7 @@ namespace Argos
                 ARGOS_THROW("Options with operation CLEAR must specify valueName.");
             break;
         }
-        data().options.push_back(move(od));
+        data().options.push_back(std::move(od));
         return *this;
     }
 
@@ -208,12 +209,12 @@ namespace Argos
     {
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return parseImpl(move(args), std::move(m_Data));
+        return parseImpl(std::move(args), std::move(m_Data));
     }
 
     ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args) const
     {
-        return parseImpl(move(args), makeCopy(data()));
+        return parseImpl(std::move(args), makeCopy(data()));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv)
@@ -235,12 +236,12 @@ namespace Argos
     {
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return makeIteratorImpl(move(args), std::move(m_Data));
+        return makeIteratorImpl(std::move(args), std::move(m_Data));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(std::vector<std::string_view> args) const
     {
-        return makeIteratorImpl(move(args), makeCopy(data()));
+        return makeIteratorImpl(std::move(args), makeCopy(data()));
     }
 
     bool ArgumentParser::allowAbbreviatedOptions() const
@@ -317,8 +318,18 @@ namespace Argos
 
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
     {
-        data().helpSettings.texts[textId] = move(text);
+        data().helpSettings.texts[textId] = std::move(text);
         return *this;
+    }
+
+    ArgumentParser&& ArgumentParser::move()
+    {
+        return std::move(*this);
+    }
+
+    void ArgumentParser::writeHelpText()
+    {
+        HelpWriter().writeHelpText(data());
     }
 
     const ParserData& ArgumentParser::data() const

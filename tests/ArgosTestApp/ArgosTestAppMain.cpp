@@ -53,13 +53,14 @@ int main(int argc, char* argv[])
     auto args = ArgumentParser("ArgosTestApp")
             .allowAbbreviatedOptions(true)
             .add(Argument("file").text("A file of some kind."))
-            .add(Option({"-h", "--help"}).type(OptionType::HELP).text("Show help."))
+            .add(Option({"--help"}).type(OptionType::HELP).text("Show help."))
             .add(Option({"-r", "--resolution"}).argument("HOR,VER").text("Set screen resolution."))
             .add(Option({"--fullscreen"}).value(true).text("Run in fullscreen mode."))
             .add(Option({"--windowed"}).valueName("--fullscreen").value(false).text("Run in windowed mode."))
             .add(Option({"--list-interfaces"}).type(OptionType::LAST_ARGUMENT).text("Display list of available graphics interfaces."))
             .add(Option({"--"}).type(OptionType::LAST_OPTION).text("Mark end of options. Allows arguments starting with '-'."))
-            .add(Option({"-a", "--anonymous"}))
+            .add(Option({"--version"}).type(OptionType::STOP).text("Show version."))
+            .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
     std::cout << "file: " << args.value("file").asString() << "\n";
 
