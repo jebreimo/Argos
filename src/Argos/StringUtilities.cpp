@@ -117,4 +117,28 @@ namespace Argos
         num.erase(outIx);
         return !underscore;
     }
+
+    std::vector<std::string_view>
+    splitString(std::string_view s, char delimiter, size_t maxSplit)
+    {
+        if (maxSplit == 0)
+            return {s};
+
+        std::vector<std::string_view> result;
+        size_t pos = 0;
+        while (true)
+        {
+            auto nextPos = s.find(delimiter, pos);
+            result.push_back(s.substr(pos, nextPos - pos));
+            if (nextPos == std::string_view::npos)
+                break;
+            pos = nextPos + 1;
+            if (result.size() == maxSplit)
+            {
+                result.push_back(s.substr(pos));
+                break;
+            }
+        }
+        return result;
+    }
 }

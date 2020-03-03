@@ -7,8 +7,9 @@
 //****************************************************************************
 #include "Argos/ArgumentValue.hpp"
 
-#include "ParsedArgumentsImpl.hpp"
 #include "Argos/ParseValue.hpp"
+#include "ParsedArgumentsImpl.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
@@ -112,6 +113,20 @@ namespace Argos
     ArgumentValue::asString(const std::string& defaultValue) const
     {
         return m_Value ? std::string(*m_Value) : defaultValue;
+    }
+
+    ArgumentValues
+    ArgumentValue::split(char separator,
+                         size_t minParts, size_t maxParts) const
+    {
+        if (!m_Value)
+            return ArgumentValues({}, m_Args, m_ValueId);
+        auto parts = splitString(*m_Value, separator, maxParts - 1);
+        if (parts.size() < minParts)
+            error("Invalid value: \"" + std::string(*m_Value)
+                  + "\". Must be at least " + std::to_string(minParts)
+                  + " values separated by \"" + separator + "\".");
+        return ArgumentValues(move(parts), m_Args, m_ValueId);
     }
 
     void ArgumentValue::error(const std::string& message) const

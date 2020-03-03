@@ -15,36 +15,14 @@ struct Rectangle
     int height = 0;
 };
 
-std::vector<std::string_view> splitString(std::string_view s, char delimiter)
-{
-    std::vector<std::string_view> result;
-    size_t pos = 0;
-    while (true)
-    {
-        auto nextPos = s.find(delimiter, pos);
-        result.push_back(s.substr(pos, nextPos - pos));
-        if (nextPos == std::string_view::npos)
-            break;
-        pos = nextPos + 1;
-    }
-    return result;
-}
-
 Rectangle parseResolution(const Argos::ArgumentValue& v)
 {
-    auto s = v.value();
-    if (!s)
-        return {640, 480};
-    auto parts = splitString(*s, ',');
-    if (parts.size() != 2)
-        v.error("Resolution must be two comma-separated integers.");
-    auto hor = Argos::parseValue<int>(parts[0]);
-    auto ver = Argos::parseValue<int>(parts[1]);
-    if (!hor || *hor < 640)
+    auto parts = v.split(',', 2, 2).asInt32s({640, 480});
+    if (parts[0] < 640)
         v.error("Horizontal resolution must be at least 640");
-    if (!ver || *ver < 480)
+    if (parts[1] < 480)
         v.error("Vertical resolution must be at least 480");
-    return {*hor, *ver};
+    return {parts[0], parts[1]};
 }
 
 int main(int argc, char* argv[])

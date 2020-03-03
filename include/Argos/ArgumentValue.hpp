@@ -10,7 +10,7 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include "IArgumentView.hpp"
+#include "ArgumentValues.hpp"
 
 namespace Argos
 {
@@ -64,6 +64,9 @@ namespace Argos
         long double asLongDouble(long double defaultValue = 0) const;
 
         std::string asString(const std::string& defaultValue = {}) const;
+
+        ArgumentValues
+        split(char separator, size_t minParts, size_t maxParts) const;
 
         void error(const std::string& message) const;
     private:
