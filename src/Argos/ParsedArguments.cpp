@@ -30,11 +30,27 @@ namespace Argos
         return *this;
     }
 
+    bool ParsedArguments::has(const std::string& name) const
+    {
+        return m_Impl->has(m_Impl->getValueId(name));
+    }
+
+    bool ParsedArguments::has(const IArgumentView& arg) const
+    {
+        return m_Impl->has(arg.valueId());
+    }
+
     ArgumentValue ParsedArguments::value(const std::string& name) const
     {
         auto id = m_Impl->getValueId(name);
         auto value = m_Impl->getValue(id);
         return {value, m_Impl, id};
+    }
+
+    ArgumentValue ParsedArguments::value(const IArgumentView& arg) const
+    {
+        auto value = m_Impl->getValue(arg.valueId());
+        return {value, m_Impl, arg.valueId()};
     }
 
     ArgumentValues ParsedArguments::values(const std::string& name) const
@@ -44,9 +60,28 @@ namespace Argos
         return {values, m_Impl, id};
     }
 
-    bool ParsedArguments::has(const std::string& name) const
+    ArgumentValues ParsedArguments::values(const IArgumentView& arg) const
     {
-        return m_Impl->has(m_Impl->getValueId(name));
+        auto values = m_Impl->getValues(arg.valueId());
+        return {values, m_Impl, arg.valueId()};
+    }
+
+    std::vector<std::unique_ptr<ArgumentView>>
+    ParsedArguments::allArguments() const
+    {
+        std::vector<std::unique_ptr<ArgumentView>> result;
+        for (auto& a : m_Impl->parserData()->arguments)
+            result.emplace_back(std::make_unique<ArgumentView>(a.get()));
+        return result;
+    }
+
+    std::vector<std::unique_ptr<OptionView>>
+    ParsedArguments::allOptions() const
+    {
+        std::vector<std::unique_ptr<OptionView>> result;
+        for (auto& o : m_Impl->parserData()->options)
+            result.emplace_back(std::make_unique<OptionView>(o.get()));
+        return result;
     }
 
     ParserResultCode ParsedArguments::resultCode() const

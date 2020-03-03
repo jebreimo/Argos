@@ -62,7 +62,51 @@ int main(int argc, char* argv[])
             .add(Option({"--version"}).type(OptionType::STOP).text("Show version."))
             .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
-    std::cout << "file: " << args.value("file").asString() << "\n";
+
+    auto allArgs = args.allArguments();
+    stable_sort(allArgs.begin(), allArgs.end(),
+                [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+
+    std::string line;
+    ArgumentView* prevArg = nullptr;
+    for (auto& a : allArgs)
+    {
+        if (prevArg && prevArg->valueId() != a->valueId())
+        {
+            std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
+            line.clear();
+        }
+        if (!line.empty())
+            line += ", ";
+        line += a->name();
+        prevArg = a.get();
+    }
+    if (prevArg)
+        std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
+    line.clear();
+
+    auto allOpts = args.allOptions();
+    stable_sort(allOpts.begin(), allOpts.end(),
+                [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+    OptionView* prevOpt = nullptr;
+    for (auto& o : allOpts)
+    {
+        if (prevOpt && prevOpt->valueId() != o->valueId())
+        {
+            std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
+            line.clear();
+        }
+        for (auto& f : o->flags())
+        {
+            if (!line.empty())
+                line += ", ";
+            line += f;
+        }
+        prevOpt = o.get();
+    }
+    if (prevOpt)
+        std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
+    line.clear();
 
     auto res = parseResolution(args.value("--resolution"));
     std::cout << "resolution: " << res.width << 'x' << res.height << '\n';

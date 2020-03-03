@@ -53,4 +53,9 @@ namespace Argos
     {
         return {m_Argument->minCount, m_Argument->maxCount};
     }
+
+    int ArgumentView::valueId() const
+    {
+        return m_Argument->valueId_;
+    }
 }

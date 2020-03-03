@@ -480,3 +480,41 @@ TEST_CASE("Two arguments with the same name")
     REQUIRE(vals[1] == "bb");
     REQUIRE(vals[2] == "cc");
 }
+
+TEST_CASE("Options ending with =")
+{
+    using namespace Argos;
+    Argv argv{"test", "--f=", "--f=2", "--f"};
+    auto it = ArgumentParser("test")
+            .autoExit(false)
+            .add(Option({"--f="}).valueName("f").argument("N"))
+            .add(Option({"--f"}).valueName("f").operation(OptionOperation::CLEAR))
+            .makeIterator(argv.size(), argv.data());
+    std::unique_ptr<IArgumentView> arg;
+    std::string_view value;
+    REQUIRE(it.next(arg, value));
+    REQUIRE(it.parsedArguments().value("f").asString(" ") == "");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(it.parsedArguments().value("f").asString() == "2");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(!it.parsedArguments().has("f"));
+    REQUIRE(!it.next(arg, value));
+}
+
+TEST_CASE("NONE option")
+{
+    using namespace Argos;
+    REQUIRE_THROWS(ArgumentParser("p").add(
+            Option({"-o"}).valueName("f").operation(OptionOperation::NONE)));
+    REQUIRE_THROWS(ArgumentParser("p").add(
+            Option({"-o"}).value("f").operation(OptionOperation::NONE)));
+    auto args = ArgumentParser("test")
+            .autoExit(false)
+            .add(Option({"--f"}).argument("N").operation(OptionOperation::NONE))
+            .add(Option({"--g"}).operation(OptionOperation::NONE))
+            .add(Option({"--h"}))
+            .parse({"--f=12", "--g", "--h"});
+    REQUIRE_THROWS(args.value("--f"));
+    REQUIRE_THROWS(args.value("--g"));
+    REQUIRE(args.value("--h").asBool());
+}

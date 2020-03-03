@@ -9,6 +9,7 @@
 #include <memory>
 #include "ArgumentValue.hpp"
 #include "ArgumentValues.hpp"
+#include "ArgumentView.hpp"
 #include "OptionView.hpp"
 
 namespace Argos
@@ -34,9 +35,19 @@ namespace Argos
 
         bool has(const std::string& name) const;
 
+        bool has(const IArgumentView& arg) const;
+
         ArgumentValue value(const std::string& name) const;
 
+        ArgumentValue value(const IArgumentView& arg) const;
+
         ArgumentValues values(const std::string& name) const;
+
+        ArgumentValues values(const IArgumentView& arg) const;
+
+        std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
+
+        std::vector<std::unique_ptr<OptionView>> allOptions() const;
 
         ParserResultCode resultCode() const;
 

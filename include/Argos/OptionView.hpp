@@ -32,6 +32,8 @@ namespace Argos
 
         int id() const final;
 
+        int valueId() const final;
+
         const std::vector<std::string>& flags() const;
 
         const std::string& argument() const;

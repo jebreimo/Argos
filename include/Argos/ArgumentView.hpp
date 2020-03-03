@@ -28,6 +28,8 @@ namespace Argos
 
         int id() const final;
 
+        int valueId() const final;
+
         const std::string& name() const;
 
         bool optional() const;

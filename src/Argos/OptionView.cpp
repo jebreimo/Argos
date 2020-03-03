@@ -45,6 +45,11 @@ namespace Argos
         return m_Option->id;
     }
 
+    int OptionView::valueId() const
+    {
+        return m_Option->valueId_;
+    }
+
     const std::vector<std::string>& OptionView::flags() const
     {
         return m_Option->flags;

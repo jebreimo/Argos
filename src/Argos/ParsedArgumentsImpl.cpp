@@ -44,6 +44,9 @@ namespace Argos
         }
         for (auto& o : m_Data->options)
         {
+            if (o->operation == OptionOperation::NONE)
+                continue;
+
             for (auto& f : o->flags)
                 m_ValueIds.emplace_back(f, o->valueId_);
             if (!o->valueName.empty())

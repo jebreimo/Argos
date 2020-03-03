@@ -26,5 +26,20 @@ namespace Argos
         virtual Visibility visibility() const = 0;
 
         virtual int id() const = 0;
+
+        /**
+         * @brief Returns the numeric id of the value the argument or option
+         *  assigns or appends to.
+         *
+         * This value is created internally in Argos and must not be
+         * confused with the customizable value returned by id().
+         * If different options or arguments have the same value name, they
+         * will also have the same value id.
+         *
+         * @return options with operation OptionOperation::NONE have
+         *   a value of 0, all other options and arguments have a value
+         *   greater than 0.
+         */
+        virtual int valueId() const = 0;
     };
 }
