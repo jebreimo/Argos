@@ -77,6 +77,9 @@ namespace Argos
 
         std::vector<std::string> asStrings(
                 const std::vector<std::string>& defaultValue = {}) const;
+
+        ArgumentValues
+        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
     private:
         template <typename T>
         std::vector<T> getValues(const std::vector<T>& defaultValue) const;

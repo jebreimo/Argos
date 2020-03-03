@@ -9,6 +9,7 @@
 
 #include "Argos/ParseValue.hpp"
 #include "ParsedArgumentsImpl.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
@@ -129,6 +130,26 @@ namespace Argos
         for (auto& v : m_Values)
             result.emplace_back(v);
         return result;
+    }
+
+    ArgumentValues
+    ArgumentValues::split(char separator,
+                          size_t minParts, size_t maxParts) const
+    {
+        std::vector<std::string_view> values;
+        for (auto value : m_Values)
+        {
+            auto parts = splitString(value, separator, maxParts - 1);
+            if (parts.size() < minParts)
+            {
+                error("Invalid value: \"" + std::string(value)
+                      + "\". Must be at least " + std::to_string(minParts)
+                      + " values separated by \"" + separator + "\".");
+                return ArgumentValues({}, m_Args, m_ValueId);
+            }
+            values.insert(values.end(), parts.begin(), parts.end());
+        }
+        return ArgumentValues(move(values), m_Args, m_ValueId);
     }
 
     template <typename T>

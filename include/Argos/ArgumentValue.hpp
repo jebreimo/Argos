@@ -66,7 +66,7 @@ namespace Argos
         std::string asString(const std::string& defaultValue = {}) const;
 
         ArgumentValues
-        split(char separator, size_t minParts, size_t maxParts) const;
+        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
 
         void error(const std::string& message) const;
     private:

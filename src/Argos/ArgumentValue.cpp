@@ -123,9 +123,12 @@ namespace Argos
             return ArgumentValues({}, m_Args, m_ValueId);
         auto parts = splitString(*m_Value, separator, maxParts - 1);
         if (parts.size() < minParts)
+        {
             error("Invalid value: \"" + std::string(*m_Value)
                   + "\". Must be at least " + std::to_string(minParts)
                   + " values separated by \"" + separator + "\".");
+            return ArgumentValues({}, m_Args, m_ValueId);
+        }
         return ArgumentValues(move(parts), m_Args, m_ValueId);
     }
 
