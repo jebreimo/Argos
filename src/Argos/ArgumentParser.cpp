@@ -17,7 +17,7 @@ namespace Argos
 {
     namespace
     {
-        bool checkStandardFlag(const std::string& flag)
+        bool checkStandardFlag(const std::string& flag, const OptionData& od)
         {
             if (flag.size() < 2)
                 return false;
@@ -28,15 +28,29 @@ namespace Argos
             if (flag[1] != '-')
                 return false;
             auto eqPos = flag.find('=');
-            return eqPos == std::string::npos || eqPos == flag.size() - 1;
+            if (eqPos == std::string::npos)
+                return true;
+            if (eqPos != flag.size() - 1)
+                return false;
+            if (od.argument.empty())
+                ARGOS_THROW(flag + ": options ending with '=' must take an argument.");
+            return true;
         }
 
-        bool checkFlag(const std::string& flag, char prefix)
+        bool checkFlag(const std::string& flag, char prefix, const OptionData& od)
         {
             if (flag.size() < 2 || flag[0] != prefix)
                 return false;
+            if (flag.size() == 2)
+                return true;
             auto eqPos = flag.find('=');
-            return eqPos == std::string::npos || eqPos == flag.size() - 1;
+            if (eqPos == std::string::npos)
+                return true;
+            if (eqPos != flag.size() - 1)
+                return false;
+            if (od.argument.empty())
+                ARGOS_THROW(flag + ": options ending with '=' must take an argument.");
+            return true;
         }
 
         std::unique_ptr<ParserData> makeCopy(const ParserData& data)
@@ -152,13 +166,13 @@ namespace Argos
             switch (data().parserSettings.optionStyle)
             {
             case OptionStyle::STANDARD:
-                ok = checkStandardFlag(flag);
+                ok = checkStandardFlag(flag, *od);
                 break;
             case OptionStyle::SLASH:
-                ok = checkFlag(flag, '/');
+                ok = checkFlag(flag, '/', *od);
                 break;
             case OptionStyle::DASH:
-                ok = checkFlag(flag, '-');
+                ok = checkFlag(flag, '-', *od);
                 break;
             default:
                 ok = false;
