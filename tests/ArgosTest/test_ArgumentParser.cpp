@@ -88,6 +88,7 @@ TEST_CASE("Section order in help text")
             .add(Option({"-s"}).section("Z"))
             .add(Argument("device").section("A"))
             .outputStream(&ss)
+            .text(TextId::USAGE_TITLE, "")
             .text(TextId::USAGE, "")
             .parse(argv.size(), argv.data());
     REQUIRE(ss.str() == "Z\n  <file>\n  -s\nA\n  <device>\n  -h\n");

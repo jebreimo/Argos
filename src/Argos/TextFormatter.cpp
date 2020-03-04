@@ -8,6 +8,7 @@
 #include <iostream>
 #include <Argos/ArgosException.hpp>
 #include <array>
+#include "ConsoleWidth.hpp"
 #include "TextFormatter.hpp"
 
 namespace Argos

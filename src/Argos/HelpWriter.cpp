@@ -7,8 +7,6 @@
 //****************************************************************************
 #include "HelpWriter.hpp"
 
-#include "ConsoleWidth.hpp"
-
 namespace Argos
 {
     namespace
@@ -73,9 +71,11 @@ namespace Argos
 
     void HelpWriter::writeHelpText(ParserData& data) const
     {
+        writeCustomText(data, TextId::INITIAL_TEXT);
         writeUsage(data);
+        writeCustomText(data, TextId::TEXT);
         writeArgumentSections(data);
-        writeEndText(data);
+        writeCustomText(data, TextId::FINAL_TEXT);
     }
 
     void HelpWriter::writeErrorMessage(ParserData& data,
@@ -84,22 +84,23 @@ namespace Argos
         data.textFormatter.writeText(data.helpSettings.programName + ":");
         data.textFormatter.writeText(msg);
         data.textFormatter.newline();
-        writeBriefUsage(data);
-    }
-
-    void HelpWriter::writeUsage(ParserData& data) const
-    {
-        auto usage = getCustomText(data, TextId::USAGE);
-        if (!usage)
+        if (!writeCustomText(data, TextId::ERROR_USAGE))
             writeBriefUsage(data);
-        else if (!usage->empty())
-            data.textFormatter.writePreformattedText(*usage);
     }
 
-    void HelpWriter::writeBriefUsage(ParserData& data) const
+    void HelpWriter::writeUsage(ParserData& data)
     {
-        auto title = getCustomText(data, TextId::USAGE_TITLE);
-        data.textFormatter.writeText(title ? *title : "USAGE\n");
+        if (!writeCustomText(data, TextId::USAGE_TITLE))
+        {
+            data.textFormatter.writeText("USAGE");
+            data.textFormatter.newline();
+        }
+        if (!writeCustomText(data, TextId::USAGE))
+            writeBriefUsage(data);
+    }
+
+    void HelpWriter::writeBriefUsage(ParserData& data)
+    {
         data.textFormatter.pushIndentation(2);
 
         writeStopAndHelpUsage(data);
@@ -130,7 +131,7 @@ namespace Argos
         data.textFormatter.popIndentation();
     }
 
-    void HelpWriter::writeStopAndHelpUsage(ParserData& data) const
+    void HelpWriter::writeStopAndHelpUsage(ParserData& data)
     {
         for (auto& opt : data.options)
         {
@@ -150,7 +151,7 @@ namespace Argos
         }
     }
 
-    void HelpWriter::writeArgumentSections(ParserData& data) const
+    void HelpWriter::writeArgumentSections(ParserData& data)
     {
         using HelpText = std::pair<std::string, std::string_view>;
         using HelpTextVector = std::vector<HelpText>;
@@ -168,32 +169,24 @@ namespace Argos
             it->second.emplace_back(std::move(a), b);
         };
 
-        auto argSection = getCustomText(data, TextId::ARGUMENTS_SECTION);
-        if (!argSection)
-            argSection = "ARGUMENTS";
+        auto argTitle = getCustomText(data, TextId::ARGUMENTS_TITLE);
+        if (!argTitle)
+            argTitle = "ARGUMENTS";
         for (auto& arg : data.arguments)
         {
             if ((arg->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
-            auto& section = arg->section.empty() ? *argSection : arg->section;
+            auto& section = arg->section.empty() ? *argTitle : arg->section;
             addHelpText(section, getArgumentName(*arg), arg->text);
-            //auto it = find_if(sections.begin(), sections.end(),
-            //                  [&](auto& t){return t.first == section;});
-            //if (it == sections.end())
-            //{
-            //    sections.push_back({section, {}});
-            //    it = std::prev(sections.end());
-            //}
-            //it->second.emplace_back(getArgumentName(*arg), arg->text);
         }
-        auto optSection = getCustomText(data, TextId::OPTIONS_SECTION);
-        if (!optSection)
-            optSection = "OPTIONS";
+        auto optTitle = getCustomText(data, TextId::OPTIONS_TITLE);
+        if (!optTitle)
+            optTitle = "OPTIONS";
         for (auto& opt : data.options)
         {
             if ((opt->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                 continue;
-            auto& section = opt->section.empty() ? *optSection : opt->section;
+            auto& section = opt->section.empty() ? *optTitle : opt->section;
             addHelpText(section, getLongOptionName(*opt), opt->text);
         }
 
@@ -202,7 +195,7 @@ namespace Argos
 
         std::vector<size_t> nameWidths;
         std::vector<size_t> textWidths;
-        for (auto&[sec, txts] : sections)
+        for (auto& [sec, txts] : sections)
         {
             for (auto&[name, txt] : txts)
             {
@@ -238,16 +231,25 @@ namespace Argos
         }
     }
 
-    void HelpWriter::writeEndText(ParserData& data) const
-    {
-    }
-
     std::optional<std::string>
-    HelpWriter::getCustomText(ParserData& data, TextId textId) const
+    HelpWriter::getCustomText(ParserData& data, TextId textId)
     {
         auto it = data.helpSettings.texts.find(textId);
         if (it != data.helpSettings.texts.end())
             return it->second;
         return {};
+    }
+
+    bool HelpWriter::writeCustomText(ParserData& data, TextId textId)
+    {
+        auto text = getCustomText(data, textId);
+        if (!text)
+            return false;
+        if (!text->empty())
+        {
+            data.textFormatter.writeText(*text);
+            data.textFormatter.newline();
+        }
+        return true;
     }
 }

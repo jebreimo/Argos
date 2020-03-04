@@ -21,17 +21,17 @@ namespace Argos
         void writeErrorMessage(ParserData& data,
                                const std::string& msg) const;
     private:
-        void writeUsage(ParserData& data) const;
+        static void writeUsage(ParserData& data);
 
-        void writeBriefUsage(ParserData& data) const;
+        static void writeBriefUsage(ParserData& data);
 
-        void writeStopAndHelpUsage(ParserData& data) const;
+        static void writeStopAndHelpUsage(ParserData& data);
 
-        void writeArgumentSections(ParserData& data) const;
+        static void writeArgumentSections(ParserData& data);
 
-        void writeEndText(ParserData& data) const;
+        static std::optional<std::string> getCustomText(ParserData& data,
+                                                        TextId textId);
 
-        std::optional<std::string> getCustomText(ParserData& data,
-                                                 TextId textId) const;
+        static bool writeCustomText(ParserData& data, TextId textId);
     };
 }

@@ -89,14 +89,14 @@ namespace Argos
 
     enum class TextId
     {
+        INITIAL_TEXT,
         USAGE_TITLE,
         USAGE,
-        USAGE_DESCRIPTION,
-        ARGUMENTS_SECTION,
-        ARGUMENTS,
-        OPTIONS_SECTION,
-        OPTIONS,
-        END_TEXT
+        TEXT,
+        ARGUMENTS_TITLE,
+        OPTIONS_TITLE,
+        FINAL_TEXT,
+        ERROR_USAGE
     };
 
     enum class Visibility : unsigned
