@@ -38,8 +38,8 @@ add_library(Argos
     src/Argos/StringUtilities.hpp
     src/Argos/StringUtilities.cpp
     src/Argos/VisitorUtilities.hpp
-    src/Argos/HelpWriter.cpp
-    src/Argos/HelpWriter.hpp
+    src/Argos/HelpText.cpp
+    src/Argos/HelpText.hpp
     src/Argos/ArgumentCounter.cpp
     src/Argos/ArgumentCounter.hpp
     src/Argos/ArgumentParser.cpp

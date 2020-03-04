@@ -9,7 +9,7 @@
 
 #include <cassert>
 #include "Argos/ArgosException.hpp"
-#include "HelpWriter.hpp"
+#include "HelpText.hpp"
 #include "StringUtilities.hpp"
 #include "OptionIterator.hpp"
 
@@ -255,7 +255,7 @@ namespace Argos
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            HelpWriter().writeHelpText(*m_Data);
+            writeHelpText(*m_Data);
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&option);
             return {OptionResult::HELP, arg};
@@ -435,7 +435,7 @@ namespace Argos
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            HelpWriter().writeErrorMessage(*m_Data, message);
+            writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         copyRemainingArgumentsToParserResult();

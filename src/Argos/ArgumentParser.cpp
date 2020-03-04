@@ -11,7 +11,7 @@
 #include "Argos/ArgosException.hpp"
 #include "ArgumentIteratorImpl.hpp"
 #include "ParserData.hpp"
-#include "HelpWriter.hpp"
+#include "HelpText.hpp"
 
 namespace Argos
 {
@@ -356,7 +356,7 @@ namespace Argos
 
     void ArgumentParser::writeHelpText()
     {
-        HelpWriter().writeHelpText(data());
+        Argos::writeHelpText(data());
     }
 
     const ParserData& ArgumentParser::data() const
