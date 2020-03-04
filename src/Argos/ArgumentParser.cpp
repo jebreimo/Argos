@@ -102,9 +102,9 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId_ = idMaker.makeNumericId(o->valueName);
+                o->valueId = idMaker.makeNumericId(o->valueName);
                 for (auto& f : o->flags)
-                    idMaker.explicitIds.emplace(f, o->valueId_);
+                    idMaker.explicitIds.emplace(f, o->valueId);
             }
         }
 
@@ -191,6 +191,8 @@ namespace Argos
                 ARGOS_THROW("NONE-options cannot have value set.");
             if (!od->valueName.empty())
                 ARGOS_THROW("NONE-options cannot have valueName set.");
+            if (od->mandatory)
+                ARGOS_THROW("NONE-options cannot be mandatory.");
             break;
         case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->value.empty())
@@ -203,6 +205,8 @@ namespace Argos
         case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->value.empty())
                 od->value = "1";
+            if (od->mandatory)
+                ARGOS_THROW("CLEAR-options cannot be mandatory.");
             break;
         }
         data().options.push_back(std::move(od));

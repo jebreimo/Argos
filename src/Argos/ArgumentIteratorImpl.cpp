@@ -208,11 +208,11 @@ namespace Argos
         case OptionOperation::ASSIGN:
             if (!option.value.empty())
             {
-                m_ParsedArgs->assignValue(option.valueId_, option.value);
+                m_ParsedArgs->assignValue(option.valueId, option.value);
             }
             else if (auto value = m_Iterator->nextValue(); value)
             {
-                arg = m_ParsedArgs->assignValue(option.valueId_, *value);
+                arg = m_ParsedArgs->assignValue(option.valueId, *value);
             }
             else
             {
@@ -223,11 +223,11 @@ namespace Argos
         case OptionOperation::APPEND:
             if (!option.value.empty())
             {
-                m_ParsedArgs->appendValue(option.valueId_, option.value);
+                m_ParsedArgs->appendValue(option.valueId, option.value);
             }
             else if (auto value = m_Iterator->nextValue(); value)
             {
-                arg = m_ParsedArgs->appendValue(option.valueId_, *value);
+                arg = m_ParsedArgs->appendValue(option.valueId, *value);
             }
             else
             {
@@ -236,7 +236,7 @@ namespace Argos
             }
             break;
         case OptionOperation::CLEAR:
-            m_ParsedArgs->clearValue(option.valueId_);
+            m_ParsedArgs->clearValue(option.valueId);
             break;
         case OptionOperation::NONE:
             break;
@@ -284,7 +284,7 @@ namespace Argos
                    : m_Iterator->nextValue();
         if (!arg)
         {
-            if (checkArgumentCounter())
+            if (checkArgumentAndOptionCounts())
                 return {IteratorResultCode::DONE, nullptr, {}};
             else
                 return {IteratorResultCode::ERROR, nullptr, {}};
@@ -309,7 +309,7 @@ namespace Argos
                 case OptionResult::ERROR:
                     return {IteratorResultCode::ERROR, option, {}};
                 case OptionResult::LAST_ARGUMENT:
-                    if (!checkArgumentCounter())
+                    if (!checkArgumentAndOptionCounts())
                         return {IteratorResultCode::ERROR, nullptr, {}};
                     [[fallthrough]];
                 case OptionResult::STOP:
@@ -401,8 +401,19 @@ namespace Argos
         return result;
     }
 
-    bool ArgumentIteratorImpl::checkArgumentCounter()
+    bool ArgumentIteratorImpl::checkArgumentAndOptionCounts()
     {
+        for (auto& o : m_Data->options)
+        {
+            if (o->mandatory && !m_ParsedArgs->has(o->valueId))
+            {
+                auto flags = o->flags.front();
+                for (unsigned i = 1; i < o->flags.size(); ++i)
+                    flags += ", " + o->flags[i];
+                error("Mandatory option \"" + flags + "\" is missing.");
+                return false;
+            }
+        }
         if (m_ArgumentCounter.isComplete())
         {
             m_State = State::DONE;

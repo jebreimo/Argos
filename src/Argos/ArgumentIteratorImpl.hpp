@@ -61,7 +61,7 @@ namespace Argos
 
         size_t countArguments() const;
 
-        bool checkArgumentCounter();
+        bool checkArgumentAndOptionCounts();
 
         void error(const std::string& message = {});
 

@@ -48,9 +48,9 @@ namespace Argos
                 continue;
 
             for (auto& f : o->flags)
-                m_ValueIds.emplace_back(f, o->valueId_);
+                m_ValueIds.emplace_back(f, o->valueId);
             if (!o->valueName.empty())
-                m_ValueIds.emplace_back(o->valueName, o->valueId_);
+                m_ValueIds.emplace_back(o->valueName, o->valueId);
         }
         sort(m_ValueIds.begin(), m_ValueIds.end());
         m_ValueIds.erase(unique(m_ValueIds.begin(), m_ValueIds.end()),
@@ -138,7 +138,7 @@ namespace Argos
         }
         for (auto& o : m_Data->options)
         {
-            if (o->valueId_ == valueId)
+            if (o->valueId == valueId)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
         }
         return result;

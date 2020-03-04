@@ -27,6 +27,6 @@ namespace Argos
         Visibility visibility = Visibility::NORMAL;
         bool mandatory = false;
         int id = 0;
-        int valueId_ = 0;
+        int valueId = 0;
     };
 }
