@@ -23,16 +23,9 @@ namespace Argos
             char* endp = nullptr;
             errno = 0;
             auto value = func(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size())
-            {
-                if (errno == 0)
-                    return value;
-                return {};
-            }
-
-            if (!removeUnderscoresFromNumber(str))
-                return false;
-            return parseFloatingPointImpl<T>(std::move(str), func);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
         }
     }
 

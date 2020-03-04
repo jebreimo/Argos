@@ -29,8 +29,6 @@ namespace Argos
     bool isLess(std::string_view str1, std::string_view str2,
                 bool caseInsensitive);
 
-    bool removeUnderscoresFromNumber(std::string& num);
-
     std::vector<std::string_view>
     splitString(std::string_view s, char delimiter, size_t maxSplit);
 }

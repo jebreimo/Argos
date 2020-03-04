@@ -5,8 +5,10 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <catch2/catch.hpp>
 #include "Argos/ParseValue.hpp"
+#include <catch2/catch.hpp>
+
+#include <cfloat>
 
 TEST_CASE("Parse signed decimal integers")
 {
@@ -29,4 +31,12 @@ TEST_CASE("Parse non-decimals")
     REQUIRE(Argos::parseValue<int>("0o671") == 0671);
     REQUIRE(!Argos::parseValue<int>("0o681").has_value());
     REQUIRE(Argos::parseValue<int>("0b1100_1111") == 0b1100'1111);
+}
+
+TEST_CASE("Parse doubles")
+{
+    REQUIRE(Argos::parseValue<double>("0") == 0.0);
+    REQUIRE(Argos::parseValue<double>("-1.234") == -1.234);
+    REQUIRE(Argos::parseValue<double>("1.234") == 1.234);
+    REQUIRE(Argos::parseValue<double>(std::to_string(DBL_MAX)) == DBL_MAX);
 }
