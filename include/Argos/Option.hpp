@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 #include "Callbacks.hpp"
-#include "Enums.hpp"
 
 namespace Argos
 {

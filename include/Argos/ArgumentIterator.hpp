@@ -7,8 +7,6 @@
 //****************************************************************************
 #pragma once
 
-#include "ArgumentView.hpp"
-#include "ArgosException.hpp"
 #include "ParsedArguments.hpp"
 
 namespace Argos

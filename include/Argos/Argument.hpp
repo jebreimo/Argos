@@ -10,7 +10,6 @@
 #include <memory>
 #include <string>
 #include "Callbacks.hpp"
-#include "Enums.hpp"
 
 namespace Argos
 {

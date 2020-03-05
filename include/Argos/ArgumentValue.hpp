@@ -10,11 +10,12 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include "ArgumentValues.hpp"
+#include "IArgumentView.hpp"
 
 namespace Argos
 {
     class ParsedArgumentsImpl;
+    class ArgumentValues;
 
     class ArgumentValue
     {

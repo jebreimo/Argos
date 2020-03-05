@@ -11,7 +11,6 @@
 #include "Argument.hpp"
 #include "ArgumentIterator.hpp"
 #include "Option.hpp"
-#include "ParsedArguments.hpp"
 
 namespace Argos
 {

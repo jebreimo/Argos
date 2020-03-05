@@ -7,7 +7,7 @@
 //****************************************************************************
 #include "Argos/ArgumentValues.hpp"
 
-#include "Argos/ParseValue.hpp"
+#include "ParseValue.hpp"
 #include "ParsedArgumentsImpl.hpp"
 #include "StringUtilities.hpp"
 

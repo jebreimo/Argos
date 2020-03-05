@@ -11,51 +11,60 @@ project(Argos)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(Argos
-    include/Argos/Argument.hpp
-    include/Argos/Option.hpp
     include/Argos/ArgosException.hpp
-    include/Argos/Enums.hpp
-    include/Argos/ArgumentParser.hpp
+    include/Argos/Argument.hpp
     include/Argos/ArgumentIterator.hpp
-    include/Argos/IArgumentView.hpp
-    include/Argos/ParsedArguments.hpp
-    include/Argos/ArgumentView.hpp
-    include/Argos/OptionView.hpp
-    include/Argos/ParsedArgumentsBuilder.hpp
+    include/Argos/ArgumentParser.hpp
     include/Argos/ArgumentValue.hpp
-    include/Argos/ParseValue.hpp
+    include/Argos/ArgumentValues.hpp
+    include/Argos/ArgumentView.hpp
+    include/Argos/Callbacks.hpp
+    include/Argos/Enums.hpp
+    include/Argos/IArgumentView.hpp
+    include/Argos/Option.hpp
+    include/Argos/OptionView.hpp
+    include/Argos/ParsedArguments.hpp
+    include/Argos/ParsedArgumentsBuilder.hpp
     src/Argos/Argument.cpp
-    src/Argos/ParsedArgumentsImpl.cpp
-    src/Argos/ParsedArgumentsImpl.hpp
-    src/Argos/ArgumentIteratorImpl.cpp
-    src/Argos/ArgumentIteratorImpl.hpp
-    src/Argos/ArgumentData.hpp
-    src/Argos/OptionData.hpp
-    src/Argos/StandardOptionIterator.cpp
-    src/Argos/StandardOptionIterator.hpp
-    src/Argos/Option.cpp
-    src/Argos/ParserData.hpp
-    src/Argos/StringUtilities.hpp
-    src/Argos/StringUtilities.cpp
-    src/Argos/VisitorUtilities.hpp
-    src/Argos/HelpText.cpp
-    src/Argos/HelpText.hpp
     src/Argos/ArgumentCounter.cpp
     src/Argos/ArgumentCounter.hpp
-    src/Argos/ArgumentParser.cpp
+    src/Argos/ArgumentData.hpp
     src/Argos/ArgumentIterator.cpp
-    src/Argos/ParsedArguments.cpp
-    src/Argos/ArgumentView.cpp
-    src/Argos/OptionView.cpp
-    src/Argos/ParsedArgumentsBuilder.cpp
+    src/Argos/ArgumentIteratorImpl.cpp
+    src/Argos/ArgumentIteratorImpl.hpp
+    src/Argos/ArgumentParser.cpp
     src/Argos/ArgumentValue.cpp
-    src/Argos/TextFormatter.cpp
-    src/Argos/TextFormatter.hpp
-    src/Argos/WordSplitter.cpp
-    src/Argos/WordSplitter.hpp
+    src/Argos/ArgumentValues.cpp
+    src/Argos/ArgumentView.cpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
-    src/Argos/ParseValue.cpp src/Argos/ArgumentValues.cpp include/Argos/ArgumentValues.hpp src/Argos/OptionIterator.cpp src/Argos/OptionIterator.hpp src/Argos/IOptionIterator.hpp include/Argos/Callbacks.hpp src/Argos/TextWriter.cpp src/Argos/TextWriter.hpp)
+    src/Argos/HelpText.cpp
+    src/Argos/HelpText.hpp
+    src/Argos/IOptionIterator.hpp
+    src/Argos/Option.cpp
+    src/Argos/OptionData.hpp
+    src/Argos/OptionIterator.cpp
+    src/Argos/OptionIterator.hpp
+    src/Argos/OptionView.cpp
+    src/Argos/ParseValue.cpp
+    src/Argos/ParseValue.hpp
+    src/Argos/ParsedArguments.cpp
+    src/Argos/ParsedArgumentsImpl.cpp
+    src/Argos/ParsedArgumentsImpl.hpp
+    src/Argos/ParsedArgumentsBuilder.cpp
+    src/Argos/ParserData.hpp
+    src/Argos/StandardOptionIterator.cpp
+    src/Argos/StandardOptionIterator.hpp
+    src/Argos/StringUtilities.cpp
+    src/Argos/StringUtilities.hpp
+    src/Argos/TextFormatter.cpp
+    src/Argos/TextFormatter.hpp
+    src/Argos/TextWriter.cpp
+    src/Argos/TextWriter.hpp
+    src/Argos/VisitorUtilities.hpp
+    src/Argos/WordSplitter.cpp
+    src/Argos/WordSplitter.hpp
+    )
 
 target_include_directories(Argos
     PUBLIC

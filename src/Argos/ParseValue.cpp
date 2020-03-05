@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 
-#include "Argos/ParseValue.hpp"
+#include "ParseValue.hpp"
 
 #include <cerrno>
 #include <cstdlib>

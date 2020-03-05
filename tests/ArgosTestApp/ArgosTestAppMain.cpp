@@ -7,7 +7,6 @@
 //****************************************************************************
 #include <Argos/ArgumentParser.hpp>
 #include <iostream>
-#include <Argos/ParseValue.hpp>
 
 struct Rectangle
 {

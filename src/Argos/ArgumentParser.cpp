@@ -17,16 +17,8 @@ namespace Argos
 {
     namespace
     {
-        bool checkStandardFlag(const std::string& flag, const OptionData& od)
+        bool checkFlagWithEqual(const std::string& flag, const OptionData& od)
         {
-            if (flag.size() < 2)
-                return false;
-            if (flag[0] != '-')
-                return false;
-            if (flag.size() == 2)
-                return true;
-            if (flag[1] != '-')
-                return false;
             auto eqPos = flag.find('=');
             if (eqPos == std::string::npos)
                 return true;
@@ -37,20 +29,26 @@ namespace Argos
             return true;
         }
 
+        bool checkStandardFlag(const std::string& flag, const OptionData& od)
+        {
+            if (flag.size() < 2)
+                return false;
+            if (flag[0] != '-')
+                return false;
+            if (flag.size() == 2)
+                return true;
+            if (flag[1] != '-')
+                return false;
+            return checkFlagWithEqual(flag, od);
+        }
+
         bool checkFlag(const std::string& flag, char prefix, const OptionData& od)
         {
             if (flag.size() < 2 || flag[0] != prefix)
                 return false;
             if (flag.size() == 2)
                 return true;
-            auto eqPos = flag.find('=');
-            if (eqPos == std::string::npos)
-                return true;
-            if (eqPos != flag.size() - 1)
-                return false;
-            if (od.argument.empty())
-                ARGOS_THROW(flag + ": options ending with '=' must take an argument.");
-            return true;
+            return checkFlagWithEqual(flag, od);
         }
 
         std::unique_ptr<ParserData> makeCopy(const ParserData& data)
