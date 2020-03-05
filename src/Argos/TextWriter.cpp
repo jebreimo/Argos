@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "TextWriter.hpp"
+
 #include <iostream>
 
 namespace Argos

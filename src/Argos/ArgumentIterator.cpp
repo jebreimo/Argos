@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "Argos/ArgumentIterator.hpp"
 
+#include "Argos/ArgosException.hpp"
 #include "ArgumentIteratorImpl.hpp"
 
 namespace Argos

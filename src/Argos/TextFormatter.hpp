@@ -10,8 +10,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "WordSplitter.hpp"
 #include "TextWriter.hpp"
+#include "WordSplitter.hpp"
 
 namespace Argos
 {

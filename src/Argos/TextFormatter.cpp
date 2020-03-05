@@ -6,8 +6,8 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include <iostream>
-#include <Argos/ArgosException.hpp>
 #include <array>
+#include "Argos/ArgosException.hpp"
 #include "ConsoleWidth.hpp"
 #include "TextFormatter.hpp"
 
