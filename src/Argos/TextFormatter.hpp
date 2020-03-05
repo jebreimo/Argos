@@ -20,9 +20,9 @@ namespace Argos
     public:
         TextFormatter();
 
-        explicit TextFormatter(size_t lineWidth, size_t indent = 0);
+        explicit TextFormatter(std::ostream* stream);
 
-        TextFormatter(std::ostream* stream, size_t lineWidth, size_t indent = 0);
+        TextFormatter(std::ostream* stream, size_t lineWidth);
 
         std::ostream* stream() const;
 

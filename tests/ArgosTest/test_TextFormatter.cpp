@@ -77,3 +77,21 @@ TEST_CASE("Keep whitespace at the start of a line.")
     formatter.flush();
     REQUIRE(ss.str() == " Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
 }
+
+TEST_CASE("Preformatted text across several lines")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 30);
+    formatter.pushIndentation(5);
+    formatter.writePreformattedText("[abc efg]");
+    formatter.writeText(" ");
+    formatter.writePreformattedText("[abc efg]");
+    formatter.writeText(" ");
+    formatter.writePreformattedText("[abc efg]");
+    formatter.writeText(" ");
+    formatter.writePreformattedText("[abc efg]");
+    formatter.writeText(" ");
+    formatter.writePreformattedText("[abc efg]");
+    formatter.flush();
+    REQUIRE(ss.str() == "     [abc efg] [abc efg]\n     [abc efg] [abc efg]\n     [abc efg]");
+}

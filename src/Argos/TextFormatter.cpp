@@ -77,21 +77,20 @@ namespace Argos
     }
 
     TextFormatter::TextFormatter()
-            : TextFormatter(&std::cout, 80)
+        : TextFormatter(&std::cout, getConsoleWidth(20))
     {}
 
-    TextFormatter::TextFormatter(size_t lineWidth, size_t indent)
-            : TextFormatter(&std::cout, lineWidth, indent)
+    TextFormatter::TextFormatter(std::ostream* stream)
+        : TextFormatter(stream, getConsoleWidth(20))
     {}
 
-    TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth,
-                                 size_t indent)
-            : m_Writer(lineWidth)
+    TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth)
+        : m_Writer(lineWidth)
     {
         if (lineWidth <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setStream(stream);
-        m_Indents.push_back(indent);
+        m_Indents.push_back(0);
     }
 
     std::ostream* TextFormatter::stream() const
@@ -152,9 +151,9 @@ namespace Argos
         auto remainder = text;
         while (!remainder.empty())
         {
-            auto [lin, rem] = nextLine(remainder);
-            if (!lin.empty())
-                m_Writer.write(lin, true);
+            auto [line, rem] = nextLine(remainder);
+            if (!line.empty())
+                appendWord(line);
             if (!rem.empty())
                 newline();
             remainder = rem;
