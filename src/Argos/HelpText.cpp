@@ -23,19 +23,17 @@ namespace Argos
 
         std::string getBriefOptionName(const OptionData& opt)
         {
-            auto flag = min_element(opt.flags.begin(), opt.flags.end(),
-                                    [](auto& a, auto& b)
-                                    {return a.size() < b.size();});
+            auto flag = opt.flags.front();
             std::string optTxt;
             bool braces = !opt.mandatory
                           && opt.type != OptionType::STOP
                           && opt.type != OptionType::HELP;
             if (braces)
                 optTxt.push_back('[');
-            optTxt += *flag;
+            optTxt += flag;
             if (!opt.argument.empty())
             {
-                if (flag->back() != '=')
+                if (flag.back() != '=')
                     optTxt += " ";
                 optTxt += "<";
                 optTxt += opt.argument;
