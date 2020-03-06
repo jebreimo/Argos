@@ -201,7 +201,7 @@ TEST_CASE("Test incorrect slash option")
             .autoExit(false)
             .optionStyle(OptionStyle::SLASH)
             .add(Option({"/bill"}))
-            .add(Argument({"file"}))
+            .add(Argument("file"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }

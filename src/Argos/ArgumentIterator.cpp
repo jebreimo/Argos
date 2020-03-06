@@ -49,10 +49,11 @@ namespace Argos
         case IteratorResultCode::DONE:
         case IteratorResultCode::UNKNOWN:
         case IteratorResultCode::ERROR:
-            arg = {};
-            value = {};
-            return false;
+            break;
         }
+        arg = {};
+        value = {};
+        return false;
     }
 
     ParsedArguments ArgumentIterator::parsedArguments() const

@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <map>
+#include <memory>
 #include <variant>
 #include "Argos/Enums.hpp"
 #include "ArgumentData.hpp"
@@ -40,13 +41,5 @@ namespace Argos
         HelpSettings helpSettings;
 
         TextFormatter textFormatter;
-        //std::string programName;
-        //
-        //OptionStyle optionStyle = OptionStyle::STANDARD;
-        //bool autoExit = true;
-        //bool allowAbbreviatedOptions = false;
-        //bool ignoreUndefinedArguments = false;
-        //bool ignoreMissingArguments = false;
-        //bool caseInsensitive = false;
     };
 }

@@ -145,12 +145,12 @@ namespace Argos
         {
             switch (style)
             {
-            case OptionStyle::STANDARD:
-                return std::make_unique<StandardOptionIterator>(move(args));
             case OptionStyle::SLASH:
                 return std::make_unique<OptionIterator>(move(args), '/');
             case OptionStyle::DASH:
                 return std::make_unique<OptionIterator>(move(args), '-');
+            default:
+                return std::make_unique<StandardOptionIterator>(move(args));
             }
         }
     }
@@ -270,6 +270,7 @@ namespace Argos
             m_State = State::ARGUMENTS_ONLY;
             return {OptionResult::NORMAL, arg};
         }
+        return {};
     }
 
     IteratorResult ArgumentIteratorImpl::doNext()

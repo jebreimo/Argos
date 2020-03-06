@@ -5,11 +5,12 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos/ArgumentView.hpp"
-#include "Argos/OptionView.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
+#include <cassert>
 #include "Argos/ArgosException.hpp"
+#include "Argos/ArgumentView.hpp"
+#include "Argos/OptionView.hpp"
 #include "HelpText.hpp"
 
 namespace Argos

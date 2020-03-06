@@ -29,23 +29,6 @@ namespace Argos
             return {text.substr(0, pos), text.substr(pos + 2)};
         }
 
-        std::tuple<std::string_view, char, std::string_view>
-        nextWord(std::string_view text)
-        {
-            auto pos = text.find_first_not_of(" ");
-            if (pos != 0)
-                text = text.substr(pos);
-            pos = text.find_first_of(" \n\r");
-            if (pos == std::string_view::npos)
-                return {text, '\0', std::string_view()};
-            auto nxt = pos + 1;
-            if (text[pos] == ' ')
-                return {text.substr(0, pos), ' ', text.substr(nxt)};
-            if (text[pos] == '\r' && nxt != text.size() && text[nxt] == '\n')
-                ++nxt;
-            return {text.substr(0, pos), '\n', text.substr(nxt)};
-        }
-
         std::tuple<char, std::string_view, std::string_view>
         nextToken(std::string_view text)
         {

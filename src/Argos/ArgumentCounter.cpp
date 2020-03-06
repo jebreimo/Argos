@@ -15,7 +15,7 @@ namespace Argos
         size_t findFirstOptional(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
         {
             size_t result = 0;
-            for (auto i = 0; i < arguments.size(); ++i)
+            for (size_t i = 0; i < arguments.size(); ++i)
             {
                 if (arguments[i]->minCount > 0)
                     result = i + 1;

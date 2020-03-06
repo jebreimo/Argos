@@ -9,6 +9,7 @@
 #include <catch2/catch.hpp>
 
 #include <cfloat>
+#include <climits>
 
 TEST_CASE("Parse signed decimal integers")
 {

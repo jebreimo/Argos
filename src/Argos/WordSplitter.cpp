@@ -5,8 +5,11 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos/ArgosException.hpp"
 #include "WordSplitter.hpp"
+
+#include <algorithm>
+#include <cstring>
+#include "Argos/ArgosException.hpp"
 
 namespace Argos
 {
@@ -88,7 +91,7 @@ namespace Argos
                 return {word.substr(startPos, index - startPos),
                         '\0',
                         word.substr(index)};
-            if (isnumber(word[index - 1]) != isnumber(word[index]))
+            if (isdigit(word[index - 1]) != isdigit(word[index]))
                 break;
             if (isalpha(word[index]) && !isVowel(word[index])
                 && word[index] != word[index - 1]

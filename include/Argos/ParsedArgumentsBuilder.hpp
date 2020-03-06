@@ -6,8 +6,9 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include <string>
 #include <optional>
+#include <string>
+#include <vector>
 #include "IArgumentView.hpp"
 
 namespace Argos
