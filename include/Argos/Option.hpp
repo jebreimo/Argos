@@ -14,7 +14,7 @@
 
 namespace Argos
 {
-    class OptionData;
+    struct OptionData;
 
     class Option
     {

@@ -13,7 +13,7 @@
 
 namespace Argos
 {
-    class OptionData;
+    struct OptionData;
 
     class OptionView : public IArgumentView
     {

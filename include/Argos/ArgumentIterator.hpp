@@ -12,7 +12,7 @@
 namespace Argos
 {
     class ArgumentIteratorImpl;
-    class ParserData;
+    struct ParserData;
 
     class ArgumentIterator
     {
