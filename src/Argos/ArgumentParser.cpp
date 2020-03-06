@@ -8,7 +8,7 @@
 #include "Argos/ArgumentParser.hpp"
 
 #include <algorithm>
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 #include "ArgumentIteratorImpl.hpp"
 #include "ParserData.hpp"
 #include "HelpText.hpp"

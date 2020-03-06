@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <cstring>
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 
 namespace Argos
 {

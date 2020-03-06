@@ -45,6 +45,3 @@ namespace Argos
         std::string m_Message;
     };
 }
-
-#define ARGOS_THROW(msg) \
-        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __FUNCTION__)

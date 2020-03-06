@@ -8,7 +8,7 @@
 #include "ArgumentIteratorImpl.hpp"
 
 #include <cassert>
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 #include "HelpText.hpp"
 #include "StringUtilities.hpp"
 #include "OptionIterator.hpp"

@@ -7,8 +7,8 @@
 //****************************************************************************
 #include "Argos/Argument.hpp"
 
+#include "ArgosThrow.hpp"
 #include "ArgumentData.hpp"
-#include "Argos/ArgosException.hpp"
 
 #define CHECK_ARGUMENT_EXISTS() \
     if (!m_Argument) \

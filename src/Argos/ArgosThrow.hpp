@@ -6,15 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include "Argos/ArgosException.hpp"
 
-namespace Argos
-{
-    // Copied from C++17 in Detail by Bartłomiej Filipek
-    template <class... Ts>
-    struct overload : Ts ...
-    {
-        using Ts::operator()...;
-    };
-
-    template <class... Ts> overload(Ts...) -> overload<Ts...>;
-}
+#define ARGOS_THROW(msg) \
+        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __FUNCTION__)

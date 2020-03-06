@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "OptionIterator.hpp"
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 
 namespace Argos
 {

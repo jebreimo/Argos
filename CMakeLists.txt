@@ -29,6 +29,7 @@ add_library(Argos
     include/Argos/OptionView.hpp
     include/Argos/ParsedArguments.hpp
     include/Argos/ParsedArgumentsBuilder.hpp
+    src/Argos/ArgosThrow.hpp
     src/Argos/Argument.cpp
     src/Argos/ArgumentCounter.cpp
     src/Argos/ArgumentCounter.hpp
@@ -65,7 +66,6 @@ add_library(Argos
     src/Argos/TextFormatter.hpp
     src/Argos/TextWriter.cpp
     src/Argos/TextWriter.hpp
-    src/Argos/VisitorUtilities.hpp
     src/Argos/WordSplitter.cpp
     src/Argos/WordSplitter.hpp
     )

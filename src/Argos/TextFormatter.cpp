@@ -7,7 +7,7 @@
 //****************************************************************************
 #include <iostream>
 #include <array>
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 #include "ConsoleWidth.hpp"
 #include "TextFormatter.hpp"
 

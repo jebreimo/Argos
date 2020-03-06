@@ -7,7 +7,7 @@
 //****************************************************************************
 #include "Argos/Option.hpp"
 
-#include "Argos/ArgosException.hpp"
+#include "ArgosThrow.hpp"
 #include "OptionData.hpp"
 
 #define CHECK_OPTION_EXISTS() \

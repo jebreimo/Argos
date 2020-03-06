@@ -5,9 +5,9 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos/ArgosException.hpp"
 #include "Argos/ParsedArguments.hpp"
 
+#include "ArgosThrow.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
 namespace Argos
