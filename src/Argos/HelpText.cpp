@@ -7,6 +7,8 @@
 //****************************************************************************
 #include "HelpText.hpp"
 
+#include <algorithm>
+
 namespace Argos
 {
     namespace

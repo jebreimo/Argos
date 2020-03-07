@@ -75,5 +75,10 @@ target_include_directories(Argos
         include
     )
 
+target_compile_definitions(Argos
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
+    )
+
 add_subdirectory(tests/ArgosTest)
 add_subdirectory(tests/ArgosTestApp)

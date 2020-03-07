@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "ParsedArgumentsImpl.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include "Argos/ArgumentView.hpp"
 #include "Argos/OptionView.hpp"

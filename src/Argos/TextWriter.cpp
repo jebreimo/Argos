@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "TextWriter.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 namespace Argos
