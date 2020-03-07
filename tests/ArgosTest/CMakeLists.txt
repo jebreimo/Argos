@@ -43,4 +43,4 @@ target_include_directories(ArgosTest
         ../../src
     )
 
-add_test(ArgosTest COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ArgosTest)
+add_test(NAME ArgosTest COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ArgosTest)
