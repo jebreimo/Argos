@@ -42,3 +42,5 @@ target_include_directories(ArgosTest
     PRIVATE
         ../../src
     )
+
+add_test(ArgosTest COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ArgosTest)

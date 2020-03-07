@@ -80,5 +80,7 @@ target_compile_definitions(Argos
         $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
     )
 
+enable_testing()
+
 add_subdirectory(tests/ArgosTest)
 add_subdirectory(tests/ArgosTestApp)

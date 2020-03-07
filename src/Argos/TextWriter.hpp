@@ -15,7 +15,7 @@ namespace Argos
     class TextWriter
     {
     public:
-        explicit TextWriter(unsigned lineWidth);
+        explicit TextWriter(unsigned lineWidth = 80);
 
         std::ostream* stream() const;
 
@@ -52,7 +52,7 @@ namespace Argos
         std::ostream* m_Stream;
         std::string m_Line;
         unsigned m_LineWidth;
-        unsigned m_TabSize;
+        unsigned m_TabSize = 4;
         unsigned m_Indent = 0;
         unsigned m_Spaces = 0;
     };

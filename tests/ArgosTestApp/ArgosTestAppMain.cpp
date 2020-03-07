@@ -6,6 +6,8 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include <Argos/ArgumentParser.hpp>
+
+#include <algorithm>
 #include <iostream>
 
 struct Rectangle
