@@ -40,7 +40,6 @@ namespace Argos
                 return m_Message.c_str();
             return std::runtime_error::what();
         }
-
     private:
         std::string m_Message;
     };

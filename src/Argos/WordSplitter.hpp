@@ -6,7 +6,6 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-
 #include <deque>
 #include <map>
 #include <string>
@@ -19,8 +18,6 @@ namespace Argos
     {
     public:
         void addWord(std::string wordRule);
-
-        void addWord(const std::string& word, const std::string& parts);
 
         std::tuple<std::string_view, char, std::string_view>
         split(std::string_view word, size_t startPos, size_t maxLength,

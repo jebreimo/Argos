@@ -1,4 +1,4 @@
-//****************************************************************************
+    //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //
@@ -39,11 +39,6 @@ namespace Argos
                        wordRule.end());
         m_Strings.push_back(move(wordRule));
         m_Splits.insert({std::string_view(m_Strings.back()), move(splits)});
-    }
-
-    void WordSplitter::addWord(const std::string& word, const std::string& parts)
-    {
-
     }
 
     std::tuple<std::string_view, char, std::string_view>
