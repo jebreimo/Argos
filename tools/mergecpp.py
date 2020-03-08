@@ -7,21 +7,20 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
+import argparse
 import os
 import re
 import sys
 
-LOCAL_INCLUDE_RE = re.compile(r"\s*#include\s*\"([^\"]+)\".*")
-INCLUDE_RE = re.compile(r"\s*#include\s*([\"<][^\">]+[\">]).*")
-PRAGMA_ONCE_RE = re.compile(r"\s*#pragma\s+once\b.*")
 
 def make_dependency_map(filenames):
+    regex = re.compile(r"\s*#include\s*\"([^\"]+)\".*")
     result = {}
     for filename in filenames:
         key = os.path.basename(filename)
         includes = []
         for line in open(filename):
-            m = LOCAL_INCLUDE_RE.match(line)
+            m = regex.match(line)
             if m:
                 includes.append(m.group(1))
         result[key] = includes
@@ -38,7 +37,7 @@ def arrange_includes(includes):
         if colors[name] == 2:
             return depths[name]
         if colors[name] == 1:
-            raise Exception(f"Circular dependency involving {name}.")
+            raise Exception(f"WARNING: Circular dependency involving {name}.")
         neighbors = includes[name]
         if neighbors:
             colors[name] = 1
@@ -53,37 +52,108 @@ def arrange_includes(includes):
     return depths
 
 
-def write_file_contents(outfile, paths, known_includes):
-    ignore_pragma_once = False
+def get_file_contents(paths):
+    output = []
     for path in paths:
+        if output and not output[-1].isspace():
+            output.append("\n")
         for line in open(path):
-            m = INCLUDE_RE.match(line)
-            if m:
-                if m.group(1) not in known_includes:
-                    outfile.write(line)
-                    known_includes.add(m.group(1))
-            else:
-                m = PRAGMA_ONCE_RE.match(line)
-                if not m:
-                    outfile.write(line)
-                elif not ignore_pragma_once:
-                    outfile.write(line)
-                    ignore_pragma_once = True
+            output.append(line)
+    return output
 
 
-def main(args):
-    includes = make_dependency_map(args)
-    for key in includes:
-        for inc in includes[key]:
-            print(f"{key} -> {inc}")
+def remove_pragma_once(lines, keep_first):
+    output = []
+    regex = re.compile(r"\s*#pragma\s+once\b.*")
+    for line in lines:
+        m = regex.match(line)
+        if not m:
+            output.append(line)
+        elif keep_first:
+            output.append(line)
+            keep_first = False
+    return output
+
+
+def remove_redundant_includes(lines):
+    output = []
+    known_includes = set()
+    regex = re.compile(r"\s*#include\s*([\"<][^\">]+[\">]).*")
+    for line in lines:
+        m = regex.match(line)
+        if not m:
+            output.append(line)
+        elif m.group(1) not in known_includes:
+            output.append(line)
+            known_includes.add(m.group(1))
+    return output
+
+
+def remove_matching_lines(lines, regex):
+    output = []
+    regex = re.compile(regex)
+    for line in lines:
+        m = regex.match(line)
+        if not m:
+            output.append(line)
+    return output
+
+
+def remove_successive_empty_lines(lines):
+    output = []
+    for line in lines:
+        if not output or not line.isspace() or not output[-1].isspace():
+            output.append(line)
+    return output
+
+
+def make_argument_parser():
+    ap = argparse.ArgumentParser(
+        description='Generates source files for a C++ command line argument parser.')
+    ap.add_argument("files", metavar="C++ files", nargs="+",
+                    help="C++ files that are to be merged")
+    ap.add_argument("-o", "--output", metavar="FILE",
+                    help="output file")
+    ap.add_argument("--no-pragma-once", action="store_const", const=True,
+                    default=False,
+                    help="don't insert a pragma once at the beginning of the header file")
+    ap.add_argument("-p", "--prepend", metavar="TEXT", action="append",
+                    help="Write TEXT at the start of the output file.")
+    return ap
+
+
+def main():
+    args = make_argument_parser().parse_args()
+    paths = []
+    visited = set()
+    for path in args.files:
+        if path not in visited:
+            paths.append(path)
+            visited.add(path)
+        else:
+            print(f"WARNING: {path} is listed more than among the input"
+                  f" files. All but the first will be ignored.")
+
+    includes = make_dependency_map(paths)
     depths = arrange_includes(includes)
-    for name in depths:
-        print(name, depths[name])
-    args.sort(key=lambda n: depths[os.path.basename(n)])
-    known_includes = {f'"{n}"' for n in includes}
-    write_file_contents(sys.stdout, args, known_includes)
+    paths.sort(key=lambda n: depths[os.path.basename(n)])
+
+    lines = get_file_contents(paths)
+    lines = remove_pragma_once(lines, not args.no_pragma_once)
+    lines = remove_matching_lines(lines, r"\s*#include\s*\"[^\"]+\".*")
+    lines = remove_matching_lines(lines, r"\s*#include\s*\<Argos/[^\>]+\>.*")
+    lines = remove_redundant_includes(lines)
+    lines = remove_successive_empty_lines(lines)
+
+    file = open(args.output, "w") if args.output else sys.stdout
+    if args.prepend:
+        for text in args.prepend:
+            file.write(text)
+    for line in lines:
+        file.write(line)
+
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
