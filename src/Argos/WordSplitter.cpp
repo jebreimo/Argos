@@ -82,11 +82,11 @@ namespace Argos
         auto minPos = startPos + (maxLength + 2) / 3;
         while (index-- > minPos)
         {
-            if (isalnum(word[index - 1]) != isalnum(word[index]))
+            if ((isalnum(word[index - 1]) == 0) != (isalnum(word[index]) == 0))
                 return {word.substr(startPos, index - startPos),
                         '\0',
                         word.substr(index)};
-            if (isdigit(word[index - 1]) != isdigit(word[index]))
+            if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
                 break;
             if (isalpha(word[index]) && !isVowel(word[index])
                 && word[index] != word[index - 1]
