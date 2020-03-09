@@ -148,6 +148,8 @@ namespace Argos
     ArgumentParser& ArgumentParser::add(Argument argument)
     {
         auto ad = argument.release();
+        if (ad->name.empty())
+            ARGOS_THROW("Argument must have a name.");
         data().arguments.emplace_back(std::move(ad));
         return *this;
     }
