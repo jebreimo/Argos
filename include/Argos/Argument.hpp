@@ -32,14 +32,60 @@ namespace Argos
 
         Argument& operator=(Argument&&) noexcept;
 
+        /**
+         * @brief Set the arguments help text.
+         * @param text The help text. The text will be automatically divided
+         *      into multiple lines if it doesn't fit fit inside the terminal
+         *      window. Text formatting using newlines, spaces and tabs is
+         *      possible.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Argument& text(const std::string& text);
 
+        /**
+         * @brief Specifies under which heading the argument will appear
+         *      in the help text.
+         *
+         * The default heading for arguments is "ARGUMENTS".
+         * @param name All arguments and options with the same section name
+         *      will be listed under the same heading.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Argument& section(const std::string& name);
 
+        /**
+         * @brief Set an alternative name for the value this argument
+         *      assigns to.
+         *
+         * The value or values of the argument can be retrieved from
+         * ParsedArgument using the displayed name, but sometimes this
+         * is inconvenient, for instance if the same argument has different
+         * names in different languages.
+         * @param id An alternative name that can be used to retrieve the
+         *      argument's value.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Argument& valueName(const std::string& id);
 
+        /**
+         * @brief Set a callback that will be called when this argument is
+         *      encountered.
+         * @param callback A function pointer or callable object.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Argument& callback(ArgumentCallback callback);
 
+        /**
+         * @brief Set restrictions for where this argument is displayed in the
+         *      auto-generated help text.
+         * @param visibility
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Argument& visibility(Visibility visibility);
 
         Argument& id(int id);
