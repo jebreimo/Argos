@@ -15,9 +15,19 @@ namespace Argos
 {
     struct ArgumentData;
 
+    /**
+     * @brief Class for defining command line arguments.
+     *
+     * The minimum requirement for a command line argument is that it has a
+     * name. Once the argument has been defined it must be *added* to the
+     * ArgumentParser with ArgumentParser::add.
+     */
     class Argument
     {
     public:
+        /**
+         * @brief Creates an unnamed argument.
+         */
         Argument();
 
         explicit Argument(const std::string& name);
@@ -33,11 +43,10 @@ namespace Argos
         Argument& operator=(Argument&&) noexcept;
 
         /**
-         * @brief Set the arguments help text.
-         * @param text The help text. The text will be automatically divided
-         *      into multiple lines if it doesn't fit fit inside the terminal
-         *      window. Text formatting using newlines, spaces and tabs is
-         *      possible.
+         * @brief Set the argument's help text.
+         * @param text The text will be automatically divided into multiple
+         *      lines if it doesn't fit fit inside the terminal window.
+         *      Text formatting using newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */

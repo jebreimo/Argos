@@ -20,17 +20,17 @@ namespace Argos
         : m_Option(std::make_unique<OptionData>())
     {}
 
+    Option::Option(std::initializer_list<std::string> flags)
+        : m_Option(std::make_unique<OptionData>())
+    {
+        m_Option->flags = flags;
+    }
+
     Option::Option(const Option& rhs)
         : m_Option(rhs.m_Option
                    ? std::make_unique<OptionData>(*rhs.m_Option)
                    : std::unique_ptr<OptionData>())
     {}
-
-    Option::Option(std::vector<std::string> flags)
-        : m_Option(std::make_unique<OptionData>())
-    {
-        m_Option->flags = move(flags);
-    }
 
     Option::Option(Option&& rhs) noexcept
         : m_Option(std::move(rhs.m_Option))

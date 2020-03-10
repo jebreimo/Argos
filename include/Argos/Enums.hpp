@@ -137,23 +137,73 @@ namespace Argos
         LAST_OPTION
     };
 
+    /**
+     * @brief A status code that can be retrieved from ParsedArguments.
+     */
     enum class ParserResultCode
     {
+        /**
+         * @brief The initial status value. Means that the arguments haven't
+         *      been processed yet.
+         *
+         * This value is only used internally.
+         */
         NONE,
+        /**
+         * @brief All the arguments and options were successfully processed.
+         */
         NORMAL,
+        /**
+         * @brief The argument parser encountered an option
+         *      of type STOP (or HELP of autoExit is false).
+         */
         STOP,
+        /**
+         * @brief The argument parser encountered an incorrect option or
+         *      argument (and autoExit is false).
+         */
         ERROR
     };
 
+    /**
+     * @brief Tells which part of the help text (or error text) is assigned.
+     */
     enum class TextId
     {
+        /**
+         * @brief Text that appears before the usage section (empty by default).
+         */
         INITIAL_TEXT,
+        /**
+         * @brief The title of the usage section (default is "USAGE").
+         */
         USAGE_TITLE,
+        /**
+         * @brief The command usage text or synopsis (normally auto-generated).
+         */
         USAGE,
+        /**
+         * @brief Text that appears between the usage section and the lists of
+         *      arguments and options (empty by default).
+         */
         TEXT,
+        /**
+         * @brief The title of the list of arguments (default is "ARGUMENTS").
+         */
         ARGUMENTS_TITLE,
+        /**
+         * @brief The title of the list of options (default is "OPTIONS").
+         */
         OPTIONS_TITLE,
+        /**
+         * @brief Text that appears at the end of the help text (empty
+         *      by default).
+         */
         FINAL_TEXT,
+        /**
+         * @brief Custom usage text for error messages (default is to use
+         *      the same text as USAGE).
+         */
         ERROR_USAGE
     };
 
