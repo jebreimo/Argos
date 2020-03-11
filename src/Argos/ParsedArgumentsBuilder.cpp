@@ -11,15 +11,16 @@
 
 namespace Argos
 {
-    ParsedArgumentsBuilder::ParsedArgumentsBuilder(ParsedArgumentsImpl* impl)
-        : m_Impl(impl)
+    ParsedArgumentsBuilder::ParsedArgumentsBuilder(
+            std::shared_ptr<ParsedArgumentsImpl> impl)
+        : m_Impl(move(impl))
     {}
 
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::append(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->appendValue(m_Impl->getValueId(name), value);
+        m_Impl->appendValue(m_Impl->getValueId(name), value, {});
         return *this;
     }
 
@@ -27,7 +28,7 @@ namespace Argos
     ParsedArgumentsBuilder::append(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->appendValue(arg.id(), value);
+        m_Impl->appendValue(arg.valueId(), value, arg.argumentId());
         return *this;
     }
 
@@ -35,7 +36,7 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->assignValue(m_Impl->getValueId(name), value);
+        m_Impl->assignValue(m_Impl->getValueId(name), value, {});
         return *this;
     }
 
@@ -43,7 +44,7 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->assignValue(arg.id(), value);
+        m_Impl->assignValue(arg.valueId(), value, arg.argumentId());
         return *this;
     }
 
@@ -57,32 +58,43 @@ namespace Argos
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::clear(const IArgumentView& arg)
     {
-        m_Impl->clearValue(arg.id());
+        m_Impl->clearValue(arg.valueId());
         return *this;
     }
 
-    std::optional<std::string_view>
-    ParsedArgumentsBuilder::value(const std::string& name)
+    ArgumentValue ParsedArgumentsBuilder::value(const std::string& name)
     {
-        return m_Impl->getValue(m_Impl->getValueId(name));
+        auto id = m_Impl->getValueId(name);
+        auto value = m_Impl->getValue(id);
+        if (value)
+            return {value->first, m_Impl, id, value->second};
+        else
+            return {{}, m_Impl, id, {}};
     }
 
-    std::optional<std::string_view>
+    ArgumentValue
     ParsedArgumentsBuilder::value(const IArgumentView& arg)
     {
-        return m_Impl->getValue(arg.id());
+        auto value = m_Impl->getValue(arg.valueId());
+        if (value)
+            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+        else
+            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
     }
 
-    std::vector<std::string_view>
+    ArgumentValues
     ParsedArgumentsBuilder::values(const std::string& name)
     {
-        return m_Impl->getValues(m_Impl->getValueId(name));
+        auto id = m_Impl->getValueId(name);
+        auto values = m_Impl->getValues(id);
+        return {values, m_Impl, id};
     }
 
-    std::vector<std::string_view>
+    ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg)
     {
-        return m_Impl->getValues(arg.id());
+        auto values = m_Impl->getValues(arg.valueId());
+        return {values, m_Impl, arg.valueId()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name)
@@ -92,7 +104,7 @@ namespace Argos
 
     bool ParsedArgumentsBuilder::has(const IArgumentView& arg)
     {
-        return m_Impl->has(arg.id());
+        return m_Impl->has(arg.valueId());
     }
 
     void ParsedArgumentsBuilder::error(const std::string& errorMessage)

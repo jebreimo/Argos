@@ -53,7 +53,7 @@ namespace Argos
         };
 
         std::pair<OptionResult, std::string_view>
-        processOption(const OptionData& option, const std::string& flag);
+        processOption(const OptionData& opt, const std::string& flag);
 
         IteratorResult doNext();
 

@@ -40,6 +40,8 @@ namespace Argos
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
-        virtual int valueId() const = 0;
+        virtual ValueId valueId() const = 0;
+
+        virtual ArgumentId argumentId() const = 0;
     };
 }

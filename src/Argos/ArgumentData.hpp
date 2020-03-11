@@ -23,6 +23,7 @@ namespace Argos
         unsigned maxCount = 1;
         Visibility visibility = Visibility::NORMAL;
         int id = 0;
-        int valueId_ = 0;
+        ValueId valueId = {};
+        ArgumentId argumentId = {};
     };
 }

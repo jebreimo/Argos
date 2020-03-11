@@ -201,19 +201,22 @@ namespace Argos
     }
 
     std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
-    ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
+    ArgumentIteratorImpl::processOption(const OptionData& opt,
+                                        const std::string& flag)
     {
         std::string_view arg;
-        switch (option.operation)
+        switch (opt.operation)
         {
         case OptionOperation::ASSIGN:
-            if (!option.value.empty())
+            if (!opt.value.empty())
             {
-                m_ParsedArgs->assignValue(option.valueId, option.value);
+                m_ParsedArgs->assignValue(opt.valueId, opt.value,
+                                          opt.argumentId);
             }
-            else if (auto value = m_Iterator->nextValue(); value)
+            else if (auto value = m_Iterator->nextValue())
             {
-                arg = m_ParsedArgs->assignValue(option.valueId, *value);
+                arg = m_ParsedArgs->assignValue(opt.valueId, *value,
+                                                opt.argumentId);
             }
             else
             {
@@ -222,13 +225,15 @@ namespace Argos
             }
             break;
         case OptionOperation::APPEND:
-            if (!option.value.empty())
+            if (!opt.value.empty())
             {
-                m_ParsedArgs->appendValue(option.valueId, option.value);
+                m_ParsedArgs->appendValue(opt.valueId, opt.value,
+                                          opt.argumentId);
             }
-            else if (auto value = m_Iterator->nextValue(); value)
+            else if (auto value = m_Iterator->nextValue())
             {
-                arg = m_ParsedArgs->appendValue(option.valueId, *value);
+                arg = m_ParsedArgs->appendValue(opt.valueId, *value,
+                                                opt.argumentId);
             }
             else
             {
@@ -237,32 +242,32 @@ namespace Argos
             }
             break;
         case OptionOperation::CLEAR:
-            m_ParsedArgs->clearValue(option.valueId);
+            m_ParsedArgs->clearValue(opt.valueId);
             break;
         case OptionOperation::NONE:
             break;
         }
 
-        if (option.callback
-            && !option.callback(OptionView(&option), arg,
-                                ParsedArgumentsBuilder(m_ParsedArgs.get())))
+        if (opt.callback
+            && !opt.callback(OptionView(&opt), arg,
+                             ParsedArgumentsBuilder(m_ParsedArgs)))
         {
             error();
             return {OptionResult::ERROR, {}};
         }
 
-        switch (option.type)
+        switch (opt.type)
         {
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
             writeHelpText(*m_Data);
             m_State = State::DONE;
-            m_ParsedArgs->setBreakingOption(&option);
+            m_ParsedArgs->setBreakingOption(&opt);
             return {OptionResult::HELP, arg};
         case OptionType::STOP:
             m_State = State::DONE;
-            m_ParsedArgs->setBreakingOption(&option);
+            m_ParsedArgs->setBreakingOption(&opt);
             return {OptionResult::STOP, arg};
         case OptionType::LAST_ARGUMENT:
             m_State = State::DONE;
@@ -330,17 +335,19 @@ namespace Argos
                 }
                 else
                 {
-                    error("Invalid option: " + std::string(m_Iterator->current()));
+                    error("Invalid option: "
+                          + std::string(m_Iterator->current()));
                     return {IteratorResultCode::ERROR, nullptr, {}};
                 }
             }
         }
         else if (auto argument = m_ArgumentCounter.nextArgument())
         {
-            auto s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
+            auto s = m_ParsedArgs->appendValue(argument->valueId, *arg,
+                                               argument->argumentId);
             if (argument->callback
                 && !argument->callback(ArgumentView(argument), s,
-                                       ParsedArgumentsBuilder(m_ParsedArgs.get())))
+                                       ParsedArgumentsBuilder(m_ParsedArgs)))
             {
                 error();
                 return {IteratorResultCode::ERROR, nullptr, {}};

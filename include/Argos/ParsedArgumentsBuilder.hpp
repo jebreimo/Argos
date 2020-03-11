@@ -6,10 +6,8 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include <optional>
-#include <string>
-#include <vector>
-#include "IArgumentView.hpp"
+#include "ArgumentValue.hpp"
+#include "ArgumentValues.hpp"
 
 namespace Argos
 {
@@ -18,7 +16,8 @@ namespace Argos
     class ParsedArgumentsBuilder
     {
     public:
-        explicit ParsedArgumentsBuilder(ParsedArgumentsImpl* impl);
+        explicit ParsedArgumentsBuilder(
+                std::shared_ptr<ParsedArgumentsImpl> impl);
 
         ParsedArgumentsBuilder& append(const std::string& name,
                                        const std::string& value);
@@ -36,13 +35,13 @@ namespace Argos
 
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
-        std::optional<std::string_view> value(const std::string& name);
+        ArgumentValue value(const std::string& name);
 
-        std::optional<std::string_view> value(const IArgumentView& arg);
+        ArgumentValue value(const IArgumentView& arg);
 
-        std::vector<std::string_view> values(const std::string& name);
+        ArgumentValues values(const std::string& name);
 
-        std::vector<std::string_view> values(const IArgumentView& arg);
+        ArgumentValues values(const IArgumentView& arg);
 
         bool has(const std::string& name);
 
@@ -50,6 +49,6 @@ namespace Argos
 
         void error(const std::string& errorMessage);
     private:
-        ParsedArgumentsImpl* m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
 }

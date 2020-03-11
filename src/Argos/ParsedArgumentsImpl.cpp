@@ -40,9 +40,9 @@ namespace Argos
         assert(m_Data);
         for (auto& a : m_Data->arguments)
         {
-            m_ValueIds.emplace_back(a->name, a->valueId_);
+            m_ValueIds.emplace_back(a->name, a->valueId);
             if (!a->valueName.empty())
-                m_ValueIds.emplace_back(a->valueName, a->valueId_);
+                m_ValueIds.emplace_back(a->valueName, a->valueId);
         }
         for (auto& o : m_Data->options)
         {
@@ -59,7 +59,7 @@ namespace Argos
                          m_ValueIds.end());
     }
 
-    bool ParsedArgumentsImpl::has(int valueId) const
+    bool ParsedArgumentsImpl::has(ValueId valueId) const
     {
         return m_Values.find(valueId) != m_Values.end();
     }
@@ -74,30 +74,34 @@ namespace Argos
         m_UnprocessedArguments.push_back(arg);
     }
 
-    std::string_view ParsedArgumentsImpl::assignValue(int valueId, const std::string& value)
+    std::string_view
+    ParsedArgumentsImpl::assignValue(ValueId valueId, const std::string& value,
+                                     ArgumentId argumentId)
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
-            return m_Values.emplace(valueId, value)->second;
+            return appendValue(valueId, value, argumentId);
 
-        it->second = value;
+        it->second = {value, argumentId};
         auto nxt = next(it);
         while (nxt != m_Values.end() && nxt->first == valueId)
             m_Values.erase(nxt++);
-        return it->second;
+        return it->second.first;
     }
 
-    std::string_view ParsedArgumentsImpl::appendValue(int valueId, const std::string& value)
+    std::string_view
+    ParsedArgumentsImpl::appendValue(ValueId valueId, const std::string& value,
+                                     ArgumentId argumentId)
     {
-        return m_Values.emplace(valueId, value)->second;
+        return m_Values.insert({valueId, {value, argumentId}})->second.first;
     }
 
-    void ParsedArgumentsImpl::clearValue(int valueId)
+    void ParsedArgumentsImpl::clearValue(ValueId valueId)
     {
         m_Values.erase(valueId);
     }
 
-    int ParsedArgumentsImpl::getValueId(std::string_view valueName) const
+    ValueId ParsedArgumentsImpl::getValueId(std::string_view valueName) const
     {
         auto idIt = lowerBound(m_ValueIds.begin(), m_ValueIds.end(),
                                valueName,
@@ -107,8 +111,8 @@ namespace Argos
         return idIt->second;
     }
 
-    std::optional<std::string_view>
-    ParsedArgumentsImpl::getValue(int valueId) const
+    std::optional<std::pair<std::string_view, ArgumentId>>
+    ParsedArgumentsImpl::getValue(ValueId valueId) const
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
@@ -119,23 +123,23 @@ namespace Argos
         return it->second;
     }
 
-    std::vector<std::string_view>
-    ParsedArgumentsImpl::getValues(int valueId) const
+    std::vector<std::pair<std::string_view, ArgumentId>>
+    ParsedArgumentsImpl::getValues(ValueId valueId) const
     {
-        std::vector<std::string_view> result;
-        auto it = m_Values.lower_bound(valueId);
-        for (; it != m_Values.end() && it->first == valueId; ++it)
+        std::vector<std::pair<std::string_view, ArgumentId>> result;
+        for (auto it = m_Values.lower_bound(valueId);
+             it != m_Values.end() && it->first == valueId; ++it)
             result.emplace_back(it->second);
         return result;
     }
 
     std::vector<std::unique_ptr<IArgumentView>>
-    ParsedArgumentsImpl::getArgumentViews(int valueId) const
+    ParsedArgumentsImpl::getArgumentViews(ValueId valueId) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
         for (auto& a : m_Data->arguments)
         {
-            if (a->valueId_ == valueId)
+            if (a->valueId == valueId)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
         for (auto& o : m_Data->options)
@@ -144,6 +148,22 @@ namespace Argos
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
         }
         return result;
+    }
+
+    std::unique_ptr<IArgumentView>
+    ParsedArgumentsImpl::getArgumentView(ArgumentId argumentId) const
+    {
+        for (auto& a : m_Data->arguments)
+        {
+            if (a->argumentId == argumentId)
+                return std::make_unique<ArgumentView>(a.get());
+        }
+        for (auto& o : m_Data->options)
+        {
+            if (o->argumentId == argumentId)
+                return std::make_unique<OptionView>(o.get());
+        }
+        return {};
     }
 
     const std::shared_ptr<ParserData>& ParsedArgumentsImpl::parserData() const
@@ -181,7 +201,7 @@ namespace Argos
             ARGOS_THROW("Error while parsing arguments.");
     }
 
-    void ParsedArgumentsImpl::error(const std::string& message, int valueId)
+    void ParsedArgumentsImpl::error(const std::string& message, ValueId valueId)
     {
         writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)

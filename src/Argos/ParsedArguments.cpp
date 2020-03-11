@@ -44,13 +44,19 @@ namespace Argos
     {
         auto id = m_Impl->getValueId(name);
         auto value = m_Impl->getValue(id);
-        return {value, m_Impl, id};
+        if (value)
+            return {value->first, m_Impl, id, value->second};
+        else
+            return {{}, m_Impl, id, {}};
     }
 
     ArgumentValue ParsedArguments::value(const IArgumentView& arg) const
     {
         auto value = m_Impl->getValue(arg.valueId());
-        return {value, m_Impl, arg.valueId()};
+        if (value)
+            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+        else
+            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
     }
 
     ArgumentValues ParsedArguments::values(const std::string& name) const

@@ -89,6 +89,8 @@ namespace Argos
 
         ParserData& data();
 
+        ArgumentId nextArgumentId() const;
+
         std::unique_ptr<ParserData> m_Data;
     };
 }

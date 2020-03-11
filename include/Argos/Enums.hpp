@@ -242,4 +242,8 @@ namespace Argos
     {
         return Visibility(unsigned(a) & unsigned(b));
     }
+
+    enum ValueId : int;
+
+    enum ArgumentId : int;
 }

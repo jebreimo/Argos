@@ -13,14 +13,15 @@
 
 namespace Argos
 {
+    class ArgumentValue;
     class ParsedArgumentsImpl;
 
     class ArgumentValues
     {
     public:
-        ArgumentValues(std::vector<std::string_view> values,
+        ArgumentValues(std::vector<std::pair<std::string_view, ArgumentId>> values,
                        std::shared_ptr<ParsedArgumentsImpl> args,
-                       int valueId);
+                       ValueId valueId);
 
         ArgumentValues(const ArgumentValues&);
 
@@ -40,7 +41,9 @@ namespace Argos
 
         size_t size() const;
 
-        const std::vector<std::string_view>& values() const;
+        std::vector<std::string_view> values() const;
+
+        ArgumentValue value(size_t index) const;
 
         std::vector<int8_t> asInt8s(
                 const std::vector<int8_t>& defaultValue = {}) const;
@@ -84,8 +87,8 @@ namespace Argos
         template <typename T>
         std::vector<T> getValues(const std::vector<T>& defaultValue) const;
 
-        std::vector<std::string_view> m_Values;
+        std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        int m_ValueId;
+        ValueId m_ValueId;
     };
 }

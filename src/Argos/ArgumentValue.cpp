@@ -16,10 +16,12 @@ namespace Argos
 {
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
-                                 int valueId)
+                                 ValueId valueId,
+                                 ArgumentId argumentId)
         : m_Value(value),
           m_Args(std::move(args)),
-          m_ValueId(valueId)
+          m_ValueId(valueId),
+          m_ArgumentId(argumentId)
     {}
 
     ArgumentValue::ArgumentValue(const ArgumentValue&) = default;
@@ -34,10 +36,10 @@ namespace Argos
     ArgumentValue&
     ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
 
-    std::vector<std::unique_ptr<IArgumentView>>
-    ArgumentValue::arguments() const
+    std::unique_ptr<IArgumentView>
+    ArgumentValue::argument() const
     {
-        return m_Args->getArgumentViews(m_ValueId);
+        return m_Args->getArgumentView(m_ArgumentId);
     }
 
     bool ArgumentValue::hasValue() const
@@ -130,7 +132,10 @@ namespace Argos
                   + " values separated by \"" + separator + "\".");
             return ArgumentValues({}, m_Args, m_ValueId);
         }
-        return ArgumentValues(move(parts), m_Args, m_ValueId);
+        std::vector<std::pair<std::string_view, ArgumentId>> values;
+        for (auto& part : parts)
+            values.emplace_back(part, m_ArgumentId);
+        return {move(values), m_Args, m_ValueId};
     }
 
     void ArgumentValue::error(const std::string& message) const

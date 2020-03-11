@@ -249,4 +249,27 @@ namespace Argos
         if (!writeCustomText(data, TextId::ERROR_USAGE))
             writeBriefUsage(data);
     }
+
+    void writeErrorMessage(ParserData& data, const std::string& msg,
+                                  int valueId)
+    {
+        std::vector<const ArgumentData*> args;
+        for (auto& a : data.arguments)
+        {
+            if (a->valueId == valueId)
+                args.push_back(a.get());
+        }
+        //std::vector<const OptionData*> opts;
+        //for (auto& opt : data.options)
+        //{
+        //    if (o->valueId == )
+        //}
+        //auto opt = find_if(data.options.begin(), data.options.end(),
+        //                   [&](auto& o) {return o->valueId == valueId});
+        //if (opt != data.options.end())
+        //{
+        //    writeErrorMessage(data, (*opt)->name + ":" + msg);
+        //    return;
+        //}
+    }
 }

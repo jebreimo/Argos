@@ -7,15 +7,17 @@
 //****************************************************************************
 #include "Argos/ArgumentValues.hpp"
 
+#include "Argos/ArgumentValue.hpp"
 #include "ParseValue.hpp"
 #include "ParsedArgumentsImpl.hpp"
 #include "StringUtilities.hpp"
 
 namespace Argos
 {
-    ArgumentValues::ArgumentValues(std::vector<std::string_view> values,
-                                   std::shared_ptr<ParsedArgumentsImpl> args,
-                                   int valueId)
+    ArgumentValues::ArgumentValues(
+            std::vector<std::pair<std::string_view, ArgumentId>> values,
+            std::shared_ptr<ParsedArgumentsImpl> args,
+            ValueId valueId)
         : m_Values(move(values)),
           m_Args(move(args)),
           m_ValueId(valueId)
@@ -54,33 +56,49 @@ namespace Argos
         return m_Values.size();
     }
 
-    const std::vector<std::string_view>& ArgumentValues::values() const
+    std::vector<std::string_view> ArgumentValues::values() const
     {
-        return m_Values;
+        std::vector<std::string_view> result;
+        for (auto& s : m_Values)
+            result.push_back(s.first);
+        return result;
     }
 
-    std::vector<int8_t> ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
+    ArgumentValue ArgumentValues::value(size_t index) const
     {
-        return getValues(defaultValue);
+        if (m_Values.empty())
+            return {{}, m_Args, m_ValueId, {}};
+
+        auto& v = m_Values.at(index);
+        return {v.first, m_Args, m_ValueId, v.second};
     }
 
-    std::vector<int16_t> ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
-    {
-        return getValues(defaultValue);
-    }
-
-    std::vector<int32_t> ArgumentValues::asInt32s(
-            const std::vector<int32_t>& defaultValue) const
-    {
-        return getValues(defaultValue);
-    }
-
-    std::vector<int64_t> ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
+    std::vector<int8_t>
+    ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<uint8_t> ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
+    std::vector<int16_t>
+    ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<int32_t>
+    ArgumentValues::asInt32s(const std::vector<int32_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<int64_t>
+    ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
+    {
+        return getValues(defaultValue);
+    }
+
+    std::vector<uint8_t>
+    ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
@@ -103,24 +121,26 @@ namespace Argos
         return getValues(defaultValue);
     }
 
-    std::vector<float> ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
+    std::vector<float>
+    ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<double> ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
+    std::vector<double>
+    ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<long double>
-    ArgumentValues::asLongDoubles(const std::vector<long double>& defaultValue) const
+    std::vector<long double> ArgumentValues::asLongDoubles(
+            const std::vector<long double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<std::string>
-    ArgumentValues::asStrings(const std::vector<std::string>& defaultValue) const
+    std::vector<std::string> ArgumentValues::asStrings(
+            const std::vector<std::string>& defaultValue) const
     {
         if (m_Values.empty())
             return defaultValue;
@@ -128,7 +148,7 @@ namespace Argos
         std::vector<std::string> result;
         result.reserve(m_Values.size());
         for (auto& v : m_Values)
-            result.emplace_back(v);
+            result.emplace_back(v.first);
         return result;
     }
 
@@ -136,20 +156,21 @@ namespace Argos
     ArgumentValues::split(char separator,
                           size_t minParts, size_t maxParts) const
     {
-        std::vector<std::string_view> values;
+        std::vector<std::pair<std::string_view, ArgumentId>> values;
         for (auto value : m_Values)
         {
-            auto parts = splitString(value, separator, maxParts - 1);
+            auto parts = splitString(value.first, separator, maxParts - 1);
             if (parts.size() < minParts)
             {
-                error("Invalid value: \"" + std::string(value)
+                error("Invalid value: \"" + std::string(value.first)
                       + "\". Must be at least " + std::to_string(minParts)
                       + " values separated by \"" + separator + "\".");
-                return ArgumentValues({}, m_Args, m_ValueId);
+                return {{}, m_Args, m_ValueId};
             }
-            values.insert(values.end(), parts.begin(), parts.end());
+            for (auto& part : parts)
+                values.emplace_back(part, value.second);
         }
-        return ArgumentValues(move(values), m_Args, m_ValueId);
+        return {move(values), m_Args, m_ValueId};
     }
 
     template <typename T>
@@ -163,10 +184,10 @@ namespace Argos
         result.reserve(m_Values.size());
         for (auto& v : m_Values)
         {
-            auto value = parseValue<T>(v);
+            auto value = parseValue<T>(v.first);
             if (!value)
             {
-                m_Args->error("Invalid value: " + std::string(v) + ".",
+                m_Args->error("Invalid value: " + std::string(v.first) + ".",
                               m_ValueId);
             }
             result.push_back(*value);

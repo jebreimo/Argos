@@ -65,21 +65,27 @@ namespace Argos
             return result;
         }
 
-        void generateValueIds(const ParserData& data)
+        void setValueIds(const ParserData& data)
         {
             struct InternalIdMaker
             {
-                int n = 1;
-                std::map<std::string, int> explicitIds;
+                ValueId n = ValueId(0);
+                std::map<std::string, ValueId> explicitIds;
 
-                int makeNumericId(const std::string& stringId)
+                ValueId makeValueId(const std::string& valueName)
                 {
-                    if (stringId.empty())
-                        return n++;
+                    if (valueName.empty())
+                    {
+                        n = ValueId(n + 1);
+                        return n;
+                    }
 
-                    auto it = explicitIds.find(stringId);
+                    auto it = explicitIds.find(valueName);
                     if (it == explicitIds.end())
-                        it = explicitIds.emplace(stringId, n++).first;
+                    {
+                        n = ValueId(n + 1);
+                        it = explicitIds.emplace(valueName, n).first;
+                    }
                     return it->second;
                 }
             };
@@ -88,19 +94,19 @@ namespace Argos
             {
                 if (!a->valueName.empty())
                 {
-                    a->valueId_ = idMaker.makeNumericId(a->valueName);
-                    idMaker.explicitIds.emplace(a->name, a->valueId_);
+                    a->valueId = idMaker.makeValueId(a->valueName);
+                    idMaker.explicitIds.emplace(a->name, a->valueId);
                 }
                 else
                 {
-                    a->valueId_ = idMaker.makeNumericId(a->name);
+                    a->valueId = idMaker.makeValueId(a->name);
                 }
             }
             for (auto& o : data.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeNumericId(o->valueName);
+                o->valueId = idMaker.makeValueId(o->valueName);
                 for (auto& f : o->flags)
                     idMaker.explicitIds.emplace(f, o->valueId);
             }
@@ -109,7 +115,7 @@ namespace Argos
         ParsedArguments parseImpl(std::vector<std::string_view> args,
                                   const std::shared_ptr<ParserData>& data)
         {
-            generateValueIds(*data);
+            setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
         }
@@ -118,7 +124,7 @@ namespace Argos
         makeIteratorImpl(std::vector<std::string_view> args,
                          const std::shared_ptr<ParserData>& data)
         {
-            generateValueIds(*data);
+            setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
     }
@@ -150,6 +156,7 @@ namespace Argos
         auto ad = argument.release();
         if (ad->name.empty())
             ARGOS_THROW("Argument must have a name.");
+        ad->argumentId = nextArgumentId();
         data().arguments.emplace_back(std::move(ad));
         return *this;
     }
@@ -209,6 +216,7 @@ namespace Argos
                 ARGOS_THROW("CLEAR-options cannot be mandatory.");
             break;
         }
+        od->argumentId = nextArgumentId();
         data().options.push_back(std::move(od));
         return *this;
     }
@@ -371,5 +379,11 @@ namespace Argos
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
         return *m_Data;
+    }
+
+    ArgumentId ArgumentParser::nextArgumentId() const
+    {
+        auto& d = data();
+        return ArgumentId(d.options.size() + d.arguments.size() + 1);
     }
 }

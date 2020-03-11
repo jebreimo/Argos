@@ -28,7 +28,9 @@ namespace Argos
 
         int id() const final;
 
-        int valueId() const final;
+        ValueId valueId() const final;
+
+        ArgumentId argumentId() const final;
 
         const std::string& name() const;
 

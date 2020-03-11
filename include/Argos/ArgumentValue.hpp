@@ -22,7 +22,8 @@ namespace Argos
     public:
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
-                      int valueId);
+                      ValueId valueId,
+                      ArgumentId argumentId);
 
         ArgumentValue(const ArgumentValue&);
 
@@ -34,7 +35,7 @@ namespace Argos
 
         ArgumentValue& operator=(ArgumentValue&&) noexcept;
 
-        std::vector<std::unique_ptr<IArgumentView>> arguments() const;
+        std::unique_ptr<IArgumentView> argument() const;
 
         bool hasValue() const;
 
@@ -76,6 +77,7 @@ namespace Argos
 
         std::optional<std::string_view> m_Value;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        int m_ValueId;
+        ValueId m_ValueId;
+        ArgumentId m_ArgumentId;
     };
 }

@@ -45,7 +45,7 @@ namespace Argos
         return m_Option->id;
     }
 
-    int OptionView::valueId() const
+    ValueId OptionView::valueId() const
     {
         return m_Option->valueId;
     }
@@ -73,5 +73,10 @@ namespace Argos
     bool OptionView::mandatory() const
     {
         return m_Option->mandatory;
+    }
+
+    ArgumentId OptionView::argumentId() const
+    {
+        return m_Option->argumentId;
     }
 }

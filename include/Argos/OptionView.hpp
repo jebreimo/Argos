@@ -26,13 +26,15 @@ namespace Argos
 
         const std::string& valueName() const final;
 
-        OptionOperation operation() const;
-
         Visibility visibility() const final;
 
         int id() const final;
 
-        int valueId() const final;
+        ValueId valueId() const final;
+
+        ArgumentId argumentId() const final;
+
+        OptionOperation operation() const;
 
         const std::vector<std::string>& flags() const;
 

@@ -19,26 +19,29 @@ namespace Argos
     public:
         ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
-        bool has(int valueId) const;
+        bool has(ValueId valueId) const;
 
         const std::vector<std::string>& unprocessedArguments() const;
 
         void addUnprocessedArgument(const std::string& arg);
 
-        std::string_view assignValue(int valueId, const std::string& value);
+        std::string_view assignValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
 
-        std::string_view appendValue(int valueId, const std::string& value);
+        std::string_view appendValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
 
-        void clearValue(int valueId);
+        void clearValue(ValueId valueId);
 
-        int getValueId(std::string_view valueName) const;
+        ValueId getValueId(std::string_view valueName) const;
 
-        std::optional<std::string_view> getValue(int valueId) const;
+        std::optional<std::pair<std::string_view, ArgumentId>> getValue(ValueId valueId) const;
 
-        std::vector<std::string_view> getValues(int valueId) const;
+        std::vector<std::pair<std::string_view, ArgumentId>> getValues(ValueId valueId) const;
 
         std::vector<std::unique_ptr<IArgumentView>>
-        getArgumentViews(int valueId) const;
+        getArgumentViews(ValueId valueId) const;
+
+        std::unique_ptr<IArgumentView>
+        getArgumentView(ArgumentId argumentId) const;
 
         const std::shared_ptr<ParserData>& parserData() const;
 
@@ -52,10 +55,10 @@ namespace Argos
 
         void error(const std::string& message);
 
-        void error(const std::string& message, int valueId);
+        void error(const std::string& message, ValueId valueId);
     private:
-        std::multimap<int, std::string> m_Values;
-        std::vector<std::pair<std::string_view, int>> m_ValueIds;
+        std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
+        std::vector<std::pair<std::string_view, ValueId>> m_ValueIds;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
         ParserResultCode m_ResultCode = ParserResultCode::NONE;
