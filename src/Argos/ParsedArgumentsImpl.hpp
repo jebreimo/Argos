@@ -58,7 +58,7 @@ namespace Argos
         void error(const std::string& message, ValueId valueId);
     private:
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
-        std::vector<std::pair<std::string_view, ValueId>> m_ValueIds;
+        std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_Ids;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
         ParserResultCode m_ResultCode = ParserResultCode::NONE;

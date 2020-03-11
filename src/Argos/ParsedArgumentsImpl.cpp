@@ -40,9 +40,9 @@ namespace Argos
         assert(m_Data);
         for (auto& a : m_Data->arguments)
         {
-            m_ValueIds.emplace_back(a->name, a->valueId);
+            m_Ids.emplace_back(a->name, a->valueId, a->argumentId);
             if (!a->valueName.empty())
-                m_ValueIds.emplace_back(a->valueName, a->valueId);
+                m_Ids.emplace_back(a->valueName, a->valueId, a->argumentId);
         }
         for (auto& o : m_Data->options)
         {
@@ -50,13 +50,22 @@ namespace Argos
                 continue;
 
             for (auto& f : o->flags)
-                m_ValueIds.emplace_back(f, o->valueId);
+                m_Ids.emplace_back(f, o->valueId, o->argumentId);
             if (!o->valueName.empty())
-                m_ValueIds.emplace_back(o->valueName, o->valueId);
+                m_Ids.emplace_back(o->valueName, o->valueId, o->argumentId);
         }
-        sort(m_ValueIds.begin(), m_ValueIds.end());
-        m_ValueIds.erase(unique(m_ValueIds.begin(), m_ValueIds.end()),
-                         m_ValueIds.end());
+        if (!m_Ids.empty())
+        {
+            using std::get;
+            sort(m_Ids.begin(), m_Ids.end());
+            for (auto it = next(m_Ids.begin()); it != m_Ids.end(); ++it)
+            {
+                auto p = prev(it);
+                if (get<0>(*it) == get<0>(*p) && get<2>(*it) != get<2>(*p))
+                    get<2>(*it) = get<2>(*p) = {};
+            }
+            m_Ids.erase(unique(m_Ids.begin(), m_Ids.end()), m_Ids.end());
+        }
     }
 
     bool ParsedArgumentsImpl::has(ValueId valueId) const
@@ -75,7 +84,8 @@ namespace Argos
     }
 
     std::string_view
-    ParsedArgumentsImpl::assignValue(ValueId valueId, const std::string& value,
+    ParsedArgumentsImpl::assignValue(ValueId valueId,
+                                     const std::string& value,
                                      ArgumentId argumentId)
     {
         auto it = m_Values.lower_bound(valueId);
@@ -90,7 +100,8 @@ namespace Argos
     }
 
     std::string_view
-    ParsedArgumentsImpl::appendValue(ValueId valueId, const std::string& value,
+    ParsedArgumentsImpl::appendValue(ValueId valueId,
+                                     const std::string& value,
                                      ArgumentId argumentId)
     {
         return m_Values.insert({valueId, {value, argumentId}})->second.first;
@@ -103,12 +114,12 @@ namespace Argos
 
     ValueId ParsedArgumentsImpl::getValueId(std::string_view valueName) const
     {
-        auto idIt = lowerBound(m_ValueIds.begin(), m_ValueIds.end(),
-                               valueName,
-                               [](auto& p, auto& s) {return p.first < s;});
-        if (idIt == m_ValueIds.end() || idIt->first != valueName)
+        using std::get;
+        auto it = lowerBound(m_Ids.begin(), m_Ids.end(), valueName,
+                             [](auto& p, auto& s) {return get<0>(p) < s;});
+        if (it == m_Ids.end() || get<0>(*it) != valueName)
             ARGOS_THROW("Unknown value: " + std::string(valueName));
-        return idIt->second;
+        return get<1>(*it);
     }
 
     std::optional<std::pair<std::string_view, ArgumentId>>
