@@ -109,6 +109,12 @@ namespace Argos
 
     void ParsedArgumentsBuilder::error(const std::string& errorMessage)
     {
-        m_Impl->error(errorMessage);
+         m_Impl->error(errorMessage);
+    }
+
+    void ParsedArgumentsBuilder::error(const std::string& errorMessage,
+                                       const IArgumentView& arg)
+    {
+        m_Impl->error(errorMessage, arg.argumentId());
     }
 }

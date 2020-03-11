@@ -140,7 +140,7 @@ namespace Argos
 
     void ArgumentValue::error(const std::string& message) const
     {
-        m_Args->error(message, m_ValueId);
+        m_Args->error(message, m_ArgumentId);
     }
 
     template <typename T>
@@ -150,8 +150,7 @@ namespace Argos
             return defaultValue;
         auto v = parseValue<T>(*m_Value);
         if (!v)
-            m_Args->error("Invalid value: " + std::string(*m_Value) + ".",
-                          m_ValueId);
+            error("Invalid value: " + std::string(*m_Value) + ".");
         return *v;
     }
 }

@@ -14,6 +14,22 @@
 
 namespace Argos
 {
+    namespace
+    {
+        ArgumentId getArgumentId(
+                const std::vector<std::pair<std::string_view, ArgumentId>>& values)
+        {
+            if (values.empty())
+                return {};
+            for (auto it = next(values.begin()); it != values.end(); ++it)
+            {
+                if (it->second != prev(it)->second)
+                    return {};
+            }
+            return values.front().second;
+        }
+    }
+
     ArgumentValues::ArgumentValues(
             std::vector<std::pair<std::string_view, ArgumentId>> values,
             std::shared_ptr<ParsedArgumentsImpl> args,
@@ -43,7 +59,7 @@ namespace Argos
 
     void ArgumentValues::error(const std::string& message) const
     {
-        m_Args->error(message, m_ValueId);
+        m_Args->error(message, getArgumentId(m_Values));
     }
 
     bool ArgumentValues::empty() const
@@ -186,10 +202,7 @@ namespace Argos
         {
             auto value = parseValue<T>(v.first);
             if (!value)
-            {
-                m_Args->error("Invalid value: " + std::string(v.first) + ".",
-                              m_ValueId);
-            }
+                error("Invalid value: " + std::string(v.first) + ".");
             result.push_back(*value);
         }
         return result;

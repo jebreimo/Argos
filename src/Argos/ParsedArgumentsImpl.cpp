@@ -212,9 +212,9 @@ namespace Argos
             ARGOS_THROW("Error while parsing arguments.");
     }
 
-    void ParsedArgumentsImpl::error(const std::string& message, ValueId valueId)
+    void ParsedArgumentsImpl::error(const std::string& message, ArgumentId argumentId)
     {
-        writeErrorMessage(*m_Data, message);
+        writeErrorMessage(*m_Data, message, argumentId);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         else

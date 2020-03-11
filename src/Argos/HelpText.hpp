@@ -17,5 +17,5 @@ namespace Argos
 
     void writeErrorMessage(ParserData& data,
                            const std::string& msg,
-                           int valueId);
+                           ArgumentId argumentId);
 }

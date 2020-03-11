@@ -230,6 +230,26 @@ namespace Argos
             if (!writeCustomText(data, TextId::USAGE))
                 writeBriefUsage(data);
         }
+
+        std::string getName(ParserData& data, ArgumentId argumentId)
+        {
+            for (auto& a : data.arguments)
+            {
+                if (a->argumentId == argumentId)
+                    return a->name;
+            }
+            for (auto& o : data.options)
+            {
+                if (o->argumentId == argumentId)
+                {
+                    std::string name = o->flags.front();
+                    for (auto i = 1; i < o->flags.size(); ++i)
+                        name += ", " + o->flags[i];
+                    return name;
+                }
+            }
+            return {};
+        }
     }
 
     void writeHelpText(ParserData& data)
@@ -243,33 +263,19 @@ namespace Argos
 
     void writeErrorMessage(ParserData& data, const std::string& msg)
     {
-        data.textFormatter.writeText(data.helpSettings.programName + ":");
+        data.textFormatter.writeText(data.helpSettings.programName + ": ");
         data.textFormatter.writeText(msg);
         data.textFormatter.newline();
         if (!writeCustomText(data, TextId::ERROR_USAGE))
-            writeBriefUsage(data);
+            writeUsage(data);
     }
 
     void writeErrorMessage(ParserData& data, const std::string& msg,
-                                  int valueId)
+                           ArgumentId argumentId)
     {
-        std::vector<const ArgumentData*> args;
-        for (auto& a : data.arguments)
-        {
-            if (a->valueId == valueId)
-                args.push_back(a.get());
-        }
-        //std::vector<const OptionData*> opts;
-        //for (auto& opt : data.options)
-        //{
-        //    if (o->valueId == )
-        //}
-        //auto opt = find_if(data.options.begin(), data.options.end(),
-        //                   [&](auto& o) {return o->valueId == valueId});
-        //if (opt != data.options.end())
-        //{
-        //    writeErrorMessage(data, (*opt)->name + ":" + msg);
-        //    return;
-        //}
+        if (auto name = getName(data, argumentId); !name.empty())
+            writeErrorMessage(data, name + ": " + msg);
+        else
+            writeErrorMessage(data, msg);
     }
 }
