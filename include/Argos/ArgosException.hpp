@@ -10,8 +10,19 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file
+ * @brief Defines the ArgosException class.
+ */
+
+/**
+ * @brief The namespace for all Argos classes and functions.
+ */
 namespace Argos
 {
+    /**
+     * @brief The exception class used throughout Argos.
+     */
     class ArgosException : public std::runtime_error
     {
     public:
@@ -34,6 +45,7 @@ namespace Argos
             m_Message += fileName + ":" + std::to_string(lineno) + ": " + message;
         }
 
+        [[nodiscard]]
         const char* what() const noexcept override
         {
             if (!m_Message.empty())

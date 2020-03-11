@@ -324,6 +324,28 @@ namespace Argos
         return *this;
     }
 
+    bool ArgumentParser::ignoreUndefinedArguments() const
+    {
+        return data().parserSettings.ignoreUndefinedArguments;
+    }
+
+    ArgumentParser& ArgumentParser::setIgnoreUndefinedArguments(bool value)
+    {
+        data().parserSettings.ignoreUndefinedArguments = value;
+        return *this;
+    }
+
+    bool ArgumentParser::ignoreUndefinedOptions() const
+    {
+        return data().parserSettings.ignoreUndefinedOptions;
+    }
+
+    ArgumentParser& ArgumentParser::setIgnoreUndefinedOptions(bool value)
+    {
+        data().parserSettings.ignoreUndefinedOptions = value;
+        return *this;
+    }
+
     std::ostream* ArgumentParser::outputStream() const
     {
         return m_Data->textFormatter.stream();

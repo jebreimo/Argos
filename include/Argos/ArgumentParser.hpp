@@ -69,6 +69,14 @@ namespace Argos
 
         ArgumentParser& optionStyle(OptionStyle value);
 
+        bool ignoreUndefinedArguments() const;
+
+        ArgumentParser& setIgnoreUndefinedArguments(bool value);
+
+        bool ignoreUndefinedOptions() const;
+
+        ArgumentParser& setIgnoreUndefinedOptions(bool value);
+
         std::ostream* outputStream() const;
 
         ArgumentParser& outputStream(std::ostream* stream);

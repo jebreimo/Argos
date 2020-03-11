@@ -9,14 +9,27 @@
 
 #include "ParsedArguments.hpp"
 
+/**
+ * @file
+ * @brief Defines the ArgumentIterator class.
+ */
 namespace Argos
 {
     class ArgumentIteratorImpl;
     struct ParserData;
 
+    /**
+     * @brief Iterator class created by ArgumentParser that lets client code
+     *      process one argument or option at a time.
+     */
     class ArgumentIterator
     {
     public:
+        /**
+         * @brief Constructs a new instance of ArgumentIterator.
+         *
+         * Client code must use ArgumentParser::makeIterator().
+         */
         ArgumentIterator(std::vector<std::string_view> args,
                          std::shared_ptr<ParserData> parserData);
 
@@ -30,9 +43,27 @@ namespace Argos
 
         ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
 
+        /**
+         * @brief Process the next argument or option and return the result.
+         *
+         * ParsedArguments has been updated when the function returns.
+         *
+         * @param arg The definition (ArgumentView or OptionView) of the
+         *      processed argument or option. If ignoreUndefinedArguments
+         *      or ignoreUndefinedOptions is true, this pointer can be empty.
+         * @param value If @a arg is an argument then this is the argument's
+         *      value. If @a arg is an option that take an argument then this
+         *      is the option's value. If @a arg is empty (i.e. this is an
+         *      undefined argument or option) then this is the unrecognized
+         *      argument value or option flag. Otherwise @a value is empty.
+         * @return true If an argument or option was processed successfully,
+         *      false if there were no more arguments or an error was
+         *      encountered.
+         */
         bool next(std::unique_ptr<IArgumentView>& arg,
                   std::string_view& value);
 
+        [[nodiscard]]
         ParsedArguments parsedArguments() const;
     private:
         ArgumentIteratorImpl& impl();

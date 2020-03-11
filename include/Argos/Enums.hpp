@@ -143,10 +143,8 @@ namespace Argos
     enum class ParserResultCode
     {
         /**
-         * @brief The initial status value. Means that the arguments haven't
+         * @brief The initial status value. Means that all the arguments haven't
          *      been processed yet.
-         *
-         * This value is only used internally.
          */
         NONE,
         /**

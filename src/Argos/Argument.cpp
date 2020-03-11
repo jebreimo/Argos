@@ -108,7 +108,10 @@ namespace Argos
     Argument& Argument::optional(bool optional)
     {
         CHECK_ARGUMENT_EXISTS();
-        m_Argument->minCount = optional ? 0 : 1;
+        if (optional)
+            m_Argument->minCount = 0;
+        else if (m_Argument->minCount == 0)
+            m_Argument->minCount = 1;
         return *this;
     }
 
@@ -124,9 +127,9 @@ namespace Argos
     Argument& Argument::count(unsigned minCount, unsigned maxCount)
     {
         if (maxCount == 0)
-            ARGOS_THROW("Argument's max count cannot be 0.");
+            ARGOS_THROW("Argument's max count must be greater than 0.");
         if (maxCount < minCount)
-            ARGOS_THROW("Argument's max count cannot be less than min count.");
+            ARGOS_THROW("Argument's max count cannot be less than its min count.");
         CHECK_ARGUMENT_EXISTS();
         m_Argument->minCount = minCount;
         m_Argument->maxCount = maxCount;
