@@ -55,7 +55,7 @@ namespace Argos
 
         void error(const std::string& message);
 
-        void error(const std::string& message, ValueId valueId);
+        void error(const std::string& message, ArgumentId argumentId);
     private:
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
         std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_Ids;
