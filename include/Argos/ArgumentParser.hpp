@@ -12,10 +12,19 @@
 #include "ArgumentIterator.hpp"
 #include "Option.hpp"
 
+/**
+ * @file
+ * @brief Defines the ArgumentParser class.
+ */
+
 namespace Argos
 {
     struct ParserData;
 
+    /**
+     * @class This is where the program's supported arguments and options are
+     *      defined and where the command line arguments are parsed.
+     */
     class ArgumentParser
     {
     public:

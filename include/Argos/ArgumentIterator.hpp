@@ -63,6 +63,15 @@ namespace Argos
         bool next(std::unique_ptr<IArgumentView>& arg,
                   std::string_view& value);
 
+        /**
+         * @brief Gives access to all the arguments and options processed
+         *      so far.
+         *
+         * The returned object is "live" in the sense that it is updated
+         * behind the scenes each time next() is called. It is therefore
+         * sufficient to only call this function once and keep a copy of
+         * the returned object.
+         */
         [[nodiscard]]
         ParsedArguments parsedArguments() const;
     private:

@@ -27,19 +27,19 @@ namespace Argos
     {
     public:
         ArgosException() noexcept
-                : std::runtime_error("Unspecified error.")
+            : std::runtime_error("Unspecified error.")
         {}
 
         explicit ArgosException(const std::string& message) noexcept
-                : std::runtime_error(message)
+            : std::runtime_error(message)
         {}
 
         ArgosException(const std::string& message,
                        const std::string& fileName,
                        int lineno,
                        const std::string& funcName)
-                : std::runtime_error(funcName + "() in " + fileName + ":"
-                                     + std::to_string(lineno) + ": " + message)
+            : std::runtime_error(funcName + "() in " + fileName + ":"
+                                 + std::to_string(lineno) + ": " + message)
         {}
     };
 }
