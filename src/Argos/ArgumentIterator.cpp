@@ -33,7 +33,7 @@ namespace Argos
     bool ArgumentIterator::next(std::unique_ptr<IArgumentView>& arg,
                                 std::string_view& value)
     {
-        auto res = m_Impl->next();
+        auto res = impl().next();
         switch (std::get<0>(res))
         {
         case IteratorResultCode::ARGUMENT:
