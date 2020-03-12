@@ -41,7 +41,9 @@ namespace Argos
 
         size_t size() const;
 
-        std::vector<std::string_view> values() const;
+        std::vector<ArgumentValue> values() const;
+
+        std::vector<std::string_view> rawValues() const;
 
         ArgumentValue value(size_t index) const;
 

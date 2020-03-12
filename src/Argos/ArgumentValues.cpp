@@ -72,7 +72,15 @@ namespace Argos
         return m_Values.size();
     }
 
-    std::vector<std::string_view> ArgumentValues::values() const
+    std::vector<ArgumentValue> ArgumentValues::values() const
+    {
+        std::vector<ArgumentValue> result;
+        for (auto& v : m_Values)
+            result.emplace_back(v.first, m_Args, m_ValueId, v.second);
+        return result;
+    }
+
+    std::vector<std::string_view> ArgumentValues::rawValues() const
     {
         std::vector<std::string_view> result;
         for (auto& s : m_Values)
