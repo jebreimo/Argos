@@ -150,7 +150,7 @@ namespace Argos
         /**
          * @brief All the arguments and options were successfully processed.
          */
-        NORMAL,
+        SUCCESS,
         /**
          * @brief The argument parser encountered an option
          *      of type STOP (or HELP of autoExit is false).

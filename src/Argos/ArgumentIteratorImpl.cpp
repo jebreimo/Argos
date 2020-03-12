@@ -341,7 +341,7 @@ namespace Argos
         if (!m_Data->parserSettings.ignoreUndefinedOptions
             || !startsWith(m_Iterator->current(), flag))
         {
-            error("Invalid option: " + std::string(m_Iterator->current()));
+            error("Unknown option: " + std::string(m_Iterator->current()));
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
         return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
@@ -443,7 +443,7 @@ namespace Argos
         if (m_ArgumentCounter.isComplete())
         {
             m_State = State::DONE;
-            m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
+            m_ParsedArgs->setResultCode(ParserResultCode::SUCCESS);
             return true;
         }
         else
