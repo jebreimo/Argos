@@ -243,7 +243,7 @@ namespace Argos
                 if (o->argumentId == argumentId)
                 {
                     std::string name = o->flags.front();
-                    for (auto i = 1; i < o->flags.size(); ++i)
+                    for (size_t i = 1; i < o->flags.size(); ++i)
                         name += ", " + o->flags[i];
                     return name;
                 }
