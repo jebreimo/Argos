@@ -170,14 +170,6 @@ namespace Argos
                                                 countArguments());
     }
 
-    IteratorResult ArgumentIteratorImpl::next()
-    {
-        auto result = doNext();
-        while (std::get<0>(result) == IteratorResultCode::UNKNOWN)
-            result = doNext();
-        return result;
-    }
-
     std::shared_ptr<ParsedArgumentsImpl>
     ArgumentIteratorImpl::parse(std::vector<std::string_view> args,
                                 const std::shared_ptr<ParserData>& data)
@@ -185,7 +177,7 @@ namespace Argos
         ArgumentIteratorImpl iterator(move(args), data);
         while (true)
         {
-            auto code = std::get<0>(iterator.doNext());
+            auto code = std::get<0>(iterator.next());
             if (code == IteratorResultCode::ERROR
                 || code == IteratorResultCode::DONE)
             {
@@ -193,6 +185,35 @@ namespace Argos
             }
         }
         return iterator.m_ParsedArgs;
+    }
+
+    IteratorResult ArgumentIteratorImpl::next()
+    {
+        if (m_State == State::ERROR)
+            ARGOS_THROW("next() called after error.");
+        if (m_State == State::DONE)
+            return {IteratorResultCode::DONE, nullptr, {}};
+
+        auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
+                   ? m_Iterator->next()
+                   : m_Iterator->nextValue();
+        if (!arg)
+        {
+            if (checkArgumentAndOptionCounts())
+                return {IteratorResultCode::DONE, nullptr, {}};
+            else
+                return {IteratorResultCode::ERROR, nullptr, {}};
+        }
+
+        if (m_State == State::ARGUMENTS_AND_OPTIONS
+            && isOption(*arg, m_Data->parserSettings.optionStyle))
+        {
+            return processOption(*arg);
+        }
+        else
+        {
+            return processArgument(*arg);
+        }
     }
 
     const std::shared_ptr<ParsedArgumentsImpl>& ArgumentIteratorImpl::parsedArguments() const
@@ -256,6 +277,14 @@ namespace Argos
             return {OptionResult::ERROR, {}};
         }
 
+        if (m_Data->parserSettings.optionCallback
+            && !m_Data->parserSettings.optionCallback(
+                    OptionView(&opt), arg,
+                    ParsedArgumentsBuilder(m_ParsedArgs)))
+        {
+            error();
+            return {OptionResult::ERROR, {}};
+        }
         switch (opt.type)
         {
         case OptionType::NORMAL:
@@ -279,71 +308,51 @@ namespace Argos
         return {};
     }
 
-    IteratorResult ArgumentIteratorImpl::doNext()
+    IteratorResult
+    ArgumentIteratorImpl::processOption(const std::string& flag)
     {
-        if (m_State == State::ERROR)
-            ARGOS_THROW("next() called after error.");
-        if (m_State == State::DONE)
-            return {IteratorResultCode::DONE, nullptr, {}};
-
-        auto arg = m_State == State::ARGUMENTS_AND_OPTIONS
-                   ? m_Iterator->next()
-                   : m_Iterator->nextValue();
-        if (!arg)
+        auto option = findOption(
+                m_Options, flag,
+                m_Data->parserSettings.allowAbbreviatedOptions,
+                m_Data->parserSettings.caseInsensitive);
+        if (option)
         {
-            if (checkArgumentAndOptionCounts())
-                return {IteratorResultCode::DONE, nullptr, {}};
-            else
-                return {IteratorResultCode::ERROR, nullptr, {}};
-        }
-
-        if (m_State == State::ARGUMENTS_AND_OPTIONS
-            && isOption(*arg, m_Data->parserSettings.optionStyle))
-        {
-            auto option = findOption(m_Options, *arg,
-                                     m_Data->parserSettings.allowAbbreviatedOptions,
-                                     m_Data->parserSettings.caseInsensitive);
-            if (option)
+            auto optRes = processOption(*option, flag);
+            switch (optRes.first)
             {
-                auto optRes = processOption(*option, *arg);
-                switch (optRes.first)
-                {
-                case OptionResult::HELP:
-                    if (m_Data->parserSettings.autoExit)
-                        exit(0);
-                    copyRemainingArgumentsToParserResult();
-                    return {IteratorResultCode::OPTION, option, optRes.second};
-                case OptionResult::ERROR:
-                    return {IteratorResultCode::ERROR, option, {}};
-                case OptionResult::LAST_ARGUMENT:
-                    if (!checkArgumentAndOptionCounts())
-                        return {IteratorResultCode::ERROR, nullptr, {}};
-                    [[fallthrough]];
-                case OptionResult::STOP:
-                    copyRemainingArgumentsToParserResult();
-                    [[fallthrough]];
-                default:
-                    return {IteratorResultCode::OPTION, option, optRes.second};
-                }
-            }
-            else
-            {
-                if (m_Data->parserSettings.ignoreUndefinedOptions
-                    && startsWith(m_Iterator->current(), *arg))
-                {
-                    m_ParsedArgs->addUnprocessedArgument(*arg);
-                }
-                else
-                {
-                    error("Invalid option: "
-                          + std::string(m_Iterator->current()));
+            case OptionResult::HELP:
+                if (m_Data->parserSettings.autoExit)
+                    exit(0);
+                copyRemainingArgumentsToParserResult();
+                return {IteratorResultCode::OPTION, option, optRes.second};
+            case OptionResult::ERROR:
+                return {IteratorResultCode::ERROR, option, {}};
+            case OptionResult::LAST_ARGUMENT:
+                if (!checkArgumentAndOptionCounts())
                     return {IteratorResultCode::ERROR, nullptr, {}};
-                }
+                [[fallthrough]];
+            case OptionResult::STOP:
+                copyRemainingArgumentsToParserResult();
+                [[fallthrough]];
+            default:
+                return {IteratorResultCode::OPTION, option, optRes.second};
             }
         }
-        else if (auto argument = m_ArgumentCounter.nextArgument())
+        if (!m_Data->parserSettings.ignoreUndefinedOptions
+            || !startsWith(m_Iterator->current(), flag))
         {
-            auto s = m_ParsedArgs->appendValue(argument->valueId, *arg,
+            error("Invalid option: " + std::string(m_Iterator->current()));
+            return {IteratorResultCode::ERROR, nullptr, {}};
+        }
+        return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
+    }
+
+    IteratorResult
+    ArgumentIteratorImpl::processArgument(const std::string& name)
+    {
+        if (auto argument = m_ArgumentCounter.nextArgument())
+        {
+            auto s = m_ParsedArgs->appendValue(argument->valueId, name,
                                                argument->argumentId);
             if (argument->callback
                 && !argument->callback(ArgumentView(argument), s,
@@ -352,18 +361,26 @@ namespace Argos
                 error();
                 return {IteratorResultCode::ERROR, nullptr, {}};
             }
+            if (m_Data->parserSettings.argumentCallback
+                && !m_Data->parserSettings.argumentCallback(
+                        ArgumentView(argument), s,
+                        ParsedArgumentsBuilder(m_ParsedArgs)))
+            {
+                error();
+                return {IteratorResultCode::ERROR, nullptr, {}};
+            }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
         else if (m_Data->parserSettings.ignoreUndefinedArguments)
         {
-            m_ParsedArgs->addUnprocessedArgument(*arg);
+            m_ParsedArgs->addUnprocessedArgument(name);
         }
         else
         {
-            error("Too many arguments, starting with \"" + *arg + "\"");
+            error("Too many arguments, starting with \"" + name + "\"");
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
-        return {IteratorResultCode::UNKNOWN, nullptr, {}};
+        return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
     }
 
     void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()

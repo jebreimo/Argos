@@ -329,7 +329,7 @@ namespace Argos
         return data().parserSettings.ignoreUndefinedArguments;
     }
 
-    ArgumentParser& ArgumentParser::setIgnoreUndefinedArguments(bool value)
+    ArgumentParser& ArgumentParser::ignoreUndefinedArguments(bool value)
     {
         data().parserSettings.ignoreUndefinedArguments = value;
         return *this;
@@ -340,7 +340,7 @@ namespace Argos
         return data().parserSettings.ignoreUndefinedOptions;
     }
 
-    ArgumentParser& ArgumentParser::setIgnoreUndefinedOptions(bool value)
+    ArgumentParser& ArgumentParser::ignoreUndefinedOptions(bool value)
     {
         data().parserSettings.ignoreUndefinedOptions = value;
         return *this;

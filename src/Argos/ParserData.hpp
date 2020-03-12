@@ -18,6 +18,8 @@ namespace Argos
 {
     struct ParserSettings
     {
+        ArgumentCallback argumentCallback;
+        OptionCallback optionCallback;
         OptionStyle optionStyle = OptionStyle::STANDARD;
         bool autoExit = true;
         bool allowAbbreviatedOptions = false;

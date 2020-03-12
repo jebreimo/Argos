@@ -540,3 +540,27 @@ TEST_CASE("Mandatory option")
             .parse({"abcd"});
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
+
+TEST_CASE("Unknown options and arguments.")
+{
+    using namespace Argos;
+    Argv argv{{"test", "-o", "arg", "man"}};
+    auto it = ArgumentParser("test")
+            .autoExit(false)
+            .ignoreUndefinedOptions(true)
+            .ignoreUndefinedArguments(true)
+            .add(Argument("FILE"))
+            .makeIterator(argv.size(), argv.data());
+    std::unique_ptr<IArgumentView> arg;
+    std::string_view value;
+    REQUIRE(it.next(arg, value));
+    REQUIRE(!arg);
+    REQUIRE(value == "-o");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(arg);
+    REQUIRE(value == "arg");
+    REQUIRE(it.next(arg, value));
+    REQUIRE(!arg);
+    REQUIRE(value == "man");
+    REQUIRE(!it.next(arg, value));
+}

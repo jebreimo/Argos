@@ -46,8 +46,11 @@ namespace Argos
                     static_cast<const OptionData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
-        case IteratorResultCode::DONE:
         case IteratorResultCode::UNKNOWN:
+            arg = {};
+            value = std::get<2>(res);
+            return true;
+        case IteratorResultCode::DONE:
         case IteratorResultCode::ERROR:
             break;
         }

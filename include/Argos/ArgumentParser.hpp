@@ -71,11 +71,19 @@ namespace Argos
 
         bool ignoreUndefinedArguments() const;
 
-        ArgumentParser& setIgnoreUndefinedArguments(bool value);
+        ArgumentParser& ignoreUndefinedArguments(bool value);
 
         bool ignoreUndefinedOptions() const;
 
-        ArgumentParser& setIgnoreUndefinedOptions(bool value);
+        ArgumentParser& ignoreUndefinedOptions(bool value);
+
+        const ArgumentCallback& argumentCallback() const;
+
+        ArgumentParser& argumentCallback(ArgumentCallback callback);
+
+        const OptionCallback& optionCallback() const;
+
+        ArgumentParser& optionCallback(OptionCallback callback);
 
         std::ostream* outputStream() const;
 
