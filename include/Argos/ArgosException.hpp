@@ -38,21 +38,8 @@ namespace Argos
                        const std::string& fileName,
                        int lineno,
                        const std::string& funcName)
-                : std::runtime_error(message)
-        {
-            if (!funcName.empty())
-                m_Message += funcName + "() in ";
-            m_Message += fileName + ":" + std::to_string(lineno) + ": " + message;
-        }
-
-        [[nodiscard]]
-        const char* what() const noexcept override
-        {
-            if (!m_Message.empty())
-                return m_Message.c_str();
-            return std::runtime_error::what();
-        }
-    private:
-        std::string m_Message;
+                : std::runtime_error(funcName + "() in " + fileName + ":"
+                                     + std::to_string(lineno) + ": " + message)
+        {}
     };
 }
