@@ -206,4 +206,9 @@ namespace Argos
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setLineWidth(lineWidth);
     }
+
+    size_t TextFormatter::currentLineWidth() const
+    {
+        return m_Writer.currentWidth();
+    }
 }

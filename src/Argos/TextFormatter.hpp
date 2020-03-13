@@ -32,6 +32,8 @@ namespace Argos
 
         void setLineWidth(size_t lineWidth);
 
+        size_t currentLineWidth() const;
+
         static constexpr size_t CURRENT_COLUMN = SIZE_MAX;
 
         void pushIndentation(size_t indent);

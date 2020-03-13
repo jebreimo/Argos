@@ -179,6 +179,8 @@ namespace Argos
                 for (auto&[name, text] : txts)
                 {
                     data.textFormatter.writeText(name);
+                    if (data.textFormatter.currentLineWidth() >= nameWidth)
+                        data.textFormatter.writeText(" ");
                     data.textFormatter.pushIndentation(nameWidth);
                     data.textFormatter.writeText(text);
                     data.textFormatter.popIndentation();
