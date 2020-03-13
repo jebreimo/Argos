@@ -346,6 +346,28 @@ namespace Argos
         return *this;
     }
 
+    const ArgumentCallback& ArgumentParser::argumentCallback() const
+    {
+        return data().parserSettings.argumentCallback;
+    }
+
+    ArgumentParser& ArgumentParser::argumentCallback(ArgumentCallback callback)
+    {
+        data().parserSettings.argumentCallback = std::move(callback);
+        return *this;
+    }
+
+    const OptionCallback& ArgumentParser::optionCallback() const
+    {
+        return data().parserSettings.optionCallback;
+    }
+
+    ArgumentParser& ArgumentParser::optionCallback(OptionCallback callback)
+    {
+        data().parserSettings.optionCallback = std::move(callback);
+        return *this;
+    }
+
     std::ostream* ArgumentParser::outputStream() const
     {
         return m_Data->textFormatter.stream();
