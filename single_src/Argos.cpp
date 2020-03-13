@@ -31,7 +31,8 @@ namespace Argos
         unsigned maxCount = 1;
         Visibility visibility = Visibility::NORMAL;
         int id = 0;
-        int valueId_ = 0;
+        ValueId valueId = {};
+        ArgumentId argumentId = {};
     };
 }
 
@@ -104,7 +105,8 @@ namespace Argos
         Visibility visibility = Visibility::NORMAL;
         bool mandatory = false;
         int id = 0;
-        int valueId = 0;
+        ArgumentId argumentId = {};
+        ValueId valueId = {};
     };
 }
 
@@ -554,7 +556,10 @@ namespace Argos
     Argument& Argument::optional(bool optional)
     {
         CHECK_ARGUMENT_EXISTS();
-        m_Argument->minCount = optional ? 0 : 1;
+        if (optional)
+            m_Argument->minCount = 0;
+        else if (m_Argument->minCount == 0)
+            m_Argument->minCount = 1;
         return *this;
     }
 
@@ -570,9 +575,9 @@ namespace Argos
     Argument& Argument::count(unsigned minCount, unsigned maxCount)
     {
         if (maxCount == 0)
-            ARGOS_THROW("Argument's max count cannot be 0.");
+            ARGOS_THROW("Argument's max count must be greater than 0.");
         if (maxCount < minCount)
-            ARGOS_THROW("Argument's max count cannot be less than min count.");
+            ARGOS_THROW("Argument's max count cannot be less than its min count.");
         CHECK_ARGUMENT_EXISTS();
         m_Argument->minCount = minCount;
         m_Argument->maxCount = maxCount;
@@ -683,9 +688,14 @@ namespace Argos
         return {m_Argument->minCount, m_Argument->maxCount};
     }
 
-    int ArgumentView::valueId() const
+    ValueId ArgumentView::valueId() const
     {
-        return m_Argument->valueId_;
+        return m_Argument->valueId;
+    }
+
+    ArgumentId ArgumentView::argumentId() const
+    {
+        return m_Argument->argumentId;
     }
 }
 
@@ -769,17 +779,17 @@ namespace Argos
         : m_Option(std::make_unique<OptionData>())
     {}
 
+    Option::Option(std::initializer_list<std::string> flags)
+        : m_Option(std::make_unique<OptionData>())
+    {
+        m_Option->flags = flags;
+    }
+
     Option::Option(const Option& rhs)
         : m_Option(rhs.m_Option
                    ? std::make_unique<OptionData>(*rhs.m_Option)
                    : std::unique_ptr<OptionData>())
     {}
-
-    Option::Option(std::vector<std::string> flags)
-        : m_Option(std::make_unique<OptionData>())
-    {
-        m_Option->flags = move(flags);
-    }
 
     Option::Option(Option&& rhs) noexcept
         : m_Option(std::move(rhs.m_Option))
@@ -1009,7 +1019,7 @@ namespace Argos
         return m_Option->id;
     }
 
-    int OptionView::valueId() const
+    ValueId OptionView::valueId() const
     {
         return m_Option->valueId;
     }
@@ -1037,6 +1047,11 @@ namespace Argos
     bool OptionView::mandatory() const
     {
         return m_Option->mandatory;
+    }
+
+    ArgumentId OptionView::argumentId() const
+    {
+        return m_Option->argumentId;
     }
 }
 
@@ -1257,6 +1272,8 @@ namespace Argos
 
         void setLineWidth(size_t lineWidth);
 
+        size_t currentLineWidth() const;
+
         static constexpr size_t CURRENT_COLUMN = SIZE_MAX;
 
         void pushIndentation(size_t indent);
@@ -1470,11 +1487,11 @@ namespace Argos
         auto minPos = startPos + (maxLength + 2) / 3;
         while (index-- > minPos)
         {
-            if (isalnum(word[index - 1]) != isalnum(word[index]))
+            if ((isalnum(word[index - 1]) == 0) != (isalnum(word[index]) == 0))
                 return {word.substr(startPos, index - startPos),
                         '\0',
                         word.substr(index)};
-            if (isdigit(word[index - 1]) != isdigit(word[index]))
+            if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
                 break;
             if (isalpha(word[index]) && !isVowel(word[index])
                 && word[index] != word[index - 1]
@@ -1748,6 +1765,8 @@ namespace Argos
 {
     struct ParserSettings
     {
+        ArgumentCallback argumentCallback;
+        OptionCallback optionCallback;
         OptionStyle optionStyle = OptionStyle::STANDARD;
         bool autoExit = true;
         bool allowAbbreviatedOptions = false;
@@ -2087,6 +2106,11 @@ namespace Argos
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setLineWidth(lineWidth);
     }
+
+    size_t TextFormatter::currentLineWidth() const
+    {
+        return m_Writer.currentWidth();
+    }
 }
 
 //****************************************************************************
@@ -2102,6 +2126,10 @@ namespace Argos
     void writeHelpText(ParserData& data);
 
     void writeErrorMessage(ParserData& data, const std::string& msg);
+
+    void writeErrorMessage(ParserData& data,
+                           const std::string& msg,
+                           ArgumentId argumentId);
 }
 
 //****************************************************************************
@@ -2121,26 +2149,29 @@ namespace Argos
     public:
         ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
-        bool has(int valueId) const;
+        bool has(ValueId valueId) const;
 
         const std::vector<std::string>& unprocessedArguments() const;
 
         void addUnprocessedArgument(const std::string& arg);
 
-        std::string_view assignValue(int valueId, const std::string& value);
+        std::string_view assignValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
 
-        std::string_view appendValue(int valueId, const std::string& value);
+        std::string_view appendValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
 
-        void clearValue(int valueId);
+        void clearValue(ValueId valueId);
 
-        int getValueId(std::string_view valueName) const;
+        ValueId getValueId(std::string_view valueName) const;
 
-        std::optional<std::string_view> getValue(int valueId) const;
+        std::optional<std::pair<std::string_view, ArgumentId>> getValue(ValueId valueId) const;
 
-        std::vector<std::string_view> getValues(int valueId) const;
+        std::vector<std::pair<std::string_view, ArgumentId>> getValues(ValueId valueId) const;
 
         std::vector<std::unique_ptr<IArgumentView>>
-        getArgumentViews(int valueId) const;
+        getArgumentViews(ValueId valueId) const;
+
+        std::unique_ptr<IArgumentView>
+        getArgumentView(ArgumentId argumentId) const;
 
         const std::shared_ptr<ParserData>& parserData() const;
 
@@ -2154,10 +2185,10 @@ namespace Argos
 
         void error(const std::string& message);
 
-        void error(const std::string& message, int valueId);
+        void error(const std::string& message, ArgumentId argumentId);
     private:
-        std::multimap<int, std::string> m_Values;
-        std::vector<std::pair<std::string_view, int>> m_ValueIds;
+        std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
+        std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_Ids;
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
         ParserResultCode m_ResultCode = ParserResultCode::NONE;
@@ -2213,9 +2244,11 @@ namespace Argos
         };
 
         std::pair<OptionResult, std::string_view>
-        processOption(const OptionData& option, const std::string& flag);
+        processOption(const OptionData& opt, const std::string& flag);
 
-        IteratorResult doNext();
+        IteratorResult processOption(const std::string& flag);
+
+        IteratorResult processArgument(const std::string& name);
 
         void copyRemainingArgumentsToParserResult();
 
@@ -2253,10 +2286,12 @@ namespace Argos
 {
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
-                                 int valueId)
+                                 ValueId valueId,
+                                 ArgumentId argumentId)
         : m_Value(value),
           m_Args(std::move(args)),
-          m_ValueId(valueId)
+          m_ValueId(valueId),
+          m_ArgumentId(argumentId)
     {}
 
     ArgumentValue::ArgumentValue(const ArgumentValue&) = default;
@@ -2271,10 +2306,10 @@ namespace Argos
     ArgumentValue&
     ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
 
-    std::vector<std::unique_ptr<IArgumentView>>
-    ArgumentValue::arguments() const
+    std::unique_ptr<IArgumentView>
+    ArgumentValue::argument() const
     {
-        return m_Args->getArgumentViews(m_ValueId);
+        return m_Args->getArgumentView(m_ArgumentId);
     }
 
     bool ArgumentValue::hasValue() const
@@ -2367,12 +2402,15 @@ namespace Argos
                   + " values separated by \"" + separator + "\".");
             return ArgumentValues({}, m_Args, m_ValueId);
         }
-        return ArgumentValues(move(parts), m_Args, m_ValueId);
+        std::vector<std::pair<std::string_view, ArgumentId>> values;
+        for (auto& part : parts)
+            values.emplace_back(part, m_ArgumentId);
+        return {move(values), m_Args, m_ValueId};
     }
 
     void ArgumentValue::error(const std::string& message) const
     {
-        m_Args->error(message, m_ValueId);
+        m_Args->error(message, m_ArgumentId);
     }
 
     template <typename T>
@@ -2382,8 +2420,7 @@ namespace Argos
             return defaultValue;
         auto v = parseValue<T>(*m_Value);
         if (!v)
-            m_Args->error("Invalid value: " + std::string(*m_Value) + ".",
-                          m_ValueId);
+            error("Invalid value: " + std::string(*m_Value) + ".");
         return *v;
     }
 }
@@ -2398,9 +2435,26 @@ namespace Argos
 
 namespace Argos
 {
-    ArgumentValues::ArgumentValues(std::vector<std::string_view> values,
-                                   std::shared_ptr<ParsedArgumentsImpl> args,
-                                   int valueId)
+    namespace
+    {
+        ArgumentId getArgumentId(
+                const std::vector<std::pair<std::string_view, ArgumentId>>& values)
+        {
+            if (values.empty())
+                return {};
+            for (auto it = next(values.begin()); it != values.end(); ++it)
+            {
+                if (it->second != prev(it)->second)
+                    return {};
+            }
+            return values.front().second;
+        }
+    }
+
+    ArgumentValues::ArgumentValues(
+            std::vector<std::pair<std::string_view, ArgumentId>> values,
+            std::shared_ptr<ParsedArgumentsImpl> args,
+            ValueId valueId)
         : m_Values(move(values)),
           m_Args(move(args)),
           m_ValueId(valueId)
@@ -2426,7 +2480,7 @@ namespace Argos
 
     void ArgumentValues::error(const std::string& message) const
     {
-        m_Args->error(message, m_ValueId);
+        m_Args->error(message, getArgumentId(m_Values));
     }
 
     bool ArgumentValues::empty() const
@@ -2439,33 +2493,57 @@ namespace Argos
         return m_Values.size();
     }
 
-    const std::vector<std::string_view>& ArgumentValues::values() const
+    std::vector<ArgumentValue> ArgumentValues::values() const
     {
-        return m_Values;
+        std::vector<ArgumentValue> result;
+        for (auto& v : m_Values)
+            result.emplace_back(v.first, m_Args, m_ValueId, v.second);
+        return result;
     }
 
-    std::vector<int8_t> ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
+    std::vector<std::string_view> ArgumentValues::rawValues() const
+    {
+        std::vector<std::string_view> result;
+        for (auto& s : m_Values)
+            result.push_back(s.first);
+        return result;
+    }
+
+    ArgumentValue ArgumentValues::value(size_t index) const
+    {
+        if (m_Values.empty())
+            return {{}, m_Args, m_ValueId, {}};
+
+        auto& v = m_Values.at(index);
+        return {v.first, m_Args, m_ValueId, v.second};
+    }
+
+    std::vector<int8_t>
+    ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int16_t> ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
+    std::vector<int16_t>
+    ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int32_t> ArgumentValues::asInt32s(
-            const std::vector<int32_t>& defaultValue) const
+    std::vector<int32_t>
+    ArgumentValues::asInt32s(const std::vector<int32_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<int64_t> ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
+    std::vector<int64_t>
+    ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<uint8_t> ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
+    std::vector<uint8_t>
+    ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
     {
         return getValues(defaultValue);
     }
@@ -2488,24 +2566,26 @@ namespace Argos
         return getValues(defaultValue);
     }
 
-    std::vector<float> ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
+    std::vector<float>
+    ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<double> ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
+    std::vector<double>
+    ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<long double>
-    ArgumentValues::asLongDoubles(const std::vector<long double>& defaultValue) const
+    std::vector<long double> ArgumentValues::asLongDoubles(
+            const std::vector<long double>& defaultValue) const
     {
         return getValues(defaultValue);
     }
 
-    std::vector<std::string>
-    ArgumentValues::asStrings(const std::vector<std::string>& defaultValue) const
+    std::vector<std::string> ArgumentValues::asStrings(
+            const std::vector<std::string>& defaultValue) const
     {
         if (m_Values.empty())
             return defaultValue;
@@ -2513,7 +2593,7 @@ namespace Argos
         std::vector<std::string> result;
         result.reserve(m_Values.size());
         for (auto& v : m_Values)
-            result.emplace_back(v);
+            result.emplace_back(v.first);
         return result;
     }
 
@@ -2521,20 +2601,21 @@ namespace Argos
     ArgumentValues::split(char separator,
                           size_t minParts, size_t maxParts) const
     {
-        std::vector<std::string_view> values;
+        std::vector<std::pair<std::string_view, ArgumentId>> values;
         for (auto value : m_Values)
         {
-            auto parts = splitString(value, separator, maxParts - 1);
+            auto parts = splitString(value.first, separator, maxParts - 1);
             if (parts.size() < minParts)
             {
-                error("Invalid value: \"" + std::string(value)
+                error("Invalid value: \"" + std::string(value.first)
                       + "\". Must be at least " + std::to_string(minParts)
                       + " values separated by \"" + separator + "\".");
-                return ArgumentValues({}, m_Args, m_ValueId);
+                return {{}, m_Args, m_ValueId};
             }
-            values.insert(values.end(), parts.begin(), parts.end());
+            for (auto& part : parts)
+                values.emplace_back(part, value.second);
         }
-        return ArgumentValues(move(values), m_Args, m_ValueId);
+        return {move(values), m_Args, m_ValueId};
     }
 
     template <typename T>
@@ -2548,12 +2629,9 @@ namespace Argos
         result.reserve(m_Values.size());
         for (auto& v : m_Values)
         {
-            auto value = parseValue<T>(v);
+            auto value = parseValue<T>(v.first);
             if (!value)
-            {
-                m_Args->error("Invalid value: " + std::string(v) + ".",
-                              m_ValueId);
-            }
+                error("Invalid value: " + std::string(v.first) + ".");
             result.push_back(*value);
         }
         return result;
@@ -2738,6 +2816,8 @@ namespace Argos
                 for (auto&[name, text] : txts)
                 {
                     data.textFormatter.writeText(name);
+                    if (data.textFormatter.currentLineWidth() >= nameWidth)
+                        data.textFormatter.writeText(" ");
                     data.textFormatter.pushIndentation(nameWidth);
                     data.textFormatter.writeText(text);
                     data.textFormatter.popIndentation();
@@ -2789,6 +2869,26 @@ namespace Argos
             if (!writeCustomText(data, TextId::USAGE))
                 writeBriefUsage(data);
         }
+
+        std::string getName(ParserData& data, ArgumentId argumentId)
+        {
+            for (auto& a : data.arguments)
+            {
+                if (a->argumentId == argumentId)
+                    return a->name;
+            }
+            for (auto& o : data.options)
+            {
+                if (o->argumentId == argumentId)
+                {
+                    std::string name = o->flags.front();
+                    for (size_t i = 1; i < o->flags.size(); ++i)
+                        name += ", " + o->flags[i];
+                    return name;
+                }
+            }
+            return {};
+        }
     }
 
     void writeHelpText(ParserData& data)
@@ -2802,11 +2902,20 @@ namespace Argos
 
     void writeErrorMessage(ParserData& data, const std::string& msg)
     {
-        data.textFormatter.writeText(data.helpSettings.programName + ":");
+        data.textFormatter.writeText(data.helpSettings.programName + ": ");
         data.textFormatter.writeText(msg);
         data.textFormatter.newline();
         if (!writeCustomText(data, TextId::ERROR_USAGE))
-            writeBriefUsage(data);
+            writeUsage(data);
+    }
+
+    void writeErrorMessage(ParserData& data, const std::string& msg,
+                           ArgumentId argumentId)
+    {
+        if (auto name = getName(data, argumentId); !name.empty())
+            writeErrorMessage(data, name + ": " + msg);
+        else
+            writeErrorMessage(data, msg);
     }
 }
 
@@ -2852,13 +2961,19 @@ namespace Argos
     {
         auto id = m_Impl->getValueId(name);
         auto value = m_Impl->getValue(id);
-        return {value, m_Impl, id};
+        if (value)
+            return {value->first, m_Impl, id, value->second};
+        else
+            return {{}, m_Impl, id, {}};
     }
 
     ArgumentValue ParsedArguments::value(const IArgumentView& arg) const
     {
         auto value = m_Impl->getValue(arg.valueId());
-        return {value, m_Impl, arg.valueId()};
+        if (value)
+            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+        else
+            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
     }
 
     ArgumentValues ParsedArguments::values(const std::string& name) const
@@ -2921,15 +3036,16 @@ namespace Argos
 
 namespace Argos
 {
-    ParsedArgumentsBuilder::ParsedArgumentsBuilder(ParsedArgumentsImpl* impl)
-        : m_Impl(impl)
+    ParsedArgumentsBuilder::ParsedArgumentsBuilder(
+            std::shared_ptr<ParsedArgumentsImpl> impl)
+        : m_Impl(move(impl))
     {}
 
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::append(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->appendValue(m_Impl->getValueId(name), value);
+        m_Impl->appendValue(m_Impl->getValueId(name), value, {});
         return *this;
     }
 
@@ -2937,7 +3053,7 @@ namespace Argos
     ParsedArgumentsBuilder::append(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->appendValue(arg.id(), value);
+        m_Impl->appendValue(arg.valueId(), value, arg.argumentId());
         return *this;
     }
 
@@ -2945,7 +3061,7 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->assignValue(m_Impl->getValueId(name), value);
+        m_Impl->assignValue(m_Impl->getValueId(name), value, {});
         return *this;
     }
 
@@ -2953,7 +3069,7 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->assignValue(arg.id(), value);
+        m_Impl->assignValue(arg.valueId(), value, arg.argumentId());
         return *this;
     }
 
@@ -2967,32 +3083,43 @@ namespace Argos
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::clear(const IArgumentView& arg)
     {
-        m_Impl->clearValue(arg.id());
+        m_Impl->clearValue(arg.valueId());
         return *this;
     }
 
-    std::optional<std::string_view>
-    ParsedArgumentsBuilder::value(const std::string& name)
+    ArgumentValue ParsedArgumentsBuilder::value(const std::string& name)
     {
-        return m_Impl->getValue(m_Impl->getValueId(name));
+        auto id = m_Impl->getValueId(name);
+        auto value = m_Impl->getValue(id);
+        if (value)
+            return {value->first, m_Impl, id, value->second};
+        else
+            return {{}, m_Impl, id, {}};
     }
 
-    std::optional<std::string_view>
+    ArgumentValue
     ParsedArgumentsBuilder::value(const IArgumentView& arg)
     {
-        return m_Impl->getValue(arg.id());
+        auto value = m_Impl->getValue(arg.valueId());
+        if (value)
+            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+        else
+            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
     }
 
-    std::vector<std::string_view>
+    ArgumentValues
     ParsedArgumentsBuilder::values(const std::string& name)
     {
-        return m_Impl->getValues(m_Impl->getValueId(name));
+        auto id = m_Impl->getValueId(name);
+        auto values = m_Impl->getValues(id);
+        return {values, m_Impl, id};
     }
 
-    std::vector<std::string_view>
+    ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg)
     {
-        return m_Impl->getValues(arg.id());
+        auto values = m_Impl->getValues(arg.valueId());
+        return {values, m_Impl, arg.valueId()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name)
@@ -3002,12 +3129,18 @@ namespace Argos
 
     bool ParsedArgumentsBuilder::has(const IArgumentView& arg)
     {
-        return m_Impl->has(arg.id());
+        return m_Impl->has(arg.valueId());
     }
 
     void ParsedArgumentsBuilder::error(const std::string& errorMessage)
     {
-        m_Impl->error(errorMessage);
+         m_Impl->error(errorMessage);
+    }
+
+    void ParsedArgumentsBuilder::error(const std::string& errorMessage,
+                                       const IArgumentView& arg)
+    {
+        m_Impl->error(errorMessage, arg.argumentId());
     }
 }
 
@@ -3047,9 +3180,9 @@ namespace Argos
         assert(m_Data);
         for (auto& a : m_Data->arguments)
         {
-            m_ValueIds.emplace_back(a->name, a->valueId_);
+            m_Ids.emplace_back(a->name, a->valueId, a->argumentId);
             if (!a->valueName.empty())
-                m_ValueIds.emplace_back(a->valueName, a->valueId_);
+                m_Ids.emplace_back(a->valueName, a->valueId, a->argumentId);
         }
         for (auto& o : m_Data->options)
         {
@@ -3057,16 +3190,25 @@ namespace Argos
                 continue;
 
             for (auto& f : o->flags)
-                m_ValueIds.emplace_back(f, o->valueId);
+                m_Ids.emplace_back(f, o->valueId, o->argumentId);
             if (!o->valueName.empty())
-                m_ValueIds.emplace_back(o->valueName, o->valueId);
+                m_Ids.emplace_back(o->valueName, o->valueId, o->argumentId);
         }
-        sort(m_ValueIds.begin(), m_ValueIds.end());
-        m_ValueIds.erase(unique(m_ValueIds.begin(), m_ValueIds.end()),
-                         m_ValueIds.end());
+        if (!m_Ids.empty())
+        {
+            using std::get;
+            sort(m_Ids.begin(), m_Ids.end());
+            for (auto it = next(m_Ids.begin()); it != m_Ids.end(); ++it)
+            {
+                auto p = prev(it);
+                if (get<0>(*it) == get<0>(*p) && get<2>(*it) != get<2>(*p))
+                    get<2>(*it) = get<2>(*p) = {};
+            }
+            m_Ids.erase(unique(m_Ids.begin(), m_Ids.end()), m_Ids.end());
+        }
     }
 
-    bool ParsedArgumentsImpl::has(int valueId) const
+    bool ParsedArgumentsImpl::has(ValueId valueId) const
     {
         return m_Values.find(valueId) != m_Values.end();
     }
@@ -3081,41 +3223,47 @@ namespace Argos
         m_UnprocessedArguments.push_back(arg);
     }
 
-    std::string_view ParsedArgumentsImpl::assignValue(int valueId, const std::string& value)
+    std::string_view
+    ParsedArgumentsImpl::assignValue(ValueId valueId,
+                                     const std::string& value,
+                                     ArgumentId argumentId)
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
-            return m_Values.emplace(valueId, value)->second;
+            return appendValue(valueId, value, argumentId);
 
-        it->second = value;
+        it->second = {value, argumentId};
         auto nxt = next(it);
         while (nxt != m_Values.end() && nxt->first == valueId)
             m_Values.erase(nxt++);
-        return it->second;
+        return it->second.first;
     }
 
-    std::string_view ParsedArgumentsImpl::appendValue(int valueId, const std::string& value)
+    std::string_view
+    ParsedArgumentsImpl::appendValue(ValueId valueId,
+                                     const std::string& value,
+                                     ArgumentId argumentId)
     {
-        return m_Values.emplace(valueId, value)->second;
+        return m_Values.insert({valueId, {value, argumentId}})->second.first;
     }
 
-    void ParsedArgumentsImpl::clearValue(int valueId)
+    void ParsedArgumentsImpl::clearValue(ValueId valueId)
     {
         m_Values.erase(valueId);
     }
 
-    int ParsedArgumentsImpl::getValueId(std::string_view valueName) const
+    ValueId ParsedArgumentsImpl::getValueId(std::string_view valueName) const
     {
-        auto idIt = lowerBound(m_ValueIds.begin(), m_ValueIds.end(),
-                               valueName,
-                               [](auto& p, auto& s) {return p.first < s;});
-        if (idIt == m_ValueIds.end() || idIt->first != valueName)
+        using std::get;
+        auto it = lowerBound(m_Ids.begin(), m_Ids.end(), valueName,
+                             [](auto& p, auto& s) {return get<0>(p) < s;});
+        if (it == m_Ids.end() || get<0>(*it) != valueName)
             ARGOS_THROW("Unknown value: " + std::string(valueName));
-        return idIt->second;
+        return get<1>(*it);
     }
 
-    std::optional<std::string_view>
-    ParsedArgumentsImpl::getValue(int valueId) const
+    std::optional<std::pair<std::string_view, ArgumentId>>
+    ParsedArgumentsImpl::getValue(ValueId valueId) const
     {
         auto it = m_Values.lower_bound(valueId);
         if (it == m_Values.end() || it->first != valueId)
@@ -3126,23 +3274,23 @@ namespace Argos
         return it->second;
     }
 
-    std::vector<std::string_view>
-    ParsedArgumentsImpl::getValues(int valueId) const
+    std::vector<std::pair<std::string_view, ArgumentId>>
+    ParsedArgumentsImpl::getValues(ValueId valueId) const
     {
-        std::vector<std::string_view> result;
-        auto it = m_Values.lower_bound(valueId);
-        for (; it != m_Values.end() && it->first == valueId; ++it)
+        std::vector<std::pair<std::string_view, ArgumentId>> result;
+        for (auto it = m_Values.lower_bound(valueId);
+             it != m_Values.end() && it->first == valueId; ++it)
             result.emplace_back(it->second);
         return result;
     }
 
     std::vector<std::unique_ptr<IArgumentView>>
-    ParsedArgumentsImpl::getArgumentViews(int valueId) const
+    ParsedArgumentsImpl::getArgumentViews(ValueId valueId) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
         for (auto& a : m_Data->arguments)
         {
-            if (a->valueId_ == valueId)
+            if (a->valueId == valueId)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
         for (auto& o : m_Data->options)
@@ -3151,6 +3299,22 @@ namespace Argos
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
         }
         return result;
+    }
+
+    std::unique_ptr<IArgumentView>
+    ParsedArgumentsImpl::getArgumentView(ArgumentId argumentId) const
+    {
+        for (auto& a : m_Data->arguments)
+        {
+            if (a->argumentId == argumentId)
+                return std::make_unique<ArgumentView>(a.get());
+        }
+        for (auto& o : m_Data->options)
+        {
+            if (o->argumentId == argumentId)
+                return std::make_unique<OptionView>(o.get());
+        }
+        return {};
     }
 
     const std::shared_ptr<ParserData>& ParsedArgumentsImpl::parserData() const
@@ -3188,9 +3352,9 @@ namespace Argos
             ARGOS_THROW("Error while parsing arguments.");
     }
 
-    void ParsedArgumentsImpl::error(const std::string& message, int valueId)
+    void ParsedArgumentsImpl::error(const std::string& message, ArgumentId argumentId)
     {
-        writeErrorMessage(*m_Data, message);
+        writeErrorMessage(*m_Data, message, argumentId);
         if (m_Data->parserSettings.autoExit)
             exit(1);
         else
@@ -3229,7 +3393,7 @@ namespace Argos
     bool ArgumentIterator::next(std::unique_ptr<IArgumentView>& arg,
                                 std::string_view& value)
     {
-        auto res = m_Impl->next();
+        auto res = impl().next();
         switch (std::get<0>(res))
         {
         case IteratorResultCode::ARGUMENT:
@@ -3242,8 +3406,11 @@ namespace Argos
                     static_cast<const OptionData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
-        case IteratorResultCode::DONE:
         case IteratorResultCode::UNKNOWN:
+            arg = {};
+            value = std::get<2>(res);
+            return true;
+        case IteratorResultCode::DONE:
         case IteratorResultCode::ERROR:
             break;
         }
@@ -3436,14 +3603,6 @@ namespace Argos
                                                 countArguments());
     }
 
-    IteratorResult ArgumentIteratorImpl::next()
-    {
-        auto result = doNext();
-        while (std::get<0>(result) == IteratorResultCode::UNKNOWN)
-            result = doNext();
-        return result;
-    }
-
     std::shared_ptr<ParsedArgumentsImpl>
     ArgumentIteratorImpl::parse(std::vector<std::string_view> args,
                                 const std::shared_ptr<ParserData>& data)
@@ -3451,7 +3610,7 @@ namespace Argos
         ArgumentIteratorImpl iterator(move(args), data);
         while (true)
         {
-            auto code = std::get<0>(iterator.doNext());
+            auto code = std::get<0>(iterator.next());
             if (code == IteratorResultCode::ERROR
                 || code == IteratorResultCode::DONE)
             {
@@ -3461,86 +3620,7 @@ namespace Argos
         return iterator.m_ParsedArgs;
     }
 
-    const std::shared_ptr<ParsedArgumentsImpl>& ArgumentIteratorImpl::parsedArguments() const
-    {
-        return m_ParsedArgs;
-    }
-
-    std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
-    ArgumentIteratorImpl::processOption(const OptionData& option, const std::string& flag)
-    {
-        std::string_view arg;
-        switch (option.operation)
-        {
-        case OptionOperation::ASSIGN:
-            if (!option.value.empty())
-            {
-                m_ParsedArgs->assignValue(option.valueId, option.value);
-            }
-            else if (auto value = m_Iterator->nextValue(); value)
-            {
-                arg = m_ParsedArgs->assignValue(option.valueId, *value);
-            }
-            else
-            {
-                error(flag + ": no value given.");
-                return {OptionResult::ERROR, {}};
-            }
-            break;
-        case OptionOperation::APPEND:
-            if (!option.value.empty())
-            {
-                m_ParsedArgs->appendValue(option.valueId, option.value);
-            }
-            else if (auto value = m_Iterator->nextValue(); value)
-            {
-                arg = m_ParsedArgs->appendValue(option.valueId, *value);
-            }
-            else
-            {
-                error(flag + ": no value given.");
-                return {OptionResult::ERROR, {}};
-            }
-            break;
-        case OptionOperation::CLEAR:
-            m_ParsedArgs->clearValue(option.valueId);
-            break;
-        case OptionOperation::NONE:
-            break;
-        }
-
-        if (option.callback
-            && !option.callback(OptionView(&option), arg,
-                                ParsedArgumentsBuilder(m_ParsedArgs.get())))
-        {
-            error();
-            return {OptionResult::ERROR, {}};
-        }
-
-        switch (option.type)
-        {
-        case OptionType::NORMAL:
-            return {OptionResult::NORMAL, arg};
-        case OptionType::HELP:
-            writeHelpText(*m_Data);
-            m_State = State::DONE;
-            m_ParsedArgs->setBreakingOption(&option);
-            return {OptionResult::HELP, arg};
-        case OptionType::STOP:
-            m_State = State::DONE;
-            m_ParsedArgs->setBreakingOption(&option);
-            return {OptionResult::STOP, arg};
-        case OptionType::LAST_ARGUMENT:
-            m_State = State::DONE;
-            return {OptionResult::LAST_ARGUMENT, arg};
-        case OptionType::LAST_OPTION:
-            m_State = State::ARGUMENTS_ONLY;
-            return {OptionResult::NORMAL, arg};
-        }
-        return {};
-    }
-
-    IteratorResult ArgumentIteratorImpl::doNext()
+    IteratorResult ArgumentIteratorImpl::next()
     {
         if (m_State == State::ERROR)
             ARGOS_THROW("next() called after error.");
@@ -3561,52 +3641,163 @@ namespace Argos
         if (m_State == State::ARGUMENTS_AND_OPTIONS
             && isOption(*arg, m_Data->parserSettings.optionStyle))
         {
-            auto option = findOption(m_Options, *arg,
-                                     m_Data->parserSettings.allowAbbreviatedOptions,
-                                     m_Data->parserSettings.caseInsensitive);
-            if (option)
+            return processOption(*arg);
+        }
+        else
+        {
+            return processArgument(*arg);
+        }
+    }
+
+    const std::shared_ptr<ParsedArgumentsImpl>& ArgumentIteratorImpl::parsedArguments() const
+    {
+        return m_ParsedArgs;
+    }
+
+    std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
+    ArgumentIteratorImpl::processOption(const OptionData& opt,
+                                        const std::string& flag)
+    {
+        std::string_view arg;
+        switch (opt.operation)
+        {
+        case OptionOperation::ASSIGN:
+            if (!opt.value.empty())
             {
-                auto optRes = processOption(*option, *arg);
-                switch (optRes.first)
-                {
-                case OptionResult::HELP:
-                    if (m_Data->parserSettings.autoExit)
-                        exit(0);
-                    copyRemainingArgumentsToParserResult();
-                    return {IteratorResultCode::OPTION, option, optRes.second};
-                case OptionResult::ERROR:
-                    return {IteratorResultCode::ERROR, option, {}};
-                case OptionResult::LAST_ARGUMENT:
-                    if (!checkArgumentAndOptionCounts())
-                        return {IteratorResultCode::ERROR, nullptr, {}};
-                    [[fallthrough]];
-                case OptionResult::STOP:
-                    copyRemainingArgumentsToParserResult();
-                    [[fallthrough]];
-                default:
-                    return {IteratorResultCode::OPTION, option, optRes.second};
-                }
+                m_ParsedArgs->assignValue(opt.valueId, opt.value,
+                                          opt.argumentId);
+            }
+            else if (auto value = m_Iterator->nextValue())
+            {
+                arg = m_ParsedArgs->assignValue(opt.valueId, *value,
+                                                opt.argumentId);
             }
             else
             {
-                if (m_Data->parserSettings.ignoreUndefinedOptions
-                    && startsWith(m_Iterator->current(), *arg))
-                {
-                    m_ParsedArgs->addUnprocessedArgument(*arg);
-                }
-                else
-                {
-                    error("Invalid option: " + std::string(m_Iterator->current()));
+                error(flag + ": no value given.");
+                return {OptionResult::ERROR, {}};
+            }
+            break;
+        case OptionOperation::APPEND:
+            if (!opt.value.empty())
+            {
+                m_ParsedArgs->appendValue(opt.valueId, opt.value,
+                                          opt.argumentId);
+            }
+            else if (auto value = m_Iterator->nextValue())
+            {
+                arg = m_ParsedArgs->appendValue(opt.valueId, *value,
+                                                opt.argumentId);
+            }
+            else
+            {
+                error(flag + ": no value given.");
+                return {OptionResult::ERROR, {}};
+            }
+            break;
+        case OptionOperation::CLEAR:
+            m_ParsedArgs->clearValue(opt.valueId);
+            break;
+        case OptionOperation::NONE:
+            break;
+        }
+
+        if (opt.callback
+            && !opt.callback(OptionView(&opt), arg,
+                             ParsedArgumentsBuilder(m_ParsedArgs)))
+        {
+            error();
+            return {OptionResult::ERROR, {}};
+        }
+
+        if (m_Data->parserSettings.optionCallback
+            && !m_Data->parserSettings.optionCallback(
+                    OptionView(&opt), arg,
+                    ParsedArgumentsBuilder(m_ParsedArgs)))
+        {
+            error();
+            return {OptionResult::ERROR, {}};
+        }
+        switch (opt.type)
+        {
+        case OptionType::NORMAL:
+            return {OptionResult::NORMAL, arg};
+        case OptionType::HELP:
+            writeHelpText(*m_Data);
+            m_State = State::DONE;
+            m_ParsedArgs->setBreakingOption(&opt);
+            return {OptionResult::HELP, arg};
+        case OptionType::STOP:
+            m_State = State::DONE;
+            m_ParsedArgs->setBreakingOption(&opt);
+            return {OptionResult::STOP, arg};
+        case OptionType::LAST_ARGUMENT:
+            m_State = State::DONE;
+            return {OptionResult::LAST_ARGUMENT, arg};
+        case OptionType::LAST_OPTION:
+            m_State = State::ARGUMENTS_ONLY;
+            return {OptionResult::NORMAL, arg};
+        }
+        return {};
+    }
+
+    IteratorResult
+    ArgumentIteratorImpl::processOption(const std::string& flag)
+    {
+        auto option = findOption(
+                m_Options, flag,
+                m_Data->parserSettings.allowAbbreviatedOptions,
+                m_Data->parserSettings.caseInsensitive);
+        if (option)
+        {
+            auto optRes = processOption(*option, flag);
+            switch (optRes.first)
+            {
+            case OptionResult::HELP:
+                if (m_Data->parserSettings.autoExit)
+                    exit(0);
+                copyRemainingArgumentsToParserResult();
+                return {IteratorResultCode::OPTION, option, optRes.second};
+            case OptionResult::ERROR:
+                return {IteratorResultCode::ERROR, option, {}};
+            case OptionResult::LAST_ARGUMENT:
+                if (!checkArgumentAndOptionCounts())
                     return {IteratorResultCode::ERROR, nullptr, {}};
-                }
+                [[fallthrough]];
+            case OptionResult::STOP:
+                copyRemainingArgumentsToParserResult();
+                [[fallthrough]];
+            default:
+                return {IteratorResultCode::OPTION, option, optRes.second};
             }
         }
-        else if (auto argument = m_ArgumentCounter.nextArgument())
+        if (!m_Data->parserSettings.ignoreUndefinedOptions
+            || !startsWith(m_Iterator->current(), flag))
         {
-            auto s = m_ParsedArgs->appendValue(argument->valueId_, *arg);
+            error("Unknown option: " + std::string(m_Iterator->current()));
+            return {IteratorResultCode::ERROR, nullptr, {}};
+        }
+        return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
+    }
+
+    IteratorResult
+    ArgumentIteratorImpl::processArgument(const std::string& name)
+    {
+        if (auto argument = m_ArgumentCounter.nextArgument())
+        {
+            auto s = m_ParsedArgs->appendValue(argument->valueId, name,
+                                               argument->argumentId);
             if (argument->callback
                 && !argument->callback(ArgumentView(argument), s,
-                                       ParsedArgumentsBuilder(m_ParsedArgs.get())))
+                                       ParsedArgumentsBuilder(m_ParsedArgs)))
+            {
+                error();
+                return {IteratorResultCode::ERROR, nullptr, {}};
+            }
+            if (m_Data->parserSettings.argumentCallback
+                && !m_Data->parserSettings.argumentCallback(
+                        ArgumentView(argument), s,
+                        ParsedArgumentsBuilder(m_ParsedArgs)))
             {
                 error();
                 return {IteratorResultCode::ERROR, nullptr, {}};
@@ -3615,14 +3806,14 @@ namespace Argos
         }
         else if (m_Data->parserSettings.ignoreUndefinedArguments)
         {
-            m_ParsedArgs->addUnprocessedArgument(*arg);
+            m_ParsedArgs->addUnprocessedArgument(name);
         }
         else
         {
-            error("Too many arguments, starting with \"" + *arg + "\"");
+            error("Too many arguments, starting with \"" + name + "\"");
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
-        return {IteratorResultCode::UNKNOWN, nullptr, {}};
+        return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
     }
 
     void ArgumentIteratorImpl::copyRemainingArgumentsToParserResult()
@@ -3685,7 +3876,7 @@ namespace Argos
         if (m_ArgumentCounter.isComplete())
         {
             m_State = State::DONE;
-            m_ParsedArgs->setResultCode(ParserResultCode::NORMAL);
+            m_ParsedArgs->setResultCode(ParserResultCode::SUCCESS);
             return true;
         }
         else
@@ -3772,21 +3963,27 @@ namespace Argos
             return result;
         }
 
-        void generateValueIds(const ParserData& data)
+        void setValueIds(const ParserData& data)
         {
             struct InternalIdMaker
             {
-                int n = 1;
-                std::map<std::string, int> explicitIds;
+                ValueId n = ValueId(0);
+                std::map<std::string, ValueId> explicitIds;
 
-                int makeNumericId(const std::string& stringId)
+                ValueId makeValueId(const std::string& valueName)
                 {
-                    if (stringId.empty())
-                        return n++;
+                    if (valueName.empty())
+                    {
+                        n = ValueId(n + 1);
+                        return n;
+                    }
 
-                    auto it = explicitIds.find(stringId);
+                    auto it = explicitIds.find(valueName);
                     if (it == explicitIds.end())
-                        it = explicitIds.emplace(stringId, n++).first;
+                    {
+                        n = ValueId(n + 1);
+                        it = explicitIds.emplace(valueName, n).first;
+                    }
                     return it->second;
                 }
             };
@@ -3795,19 +3992,19 @@ namespace Argos
             {
                 if (!a->valueName.empty())
                 {
-                    a->valueId_ = idMaker.makeNumericId(a->valueName);
-                    idMaker.explicitIds.emplace(a->name, a->valueId_);
+                    a->valueId = idMaker.makeValueId(a->valueName);
+                    idMaker.explicitIds.emplace(a->name, a->valueId);
                 }
                 else
                 {
-                    a->valueId_ = idMaker.makeNumericId(a->name);
+                    a->valueId = idMaker.makeValueId(a->name);
                 }
             }
             for (auto& o : data.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeNumericId(o->valueName);
+                o->valueId = idMaker.makeValueId(o->valueName);
                 for (auto& f : o->flags)
                     idMaker.explicitIds.emplace(f, o->valueId);
             }
@@ -3816,7 +4013,7 @@ namespace Argos
         ParsedArguments parseImpl(std::vector<std::string_view> args,
                                   const std::shared_ptr<ParserData>& data)
         {
-            generateValueIds(*data);
+            setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
         }
@@ -3825,7 +4022,7 @@ namespace Argos
         makeIteratorImpl(std::vector<std::string_view> args,
                          const std::shared_ptr<ParserData>& data)
         {
-            generateValueIds(*data);
+            setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
     }
@@ -3855,6 +4052,9 @@ namespace Argos
     ArgumentParser& ArgumentParser::add(Argument argument)
     {
         auto ad = argument.release();
+        if (ad->name.empty())
+            ARGOS_THROW("Argument must have a name.");
+        ad->argumentId = nextArgumentId();
         data().arguments.emplace_back(std::move(ad));
         return *this;
     }
@@ -3914,6 +4114,7 @@ namespace Argos
                 ARGOS_THROW("CLEAR-options cannot be mandatory.");
             break;
         }
+        od->argumentId = nextArgumentId();
         data().options.push_back(std::move(od));
         return *this;
     }
@@ -4021,6 +4222,50 @@ namespace Argos
         return *this;
     }
 
+    bool ArgumentParser::ignoreUndefinedArguments() const
+    {
+        return data().parserSettings.ignoreUndefinedArguments;
+    }
+
+    ArgumentParser& ArgumentParser::ignoreUndefinedArguments(bool value)
+    {
+        data().parserSettings.ignoreUndefinedArguments = value;
+        return *this;
+    }
+
+    bool ArgumentParser::ignoreUndefinedOptions() const
+    {
+        return data().parserSettings.ignoreUndefinedOptions;
+    }
+
+    ArgumentParser& ArgumentParser::ignoreUndefinedOptions(bool value)
+    {
+        data().parserSettings.ignoreUndefinedOptions = value;
+        return *this;
+    }
+
+    const ArgumentCallback& ArgumentParser::argumentCallback() const
+    {
+        return data().parserSettings.argumentCallback;
+    }
+
+    ArgumentParser& ArgumentParser::argumentCallback(ArgumentCallback callback)
+    {
+        data().parserSettings.argumentCallback = std::move(callback);
+        return *this;
+    }
+
+    const OptionCallback& ArgumentParser::optionCallback() const
+    {
+        return data().parserSettings.optionCallback;
+    }
+
+    ArgumentParser& ArgumentParser::optionCallback(OptionCallback callback)
+    {
+        data().parserSettings.optionCallback = std::move(callback);
+        return *this;
+    }
+
     std::ostream* ArgumentParser::outputStream() const
     {
         return m_Data->textFormatter.stream();
@@ -4076,5 +4321,11 @@ namespace Argos
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
         return *m_Data;
+    }
+
+    ArgumentId ArgumentParser::nextArgumentId() const
+    {
+        auto& d = data();
+        return ArgumentId(d.options.size() + d.arguments.size() + 1);
     }
 }
