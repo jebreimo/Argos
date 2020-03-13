@@ -14,6 +14,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|.*Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
+function(TargetEnableCodeCoverage target isEnabled)
+    if (${isEnabled})
+        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|.*Clang")
+            target_compile_options(${target} PRIVATE --coverage)
+            target_link_options(${target} PUBLIC --coverage)
+        endif()
+    endif()
+endfunction()
+
 configure_file(include/Argos/ArgosVersion.hpp.in
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Argos/ArgosVersion.hpp @ONLY)
 
@@ -71,7 +80,7 @@ add_library(Argos
     src/Argos/TextWriter.hpp
     src/Argos/WordSplitter.cpp
     src/Argos/WordSplitter.hpp
-    include/Argos/ArgosVersion.hpp.in)
+    )
 
 target_include_directories(Argos
     PUBLIC
@@ -83,7 +92,9 @@ target_compile_definitions(Argos
         $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
     )
 
-enable_testing()
+TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
+
+enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
 
 add_subdirectory(tests/ArgosTest)
 add_subdirectory(tests/ArgosTestApp)

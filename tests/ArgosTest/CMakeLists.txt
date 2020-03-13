@@ -43,4 +43,6 @@ target_include_directories(ArgosTest
         ../../src
     )
 
+TargetEnableCodeCoverage(ArgosTest "${ARGOS_CODE_COVERAGE}")
+
 add_test(NAME ArgosTest COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ArgosTest)
