@@ -1,0 +1,13 @@
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-03-12.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+#pragma once
+
+constexpr char ARGOS_VERSION[] = "@Argos_VERSION@";
+constexpr unsigned ARGOS_VERSION_MAJOR = @Argos_VERSION_MAJOR@;
+constexpr unsigned ARGOS_VERSION_MINOR = @Argos_VERSION_MINOR@;
+constexpr unsigned ARGOS_VERSION_PATCH = @Argos_VERSION_PATCH@;

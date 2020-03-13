@@ -33,3 +33,4 @@
 /build
 /cmake-build-*
 .DS_Store
+/include/Argos/ArgosVersion.hpp
