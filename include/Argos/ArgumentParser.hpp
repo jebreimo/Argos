@@ -24,8 +24,10 @@ namespace Argos
     struct ParserData;
 
     /**
-     * @class This is where the program's supported arguments and options are
-     *      defined and where the command line arguments are parsed.
+     * @brief This main class of Argos.
+     *
+     * Use this class to define the program's command line interface and
+     * parse the actual command line arguments.
      */
     class ArgumentParser
     {

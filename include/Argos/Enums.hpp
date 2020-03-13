@@ -7,6 +7,11 @@
 //****************************************************************************
 #pragma once
 
+/**
+ * @file
+ * @brief Defines the enum types used throughout Argos.
+ */
+
 namespace Argos
 {
     /**

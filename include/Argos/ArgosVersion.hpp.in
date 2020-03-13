@@ -7,6 +7,11 @@
 //****************************************************************************
 #pragma once
 
+/**
+ * @file
+ * @brief Defines the current Argos version.
+ */
+
 constexpr char ARGOS_VERSION[] = "@Argos_VERSION@";
 constexpr unsigned ARGOS_VERSION_MAJOR = @Argos_VERSION_MAJOR@;
 constexpr unsigned ARGOS_VERSION_MINOR = @Argos_VERSION_MINOR@;
