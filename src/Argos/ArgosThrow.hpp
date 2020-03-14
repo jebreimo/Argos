@@ -9,4 +9,4 @@
 #include "Argos/ArgosException.hpp"
 
 #define ARGOS_THROW(msg) \
-        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __FUNCTION__)
+        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __func__)

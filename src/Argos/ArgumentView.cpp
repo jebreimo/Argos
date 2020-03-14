@@ -6,13 +6,18 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/ArgumentView.hpp"
+
+#include "ArgosThrow.hpp"
 #include "ArgumentData.hpp"
 
 namespace Argos
 {
     ArgumentView::ArgumentView(const ArgumentData* data)
             : m_Argument(data)
-    {}
+    {
+        if (!data)
+            ARGOS_THROW("data can not be null");
+    }
 
     const std::string& ArgumentView::text() const
     {

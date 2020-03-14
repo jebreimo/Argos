@@ -7,13 +7,17 @@
 //****************************************************************************
 #include "Argos/OptionView.hpp"
 
+#include "ArgosThrow.hpp"
 #include "OptionData.hpp"
 
 namespace Argos
 {
     OptionView::OptionView(const OptionData* data)
         : m_Option(data)
-    {}
+    {
+        if (!data)
+            ARGOS_THROW("data can not be null");
+    }
 
     const std::string& OptionView::text() const
     {
