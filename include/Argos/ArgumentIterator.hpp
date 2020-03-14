@@ -33,14 +33,31 @@ namespace Argos
         ArgumentIterator(std::vector<std::string_view> args,
                          std::shared_ptr<ParserData> parserData);
 
+        /**
+         * @private
+         */
         ArgumentIterator(const ArgumentIterator&) = delete;
 
+        /**
+         * @brief Moves the innards of the old object to the new one.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentIterator(ArgumentIterator&&) noexcept;
 
         ~ArgumentIterator();
 
+        /**
+         * @private
+         */
         ArgumentIterator& operator=(const ArgumentIterator&) = delete;
 
+        /**
+         * @brief Moves the innards of the object on the right hand side
+         *      to the one on the left hand side.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
 
         /**

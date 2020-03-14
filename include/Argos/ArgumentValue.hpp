@@ -12,14 +12,27 @@
 #include <vector>
 #include "IArgumentView.hpp"
 
+/**
+ * @file
+ * @brief Defines the ArgumentValue class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
     class ArgumentValues;
 
+    /**
+     * @brief Wrapper class for the value of an argument or option.
+     *
+     * ParsedArguments returns instances of ArgumentValue.
+     */
     class ArgumentValue
     {
     public:
+        /**
+         * @private
+         */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId valueId,

@@ -36,21 +36,38 @@ namespace Argos
         Argument();
 
         /**
-         * Creates an argument with name @a name.
+         * @brief Creates an argument with name @a name.
          * @param name The name that will be displayed in the help text as
          *      well as the name used when retrieving the argument's value from
          *      ParsedArguments.
          */
         explicit Argument(const std::string& name);
 
+        /**
+         * @brief Creates a complete copy of the given argument.
+         */
         Argument(const Argument&);
 
+        /**
+         * @brief Moves the innards of the given argument to the new object.
+         *
+         * Attempts to use the old object will result in an exception.
+         */
         Argument(Argument&&) noexcept;
 
         ~Argument();
 
+        /**
+         * @brief Copies everything in the given argument.
+         */
         Argument& operator=(const Argument&);
 
+        /**
+         * @brief Moves the innards of the given argument to the current
+         * object.
+         *
+         * Attempts to use the old object will result in an exception.
+         */
         Argument& operator=(Argument&&) noexcept;
 
         /**
@@ -141,9 +158,10 @@ namespace Argos
          *
          * This function is a convenience function that affects the argument's
          * minimum count.
-         * @param optional @arg true The argument's minimum count is set to 0.
-         *                 @arg false The argument's minimum count is set to 1
-         *                 if it currently is 0.
+         * @param optional
+         *      @arg true The argument's minimum count is set to 0.
+         *      @arg false The argument's minimum count is set to 1
+         *          if it currently is 0.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
@@ -169,9 +187,10 @@ namespace Argos
         Argument& count(unsigned minCount, unsigned maxCount);
 
         /**
+         * @private
          * @brief Used internally in Argos.
          *
-         * The Argument instance is no longer usable after this function has
+         * The object is no longer usable after this function has
          * been called.
          * @return Pointer to the argument implementation.
          */

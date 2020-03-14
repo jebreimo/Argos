@@ -9,13 +9,25 @@
 #include "ArgumentValue.hpp"
 #include "ArgumentValues.hpp"
 
+/**
+ * @file
+ * @brief Defines the ParsedArgumentsBuilder class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief An interface to ParsedArguments that lets argument and option
+     *      callbacks query and modify the parsed argument values
+     */
     class ParsedArgumentsBuilder
     {
     public:
+        /**
+         * @private
+         */
         explicit ParsedArgumentsBuilder(
                 std::shared_ptr<ParsedArgumentsImpl> impl);
 

@@ -6,12 +6,16 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-
 #include <initializer_list>
 #include <memory>
 #include <string>
 #include <vector>
 #include "Callbacks.hpp"
+
+/**
+ * @file
+ * @brief Defines the Option class.
+ */
 
 namespace Argos
 {
@@ -99,6 +103,17 @@ namespace Argos
          */
         Option& visibility(Visibility visibility);
 
+        /**
+         * @brief Set a custom id that can be used in callback functions etc.
+         *      to quickly distinguish between different options.
+         *
+         * The id purely is intended for client code, Argos itself ignores
+         * this value.
+         *
+         * @param id Can be any integer value.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Option& id(int id);
 
         Option& flag(const std::string& f);
@@ -121,6 +136,14 @@ namespace Argos
 
         const OptionData& data() const;
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         *
+         * The object is no longer usable after this function has
+         * been called.
+         * @return Pointer to the option implementation.
+         */
         std::unique_ptr<OptionData> release();
     private:
         std::unique_ptr<OptionData> m_Option;

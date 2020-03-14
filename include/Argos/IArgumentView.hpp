@@ -10,21 +10,46 @@
 #include <string>
 #include "Enums.hpp"
 
+/**
+ * @file
+ * @brief Defines the IArgumentView interface class.
+ */
+
 namespace Argos
 {
+    /**
+     * @brief Interface class with the functions ArgumentView and OptionView
+     *      have in common.
+     */
     class IArgumentView
     {
     public:
         virtual ~IArgumentView() = default;
 
+        /**
+         * @brief Returns the argument's or option's help text.
+         */
         virtual const std::string& text() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's section name.
+         */
         virtual const std::string& section() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's value name.
+         */
         virtual const std::string& valueName() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's visibility in
+         *      the help text and error messages.
+         */
         virtual Visibility visibility() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's custom id.
+         */
         virtual int id() const = 0;
 
         /**
@@ -42,6 +67,12 @@ namespace Argos
          */
         virtual ValueId valueId() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's argumentId().
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
         virtual ArgumentId argumentId() const = 0;
     };
 }

@@ -12,23 +12,41 @@
 #include "ArgumentView.hpp"
 #include "OptionView.hpp"
 
+/**
+ * @file
+ * @brief Defines the ParsedArguments class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief The result of the ArgumentParser. Gives access to all argument
+     *      and option values.
+     */
     class ParsedArguments
     {
     public:
         ParsedArguments();
 
+        /**
+         * @private
+         */
         ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
 
+        /**
+         * @private
+         */
         ParsedArguments(const ParsedArguments&) = delete;
 
         ParsedArguments(ParsedArguments&&) noexcept;
 
         ~ParsedArguments();
 
+        /**
+         * @private
+         */
         ParsedArguments& operator=(const ParsedArguments&) = delete;
 
         ParsedArguments& operator=(ParsedArguments&&) noexcept;

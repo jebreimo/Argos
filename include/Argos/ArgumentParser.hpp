@@ -34,16 +34,38 @@ namespace Argos
     public:
         ArgumentParser();
 
+        /**
+         * @brief Creates a new argument parser.
+         * @param programName The name of the program that will be displayed
+         *      in the help text and error messages.
+         */
         explicit ArgumentParser(const std::string& programName);
 
+        /**
+         * @brief Moves the innards of the old object to the new one.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentParser(ArgumentParser&&) noexcept;
 
+        /**
+         * @private
+         */
         ArgumentParser(const ArgumentParser&) = delete;
 
         ~ArgumentParser();
 
+        /**
+         * @brief Moves the innards of the object on the right hand side
+         *      to the one on the left hand side.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentParser& operator=(ArgumentParser&&) noexcept;
 
+        /**
+         * @private
+         */
         ArgumentParser& operator=(const ArgumentParser&) = delete;
 
         ArgumentParser& add(Argument argument);
