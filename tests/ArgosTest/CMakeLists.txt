@@ -34,7 +34,7 @@ add_executable(ArgosTest
 
 target_link_libraries(ArgosTest
     PRIVATE
-        Argos
+        Argos::Argos
         Catch2::Catch2
     )
 

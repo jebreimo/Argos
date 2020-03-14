@@ -96,5 +96,7 @@ TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
 
 enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
 
+add_library(Argos::Argos ALIAS Argos)
+
 add_subdirectory(tests/ArgosTest)
 add_subdirectory(tests/ArgosTestApp)

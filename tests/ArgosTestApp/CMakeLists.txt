@@ -14,5 +14,5 @@ add_executable(ArgosTestApp
 
 target_link_libraries(ArgosTestApp
     PRIVATE
-        Argos
+        Argos::Argos
     )
