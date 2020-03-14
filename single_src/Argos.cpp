@@ -7,7 +7,7 @@
 //****************************************************************************
 
 #define ARGOS_THROW(msg) \
-        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __FUNCTION__)
+        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __func__)
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -646,7 +646,10 @@ namespace Argos
 {
     ArgumentView::ArgumentView(const ArgumentData* data)
             : m_Argument(data)
-    {}
+    {
+        if (!data)
+            ARGOS_THROW("data can not be null");
+    }
 
     const std::string& ArgumentView::text() const
     {
@@ -987,7 +990,10 @@ namespace Argos
 {
     OptionView::OptionView(const OptionData* data)
         : m_Option(data)
-    {}
+    {
+        if (!data)
+            ARGOS_THROW("data can not be null");
+    }
 
     const std::string& OptionView::text() const
     {

@@ -30,10 +30,24 @@ namespace Argos
             : std::runtime_error("Unspecified error.")
         {}
 
+        /**
+         * @brief Passes @a message on to the base class.
+         */
         explicit ArgosException(const std::string& message) noexcept
             : std::runtime_error(message)
         {}
 
+        /**
+         * @brief Prefixes @a message with source file, line number
+         * and function name.
+         * @param message The error message.
+         * @param fileName Typically the value of __FILE__ where the
+         *      exception was thrown.
+         * @param lineno Typically the value of __LINE__ where the
+         *      exception was thrown.
+         * @param funcName Typically the value of __func__ where the
+         *      exception was thrown.
+         */
         ArgosException(const std::string& message,
                        const std::string& fileName,
                        int lineno,
@@ -57,9 +71,27 @@ namespace Argos
  * @brief Defines the current Argos version.
  */
 
+/**
+ * @brief String representation of the complete version number.
+ */
 constexpr char ARGOS_VERSION[] = "0.99.1";
+
+/**
+ * @brief Incremented if a new version is significantly incompatible
+ *      with the previous version.
+ */
 constexpr unsigned ARGOS_VERSION_MAJOR = 0;
+
+/**
+ * @brief Incremented when Argos's interface is modified without introducing
+ *      incompatibilities with previous versions.
+ */
 constexpr unsigned ARGOS_VERSION_MINOR = 99;
+
+/**
+ * @brief Incremented when Argos's internals are modified without modifying
+ *      its interface.
+ */
 constexpr unsigned ARGOS_VERSION_PATCH = 1;
 
 //****************************************************************************
@@ -322,21 +354,46 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the IArgumentView interface class.
+ */
+
 namespace Argos
 {
+    /**
+     * @brief Interface class with the functions ArgumentView and OptionView
+     *      have in common.
+     */
     class IArgumentView
     {
     public:
         virtual ~IArgumentView() = default;
 
+        /**
+         * @brief Returns the argument's or option's help text.
+         */
         virtual const std::string& text() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's section name.
+         */
         virtual const std::string& section() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's value name.
+         */
         virtual const std::string& valueName() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's visibility in
+         *      the help text and error messages.
+         */
         virtual Visibility visibility() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's custom id.
+         */
         virtual int id() const = 0;
 
         /**
@@ -354,6 +411,12 @@ namespace Argos
          */
         virtual ValueId valueId() const = 0;
 
+        /**
+         * @brief Returns the argument's or option's argumentId().
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
         virtual ArgumentId argumentId() const = 0;
     };
 }
@@ -369,14 +432,27 @@ namespace Argos
 #include <optional>
 #include <vector>
 
+/**
+ * @file
+ * @brief Defines the ArgumentValue class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
     class ArgumentValues;
 
+    /**
+     * @brief Wrapper class for the value of an argument or option.
+     *
+     * ParsedArguments returns instances of ArgumentValue.
+     */
     class ArgumentValue
     {
     public:
+        /**
+         * @private
+         */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId valueId,
@@ -447,14 +523,28 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the ArgumentValues class.
+ */
+
 namespace Argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief Wrapper class for the values of a multi-value argument
+     *      or option.
+     *
+     * ParsedArguments returns instances of ArgumentValues.
+     */
     class ArgumentValues
     {
     public:
+        /**
+         * @private
+         */
         ArgumentValues(std::vector<std::pair<std::string_view, ArgumentId>> values,
                        std::shared_ptr<ParsedArgumentsImpl> args,
                        ValueId valueId);
@@ -539,27 +629,76 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the ArgumentView class.
+ */
+
 namespace Argos
 {
     struct ArgumentData;
 
+    /**
+     * @brief Provides read-only access to an argument definition.
+     */
     class ArgumentView : public IArgumentView
     {
     public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
         explicit ArgumentView(const ArgumentData* data);
 
+        /**
+         * @brief Returns the argument's or option's help text.
+         */
         const std::string& text() const final;
 
+        /**
+         * @brief Returns the argument's section name.
+         */
         const std::string& section() const final;
 
+        /**
+         * @brief Returns the argument's value name.
+         */
         const std::string& valueName() const final;
 
+        /**
+         * @brief Returns the argument's visibility in
+         *      the help text and error messages.
+         */
         Visibility visibility() const final;
 
+        /**
+         * @brief Returns the argument's custom id.
+         */
         int id() const final;
 
+        /**
+         * @brief Returns the numeric id of the value the argument assigns
+         *      or appends to.
+         *
+         * This value is created internally in Argos and must not be
+         * confused with the customizable value returned by id().
+         * If different options or arguments have the same value name, they
+         * will also have the same value id.
+         *
+         * @return options with operation OptionOperation::NONE have
+         *      a value of 0, all other options and arguments have a value
+         *      greater than 0.
+         */
         ValueId valueId() const final;
 
+        /**
+         * @brief Returns the argument's argumentId().
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
         ArgumentId argumentId() const final;
 
         const std::string& name() const;
@@ -580,27 +719,76 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the OptionView class.
+ */
+
 namespace Argos
 {
     struct OptionData;
 
+    /**
+     * @brief Provides read-only access to an option definition.
+     */
     class OptionView : public IArgumentView
     {
     public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
         explicit OptionView(const OptionData* data);
 
+        /**
+         * @brief Returns the option's or option's help text.
+         */
         const std::string& text() const final;
 
+        /**
+         * @brief Returns the option's section name.
+         */
         const std::string& section() const final;
 
+        /**
+         * @brief Returns the option's value name.
+         */
         const std::string& valueName() const final;
 
+        /**
+         * @brief Returns the option's visibility in
+         *      the help text and error messages.
+         */
         Visibility visibility() const final;
 
+        /**
+         * @brief Returns the option's custom id.
+         */
         int id() const final;
 
+        /**
+         * @brief Returns the numeric id of the value the argument assigns
+         *      or appends to.
+         *
+         * This value is created internally in Argos and must not be
+         * confused with the customizable value returned by id().
+         * If different options or arguments have the same value name, they
+         * will also have the same value id.
+         *
+         * @return options with operation OptionOperation::NONE have
+         *      a value of 0, all other options and arguments have a value
+         *      greater than 0.
+         */
         ValueId valueId() const final;
 
+        /**
+         * @brief Returns the option's argumentId().
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
         ArgumentId argumentId() const final;
 
         OptionOperation operation() const;
@@ -627,23 +815,41 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the ParsedArguments class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief The result of the ArgumentParser. Gives access to all argument
+     *      and option values.
+     */
     class ParsedArguments
     {
     public:
         ParsedArguments();
 
+        /**
+         * @private
+         */
         ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
 
+        /**
+         * @private
+         */
         ParsedArguments(const ParsedArguments&) = delete;
 
         ParsedArguments(ParsedArguments&&) noexcept;
 
         ~ParsedArguments();
 
+        /**
+         * @private
+         */
         ParsedArguments& operator=(const ParsedArguments&) = delete;
 
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
@@ -682,13 +888,25 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Defines the ParsedArgumentsBuilder class.
+ */
+
 namespace Argos
 {
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief An interface to ParsedArguments that lets argument and option
+     *      callbacks query and modify the parsed argument values
+     */
     class ParsedArgumentsBuilder
     {
     public:
+        /**
+         * @private
+         */
         explicit ParsedArgumentsBuilder(
                 std::shared_ptr<ParsedArgumentsImpl> impl);
 
@@ -761,14 +979,31 @@ namespace Argos
         ArgumentIterator(std::vector<std::string_view> args,
                          std::shared_ptr<ParserData> parserData);
 
+        /**
+         * @private
+         */
         ArgumentIterator(const ArgumentIterator&) = delete;
 
+        /**
+         * @brief Moves the innards of the old object to the new one.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentIterator(ArgumentIterator&&) noexcept;
 
         ~ArgumentIterator();
 
+        /**
+         * @private
+         */
         ArgumentIterator& operator=(const ArgumentIterator&) = delete;
 
+        /**
+         * @brief Moves the innards of the object on the right hand side
+         *      to the one on the left hand side.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
 
         /**
@@ -820,12 +1055,44 @@ namespace Argos
 //****************************************************************************
 #include <functional>
 
+/**
+ * @file
+ * @brief Defines ArgumentCallback and OptionCallback.
+ */
+
 namespace Argos
 {
+    /**
+     * @brief Callback that can called each time given arguments appear
+     *      on the command line.
+     *
+     * The three parameters are:
+     * - ArgumentView: the argument that was encountered (particularly
+     *   useful if the same function has been registered with multiple
+     *   arguments).
+     * - std::string_view: the raw value of the argument. Note that this
+     *   value can also be retrieved via the ParsedArgumentsBuilder.
+     * - ParsedArgumentsBuilder: this object can be used to read or modify
+     *   the values of arguments and options.
+     */
     using ArgumentCallback = std::function<bool(ArgumentView,
                                                 std::string_view,
                                                 ParsedArgumentsBuilder)>;
 
+    /**
+     * @brief Callback that can called each time given options appear
+     *      on the command line.
+     *
+     * The three parameters are:
+     * - OptionView: the option that was encountered (particularly
+     *   useful if the same function has been registered with multiple
+     *   options).
+     * - std::string_view: the raw value of the option if the option actually
+     *   has one. Note that this value can also be retrieved via the
+     *   ParsedArgumentsBuilder.
+     * - ParsedArgumentsBuilder: this object can be used to read or modify
+     *   the values of arguments and options.
+     */
     using OptionCallback = std::function<bool(OptionView,
                                               std::string_view,
                                               ParsedArgumentsBuilder)>;
@@ -864,21 +1131,38 @@ namespace Argos
         Argument();
 
         /**
-         * Creates an argument with name @a name.
+         * @brief Creates an argument with name @a name.
          * @param name The name that will be displayed in the help text as
          *      well as the name used when retrieving the argument's value from
          *      ParsedArguments.
          */
         explicit Argument(const std::string& name);
 
+        /**
+         * @brief Creates a complete copy of the given argument.
+         */
         Argument(const Argument&);
 
+        /**
+         * @brief Moves the innards of the given argument to the new object.
+         *
+         * Attempts to use the old object will result in an exception.
+         */
         Argument(Argument&&) noexcept;
 
         ~Argument();
 
+        /**
+         * @brief Copies everything in the given argument.
+         */
         Argument& operator=(const Argument&);
 
+        /**
+         * @brief Moves the innards of the given argument to the current
+         * object.
+         *
+         * Attempts to use the old object will result in an exception.
+         */
         Argument& operator=(Argument&&) noexcept;
 
         /**
@@ -969,9 +1253,10 @@ namespace Argos
          *
          * This function is a convenience function that affects the argument's
          * minimum count.
-         * @param optional @arg true The argument's minimum count is set to 0.
-         *                 @arg false The argument's minimum count is set to 1
-         *                 if it currently is 0.
+         * @param optional
+         *      @arg true The argument's minimum count is set to 0.
+         *      @arg false The argument's minimum count is set to 1
+         *          if it currently is 0.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
@@ -997,9 +1282,10 @@ namespace Argos
         Argument& count(unsigned minCount, unsigned maxCount);
 
         /**
+         * @private
          * @brief Used internally in Argos.
          *
-         * The Argument instance is no longer usable after this function has
+         * The object is no longer usable after this function has
          * been called.
          * @return Pointer to the argument implementation.
          */
@@ -1016,8 +1302,12 @@ namespace Argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-
 #include <initializer_list>
+
+/**
+ * @file
+ * @brief Defines the Option class.
+ */
 
 namespace Argos
 {
@@ -1105,6 +1395,17 @@ namespace Argos
          */
         Option& visibility(Visibility visibility);
 
+        /**
+         * @brief Set a custom id that can be used in callback functions etc.
+         *      to quickly distinguish between different options.
+         *
+         * The id purely is intended for client code, Argos itself ignores
+         * this value.
+         *
+         * @param id Can be any integer value.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         Option& id(int id);
 
         Option& flag(const std::string& f);
@@ -1127,6 +1428,14 @@ namespace Argos
 
         const OptionData& data() const;
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         *
+         * The object is no longer usable after this function has
+         * been called.
+         * @return Pointer to the option implementation.
+         */
         std::unique_ptr<OptionData> release();
     private:
         std::unique_ptr<OptionData> m_Option;
@@ -1162,16 +1471,38 @@ namespace Argos
     public:
         ArgumentParser();
 
+        /**
+         * @brief Creates a new argument parser.
+         * @param programName The name of the program that will be displayed
+         *      in the help text and error messages.
+         */
         explicit ArgumentParser(const std::string& programName);
 
+        /**
+         * @brief Moves the innards of the old object to the new one.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentParser(ArgumentParser&&) noexcept;
 
+        /**
+         * @private
+         */
         ArgumentParser(const ArgumentParser&) = delete;
 
         ~ArgumentParser();
 
+        /**
+         * @brief Moves the innards of the object on the right hand side
+         *      to the one on the left hand side.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
         ArgumentParser& operator=(ArgumentParser&&) noexcept;
 
+        /**
+         * @private
+         */
         ArgumentParser& operator=(const ArgumentParser&) = delete;
 
         ArgumentParser& add(Argument argument);
