@@ -19,7 +19,7 @@
 namespace Argos
 {
     /**
-     * @brief Callback that can called each time given arguments appear
+     * @brief A callback that is called each time given arguments appear
      *      on the command line.
      *
      * The three parameters are:
@@ -36,7 +36,7 @@ namespace Argos
                                                 ParsedArgumentsBuilder)>;
 
     /**
-     * @brief Callback that can called each time given options appear
+     * @brief A callback that is called each time given options appear
      *      on the command line.
      *
      * The three parameters are:

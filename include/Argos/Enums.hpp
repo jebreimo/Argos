@@ -57,6 +57,9 @@ namespace Argos
          * and some have operation ASSIGN and some have operation APPEND, all
          * values that have been appended will be replaced when an ASSIGN
          * option is encountered.
+         *
+         * If the option doesn't have either a value or an argument, its
+         * value automatically becomes @a true (or 1).
          */
         ASSIGN,
         /**

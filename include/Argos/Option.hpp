@@ -92,8 +92,6 @@ namespace Argos
          */
         Option& callback(OptionCallback callback);
 
-        Option& operation(OptionOperation operation);
-
         /**
          * @brief Set restrictions for where this option is displayed in the
          *      auto-generated help text.
@@ -115,6 +113,8 @@ namespace Argos
          *      method calls.
          */
         Option& id(int id);
+
+        Option& operation(OptionOperation operation);
 
         Option& flag(const std::string& f);
 

@@ -68,8 +68,29 @@ namespace Argos
          */
         ArgumentParser& operator=(const ArgumentParser&) = delete;
 
+        /**
+         * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @throw ArgosException if the argument doesn't have a name.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         ArgumentParser& add(Argument argument);
 
+        /**
+         * @brief Add a new option definition to the ArgumentParser.
+         *
+         * @throw ArgosException if the option doesn't have any flags
+         *      or the flags don't match the current option style.
+         * @throw ArgosException if certain meaningless combinations of
+         *      option operation and properties are found:
+         *      - an option with operation NONE is mandatory or has value
+         *        or valueName.
+         *      - an option with operation CLEAR is mandatory.
+         *      - an option
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         ArgumentParser& add(Option option);
 
         ParsedArguments parse(int argc, char* argv[]);
