@@ -19,8 +19,26 @@ Indices and tables
 * :ref:`search`
 
 
-Docs
-====
+The ArgumentParser
+==================
 
-.. doxygennamespace:: Argos
+.. doxygenclass:: Argos::ArgumentParser
+   :members:
+
+.. doxygenclass:: Argos::Argument
+   :members:
+
+.. doxygenclass:: Argos::Option
+   :members:
+
+The ParsedArguments
+===================
+
+.. doxygenclass:: Argos::ParsedArguments
+   :members:
+
+.. doxygenclass:: Argos::ArgumentValue
+   :members:
+
+.. doxygenclass:: Argos::ArgumentValues
    :members:

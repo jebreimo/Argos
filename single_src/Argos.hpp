@@ -152,6 +152,9 @@ namespace Argos
          * and some have operation ASSIGN and some have operation APPEND, all
          * values that have been appended will be replaced when an ASSIGN
          * option is encountered.
+         *
+         * If the option doesn't have either a value or an argument, its
+         * value automatically becomes @a true (or 1).
          */
         ASSIGN,
         /**
@@ -1063,7 +1066,7 @@ namespace Argos
 namespace Argos
 {
     /**
-     * @brief Callback that can called each time given arguments appear
+     * @brief A callback that is called each time given arguments appear
      *      on the command line.
      *
      * The three parameters are:
@@ -1080,7 +1083,7 @@ namespace Argos
                                                 ParsedArgumentsBuilder)>;
 
     /**
-     * @brief Callback that can called each time given options appear
+     * @brief A callback that is called each time given options appear
      *      on the command line.
      *
      * The three parameters are:
@@ -1384,8 +1387,6 @@ namespace Argos
          */
         Option& callback(OptionCallback callback);
 
-        Option& operation(OptionOperation operation);
-
         /**
          * @brief Set restrictions for where this option is displayed in the
          *      auto-generated help text.
@@ -1407,6 +1408,8 @@ namespace Argos
          *      method calls.
          */
         Option& id(int id);
+
+        Option& operation(OptionOperation operation);
 
         Option& flag(const std::string& f);
 
@@ -1505,16 +1508,71 @@ namespace Argos
          */
         ArgumentParser& operator=(const ArgumentParser&) = delete;
 
+        /**
+         * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @throw ArgosException if the argument doesn't have a name.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         ArgumentParser& add(Argument argument);
 
+        /**
+         * @brief Add a new option definition to the ArgumentParser.
+         *
+         * @throw ArgosException if the option doesn't have any flags
+         *      or the flags don't match the current option style.
+         * @throw ArgosException if certain meaningless combinations of
+         *      option operation and properties are found:
+         *      - an option with operation NONE is mandatory or has value
+         *        or valueName.
+         *      - an option with operation CLEAR is mandatory.
+         *      - an option
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
         ArgumentParser& add(Option option);
 
+        /**
+         * @brief Parses the arguments and options in argv.
+         *
+         * @a argc and @a argv are the same arguments that the @a main
+         * function receives: @a argv is a list of zero-terminated
+         * strings and @a argc is the number of strings in @a argv. @a argv
+         * must have at least one value (i.e. the name of the program itself).
+         *
+         * @note After this non-const version of parse() has been called, the
+         * ArgumentParser is no longer valid.
+         */
         ParsedArguments parse(int argc, char* argv[]);
 
+        /**
+         * @brief Parses the arguments and options in @a argv.
+         *
+         * @a argc and @a argv are the same arguments that the @a main
+         * function receives: @a argv is a list of zero-terminated
+         * strings and @a argc is the number of strings in @a argv. @a argv
+         * must have at least one value (i.e. the name of the program itself).
+         */
         ParsedArguments parse(int argc, char* argv[]) const;
 
+        /**
+         * @brief Parses the arguments and options in @a args.
+         *
+         * Unlike when parse is invoked with @a argc and @a argv, @a args
+         * should not have the name of the program itself as its first value.
+         *
+         * @note After this non-const version of parse() has been called, the
+         * ArgumentParser is no longer valid.
+         */
         ParsedArguments parse(std::vector<std::string_view> args);
 
+        /**
+         * @brief Parses the arguments and options in @a args.
+         *
+         * Unlike when parse is invoked with @a argc and @a argv, @a args
+         * should not have the name of the program itself as its first value.
+         */
         ParsedArguments parse(std::vector<std::string_view> args) const;
 
         ArgumentIterator makeIterator(int argc, char* argv[]);

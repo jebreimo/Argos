@@ -93,12 +93,46 @@ namespace Argos
          */
         ArgumentParser& add(Option option);
 
+        /**
+         * @brief Parses the arguments and options in argv.
+         *
+         * @a argc and @a argv are the same arguments that the @a main
+         * function receives: @a argv is a list of zero-terminated
+         * strings and @a argc is the number of strings in @a argv. @a argv
+         * must have at least one value (i.e. the name of the program itself).
+         *
+         * @note After this non-const version of parse() has been called, the
+         * ArgumentParser is no longer valid.
+         */
         ParsedArguments parse(int argc, char* argv[]);
 
+        /**
+         * @brief Parses the arguments and options in @a argv.
+         *
+         * @a argc and @a argv are the same arguments that the @a main
+         * function receives: @a argv is a list of zero-terminated
+         * strings and @a argc is the number of strings in @a argv. @a argv
+         * must have at least one value (i.e. the name of the program itself).
+         */
         ParsedArguments parse(int argc, char* argv[]) const;
 
+        /**
+         * @brief Parses the arguments and options in @a args.
+         *
+         * Unlike when parse is invoked with @a argc and @a argv, @a args
+         * should not have the name of the program itself as its first value.
+         *
+         * @note After this non-const version of parse() has been called, the
+         * ArgumentParser is no longer valid.
+         */
         ParsedArguments parse(std::vector<std::string_view> args);
 
+        /**
+         * @brief Parses the arguments and options in @a args.
+         *
+         * Unlike when parse is invoked with @a argc and @a argv, @a args
+         * should not have the name of the program itself as its first value.
+         */
         ParsedArguments parse(std::vector<std::string_view> args) const;
 
         ArgumentIterator makeIterator(int argc, char* argv[]);
