@@ -44,5 +44,6 @@ target_include_directories(ArgosTest
     )
 
 TargetEnableCodeCoverage(ArgosTest "${ARGOS_CODE_COVERAGE}")
+TargetEnableAllWarnings(ArgosTest)
 
 add_test(NAME ArgosTest COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ArgosTest)

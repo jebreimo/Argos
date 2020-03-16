@@ -11,8 +11,9 @@ add_executable(ArgosTestApp
     ArgosTestAppMain.cpp
     )
 
-
 target_link_libraries(ArgosTestApp
     PRIVATE
         Argos::Argos
     )
+
+TargetEnableAllWarnings(ArgosTestApp)

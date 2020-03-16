@@ -12,9 +12,12 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|.*Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif()
+function(TargetEnableAllWarnings target)
+    target_compile_options(${target}
+        PRIVATE
+            $<$<CXX_COMPILER_ID:Clang,GNU,AppleClang>:-Wall>
+            $<$<CXX_COMPILER_ID:MSVC>:/W4>)
+endfunction()
 
 configure_file(include/Argos/ArgosVersion.hpp.in
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Argos/ArgosVersion.hpp @ONLY)
@@ -77,13 +80,16 @@ add_library(Argos
 
 target_include_directories(Argos
     PUBLIC
-        include
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
 
 target_compile_definitions(Argos
     PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
     )
+
+TargetEnableAllWarnings(Argos)
 
 include(CodeCoverage)
 TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
