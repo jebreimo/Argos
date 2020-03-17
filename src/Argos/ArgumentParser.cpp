@@ -10,8 +10,9 @@
 #include <algorithm>
 #include "ArgosThrow.hpp"
 #include "ArgumentIteratorImpl.hpp"
-#include "ParserData.hpp"
 #include "HelpText.hpp"
+#include "ParserData.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
@@ -112,9 +113,53 @@ namespace Argos
             }
         }
 
+        inline bool hasHelpOption(const ParserData& data)
+        {
+            for (auto& o : data.options)
+                if (o->type == OptionType::HELP)
+                    return true;
+            return false;
+        }
+
+        inline bool hasFlag(const ParserData& data, std::string_view flag)
+        {
+            for (auto& o : data.options)
+                for (auto& f : o->flags)
+                    if (areEqual(f, flag, data.parserSettings.caseInsensitive))
+                        return true;
+            return false;
+        }
+
+        void addMissingHelpOption(ParserData& data)
+        {
+            if (!data.parserSettings.generateHelpOption)
+                return;
+            if (hasHelpOption(data))
+                return;
+            std::string flag;
+            switch (data.parserSettings.optionStyle)
+            {
+            case OptionStyle::STANDARD:
+                flag = "--help";
+                break;
+            case OptionStyle::SLASH:
+                flag = "/?";
+                break;
+            case OptionStyle::DASH:
+                flag = "-help";
+                break;
+            }
+            if (hasFlag(data, flag))
+                return;
+
+            data.options.push_back(Option{flag}.type(OptionType::HELP)
+                                       .text("Show help text.").release());
+        }
+
         ParsedArguments parseImpl(std::vector<std::string_view> args,
                                   const std::shared_ptr<ParserData>& data)
         {
+            addMissingHelpOption(*data);
             setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
@@ -124,6 +169,7 @@ namespace Argos
         makeIteratorImpl(std::vector<std::string_view> args,
                          const std::shared_ptr<ParserData>& data)
         {
+            addMissingHelpOption(*data);
             setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
@@ -304,6 +350,17 @@ namespace Argos
     ArgumentParser& ArgumentParser::caseInsensitive(bool value)
     {
         data().parserSettings.caseInsensitive = value;
+        return *this;
+    }
+
+    bool ArgumentParser::generateHelpOption() const
+    {
+        return data().parserSettings.generateHelpOption;
+    }
+
+    ArgumentParser& ArgumentParser::generateHelpOption(bool value)
+    {
+        data().parserSettings.generateHelpOption = value;
         return *this;
     }
 

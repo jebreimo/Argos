@@ -248,7 +248,7 @@ namespace Argos
                         return {};
                     }
                 }
-                return -value;
+                return IntT(-value);
             }
             else
             {
@@ -260,7 +260,7 @@ namespace Argos
                     if (digit > 0)
                         return {};
                 }
-                return 0;
+                return IntT(0);
             }
         }
     }
@@ -312,9 +312,9 @@ namespace Argos
                             : parseNegativeIntegerImpl<IntT, 10>(str);
         }
         if (num == "false")
-            return 0;
+            return IntT(0);
         if (num == "true")
-            return 1;
+            return IntT(1);
         return {};
     }
 
@@ -1258,6 +1258,7 @@ namespace Argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <climits>
 
 namespace Argos
 {
@@ -1268,21 +1269,21 @@ namespace Argos
 
         explicit TextFormatter(std::ostream* stream);
 
-        TextFormatter(std::ostream* stream, size_t lineWidth);
+        TextFormatter(std::ostream* stream, unsigned lineWidth);
 
         std::ostream* stream() const;
 
         void setStream(std::ostream* stream);
 
-        size_t lineWidth() const;
+        unsigned lineWidth() const;
 
-        void setLineWidth(size_t lineWidth);
+        void setLineWidth(unsigned lineWidth);
 
-        size_t currentLineWidth() const;
+        unsigned currentLineWidth() const;
 
-        static constexpr size_t CURRENT_COLUMN = SIZE_MAX;
+        static constexpr unsigned CURRENT_COLUMN = UINT_MAX;
 
-        void pushIndentation(size_t indent);
+        void pushIndentation(unsigned indent);
 
         void popIndentation();
 
@@ -1297,7 +1298,7 @@ namespace Argos
         void appendWord(std::string_view word);
 
         TextWriter m_Writer;
-        std::vector<size_t> m_Indents;
+        std::vector<unsigned> m_Indents;
         WordSplitter m_WordSplitter;
     };
 }
@@ -1779,6 +1780,7 @@ namespace Argos
         bool ignoreUndefinedOptions = false;
         bool ignoreUndefinedArguments = false;
         bool caseInsensitive = false;
+        bool generateHelpOption = true;
     };
 
     struct HelpSettings
@@ -1973,7 +1975,7 @@ namespace Argos
         : TextFormatter(stream, getConsoleWidth(20))
     {}
 
-    TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth)
+    TextFormatter::TextFormatter(std::ostream* stream, unsigned lineWidth)
         : m_Writer(lineWidth)
     {
         if (lineWidth <= 2)
@@ -1992,7 +1994,7 @@ namespace Argos
         m_Writer.setStream(stream);
     }
 
-    void TextFormatter::pushIndentation(size_t indent)
+    void TextFormatter::pushIndentation(unsigned indent)
     {
         if (indent == CURRENT_COLUMN)
         {
@@ -2025,7 +2027,7 @@ namespace Argos
                 m_Writer.newline();
                 break;
             case ' ':
-                m_Writer.setSpaces(token.size());
+                m_Writer.setSpaces(static_cast<unsigned>(token.size()));
                 break;
             default:
                 appendWord(token);
@@ -2101,19 +2103,19 @@ namespace Argos
         }
     }
 
-    size_t TextFormatter::lineWidth() const
+    unsigned TextFormatter::lineWidth() const
     {
         return m_Writer.lineWidth();
     }
 
-    void TextFormatter::setLineWidth(size_t lineWidth)
+    void TextFormatter::setLineWidth(unsigned lineWidth)
     {
         if (lineWidth <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setLineWidth(lineWidth);
     }
 
-    size_t TextFormatter::currentLineWidth() const
+    unsigned int TextFormatter::currentLineWidth() const
     {
         return m_Writer.currentWidth();
     }
@@ -2388,8 +2390,7 @@ namespace Argos
         return getValue(defaultValue);
     }
 
-    std::string
-    ArgumentValue::asString(const std::string& defaultValue) const
+    std::string ArgumentValue::asString(const std::string& defaultValue) const
     {
         return m_Value ? std::string(*m_Value) : defaultValue;
     }
@@ -2409,6 +2410,7 @@ namespace Argos
             return ArgumentValues({}, m_Args, m_ValueId);
         }
         std::vector<std::pair<std::string_view, ArgumentId>> values;
+        values.reserve(parts.size());
         for (auto& part : parts)
             values.emplace_back(part, m_ArgumentId);
         return {move(values), m_Args, m_ValueId};
@@ -2793,14 +2795,14 @@ namespace Argos
             if (sections.empty())
                 return;
 
-            std::vector<size_t> nameWidths;
-            std::vector<size_t> textWidths;
-            for (auto&[sec, txts] : sections)
+            std::vector<unsigned> nameWidths;
+            std::vector<unsigned> textWidths;
+            for (auto& entry : sections)
             {
-                for (auto&[name, txt] : txts)
+                for (auto&[name, txt] : entry.second)
                 {
-                    nameWidths.push_back(name.size());
-                    textWidths.push_back(txt.size());
+                    nameWidths.push_back(static_cast<unsigned>(name.size()));
+                    textWidths.push_back(static_cast<unsigned>(txt.size()));
                 }
             }
 
@@ -4016,9 +4018,53 @@ namespace Argos
             }
         }
 
+        inline bool hasHelpOption(const ParserData& data)
+        {
+            for (auto& o : data.options)
+                if (o->type == OptionType::HELP)
+                    return true;
+            return false;
+        }
+
+        inline bool hasFlag(const ParserData& data, std::string_view flag)
+        {
+            for (auto& o : data.options)
+                for (auto& f : o->flags)
+                    if (areEqual(f, flag, data.parserSettings.caseInsensitive))
+                        return true;
+            return false;
+        }
+
+        void addMissingHelpOption(ParserData& data)
+        {
+            if (!data.parserSettings.generateHelpOption)
+                return;
+            if (hasHelpOption(data))
+                return;
+            std::string flag;
+            switch (data.parserSettings.optionStyle)
+            {
+            case OptionStyle::STANDARD:
+                flag = "--help";
+                break;
+            case OptionStyle::SLASH:
+                flag = "/?";
+                break;
+            case OptionStyle::DASH:
+                flag = "-help";
+                break;
+            }
+            if (hasFlag(data, flag))
+                return;
+
+            data.options.push_back(Option{flag}.type(OptionType::HELP)
+                                       .text("Show help text.").release());
+        }
+
         ParsedArguments parseImpl(std::vector<std::string_view> args,
                                   const std::shared_ptr<ParserData>& data)
         {
+            addMissingHelpOption(*data);
             setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
@@ -4028,6 +4074,7 @@ namespace Argos
         makeIteratorImpl(std::vector<std::string_view> args,
                          const std::shared_ptr<ParserData>& data)
         {
+            addMissingHelpOption(*data);
             setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
@@ -4208,6 +4255,17 @@ namespace Argos
     ArgumentParser& ArgumentParser::caseInsensitive(bool value)
     {
         data().parserSettings.caseInsensitive = value;
+        return *this;
+    }
+
+    bool ArgumentParser::generateHelpOption() const
+    {
+        return data().parserSettings.generateHelpOption;
+    }
+
+    ArgumentParser& ArgumentParser::generateHelpOption(bool value)
+    {
+        data().parserSettings.generateHelpOption = value;
         return *this;
     }
 

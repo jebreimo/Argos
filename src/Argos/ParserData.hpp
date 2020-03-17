@@ -26,6 +26,7 @@ namespace Argos
         bool ignoreUndefinedOptions = false;
         bool ignoreUndefinedArguments = false;
         bool caseInsensitive = false;
+        bool generateHelpOption = true;
     };
 
     struct HelpSettings

@@ -72,8 +72,6 @@ namespace Argos
          * @brief Add a new argument definition to the ArgumentParser.
          *
          * @throw ArgosException if the argument doesn't have a name.
-         * @return Reference to itself. This makes it possible to chain
-         *      method calls.
          */
         ArgumentParser& add(Argument argument);
 
@@ -88,8 +86,6 @@ namespace Argos
          *        or valueName.
          *      - an option with operation CLEAR is mandatory.
          *      - an option
-         * @return Reference to itself. This makes it possible to chain
-         *      method calls.
          */
         ArgumentParser& add(Option option);
 
@@ -154,6 +150,25 @@ namespace Argos
         bool caseInsensitive() const;
 
         ArgumentParser& caseInsensitive(bool value);
+
+        /**
+         * @brief Returns whether or not a help option will be auto-generated
+         *      if none has been added.
+         */
+        bool generateHelpOption() const;
+
+        /**
+         * @brief Turn auto-generation of help option on or off.
+         *
+         * If this property is true and no help option has been added by the
+         * client code, the ArgumentParser will add one itself. Depending on
+         * the option style, the help flag will be either --help, /? or -help.
+         * No help flag will be added if the ArgumentParser has a conflicting
+         * flag.
+         *
+         * By default this is on.
+         */
+        ArgumentParser& generateHelpOption(bool value);
 
         OptionStyle optionStyle() const;
 
