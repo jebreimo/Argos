@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <climits>
 #include <iosfwd>
 #include <string>
 #include <string_view>
