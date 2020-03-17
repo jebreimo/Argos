@@ -628,3 +628,15 @@ TEST_CASE("Unknown argument, invalid short option.")
     REQUIRE(!it.next(arg, value));
     REQUIRE(it.parsedArguments().resultCode() == ParserResultCode::ERROR);
 }
+
+TEST_CASE("Default help")
+{
+    using namespace Argos;
+    std::stringstream ss;
+    auto args = ArgumentParser("test")
+        .autoExit(false)
+        .outputStream(&ss)
+        .add(Argument("arg"))
+        .parse({"--help"});
+    REQUIRE(args.resultCode() == ParserResultCode::STOP);
+}

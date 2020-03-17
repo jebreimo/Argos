@@ -153,7 +153,8 @@ namespace Argos
                 return;
 
             data.options.push_back(Option{flag}.type(OptionType::HELP)
-                                       .text("Show help text.").release());
+                                       .text("Show help text.")
+                                       .value("1").release());
         }
 
         ParsedArguments parseImpl(std::vector<std::string_view> args,
