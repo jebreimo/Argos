@@ -132,6 +132,7 @@ namespace Argos
             return ArgumentValues({}, m_Args, m_ValueId);
         }
         std::vector<std::pair<std::string_view, ArgumentId>> values;
+        values.reserve(parts.size());
         for (auto& part : parts)
             values.emplace_back(part, m_ArgumentId);
         return {move(values), m_Args, m_ValueId};

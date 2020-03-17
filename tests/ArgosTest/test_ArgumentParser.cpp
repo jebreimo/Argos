@@ -20,9 +20,9 @@ struct Argv
             argv.push_back(arg.data());
     }
 
-    size_t size() const
+    int size() const
     {
-        return argv.size();
+        return static_cast<int>(argv.size());
     }
 
     char** data()
@@ -444,7 +444,7 @@ TEST_CASE("Test option callback")
             .add(Option({"-b"}))
             .add(Option({"-c"}))
             .add(Option({"-a"}).callback(
-                    [](auto opt, auto val, auto builder) -> bool
+                    [](auto opt, auto, auto builder) -> bool
                     {
                         builder.assign("-b", "true").assign("-c", "true");
                         return true;
@@ -464,7 +464,7 @@ TEST_CASE("Test argument callback")
     auto args = parser.autoExit(false)
             .add(Option({"-b"}))
             .add(Argument("arg").callback(
-                    [](auto arg, auto val, auto builder) -> bool
+                    [](auto arg, auto, auto builder) -> bool
                     {
                         builder.assign("-b", "false");
                         return true;

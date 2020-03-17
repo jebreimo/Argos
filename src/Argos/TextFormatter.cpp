@@ -67,7 +67,7 @@ namespace Argos
         : TextFormatter(stream, getConsoleWidth(20))
     {}
 
-    TextFormatter::TextFormatter(std::ostream* stream, size_t lineWidth)
+    TextFormatter::TextFormatter(std::ostream* stream, unsigned lineWidth)
         : m_Writer(lineWidth)
     {
         if (lineWidth <= 2)
@@ -86,7 +86,7 @@ namespace Argos
         m_Writer.setStream(stream);
     }
 
-    void TextFormatter::pushIndentation(size_t indent)
+    void TextFormatter::pushIndentation(unsigned indent)
     {
         if (indent == CURRENT_COLUMN)
         {
@@ -195,19 +195,19 @@ namespace Argos
         }
     }
 
-    size_t TextFormatter::lineWidth() const
+    unsigned TextFormatter::lineWidth() const
     {
         return m_Writer.lineWidth();
     }
 
-    void TextFormatter::setLineWidth(size_t lineWidth)
+    void TextFormatter::setLineWidth(unsigned lineWidth)
     {
         if (lineWidth <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setLineWidth(lineWidth);
     }
 
-    size_t TextFormatter::currentLineWidth() const
+    unsigned int TextFormatter::currentLineWidth() const
     {
         return m_Writer.currentWidth();
     }

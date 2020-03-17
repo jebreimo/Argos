@@ -139,7 +139,7 @@ namespace Argos
                         return {};
                     }
                 }
-                return -value;
+                return IntT(-value);
             }
             else
             {
