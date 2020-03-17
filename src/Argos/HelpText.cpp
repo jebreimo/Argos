@@ -150,14 +150,14 @@ namespace Argos
             if (sections.empty())
                 return;
 
-            std::vector<size_t> nameWidths;
-            std::vector<size_t> textWidths;
-            for (auto&[sec, txts] : sections)
+            std::vector<unsigned> nameWidths;
+            std::vector<unsigned> textWidths;
+            for (auto& entry : sections)
             {
-                for (auto&[name, txt] : txts)
+                for (auto&[name, txt] : entry.second)
                 {
-                    nameWidths.push_back(name.size());
-                    textWidths.push_back(txt.size());
+                    nameWidths.push_back(static_cast<unsigned>(name.size()));
+                    textWidths.push_back(static_cast<unsigned>(txt.size()));
                 }
             }
 

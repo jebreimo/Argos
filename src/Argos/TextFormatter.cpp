@@ -119,7 +119,7 @@ namespace Argos
                 m_Writer.newline();
                 break;
             case ' ':
-                m_Writer.setSpaces(token.size());
+                m_Writer.setSpaces(static_cast<unsigned>(token.size()));
                 break;
             default:
                 appendWord(token);
