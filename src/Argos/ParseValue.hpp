@@ -151,7 +151,7 @@ namespace Argos
                     if (digit > 0)
                         return {};
                 }
-                return 0;
+                return IntT(0);
             }
         }
     }
@@ -203,9 +203,9 @@ namespace Argos
                             : parseNegativeIntegerImpl<IntT, 10>(str);
         }
         if (num == "false")
-            return 0;
+            return IntT(0);
         if (num == "true")
-            return 1;
+            return IntT(1);
         return {};
     }
 

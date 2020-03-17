@@ -112,8 +112,7 @@ namespace Argos
         return getValue(defaultValue);
     }
 
-    std::string
-    ArgumentValue::asString(const std::string& defaultValue) const
+    std::string ArgumentValue::asString(const std::string& defaultValue) const
     {
         return m_Value ? std::string(*m_Value) : defaultValue;
     }
