@@ -61,29 +61,25 @@ namespace Argos
 
         ArgumentValue value(size_t index) const;
 
-        std::vector<int8_t> asInt8s(
-                const std::vector<int8_t>& defaultValue = {}) const;
+        std::vector<int>
+        asInts(const std::vector<int>& defaultValue = {},
+               int base = 10) const;
 
-        std::vector<int16_t> asInt16s(
-                const std::vector<int16_t>& defaultValue = {}) const;
+        std::vector<long>
+        asLongs(const std::vector<long>& defaultValue = {},
+                int base = 10) const;
 
-        std::vector<int32_t> asInt32s(
-                const std::vector<int32_t>& defaultValue = {}) const;
+        std::vector<long long>
+        asLLongs(const std::vector<long long>& defaultValue = {},
+                 int base = 10) const;
 
-        std::vector<int64_t> asInt64s(
-                const std::vector<int64_t>& defaultValue = {}) const;
+        std::vector<unsigned long>
+        asULongs(const std::vector<unsigned long>& defaultValue = {},
+                 int base = 10) const;
 
-        std::vector<uint8_t> asUint8s(
-                const std::vector<uint8_t>& defaultValue = {}) const;
-
-        std::vector<uint16_t> asUint16s(
-                const std::vector<uint16_t>& defaultValue = {}) const;
-
-        std::vector<uint32_t> asUint32s(
-                const std::vector<uint32_t>& defaultValue = {}) const;
-
-        std::vector<uint64_t> asUint64s(
-                const std::vector<uint64_t>& defaultValue = {}) const;
+        std::vector<unsigned long long>
+        asULLongs(const std::vector<unsigned long long>& defaultValue = {},
+                  int base = 10) const;
 
         std::vector<float> asFloats(
                 const std::vector<float>& defaultValue = {}) const;
@@ -91,18 +87,12 @@ namespace Argos
         std::vector<double> asDoubles(
                 const std::vector<double>& defaultValue = {}) const;
 
-        std::vector<long double> asLongDoubles(
-                const std::vector<long double>& defaultValue = {}) const;
-
         std::vector<std::string> asStrings(
                 const std::vector<std::string>& defaultValue = {}) const;
 
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
     private:
-        template <typename T>
-        std::vector<T> getValues(const std::vector<T>& defaultValue) const;
-
         std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         ValueId m_ValueId;

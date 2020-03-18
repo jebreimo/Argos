@@ -54,62 +54,81 @@ namespace Argos
 
     bool ArgumentValue::asBool(bool defaultValue) const
     {
-        return getValue(defaultValue ? 1 : 0);
+        if (!m_Value)
+            return defaultValue;
+        return m_Value != "0" && m_Value != "false";
     }
 
-    int8_t ArgumentValue::asInt8(int8_t defaultValue) const
+    int ArgumentValue::asInt(int defaultValue, int base) const
     {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseInteger<int>(std::string(*m_Value), base);
+        if (!v)
+            error();
+        return *v;
     }
 
-    int16_t ArgumentValue::asInt16(int16_t defaultValue) const
+    long ArgumentValue::asLong(long defaultValue, int base) const
     {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseInteger<long>(std::string(*m_Value), base);
+        if (!v)
+            error();
+        return *v;
     }
 
-    int32_t ArgumentValue::asInt32(int32_t defaultValue) const
+    long long ArgumentValue::asLLong(long long defaultValue, int base) const
     {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseInteger<long long>(std::string(*m_Value), base);
+        if (!v)
+            error();
+        return *v;
     }
 
-    int64_t ArgumentValue::asInt64(int64_t defaultValue) const
+    unsigned long
+    ArgumentValue::asULong(unsigned long defaultValue, int base) const
     {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseInteger<unsigned long>(std::string(*m_Value), base);
+        if (!v)
+            error();
+        return *v;
     }
 
-    uint8_t ArgumentValue::asUint8(uint8_t defaultValue) const
+    unsigned long long
+    ArgumentValue::asULLong(unsigned long long defaultValue, int base) const
     {
-        return getValue(defaultValue);
-    }
-
-    uint16_t ArgumentValue::asUint16(uint16_t defaultValue) const
-    {
-        return getValue(defaultValue);
-    }
-
-    uint32_t ArgumentValue::asUint32(uint32_t defaultValue) const
-    {
-        return getValue(defaultValue);
-    }
-
-    uint64_t ArgumentValue::asUint64(uint64_t defaultValue) const
-    {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseInteger<unsigned long long>(std::string(*m_Value), base);
+        if (!v)
+            error();
+        return *v;
     }
 
     float ArgumentValue::asFloat(float defaultValue) const
     {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseFloatingPoint<float>(std::string(*m_Value));
+        if (!v)
+            error();
+        return *v;
     }
 
     double ArgumentValue::asDouble(double defaultValue) const
     {
-        return getValue(defaultValue);
-    }
-
-    long double ArgumentValue::asLongDouble(long double defaultValue) const
-    {
-        return getValue(defaultValue);
+        if (!m_Value)
+            return defaultValue;
+        auto v = parseFloatingPoint<double>(std::string(*m_Value));
+        if (!v)
+            error();
+        return *v;
     }
 
     std::string ArgumentValue::asString(const std::string& defaultValue) const
@@ -143,14 +162,8 @@ namespace Argos
         m_Args->error(message, m_ArgumentId);
     }
 
-    template <typename T>
-    T ArgumentValue::getValue(const T& defaultValue) const
+    void ArgumentValue::error() const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseValue<T>(*m_Value);
-        if (!v)
-            error("Invalid value: " + std::string(*m_Value) + ".");
-        return *v;
+        error("Invalid value: " + std::string(*m_Value) + ".");
     }
 }

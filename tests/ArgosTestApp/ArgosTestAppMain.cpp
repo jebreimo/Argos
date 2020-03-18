@@ -18,7 +18,7 @@ struct Rectangle
 
 Rectangle parseResolution(const Argos::ArgumentValue& v)
 {
-    auto parts = v.split(',', 2, 2).asInt32s({640, 480});
+    auto parts = v.split(',', 2, 2).asInts({640, 480});
     if (parts[0] < 640)
         v.error("Horizontal resolution must be at least 640");
     if (parts[1] < 480)

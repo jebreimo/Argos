@@ -152,9 +152,12 @@ namespace Argos
             if (hasFlag(data, flag))
                 return;
 
-            data.options.push_back(Option{flag}.type(OptionType::HELP)
-                                       .text("Show help text.")
-                                       .value("1").release());
+            auto opt = Option{flag}.type(OptionType::HELP)
+                .text("Show help text.")
+                .value("1").release();
+            opt->argumentId = ArgumentId(data.options.size()
+                                         + data.arguments.size() + 1);
+            data.options.push_back(move(opt));
         }
 
         ParsedArguments parseImpl(std::vector<std::string_view> args,

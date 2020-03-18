@@ -28,6 +28,50 @@ namespace Argos
             }
             return values.front().second;
         }
+
+        void error(const ArgumentValues& values, std::string_view value)
+        {
+            values.error("Invalid value: " + std::string(value) + ".");
+        }
+
+        template <typename T>
+        std::vector<T> parseFloats(const ArgumentValues& values,
+                                   const std::vector<T>& defaultValue)
+        {
+            if (values.empty())
+                return defaultValue;
+
+            std::vector<T> result;
+            result.reserve(values.size());
+            for (auto& v : values.rawValues())
+            {
+                auto value = parseFloatingPoint<T>(std::string(v));
+                if (!value)
+                    error(values, v);
+                result.push_back(*value);
+            }
+            return result;
+        }
+
+        template <typename T>
+        std::vector<T> parseIntegers(const ArgumentValues& values,
+                                     const std::vector<T>& defaultValue,
+                                     int base)
+        {
+            if (values.empty())
+                return defaultValue;
+
+            std::vector<T> result;
+            result.reserve(values.size());
+            for (auto& v : values.rawValues())
+            {
+                auto value = parseInteger<T>(std::string(v), base);
+                if (!value)
+                    error(values, v);
+                result.push_back(*value);
+            }
+            return result;
+        }
     }
 
     ArgumentValues::ArgumentValues(
@@ -97,70 +141,51 @@ namespace Argos
         return {v.first, m_Args, m_ValueId, v.second};
     }
 
-    std::vector<int8_t>
-    ArgumentValues::asInt8s(const std::vector<int8_t>& defaultValue) const
+    std::vector<int>
+    ArgumentValues::asInts(const std::vector<int>& defaultValue,
+                           int base) const
     {
-        return getValues(defaultValue);
+        return parseIntegers<int>(*this, defaultValue, base);
     }
 
-    std::vector<int16_t>
-    ArgumentValues::asInt16s(const std::vector<int16_t>& defaultValue) const
+    std::vector<long>
+    ArgumentValues::asLongs(const std::vector<long>& defaultValue,
+                            int base) const
     {
-        return getValues(defaultValue);
+        return parseIntegers<long>(*this, defaultValue, base);
     }
 
-    std::vector<int32_t>
-    ArgumentValues::asInt32s(const std::vector<int32_t>& defaultValue) const
+    std::vector<long long>
+    ArgumentValues::asLLongs(const std::vector<long long>& defaultValue,
+                             int base) const
     {
-        return getValues(defaultValue);
+        return parseIntegers<long long>(*this, defaultValue, base);
     }
 
-    std::vector<int64_t>
-    ArgumentValues::asInt64s(const std::vector<int64_t>& defaultValue) const
+    std::vector<unsigned long>
+    ArgumentValues::asULongs(const std::vector<unsigned long>& defaultValue,
+                             int base) const
     {
-        return getValues(defaultValue);
+        return parseIntegers<unsigned long>(*this, defaultValue, base);
     }
 
-    std::vector<uint8_t>
-    ArgumentValues::asUint8s(const std::vector<uint8_t>& defaultValue) const
+    std::vector<unsigned long long> ArgumentValues::asULLongs(
+        const std::vector<unsigned long long>& defaultValue,
+        int base) const
     {
-        return getValues(defaultValue);
-    }
-
-    std::vector<uint16_t>
-    ArgumentValues::asUint16s(const std::vector<uint16_t>& defaultValue) const
-    {
-        return getValues(defaultValue);
-    }
-
-    std::vector<uint32_t>
-    ArgumentValues::asUint32s(const std::vector<uint32_t>& defaultValue) const
-    {
-        return getValues(defaultValue);
-    }
-
-    std::vector<uint64_t>
-    ArgumentValues::asUint64s(const std::vector<uint64_t>& defaultValue) const
-    {
-        return getValues(defaultValue);
+        return parseIntegers<unsigned long long>(*this, defaultValue, base);
     }
 
     std::vector<float>
     ArgumentValues::asFloats(const std::vector<float>& defaultValue) const
     {
-        return getValues(defaultValue);
+        return parseFloats(*this, defaultValue);
     }
 
     std::vector<double>
     ArgumentValues::asDoubles(const std::vector<double>& defaultValue) const
     {
-        return getValues(defaultValue);
-    }
-
-    std::vector<long double> ArgumentValues::asLongDoubles(
-            const std::vector<long double>& defaultValue) const
-    {
-        return getValues(defaultValue);
+        return parseFloats(*this, defaultValue);
     }
 
     std::vector<std::string> ArgumentValues::asStrings(
@@ -195,24 +220,5 @@ namespace Argos
                 values.emplace_back(part, value.second);
         }
         return {move(values), m_Args, m_ValueId};
-    }
-
-    template <typename T>
-    std::vector<T> ArgumentValues::getValues(
-            const std::vector<T>& defaultValue) const
-    {
-        if (m_Values.empty())
-            return defaultValue;
-
-        std::vector<T> result;
-        result.reserve(m_Values.size());
-        for (auto& v : m_Values)
-        {
-            auto value = parseValue<T>(v.first);
-            if (!value)
-                error("Invalid value: " + std::string(v.first) + ".");
-            result.push_back(*value);
-        }
-        return result;
     }
 }

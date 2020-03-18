@@ -56,27 +56,21 @@ namespace Argos
 
         bool asBool(bool defaultValue = false) const;
 
-        int8_t asInt8(int8_t defaultValue = 0) const;
+        int asInt(int defaultValue = 0, int base = 10) const;
 
-        int16_t asInt16(int16_t defaultValue = 0) const;
+        long asLong(long defaultValue = 0, int base = 10) const;
 
-        int32_t asInt32(int32_t defaultValue = 0) const;
+        long long asLLong(long long defaultValue = 0, int base = 10) const;
 
-        int64_t asInt64(int64_t defaultValue = 0) const;
+        unsigned long
+        asULong(unsigned long defaultValue = 0, int base = 10) const;
 
-        uint8_t asUint8(uint8_t defaultValue = 0) const;
-
-        uint16_t asUint16(uint16_t defaultValue = 0) const;
-
-        uint32_t asUint32(uint32_t defaultValue = 0) const;
-
-        uint64_t asUint64(uint64_t defaultValue = 0) const;
+        unsigned long long
+        asULLong(unsigned long long defaultValue = 0, int base = 10) const;
 
         float asFloat(float defaultValue = 0) const;
 
         double asDouble(double defaultValue = 0) const;
-
-        long double asLongDouble(long double defaultValue = 0) const;
 
         std::string asString(const std::string& defaultValue = {}) const;
 
@@ -85,8 +79,7 @@ namespace Argos
 
         void error(const std::string& message) const;
     private:
-        template <typename T>
-        T getValue(const T& defaultValue) const;
+        void error() const;
 
         std::optional<std::string_view> m_Value;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;

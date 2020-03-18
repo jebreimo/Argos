@@ -126,7 +126,7 @@ TEST_CASE("List argument")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::SUCCESS);
-    auto numbers = args.values("-n").asInt32s();
+    auto numbers = args.values("-n").asInts();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
     REQUIRE(numbers[0] == 12);
@@ -171,7 +171,7 @@ TEST_CASE("Test dash options")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::SUCCESS);
-    auto numbers = args.values("-number").asInt32s();
+    auto numbers = args.values("-number").asInts();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
 }
@@ -188,7 +188,7 @@ TEST_CASE("Tet slash options")
                          .argument("NUM"))
             .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::SUCCESS);
-    auto numbers = args.values("/number").asInt32s();
+    auto numbers = args.values("/number").asLongs();
     REQUIRE(!numbers.empty());
     REQUIRE(numbers.size() == 4);
 }
@@ -362,11 +362,11 @@ TEST_CASE("CLEAR option")
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 1);
     REQUIRE(value == "34");
-    auto bars = it.parsedArguments().values("--bar").asInt32s();
-    REQUIRE(bars == std::vector<int32_t>{12, 34});
+    auto bars = it.parsedArguments().values("--bar").asULongs();
+    REQUIRE(bars == std::vector<unsigned long>{12, 34});
     REQUIRE(it.next(arg, value));
     REQUIRE(arg->id() == 2);
-    bars = it.parsedArguments().values("--bar").asInt32s();
+    bars = it.parsedArguments().values("--bar").asULongs();
     REQUIRE(bars.empty());
     REQUIRE(it.parsedArguments().value("--bud").asBool());
 }

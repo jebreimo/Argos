@@ -15,8 +15,8 @@ TEST_CASE("Test ArgumentValue split")
             .autoExit(false)
             .add(Option({"--f="}).argument("M,N"))
             .parse({"--f=34,45"});
-    auto values = args.value("--f=").split(',', 2, 2).asInt32s();
-    REQUIRE(values == std::vector<int32_t>{34, 45});
+    auto values = args.value("--f=").split(',', 2, 2).asInts();
+    REQUIRE(values == std::vector<int>{34, 45});
 }
 
 TEST_CASE("Test ArgumentValues split")

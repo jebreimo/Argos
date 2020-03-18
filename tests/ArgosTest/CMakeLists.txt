@@ -24,7 +24,6 @@ add_executable(ArgosTest
     test_ArgumentParser.cpp
     test_ArgumentValue.cpp
     test_HelpWriter.cpp
-    test_ParseValue.cpp
     test_StandardOptionIterator.cpp
     test_StringUtilities.cpp
     test_TextFormatter.cpp
