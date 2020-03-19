@@ -196,6 +196,8 @@ namespace Argos
          */
         std::unique_ptr<ArgumentData> release();
     private:
+        void checkArgument() const;
+
         std::unique_ptr<ArgumentData> m_Argument;
     };
 }

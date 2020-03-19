@@ -49,7 +49,7 @@ namespace Argos
 
         void setResultCode(ParserResultCode resultCode);
 
-        const OptionData* breakingOption() const;
+        const OptionData* stopOption() const;
 
         void setBreakingOption(const OptionData* option);
 

@@ -97,7 +97,7 @@ namespace Argos
 
     OptionView ParsedArguments::stopOption() const
     {
-        auto option = m_Impl->breakingOption();
+        auto option = m_Impl->stopOption();
         if (!option)
             ARGOS_THROW("There is no special option.");
         return OptionView(option);

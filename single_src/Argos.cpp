@@ -3931,7 +3931,7 @@ namespace Argos
             if (eqPos != flag.size() - 1)
                 return false;
             if (od.argument.empty())
-                ARGOS_THROW(flag + ": options ending with '=' must take an argument.");
+                ARGOS_THROW( "Options ending with '=' must take an argument: " + flag);
             return true;
         }
 

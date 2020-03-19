@@ -37,23 +37,8 @@ namespace Argos
             : std::runtime_error(message)
         {}
 
-        /**
-         * @brief Prefixes @a message with source file, line number
-         * and function name.
-         * @param message The error message.
-         * @param fileName Typically the value of __FILE__ where the
-         *      exception was thrown.
-         * @param lineno Typically the value of __LINE__ where the
-         *      exception was thrown.
-         * @param funcName Typically the value of __func__ where the
-         *      exception was thrown.
-         */
-        ArgosException(const std::string& message,
-                       const std::string& fileName,
-                       int lineno,
-                       const std::string& funcName)
-            : std::runtime_error(funcName + "() in " + fileName + ":"
-                                 + std::to_string(lineno) + ": " + message)
+        explicit ArgosException(const char* message) noexcept
+            : std::runtime_error(message)
         {}
     };
 }

@@ -10,10 +10,6 @@
 #include "ArgosThrow.hpp"
 #include "ArgumentData.hpp"
 
-#define CHECK_ARGUMENT_EXISTS() \
-    if (!m_Argument) \
-        ARGOS_THROW("Cannot use Argument instance after release() has been called.")
-
 namespace Argos
 {
     Argument::Argument()
@@ -58,56 +54,56 @@ namespace Argos
 
     Argument& Argument::text(const std::string& text)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->text = text;
         return *this;
     }
 
     Argument& Argument::section(const std::string& name)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->section = name;
         return *this;
     }
 
     Argument& Argument::valueName(const std::string& id)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->valueName = id;
         return *this;
     }
 
     Argument& Argument::callback(ArgumentCallback callback)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->callback = callback;
         return *this;
     }
 
     Argument& Argument::visibility(Visibility visibility)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->visibility = visibility;
         return *this;
     }
 
     Argument& Argument::id(int id)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->id = id;
         return *this;
     }
 
     Argument& Argument::name(const std::string& name)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->name = name;
         return *this;
     }
 
     Argument& Argument::optional(bool optional)
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         if (optional)
             m_Argument->minCount = 0;
         else if (m_Argument->minCount == 0)
@@ -119,7 +115,7 @@ namespace Argos
     {
         if (n <= 0)
             ARGOS_THROW("Argument's count must be greater than 0.");
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->minCount = m_Argument->maxCount = n;
         return *this;
     }
@@ -130,7 +126,7 @@ namespace Argos
             ARGOS_THROW("Argument's max count must be greater than 0.");
         if (maxCount < minCount)
             ARGOS_THROW("Argument's max count cannot be less than its min count.");
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         m_Argument->minCount = minCount;
         m_Argument->maxCount = maxCount;
         return *this;
@@ -138,7 +134,14 @@ namespace Argos
 
     std::unique_ptr<ArgumentData> Argument::release()
     {
-        CHECK_ARGUMENT_EXISTS();
+        checkArgument();
         return std::move(m_Argument);
+    }
+
+    void Argument::checkArgument() const
+    {
+        if (!m_Argument)
+            ARGOS_THROW("Cannot use Argument instance after"
+                        " release() has been called.");
     }
 }

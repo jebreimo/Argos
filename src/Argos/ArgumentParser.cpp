@@ -26,12 +26,14 @@ namespace Argos
             if (eqPos != flag.size() - 1)
                 return false;
             if (od.argument.empty())
-                ARGOS_THROW(flag + ": options ending with '=' must take an argument.");
+                ARGOS_THROW("Options ending with '=' must take an argument: " + flag);
             return true;
         }
 
         bool checkStandardFlag(const std::string& flag, const OptionData& od)
         {
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
+                return false;
             if (flag.size() < 2)
                 return false;
             if (flag[0] != '-')
@@ -46,6 +48,8 @@ namespace Argos
         bool checkFlag(const std::string& flag, char prefix, const OptionData& od)
         {
             if (flag.size() < 2 || flag[0] != prefix)
+                return false;
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
                 return false;
             if (flag.size() == 2)
                 return true;
@@ -71,9 +75,9 @@ namespace Argos
             struct InternalIdMaker
             {
                 ValueId n = ValueId(0);
-                std::map<std::string, ValueId> explicitIds;
+                std::map<std::string_view, ValueId> explicitIds;
 
-                ValueId makeValueId(const std::string& valueName)
+                ValueId makeValueId(std::string_view valueName)
                 {
                     if (valueName.empty())
                     {

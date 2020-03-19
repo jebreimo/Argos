@@ -10,10 +10,6 @@
 #include "ArgosThrow.hpp"
 #include "OptionData.hpp"
 
-#define CHECK_OPTION_EXISTS() \
-    if (!m_Option) \
-        ARGOS_THROW("Cannot use Option instance after release() has been called.")
-
 namespace Argos
 {
     Option::Option()
@@ -58,70 +54,70 @@ namespace Argos
 
     Option& Option::text(const std::string& text)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->text = text;
         return *this;
     }
 
     Option& Option::section(const std::string& name)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->section = name;
         return *this;
     }
 
     Option& Option::valueName(const std::string& id)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->valueName = id;
         return *this;
     }
 
     Option& Option::operation(OptionOperation operation)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->operation = operation;
         return *this;
     }
 
     Option& Option::visibility(Visibility visibility)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->visibility = visibility;
         return *this;
     }
 
     Option& Option::id(int id)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->id = id;
         return *this;
     }
 
     Option& Option::flag(const std::string& f)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->flags = {f};
         return *this;
     }
 
     Option& Option::flags(std::vector<std::string> f)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->flags = std::move(f);
         return *this;
     }
 
     Option& Option::argument(const std::string& name)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->argument = name;
         return *this;
     }
 
     Option& Option::value(const std::string& value)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->value = value;
         return *this;
     }
@@ -133,48 +129,55 @@ namespace Argos
 
     Option& Option::value(int value)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->value = std::to_string(value);
         return *this;
     }
 
     Option& Option::value(double value)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->value = std::to_string(value);
         return *this;
     }
 
     Option& Option::callback(OptionCallback callback)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->callback = move(callback);
         return *this;
     }
 
     Option& Option::type(OptionType type)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->type = type;
         return *this;
     }
 
     Option& Option::mandatory(bool mandatory)
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         m_Option->mandatory = mandatory;
         return *this;
     }
 
     const OptionData& Option::data() const
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         return *m_Option;
     }
 
     std::unique_ptr<OptionData> Option::release()
     {
-        CHECK_OPTION_EXISTS();
+        checkOption();
         return std::move(m_Option);
+    }
+
+    void Option::checkOption() const
+    {
+        if (!m_Option)
+            ARGOS_THROW("Cannot use Option instance after"
+                        " release() has been called.");
     }
 }

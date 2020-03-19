@@ -146,6 +146,8 @@ namespace Argos
          */
         std::unique_ptr<OptionData> release();
     private:
+        void checkOption() const;
+
         std::unique_ptr<OptionData> m_Option;
     };
 }

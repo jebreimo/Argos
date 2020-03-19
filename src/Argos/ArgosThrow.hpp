@@ -8,5 +8,11 @@
 #pragma once
 #include "Argos/ArgosException.hpp"
 
+#define _ARGOS_THROW_3(file, line, msg) \
+    throw ::Argos::ArgosException(file ":" #line ": " msg)
+
+#define _ARGOS_THROW_2(file, line, msg) \
+    _ARGOS_THROW_3(file, line, msg)
+
 #define ARGOS_THROW(msg) \
-        throw ::Argos::ArgosException((msg), __FILE__, __LINE__, __func__)
+    _ARGOS_THROW_2(__FILE__, __LINE__, msg)

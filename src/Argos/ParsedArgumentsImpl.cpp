@@ -192,7 +192,7 @@ namespace Argos
         m_ResultCode = resultCode;
     }
 
-    const OptionData* ParsedArgumentsImpl::breakingOption() const
+    const OptionData* ParsedArgumentsImpl::stopOption() const
     {
         return m_SpecialOption;
     }

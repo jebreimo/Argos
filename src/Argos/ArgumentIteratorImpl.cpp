@@ -30,31 +30,15 @@ namespace Argos
                 for (auto& flag : option->flags)
                     index.emplace_back(flag, option.get());
             }
-            OptionTable::iterator it;
-            if (caseInsensitive)
+            sort(index.begin(), index.end(), [&](auto& a, auto& b)
             {
-                sort(index.begin(), index.end(), [](auto& a, auto& b)
-                {
-                    return isLessCI(a.first, b.first);
-                });
-                it = adjacent_find(index.begin(), index.end(),
-                                   [](auto& a, auto& b)
-                {
-                    return areEqualCI(a.first, b.first);
-                });
-            }
-            else
+                return isLess(a.first, b.first, caseInsensitive);
+            });
+            auto it = adjacent_find(index.begin(), index.end(),
+                                    [&](auto& a, auto& b)
             {
-                sort(index.begin(), index.end(), [](auto& a, auto& b)
-                {
-                    return a.first < b.first;
-                });
-                it = adjacent_find(index.begin(), index.end(),
-                                   [](auto& a, auto& b)
-                {
-                    return a.first == b.first;
-                });
-            }
+                return areEqual(a.first, b.first, caseInsensitive);
+            });
             if (it == index.end())
                 return index;
 
@@ -70,33 +54,16 @@ namespace Argos
             }
         }
 
-        OptionTable::const_iterator findOptionCS(const OptionTable& options,
-                                                 std::string_view arg)
-        {
-            OptionTable::value_type key = {arg, nullptr};
-            return std::lower_bound(
-                    options.begin(), options.end(),
-                    key,
-                    [&](auto& a, auto& b) {return a.first < b.first;});
-        }
-
-        OptionTable::const_iterator findOptionCI(const OptionTable& options,
-                                                 std::string_view arg)
-        {
-            OptionTable::value_type key = {arg, nullptr};
-            return std::lower_bound(
-                    options.begin(), options.end(),
-                    key,
-                    [&](auto& a, auto& b) {return isLessCI(a.first, b.first);});
-        }
-
         const OptionData* findOptionImpl(const OptionTable& options,
                                          std::string_view arg,
                                          bool allowAbbreviations,
                                          bool caseInsensitive)
         {
-            auto it = caseInsensitive ? findOptionCI(options, arg)
-                                      : findOptionCS(options, arg);
+            auto it = std::lower_bound(
+                options.begin(), options.end(),
+                OptionTable::value_type(arg, nullptr),
+                [&](auto& a, auto& b)
+                {return isLess(a.first, b.first, caseInsensitive);});
             if (it == options.end())
                 return nullptr;
             if (it->first == arg)
