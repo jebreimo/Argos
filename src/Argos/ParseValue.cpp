@@ -9,6 +9,7 @@
 #include "ParseValue.hpp"
 
 #include <cerrno>
+#include <climits>
 #include <cstdlib>
 #include "StringUtilities.hpp"
 
