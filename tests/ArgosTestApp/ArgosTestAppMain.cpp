@@ -7,24 +7,24 @@
 //****************************************************************************
 #include <Argos/ArgumentParser.hpp>
 
-#include <algorithm>
-#include <iostream>
+//#include <algorithm>
+//#include <iostream>
 
-struct Rectangle
-{
-    int width = 0;
-    int height = 0;
-};
-
-Rectangle parseResolution(const Argos::ArgumentValue& v)
-{
-    auto parts = v.split(',', 2, 2).asInts({640, 480});
-    if (parts[0] < 640)
-        v.error("Horizontal resolution must be at least 640");
-    if (parts[1] < 480)
-        v.error("Vertical resolution must be at least 480");
-    return {parts[0], parts[1]};
-}
+//struct Rectangle
+//{
+//    int width = 0;
+//    int height = 0;
+//};
+//
+//Rectangle parseResolution(const Argos::ArgumentValue& v)
+//{
+//    auto parts = v.split(',', 2, 2).asInts({640, 480});
+//    if (parts[0] < 640)
+//        v.error("Horizontal resolution must be at least 640");
+//    if (parts[1] < 480)
+//        v.error("Vertical resolution must be at least 480");
+//    return {parts[0], parts[1]};
+//}
 
 int main(int argc, char* argv[])
 {
@@ -42,53 +42,53 @@ int main(int argc, char* argv[])
             .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
 
-    auto allArgs = args.allArguments();
-    stable_sort(allArgs.begin(), allArgs.end(),
-                [](auto& a, auto& b) {return a->valueId() < b->valueId();});
-
-    std::string line;
-    ArgumentView* prevArg = nullptr;
-    for (auto& a : allArgs)
-    {
-        if (prevArg && prevArg->valueId() != a->valueId())
-        {
-            std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
-            line.clear();
-        }
-        if (!line.empty())
-            line += ", ";
-        line += a->name();
-        prevArg = a.get();
-    }
-    if (prevArg)
-        std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
-    line.clear();
-
-    auto allOpts = args.allOptions();
-    stable_sort(allOpts.begin(), allOpts.end(),
-                [](auto& a, auto& b) {return a->valueId() < b->valueId();});
-    OptionView* prevOpt = nullptr;
-    for (auto& o : allOpts)
-    {
-        if (prevOpt && prevOpt->valueId() != o->valueId())
-        {
-            std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
-            line.clear();
-        }
-        for (auto& f : o->flags())
-        {
-            if (!line.empty())
-                line += ", ";
-            line += f;
-        }
-        prevOpt = o.get();
-    }
-    if (prevOpt)
-        std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
-    line.clear();
-
-    auto res = parseResolution(args.value("--resolution"));
-    std::cout << "resolution: " << res.width << 'x' << res.height << '\n';
+    //auto allArgs = args.allArguments();
+    //stable_sort(allArgs.begin(), allArgs.end(),
+    //            [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+    //
+    //std::string line;
+    //ArgumentView* prevArg = nullptr;
+    //for (auto& a : allArgs)
+    //{
+    //    if (prevArg && prevArg->valueId() != a->valueId())
+    //    {
+    //        std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
+    //        line.clear();
+    //    }
+    //    if (!line.empty())
+    //        line += ", ";
+    //    line += a->name();
+    //    prevArg = a.get();
+    //}
+    //if (prevArg)
+    //    std::cout << line << ": \"" << args.value(*prevArg).asString() << "\"\n";
+    //line.clear();
+    //
+    //auto allOpts = args.allOptions();
+    //stable_sort(allOpts.begin(), allOpts.end(),
+    //            [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+    //OptionView* prevOpt = nullptr;
+    //for (auto& o : allOpts)
+    //{
+    //    if (prevOpt && prevOpt->valueId() != o->valueId())
+    //    {
+    //        std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
+    //        line.clear();
+    //    }
+    //    for (auto& f : o->flags())
+    //    {
+    //        if (!line.empty())
+    //            line += ", ";
+    //        line += f;
+    //    }
+    //    prevOpt = o.get();
+    //}
+    //if (prevOpt)
+    //    std::cout << line << ": \"" << args.value(*prevOpt).asString() << "\"\n";
+    //line.clear();
+    //
+    //auto res = parseResolution(args.value("--resolution"));
+    //std::cout << "resolution: " << res.width << 'x' << res.height << '\n';
 
     return 0;
 }

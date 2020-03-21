@@ -73,6 +73,21 @@ namespace Argos
     }
 
     template <>
+    std::optional<unsigned> parseInteger<unsigned>(const std::string& str, int base)
+    {
+        auto n = parseIntegerImpl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
     std::optional<long> parseInteger<long>(const std::string& str, int base)
     {
         return parseIntegerImpl<long>(str, base);
@@ -113,7 +128,7 @@ namespace Argos
         template <>
         double strToFloat<double>(const char* str, char** endp)
         {
-            return strtof(str, endp);
+            return strtod(str, endp);
         }
 
         template <typename T>

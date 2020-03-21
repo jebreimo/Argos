@@ -14,6 +14,33 @@
 
 namespace Argos
 {
+    namespace
+    {
+        template <typename T>
+        T getInteger(const ArgumentValue& value, T defaultValue, int base)
+        {
+            auto s = value.value();
+            if (!s)
+                return defaultValue;
+            auto n = parseInteger<T>(std::string(*s), base);
+            if (!n)
+                value.error();
+            return *n;
+        }
+
+        template <typename T>
+        T getFloatingPoint(const ArgumentValue& value, T defaultValue)
+        {
+            auto s = value.value();
+            if (!s)
+                return defaultValue;
+            auto n = parseFloatingPoint<T>(std::string(*s));
+            if (!n)
+                value.error();
+            return *n;
+        }
+    }
+
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
                                  ValueId valueId,
@@ -61,74 +88,44 @@ namespace Argos
 
     int ArgumentValue::asInt(int defaultValue, int base) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseInteger<int>(std::string(*m_Value), base);
-        if (!v)
-            error();
-        return *v;
+        return getInteger<int>(*this, defaultValue, base);
+    }
+
+    unsigned ArgumentValue::asUInt(unsigned defaultValue, int base) const
+    {
+        return getInteger<unsigned>(*this, defaultValue, base);
     }
 
     long ArgumentValue::asLong(long defaultValue, int base) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseInteger<long>(std::string(*m_Value), base);
-        if (!v)
-            error();
-        return *v;
+        return getInteger<long>(*this, defaultValue, base);
     }
 
     long long ArgumentValue::asLLong(long long defaultValue, int base) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseInteger<long long>(std::string(*m_Value), base);
-        if (!v)
-            error();
-        return *v;
+        return getInteger<long long>(*this, defaultValue, base);
     }
 
     unsigned long
     ArgumentValue::asULong(unsigned long defaultValue, int base) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseInteger<unsigned long>(std::string(*m_Value), base);
-        if (!v)
-            error();
-        return *v;
+        return getInteger<unsigned long>(*this, defaultValue, base);
     }
 
     unsigned long long
     ArgumentValue::asULLong(unsigned long long defaultValue, int base) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseInteger<unsigned long long>(std::string(*m_Value), base);
-        if (!v)
-            error();
-        return *v;
+        return getInteger<unsigned long long>(*this, defaultValue, base);
     }
 
     float ArgumentValue::asFloat(float defaultValue) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseFloatingPoint<float>(std::string(*m_Value));
-        if (!v)
-            error();
-        return *v;
+        return getFloatingPoint<float>(*this, defaultValue);
     }
 
     double ArgumentValue::asDouble(double defaultValue) const
     {
-        if (!m_Value)
-            return defaultValue;
-        auto v = parseFloatingPoint<double>(std::string(*m_Value));
-        if (!v)
-            error();
-        return *v;
+        return getFloatingPoint<double>(*this, defaultValue);
     }
 
     std::string ArgumentValue::asString(const std::string& defaultValue) const
@@ -146,7 +143,7 @@ namespace Argos
         if (parts.size() < minParts)
         {
             error("Invalid value: \"" + std::string(*m_Value)
-                  + "\". Must be at least " + std::to_string(minParts)
+                  + "\". Must have at least " + std::to_string(minParts)
                   + " values separated by \"" + separator + "\".");
             return ArgumentValues({}, m_Args, m_ValueId);
         }

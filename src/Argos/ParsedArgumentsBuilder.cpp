@@ -87,14 +87,14 @@ namespace Argos
     {
         auto id = m_Impl->getValueId(name);
         auto values = m_Impl->getValues(id);
-        return {values, m_Impl, id};
+        return {move(values), m_Impl, id};
     }
 
     ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg)
     {
         auto values = m_Impl->getValues(arg.valueId());
-        return {values, m_Impl, arg.valueId()};
+        return {move(values), m_Impl, arg.valueId()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name)

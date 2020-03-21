@@ -128,8 +128,6 @@ namespace Argos
 
         Option& value(int value);
 
-        Option& value(double value);
-
         Option& type(OptionType type);
 
         Option& mandatory(bool mandatory);

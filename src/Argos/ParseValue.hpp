@@ -21,16 +21,23 @@ namespace Argos
     std::optional<int> parseInteger<int>(const std::string& str, int base);
 
     template <>
+    std::optional<unsigned>
+    parseInteger<unsigned>(const std::string& str, int base);
+
+    template <>
     std::optional<long> parseInteger<long>(const std::string& str, int base);
 
     template <>
-    std::optional<long long> parseInteger<long long>(const std::string& str, int base);
+    std::optional<long long>
+    parseInteger<long long>(const std::string& str, int base);
 
     template <>
-    std::optional<unsigned long> parseInteger<unsigned long>(const std::string& str, int base);
+    std::optional<unsigned long>
+    parseInteger<unsigned long>(const std::string& str, int base);
 
     template <>
-    std::optional<unsigned long long> parseInteger<unsigned long long>(const std::string& str, int base);
+    std::optional<unsigned long long>
+    parseInteger<unsigned long long>(const std::string& str, int base);
 
     template <typename T>
     std::optional<T> parseFloatingPoint(const std::string& str);

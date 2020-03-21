@@ -206,9 +206,7 @@ namespace Argos
 
         void writeHelpText();
     private:
-        const ParserData& data() const;
-
-        ParserData& data();
+        void checkData() const;
 
         ArgumentId nextArgumentId() const;
 

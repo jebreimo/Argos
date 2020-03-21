@@ -58,6 +58,8 @@ namespace Argos
 
         int asInt(int defaultValue = 0, int base = 10) const;
 
+        unsigned asUInt(unsigned defaultValue = 0, int base = 10) const;
+
         long asLong(long defaultValue = 0, int base = 10) const;
 
         long long asLLong(long long defaultValue = 0, int base = 10) const;
@@ -78,9 +80,9 @@ namespace Argos
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
 
         void error(const std::string& message) const;
-    private:
-        void error() const;
 
+        void error() const;
+    private:
         std::optional<std::string_view> m_Value;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         ValueId m_ValueId;

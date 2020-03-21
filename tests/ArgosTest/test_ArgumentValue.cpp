@@ -24,8 +24,20 @@ TEST_CASE("Test ArgumentValues split")
     using namespace Argos;
     auto args = ArgumentParser("test")
             .autoExit(false)
-            .add(Option({"--f"}).argument("PATHS").operation(OptionOperation::APPEND))
+            .add(Option{"--f"}.argument("PATHS").operation(OptionOperation::APPEND))
             .parse({"--f", "/a/b:/a/c", "--f", "/b/c:/b/d/e:/c/a"});
     auto values = args.values("--f").split(':').asStrings();
     REQUIRE(values == std::vector<std::string>{"/a/b", "/a/c", "/b/c", "/b/d/e", "/c/a"});
+}
+
+TEST_CASE("Double values")
+{
+    using namespace Argos;
+    auto args = ArgumentParser("test")
+        .autoExit(false)
+        .add(Argument("ARG1"))
+        .add(Option{"-v"}.argument("N"))
+        .parse({"1.567"});
+    REQUIRE(args.value("ARG1").asDouble() == 1.567);
+    REQUIRE(args.value("-v").asDouble(1e-10) == 1e-10);
 }

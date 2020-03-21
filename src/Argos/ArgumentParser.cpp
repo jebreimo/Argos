@@ -188,13 +188,13 @@ namespace Argos
     {}
 
     ArgumentParser::ArgumentParser(const std::string& programName)
-            : m_Data(std::make_unique<ParserData>())
+        : m_Data(std::make_unique<ParserData>())
     {
-        data().helpSettings.programName = programName;
+        m_Data->helpSettings.programName = programName;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
-            : m_Data(std::move(rhs.m_Data))
+        : m_Data(std::move(rhs.m_Data))
     {}
 
     ArgumentParser::~ArgumentParser() = default;
@@ -207,24 +207,25 @@ namespace Argos
 
     ArgumentParser& ArgumentParser::add(Argument argument)
     {
+        checkData();
         auto ad = argument.release();
         if (ad->name.empty())
             ARGOS_THROW("Argument must have a name.");
         ad->argumentId = nextArgumentId();
-        data().arguments.emplace_back(std::move(ad));
+        m_Data->arguments.emplace_back(std::move(ad));
         return *this;
     }
 
     ArgumentParser& ArgumentParser::add(Option option)
     {
+        checkData();
         auto od = option.release();
-
         if (od->flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
         for (auto& flag : od->flags)
         {
             bool ok;
-            switch (data().parserSettings.optionStyle)
+            switch (m_Data->parserSettings.optionStyle)
             {
             case OptionStyle::STANDARD:
                 ok = checkStandardFlag(flag, *od);
@@ -271,7 +272,7 @@ namespace Argos
             break;
         }
         od->argumentId = nextArgumentId();
-        data().options.push_back(std::move(od));
+        m_Data->options.push_back(std::move(od));
         return *this;
     }
 
@@ -298,7 +299,8 @@ namespace Argos
 
     ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args) const
     {
-        return parseImpl(std::move(args), makeCopy(data()));
+        checkData();
+        return parseImpl(std::move(args), makeCopy(*m_Data));
     }
 
     ArgumentIterator ArgumentParser::makeIterator(int argc, char** argv)
@@ -325,133 +327,156 @@ namespace Argos
 
     ArgumentIterator ArgumentParser::makeIterator(std::vector<std::string_view> args) const
     {
-        return makeIteratorImpl(std::move(args), makeCopy(data()));
+        checkData();
+        return makeIteratorImpl(std::move(args), makeCopy(*m_Data));
     }
 
     bool ArgumentParser::allowAbbreviatedOptions() const
     {
-        return data().parserSettings.allowAbbreviatedOptions;
+        checkData();
+        return m_Data->parserSettings.allowAbbreviatedOptions;
     }
 
     ArgumentParser& ArgumentParser::allowAbbreviatedOptions(bool value)
     {
-        data().parserSettings.allowAbbreviatedOptions = value;
+        checkData();
+        m_Data->parserSettings.allowAbbreviatedOptions = value;
         return *this;
     }
 
     bool ArgumentParser::autoExit() const
     {
-        return data().parserSettings.autoExit;
+        checkData();
+        return m_Data->parserSettings.autoExit;
     }
 
     ArgumentParser& ArgumentParser::autoExit(bool value)
     {
-        data().parserSettings.autoExit = value;
+        checkData();
+        m_Data->parserSettings.autoExit = value;
         return *this;
     }
 
     bool ArgumentParser::caseInsensitive() const
     {
-        return data().parserSettings.caseInsensitive;
+        checkData();
+        return m_Data->parserSettings.caseInsensitive;
     }
 
     ArgumentParser& ArgumentParser::caseInsensitive(bool value)
     {
-        data().parserSettings.caseInsensitive = value;
+        checkData();
+        m_Data->parserSettings.caseInsensitive = value;
         return *this;
     }
 
     bool ArgumentParser::generateHelpOption() const
     {
-        return data().parserSettings.generateHelpOption;
+        checkData();
+        return m_Data->parserSettings.generateHelpOption;
     }
 
     ArgumentParser& ArgumentParser::generateHelpOption(bool value)
     {
-        data().parserSettings.generateHelpOption = value;
+        checkData();
+        m_Data->parserSettings.generateHelpOption = value;
         return *this;
     }
 
     OptionStyle ArgumentParser::optionStyle() const
     {
-        return data().parserSettings.optionStyle;
+        checkData();
+        return m_Data->parserSettings.optionStyle;
     }
 
     ArgumentParser& ArgumentParser::optionStyle(OptionStyle value)
     {
-        if (value != data().parserSettings.optionStyle)
+        checkData();
+        if (value != m_Data->parserSettings.optionStyle)
         {
-            if (!data().options.empty())
+            if (!m_Data->options.empty())
                 ARGOS_THROW("Can't change option style after"
                             " options have been added.");
-            data().parserSettings.optionStyle = value;
+            m_Data->parserSettings.optionStyle = value;
         }
         return *this;
     }
 
     bool ArgumentParser::ignoreUndefinedArguments() const
     {
-        return data().parserSettings.ignoreUndefinedArguments;
+        checkData();
+        return m_Data->parserSettings.ignoreUndefinedArguments;
     }
 
     ArgumentParser& ArgumentParser::ignoreUndefinedArguments(bool value)
     {
-        data().parserSettings.ignoreUndefinedArguments = value;
+        checkData();
+        m_Data->parserSettings.ignoreUndefinedArguments = value;
         return *this;
     }
 
     bool ArgumentParser::ignoreUndefinedOptions() const
     {
-        return data().parserSettings.ignoreUndefinedOptions;
+        checkData();
+        return m_Data->parserSettings.ignoreUndefinedOptions;
     }
 
     ArgumentParser& ArgumentParser::ignoreUndefinedOptions(bool value)
     {
-        data().parserSettings.ignoreUndefinedOptions = value;
+        checkData();
+        m_Data->parserSettings.ignoreUndefinedOptions = value;
         return *this;
     }
 
     const ArgumentCallback& ArgumentParser::argumentCallback() const
     {
-        return data().parserSettings.argumentCallback;
+        checkData();
+        return m_Data->parserSettings.argumentCallback;
     }
 
     ArgumentParser& ArgumentParser::argumentCallback(ArgumentCallback callback)
     {
-        data().parserSettings.argumentCallback = std::move(callback);
+        checkData();
+        m_Data->parserSettings.argumentCallback = std::move(callback);
         return *this;
     }
 
     const OptionCallback& ArgumentParser::optionCallback() const
     {
-        return data().parserSettings.optionCallback;
+        checkData();
+        return m_Data->parserSettings.optionCallback;
     }
 
     ArgumentParser& ArgumentParser::optionCallback(OptionCallback callback)
     {
-        data().parserSettings.optionCallback = std::move(callback);
+        checkData();
+        m_Data->parserSettings.optionCallback = std::move(callback);
         return *this;
     }
 
     std::ostream* ArgumentParser::outputStream() const
     {
+        checkData();
         return m_Data->textFormatter.stream();
     }
 
     ArgumentParser& ArgumentParser::outputStream(std::ostream* stream)
     {
+        checkData();
         m_Data->textFormatter.setStream(stream);
         return *this;
     }
 
     const std::string& ArgumentParser::programName() const
     {
-        return data().helpSettings.programName;
+        checkData();
+        return m_Data->helpSettings.programName;
     }
 
     ArgumentParser& ArgumentParser::programName(const std::string& name)
     {
-        data().helpSettings.programName = name;
+        checkData();
+        m_Data->helpSettings.programName = name;
         return *this;
     }
 
@@ -462,7 +487,8 @@ namespace Argos
 
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
     {
-        data().helpSettings.texts[textId] = std::move(text);
+        checkData();
+        m_Data->helpSettings.texts[textId] = std::move(text);
         return *this;
     }
 
@@ -473,26 +499,19 @@ namespace Argos
 
     void ArgumentParser::writeHelpText()
     {
-        Argos::writeHelpText(data());
+        checkData();
+        Argos::writeHelpText(*m_Data);
     }
 
-    const ParserData& ArgumentParser::data() const
+    void ArgumentParser::checkData() const
     {
         if (!m_Data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return *m_Data;
-    }
-
-    ParserData& ArgumentParser::data()
-    {
-        if (!m_Data)
-            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-        return *m_Data;
     }
 
     ArgumentId ArgumentParser::nextArgumentId() const
     {
-        auto& d = data();
+        auto& d = *m_Data;
         return ArgumentId(d.options.size() + d.arguments.size() + 1);
     }
 }

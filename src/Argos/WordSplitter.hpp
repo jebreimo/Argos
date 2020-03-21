@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include <deque>
+#include <list>
 #include <map>
 #include <string>
 #include <string_view>
@@ -29,6 +29,6 @@ namespace Argos
 
         using Split = std::pair<unsigned, char>;
         std::map<std::string_view, std::vector<Split>> m_Splits;
-        std::deque<std::string> m_Strings;
+        std::list<std::string> m_Strings;
     };
 }

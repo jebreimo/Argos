@@ -134,13 +134,6 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::value(double value)
-    {
-        checkOption();
-        m_Option->value = std::to_string(value);
-        return *this;
-    }
-
     Option& Option::callback(OptionCallback callback)
     {
         checkOption();

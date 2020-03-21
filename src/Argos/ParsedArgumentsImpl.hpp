@@ -17,7 +17,7 @@ namespace Argos
     class ParsedArgumentsImpl
     {
     public:
-        ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
+        explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
         bool has(ValueId valueId) const;
 
@@ -25,17 +25,23 @@ namespace Argos
 
         void addUnprocessedArgument(const std::string& arg);
 
-        std::string_view assignValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
+        std::string_view assignValue(ValueId valueId,
+                                     const std::string& value,
+                                     ArgumentId argumentId);
 
-        std::string_view appendValue(ValueId valueId, const std::string& value, ArgumentId argumentId);
+        std::string_view appendValue(ValueId valueId,
+                                     const std::string& value,
+                                     ArgumentId argumentId);
 
         void clearValue(ValueId valueId);
 
         ValueId getValueId(std::string_view valueName) const;
 
-        std::optional<std::pair<std::string_view, ArgumentId>> getValue(ValueId valueId) const;
+        std::optional<std::pair<std::string_view, ArgumentId>>
+        getValue(ValueId valueId) const;
 
-        std::vector<std::pair<std::string_view, ArgumentId>> getValues(ValueId valueId) const;
+        std::vector<std::pair<std::string_view, ArgumentId>>
+        getValues(ValueId valueId) const;
 
         std::vector<std::unique_ptr<IArgumentView>>
         getArgumentViews(ValueId valueId) const;
@@ -62,6 +68,6 @@ namespace Argos
         std::vector<std::string> m_UnprocessedArguments;
         std::shared_ptr<ParserData> m_Data;
         ParserResultCode m_ResultCode = ParserResultCode::NONE;
-        const OptionData* m_SpecialOption = nullptr;
+        const OptionData* m_StopOption = nullptr;
     };
 }

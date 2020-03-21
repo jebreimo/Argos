@@ -65,16 +65,20 @@ namespace Argos
         asInts(const std::vector<int>& defaultValue = {},
                int base = 10) const;
 
+        std::vector<unsigned>
+        asUInts(const std::vector<unsigned>& defaultValue = {},
+               int base = 10) const;
+
         std::vector<long>
         asLongs(const std::vector<long>& defaultValue = {},
                 int base = 10) const;
 
-        std::vector<long long>
-        asLLongs(const std::vector<long long>& defaultValue = {},
-                 int base = 10) const;
-
         std::vector<unsigned long>
         asULongs(const std::vector<unsigned long>& defaultValue = {},
+                 int base = 10) const;
+
+        std::vector<long long>
+        asLLongs(const std::vector<long long>& defaultValue = {},
                  int base = 10) const;
 
         std::vector<unsigned long long>

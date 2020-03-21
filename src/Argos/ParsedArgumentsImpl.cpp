@@ -194,13 +194,13 @@ namespace Argos
 
     const OptionData* ParsedArgumentsImpl::stopOption() const
     {
-        return m_SpecialOption;
+        return m_StopOption;
     }
 
     void ParsedArgumentsImpl::setBreakingOption(const OptionData* option)
     {
         m_ResultCode = ParserResultCode::STOP;
-        m_SpecialOption = option;
+        m_StopOption = option;
     }
 
     void ParsedArgumentsImpl::error(const std::string& message)

@@ -148,6 +148,13 @@ namespace Argos
         return parseIntegers<int>(*this, defaultValue, base);
     }
 
+    std::vector<unsigned>
+    ArgumentValues::asUInts(const std::vector<unsigned>& defaultValue,
+                            int base) const
+    {
+        return parseIntegers<unsigned>(*this, defaultValue, base);
+    }
+
     std::vector<long>
     ArgumentValues::asLongs(const std::vector<long>& defaultValue,
                             int base) const
