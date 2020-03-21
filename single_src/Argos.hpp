@@ -37,23 +37,8 @@ namespace Argos
             : std::runtime_error(message)
         {}
 
-        /**
-         * @brief Prefixes @a message with source file, line number
-         * and function name.
-         * @param message The error message.
-         * @param fileName Typically the value of __FILE__ where the
-         *      exception was thrown.
-         * @param lineno Typically the value of __LINE__ where the
-         *      exception was thrown.
-         * @param funcName Typically the value of __func__ where the
-         *      exception was thrown.
-         */
-        ArgosException(const std::string& message,
-                       const std::string& fileName,
-                       int lineno,
-                       const std::string& funcName)
-            : std::runtime_error(funcName + "() in " + fileName + ":"
-                                 + std::to_string(lineno) + ": " + message)
+        explicit ArgosException(const char* message) noexcept
+            : std::runtime_error(message)
         {}
     };
 }
@@ -479,27 +464,23 @@ namespace Argos
 
         bool asBool(bool defaultValue = false) const;
 
-        int8_t asInt8(int8_t defaultValue = 0) const;
+        int asInt(int defaultValue = 0, int base = 10) const;
 
-        int16_t asInt16(int16_t defaultValue = 0) const;
+        unsigned asUInt(unsigned defaultValue = 0, int base = 10) const;
 
-        int32_t asInt32(int32_t defaultValue = 0) const;
+        long asLong(long defaultValue = 0, int base = 10) const;
 
-        int64_t asInt64(int64_t defaultValue = 0) const;
+        long long asLLong(long long defaultValue = 0, int base = 10) const;
 
-        uint8_t asUint8(uint8_t defaultValue = 0) const;
+        unsigned long
+        asULong(unsigned long defaultValue = 0, int base = 10) const;
 
-        uint16_t asUint16(uint16_t defaultValue = 0) const;
-
-        uint32_t asUint32(uint32_t defaultValue = 0) const;
-
-        uint64_t asUint64(uint64_t defaultValue = 0) const;
+        unsigned long long
+        asULLong(unsigned long long defaultValue = 0, int base = 10) const;
 
         float asFloat(float defaultValue = 0) const;
 
         double asDouble(double defaultValue = 0) const;
-
-        long double asLongDouble(long double defaultValue = 0) const;
 
         std::string asString(const std::string& defaultValue = {}) const;
 
@@ -507,10 +488,9 @@ namespace Argos
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
 
         void error(const std::string& message) const;
-    private:
-        template <typename T>
-        T getValue(const T& defaultValue) const;
 
+        void error() const;
+    private:
         std::optional<std::string_view> m_Value;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         ValueId m_ValueId;
@@ -576,29 +556,29 @@ namespace Argos
 
         ArgumentValue value(size_t index) const;
 
-        std::vector<int8_t> asInt8s(
-                const std::vector<int8_t>& defaultValue = {}) const;
+        std::vector<int>
+        asInts(const std::vector<int>& defaultValue = {},
+               int base = 10) const;
 
-        std::vector<int16_t> asInt16s(
-                const std::vector<int16_t>& defaultValue = {}) const;
+        std::vector<unsigned>
+        asUInts(const std::vector<unsigned>& defaultValue = {},
+               int base = 10) const;
 
-        std::vector<int32_t> asInt32s(
-                const std::vector<int32_t>& defaultValue = {}) const;
+        std::vector<long>
+        asLongs(const std::vector<long>& defaultValue = {},
+                int base = 10) const;
 
-        std::vector<int64_t> asInt64s(
-                const std::vector<int64_t>& defaultValue = {}) const;
+        std::vector<unsigned long>
+        asULongs(const std::vector<unsigned long>& defaultValue = {},
+                 int base = 10) const;
 
-        std::vector<uint8_t> asUint8s(
-                const std::vector<uint8_t>& defaultValue = {}) const;
+        std::vector<long long>
+        asLLongs(const std::vector<long long>& defaultValue = {},
+                 int base = 10) const;
 
-        std::vector<uint16_t> asUint16s(
-                const std::vector<uint16_t>& defaultValue = {}) const;
-
-        std::vector<uint32_t> asUint32s(
-                const std::vector<uint32_t>& defaultValue = {}) const;
-
-        std::vector<uint64_t> asUint64s(
-                const std::vector<uint64_t>& defaultValue = {}) const;
+        std::vector<unsigned long long>
+        asULLongs(const std::vector<unsigned long long>& defaultValue = {},
+                  int base = 10) const;
 
         std::vector<float> asFloats(
                 const std::vector<float>& defaultValue = {}) const;
@@ -606,18 +586,12 @@ namespace Argos
         std::vector<double> asDoubles(
                 const std::vector<double>& defaultValue = {}) const;
 
-        std::vector<long double> asLongDoubles(
-                const std::vector<long double>& defaultValue = {}) const;
-
         std::vector<std::string> asStrings(
                 const std::vector<std::string>& defaultValue = {}) const;
 
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
     private:
-        template <typename T>
-        std::vector<T> getValues(const std::vector<T>& defaultValue) const;
-
         std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;
         ValueId m_ValueId;
@@ -1294,6 +1268,8 @@ namespace Argos
          */
         std::unique_ptr<ArgumentData> release();
     private:
+        void checkArgument() const;
+
         std::unique_ptr<ArgumentData> m_Argument;
     };
 }
@@ -1423,8 +1399,6 @@ namespace Argos
 
         Option& value(int value);
 
-        Option& value(double value);
-
         Option& type(OptionType type);
 
         Option& mandatory(bool mandatory);
@@ -1441,6 +1415,8 @@ namespace Argos
          */
         std::unique_ptr<OptionData> release();
     private:
+        void checkOption() const;
+
         std::unique_ptr<OptionData> m_Option;
     };
 }
@@ -1646,9 +1622,7 @@ namespace Argos
 
         void writeHelpText();
     private:
-        const ParserData& data() const;
-
-        ParserData& data();
+        void checkData() const;
 
         ArgumentId nextArgumentId() const;
 
