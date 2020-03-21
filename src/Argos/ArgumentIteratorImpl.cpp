@@ -398,7 +398,7 @@ namespace Argos
     {
         for (auto& o : m_Data->options)
         {
-            if (o->mandatory && !m_ParsedArgs->has(o->valueId))
+            if (!o->optional && !m_ParsedArgs->has(o->valueId))
             {
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)

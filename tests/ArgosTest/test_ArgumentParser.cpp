@@ -535,7 +535,7 @@ TEST_CASE("Mandatory option")
     using namespace Argos;
     auto args = ArgumentParser("test")
             .autoExit(false)
-            .add(Option({"--f"}).argument("N").mandatory(true))
+            .add(Option({"--f"}).argument("N").optional(false))
             .add(Argument("arg"))
             .parse({"abcd"});
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);

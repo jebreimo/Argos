@@ -130,7 +130,7 @@ namespace Argos
 
         Option& type(OptionType type);
 
-        Option& mandatory(bool mandatory);
+        Option& optional(bool optional);
 
         const OptionData& data() const;
 

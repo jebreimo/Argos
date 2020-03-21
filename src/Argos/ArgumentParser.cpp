@@ -253,8 +253,8 @@ namespace Argos
                 ARGOS_THROW("NONE-options cannot have value set.");
             if (!od->valueName.empty())
                 ARGOS_THROW("NONE-options cannot have valueName set.");
-            if (od->mandatory)
-                ARGOS_THROW("NONE-options cannot be mandatory.");
+            if (!od->optional)
+                ARGOS_THROW("NONE-options must be optional.");
             break;
         case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->value.empty())
@@ -267,8 +267,8 @@ namespace Argos
         case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->value.empty())
                 od->value = "1";
-            if (od->mandatory)
-                ARGOS_THROW("CLEAR-options cannot be mandatory.");
+            if (!od->optional)
+                ARGOS_THROW("CLEAR-options must be optional.");
             break;
         }
         od->argumentId = nextArgumentId();

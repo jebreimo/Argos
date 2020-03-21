@@ -91,7 +91,7 @@ namespace Argos
 
         OptionType type() const;
 
-        bool mandatory() const;
+        bool optional() const;
     private:
         const OptionData* m_Option;
     };

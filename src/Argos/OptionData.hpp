@@ -25,7 +25,7 @@ namespace Argos
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
         Visibility visibility = Visibility::NORMAL;
-        bool mandatory = false;
+        bool optional = true;
         int id = 0;
         ArgumentId argumentId = {};
         ValueId valueId = {};

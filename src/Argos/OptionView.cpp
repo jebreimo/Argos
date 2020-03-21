@@ -74,9 +74,9 @@ namespace Argos
         return m_Option->type;
     }
 
-    bool OptionView::mandatory() const
+    bool OptionView::optional() const
     {
-        return m_Option->mandatory;
+        return m_Option->optional;
     }
 
     ArgumentId OptionView::argumentId() const

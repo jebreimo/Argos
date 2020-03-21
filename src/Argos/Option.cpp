@@ -148,10 +148,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::mandatory(bool mandatory)
+    Option& Option::optional(bool optional)
     {
         checkOption();
-        m_Option->mandatory = mandatory;
+        m_Option->optional = optional;
         return *this;
     }
 

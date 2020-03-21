@@ -26,7 +26,7 @@ namespace Argos
         std::string getBriefOptionName(const OptionData& opt)
         {
             std::string optTxt;
-            bool braces = !opt.mandatory
+            bool braces = opt.optional
                           && opt.type != OptionType::STOP
                           && opt.type != OptionType::HELP;
             if (braces)
