@@ -108,16 +108,53 @@ namespace Argos
             }
         }
 
+        using HelpText = std::pair<std::string, std::string_view>;
+        using HelpTextVector = std::vector<HelpText>;
+        using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
+
+        unsigned int getHelpTextLabelWidth(
+            const ParserData& data,
+            const std::vector<SectionHelpTexts>& sections)
+        {
+            // Determine what width should be reserved for the argument names
+            // and option flags.
+            std::vector<unsigned> nameWidths;
+            std::vector<unsigned> textWidths;
+            for (auto& entry : sections)
+            {
+                for (auto& [name, txt] : entry.second)
+                {
+                    nameWidths.push_back(static_cast<unsigned>(name.size()));
+                    textWidths.push_back(static_cast<unsigned>(txt.size()));
+                }
+            }
+
+            std::sort(nameWidths.begin(), nameWidths.end());
+            std::sort(textWidths.begin(), textWidths.end());
+            auto lineWidth = data.textFormatter.lineWidth();
+            // Check if both the longest name and the longest help text
+            // can fit on the same line.
+            auto nameWidth = nameWidths.back() + 3;
+            if (nameWidth + textWidths.back() > lineWidth)
+            {
+                // Check if 75% of the names and help texts can fit on
+                // the same line.
+                auto index75 = 3 * nameWidths.size() / 4;
+                nameWidth = nameWidths[index75] + 3;
+                if (nameWidth + textWidths[index75] > lineWidth)
+                    nameWidth = lineWidth / 5;
+            }
+            return nameWidth;
+        }
+
         void writeArgumentSections(ParserData& data)
         {
-            using HelpText = std::pair<std::string, std::string_view>;
-            using HelpTextVector = std::vector<HelpText>;
-            using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
             std::vector<SectionHelpTexts> sections;
+
             auto addHelpText = [&](std::string_view s, std::string a, std::string_view b)
             {
                 auto it = find_if(sections.begin(), sections.end(),
-                                  [&](auto& t) {return t.first == s;});
+                                  [&](auto& v) {return v.first == s;});
                 if (it == sections.end())
                 {
                     sections.push_back({s, {}});
@@ -129,54 +166,34 @@ namespace Argos
             auto argTitle = getCustomText(data, TextId::ARGUMENTS_TITLE);
             if (!argTitle)
                 argTitle = "ARGUMENTS";
-            for (auto& arg : data.arguments)
+            for (auto& a : data.arguments)
             {
-                if ((arg->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
-                auto& section = arg->section.empty() ? *argTitle : arg->section;
-                addHelpText(section, getArgumentName(*arg), arg->text);
+                auto& section = a->section.empty() ? *argTitle : a->section;
+                addHelpText(section, getArgumentName(*a), a->text);
             }
             auto optTitle = getCustomText(data, TextId::OPTIONS_TITLE);
             if (!optTitle)
                 optTitle = "OPTIONS";
-            for (auto& opt : data.options)
+            for (auto& o : data.options)
             {
-                if ((opt->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
-                auto& section = opt->section.empty() ? *optTitle : opt->section;
-                addHelpText(section, getLongOptionName(*opt), opt->text);
+                auto& section = o->section.empty() ? *optTitle : o->section;
+                addHelpText(section, getLongOptionName(*o), o->text);
             }
 
             if (sections.empty())
                 return;
+            unsigned int nameWidth = getHelpTextLabelWidth(data, sections);
 
-            std::vector<unsigned> nameWidths;
-            std::vector<unsigned> textWidths;
-            for (auto& entry : sections)
-            {
-                for (auto&[name, txt] : entry.second)
-                {
-                    nameWidths.push_back(static_cast<unsigned>(name.size()));
-                    textWidths.push_back(static_cast<unsigned>(txt.size()));
-                }
-            }
-
-            std::sort(nameWidths.begin(), nameWidths.end());
-            std::sort(textWidths.begin(), textWidths.end());
-            auto nameWidth = nameWidths.back() + 3;
-            if (nameWidth + textWidths.back() > data.textFormatter.lineWidth())
-            {
-                auto index75 = 3 * nameWidths.size() / 4;
-                nameWidth = nameWidths[index75] + 3;
-                if (nameWidth + textWidths[index75] > data.textFormatter.lineWidth())
-                    nameWidth = data.textFormatter.lineWidth() / 4;
-            }
             for (auto&[section, txts] : sections)
             {
                 data.textFormatter.writeText(section);
                 data.textFormatter.newline();
                 data.textFormatter.pushIndentation(2);
-                for (auto&[name, text] : txts)
+                for (auto& [name, text] : txts)
                 {
                     data.textFormatter.writeText(name);
                     if (data.textFormatter.currentLineWidth() >= nameWidth)
