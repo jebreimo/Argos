@@ -109,7 +109,7 @@ namespace Argos
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
         Visibility visibility = Visibility::NORMAL;
-        bool mandatory = false;
+        bool optional = true;
         int id = 0;
         ArgumentId argumentId = {};
         ValueId valueId = {};
@@ -746,10 +746,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::mandatory(bool mandatory)
+    Option& Option::optional(bool optional)
     {
         checkOption();
-        m_Option->mandatory = mandatory;
+        m_Option->optional = optional;
         return *this;
     }
 
@@ -882,9 +882,9 @@ namespace Argos
         return m_Option->type;
     }
 
-    bool OptionView::mandatory() const
+    bool OptionView::optional() const
     {
-        return m_Option->mandatory;
+        return m_Option->optional;
     }
 
     ArgumentId OptionView::argumentId() const
@@ -2641,7 +2641,7 @@ namespace Argos
         std::string getBriefOptionName(const OptionData& opt)
         {
             std::string optTxt;
-            bool braces = !opt.mandatory
+            bool braces = opt.optional
                           && opt.type != OptionType::STOP
                           && opt.type != OptionType::HELP;
             if (braces)
@@ -3826,7 +3826,7 @@ namespace Argos
     {
         for (auto& o : m_Data->options)
         {
-            if (o->mandatory && !m_ParsedArgs->has(o->valueId))
+            if (!o->optional && !m_ParsedArgs->has(o->valueId))
             {
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)
@@ -4112,8 +4112,8 @@ namespace Argos
                 ARGOS_THROW("NONE-options cannot have value set.");
             if (!od->valueName.empty())
                 ARGOS_THROW("NONE-options cannot have valueName set.");
-            if (od->mandatory)
-                ARGOS_THROW("NONE-options cannot be mandatory.");
+            if (!od->optional)
+                ARGOS_THROW("NONE-options must be optional.");
             break;
         case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->value.empty())
@@ -4126,8 +4126,8 @@ namespace Argos
         case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->value.empty())
                 od->value = "1";
-            if (od->mandatory)
-                ARGOS_THROW("CLEAR-options cannot be mandatory.");
+            if (!od->optional)
+                ARGOS_THROW("CLEAR-options must be optional.");
             break;
         }
         od->argumentId = nextArgumentId();
