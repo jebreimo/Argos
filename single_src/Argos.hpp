@@ -59,7 +59,7 @@ namespace Argos
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.5";
+constexpr char ARGOS_VERSION[] = "0.99.6";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -77,7 +77,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 5;
+constexpr unsigned ARGOS_VERSION_PATCH = 6;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1452,10 +1452,16 @@ namespace Argos
 
         /**
          * @brief Creates a new argument parser.
+         *
          * @param programName The name of the program that will be displayed
          *      in the help text and error messages.
+         * @param extractFileName Set this to true if @a programName is a
+         *      path that may contain directories, but the help text should
+         *      only use the file name part. This is particularly useful if
+         *      @a argv[0] is used as the programName.
          */
-        explicit ArgumentParser(const std::string& programName);
+        explicit ArgumentParser(std::string_view programName,
+                                bool extractFileName = false);
 
         /**
          * @brief Moves the innards of the old object to the new one.

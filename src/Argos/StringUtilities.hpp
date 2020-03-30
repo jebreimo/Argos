@@ -31,4 +31,6 @@ namespace Argos
 
     std::vector<std::string_view>
     splitString(std::string_view s, char delimiter, size_t maxSplit);
+
+    std::string_view getBaseName(std::string_view str);
 }

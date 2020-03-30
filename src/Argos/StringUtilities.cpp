@@ -110,4 +110,10 @@ namespace Argos
         }
         return result;
     }
+
+    std::string_view getBaseName(std::string_view str)
+    {
+        auto pos = str.find_last_of("/\\");
+        return pos == std::string_view::npos ? str : str.substr(pos + 1);
+    }
 }

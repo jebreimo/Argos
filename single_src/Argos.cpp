@@ -193,6 +193,8 @@ namespace Argos
 
     std::vector<std::string_view>
     splitString(std::string_view s, char delimiter, size_t maxSplit);
+
+    std::string_view getBaseName(std::string_view str);
 }
 
 //****************************************************************************
@@ -1190,6 +1192,12 @@ namespace Argos
             }
         }
         return result;
+    }
+
+    std::string_view getBaseName(std::string_view str)
+    {
+        auto pos = str.find_last_of("/\\");
+        return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
 }
 
@@ -4046,10 +4054,13 @@ namespace Argos
             : ArgumentParser("UNINITIALIZED")
     {}
 
-    ArgumentParser::ArgumentParser(const std::string& programName)
+    ArgumentParser::ArgumentParser(std::string_view programName,
+                                   bool extractFileName)
         : m_Data(std::make_unique<ParserData>())
     {
-        m_Data->helpSettings.programName = programName;
+        m_Data->helpSettings.programName = extractFileName
+                                           ? getBaseName(programName)
+                                           : programName;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept

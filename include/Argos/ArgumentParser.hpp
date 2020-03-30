@@ -36,10 +36,16 @@ namespace Argos
 
         /**
          * @brief Creates a new argument parser.
+         *
          * @param programName The name of the program that will be displayed
          *      in the help text and error messages.
+         * @param extractFileName Set this to true if @a programName is a
+         *      path that may contain directories, but the help text should
+         *      only use the file name part. This is particularly useful if
+         *      @a argv[0] is used as the programName.
          */
-        explicit ArgumentParser(const std::string& programName);
+        explicit ArgumentParser(std::string_view programName,
+                                bool extractFileName = false);
 
         /**
          * @brief Moves the innards of the old object to the new one.

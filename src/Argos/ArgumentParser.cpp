@@ -187,10 +187,13 @@ namespace Argos
             : ArgumentParser("UNINITIALIZED")
     {}
 
-    ArgumentParser::ArgumentParser(const std::string& programName)
+    ArgumentParser::ArgumentParser(std::string_view programName,
+                                   bool extractFileName)
         : m_Data(std::make_unique<ParserData>())
     {
-        m_Data->helpSettings.programName = programName;
+        m_Data->helpSettings.programName = extractFileName
+                                           ? getBaseName(programName)
+                                           : programName;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
