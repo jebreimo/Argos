@@ -33,6 +33,7 @@ namespace Argos
     {
         std::string programName;
         std::map<TextId, std::string> texts;
+        std::ostream* outputStream = nullptr;
     };
 
     struct ParserData

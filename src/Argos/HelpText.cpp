@@ -8,6 +8,7 @@
 #include "HelpText.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 namespace Argos
 {
@@ -273,6 +274,8 @@ namespace Argos
 
     void writeHelpText(ParserData& data)
     {
+        if (data.helpSettings.outputStream)
+            data.textFormatter.setStream(data.helpSettings.outputStream);
         writeCustomText(data, TextId::INITIAL_TEXT);
         writeUsage(data);
         writeCustomText(data, TextId::TEXT);
@@ -282,6 +285,10 @@ namespace Argos
 
     void writeErrorMessage(ParserData& data, const std::string& msg)
     {
+        if (data.helpSettings.outputStream)
+            data.textFormatter.setStream(data.helpSettings.outputStream);
+        else
+            data.textFormatter.setStream(&std::cerr);
         data.textFormatter.writeText(data.helpSettings.programName + ": ");
         data.textFormatter.writeText(msg);
         data.textFormatter.newline();

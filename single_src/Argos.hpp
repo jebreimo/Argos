@@ -59,7 +59,7 @@ namespace Argos
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.6";
+constexpr char ARGOS_VERSION[] = "0.99.7";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -77,7 +77,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 6;
+constexpr unsigned ARGOS_VERSION_PATCH = 7;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.

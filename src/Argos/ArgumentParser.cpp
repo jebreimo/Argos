@@ -460,13 +460,13 @@ namespace Argos
     std::ostream* ArgumentParser::outputStream() const
     {
         checkData();
-        return m_Data->textFormatter.stream();
+        return m_Data->helpSettings.outputStream;
     }
 
     ArgumentParser& ArgumentParser::outputStream(std::ostream* stream)
     {
         checkData();
-        m_Data->textFormatter.setStream(stream);
+        m_Data->helpSettings.outputStream = stream;
         return *this;
     }
 

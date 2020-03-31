@@ -1736,6 +1736,7 @@ namespace Argos
     {
         std::string programName;
         std::map<TextId, std::string> texts;
+        std::ostream* outputStream = nullptr;
     };
 
     struct ParserData
@@ -2896,6 +2897,8 @@ namespace Argos
 
     void writeHelpText(ParserData& data)
     {
+        if (data.helpSettings.outputStream)
+            data.textFormatter.setStream(data.helpSettings.outputStream);
         writeCustomText(data, TextId::INITIAL_TEXT);
         writeUsage(data);
         writeCustomText(data, TextId::TEXT);
@@ -2905,6 +2908,10 @@ namespace Argos
 
     void writeErrorMessage(ParserData& data, const std::string& msg)
     {
+        if (data.helpSettings.outputStream)
+            data.textFormatter.setStream(data.helpSettings.outputStream);
+        else
+            data.textFormatter.setStream(&std::cerr);
         data.textFormatter.writeText(data.helpSettings.programName + ": ");
         data.textFormatter.writeText(msg);
         data.textFormatter.newline();
@@ -4327,13 +4334,13 @@ namespace Argos
     std::ostream* ArgumentParser::outputStream() const
     {
         checkData();
-        return m_Data->textFormatter.stream();
+        return m_Data->helpSettings.outputStream;
     }
 
     ArgumentParser& ArgumentParser::outputStream(std::ostream* stream)
     {
         checkData();
-        m_Data->textFormatter.setStream(stream);
+        m_Data->helpSettings.outputStream = stream;
         return *this;
     }
 
