@@ -91,7 +91,7 @@ TEST_CASE("Section order in help text")
             .text(TextId::USAGE_TITLE, "")
             .text(TextId::USAGE, "")
             .parse(argv.size(), argv.data());
-    REQUIRE(ss.str() == "Z\n  <file>\n  -s\nA\n  <device>\n  -h\n");
+    REQUIRE(ss.str() == "Z\n  <file>\n  -s\n\nA\n  <device>\n  -h\n");
 }
 
 TEST_CASE("Two argument")

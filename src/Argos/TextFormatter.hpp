@@ -35,6 +35,8 @@ namespace Argos
 
         unsigned currentLineWidth() const;
 
+        bool isCurrentLineEmpty() const;
+
         static constexpr unsigned CURRENT_COLUMN = UINT_MAX;
 
         void pushIndentation(unsigned indent);

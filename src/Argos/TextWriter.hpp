@@ -41,7 +41,7 @@ namespace Argos
 
         unsigned remainingWidth() const;
 
-        bool empty() const;
+        bool isCurrentLineEmpty() const;
 
         unsigned lineWidth() const;
 

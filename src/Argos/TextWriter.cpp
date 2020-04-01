@@ -89,7 +89,7 @@ namespace Argos
         return m_LineWidth - std::min(currentWidth(), m_LineWidth);
     }
 
-    bool TextWriter::empty() const
+    bool TextWriter::isCurrentLineEmpty() const
     {
         return m_Line.empty();
     }

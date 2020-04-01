@@ -60,11 +60,11 @@ namespace Argos
     }
 
     TextFormatter::TextFormatter()
-        : TextFormatter(&std::cout, getConsoleWidth(20))
+        : TextFormatter(&std::cout, getConsoleWidth(32))
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream)
-        : TextFormatter(stream, getConsoleWidth(20))
+        : TextFormatter(stream, getConsoleWidth(32))
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream, unsigned lineWidth)
@@ -166,7 +166,7 @@ namespace Argos
                     word,
                     word.size() - remainder.size(),
                     width,
-                    m_Writer.empty());
+                    m_Writer.isCurrentLineEmpty());
             if (!w.empty())
             {
                 m_Writer.write(w);
@@ -175,7 +175,7 @@ namespace Argos
                 newline();
                 remainder = r;
             }
-            else if (m_Writer.empty())
+            else if (m_Writer.isCurrentLineEmpty())
             {
                 if (m_Writer.spaces() != 0)
                 {
@@ -210,5 +210,10 @@ namespace Argos
     unsigned int TextFormatter::currentLineWidth() const
     {
         return m_Writer.currentWidth();
+    }
+
+    bool TextFormatter::isCurrentLineEmpty() const
+    {
+        return m_Writer.isCurrentLineEmpty();
     }
 }

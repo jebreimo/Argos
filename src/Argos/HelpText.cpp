@@ -18,10 +18,25 @@ namespace Argos
         {
             if (arg.name[0] == '<' || arg.name[0] == '[')
                 return arg.name;
-            else if (arg.minCount == 0)
-                return "[<" + arg.name + ">]";
+
+            std::string result;
+            for (int i = 0; i < arg.minCount; ++i)
+            {
+                if (!result.empty())
+                    result += " ";
+                result += "<" + arg.name + ">";
+            }
+
+            if (arg.maxCount == arg.minCount)
+                return result;
+
+            if (!result.empty())
+                result += " ";
+            if (arg.maxCount - arg.minCount == 1)
+                result += "[<" + arg.name + ">]";
             else
-                return "<" + arg.name + ">";
+                result += "[<" + arg.name + ">]...";
+            return result;
         }
 
         std::string getBriefOptionName(const OptionData& opt)
@@ -76,17 +91,25 @@ namespace Argos
             return {};
         }
 
-        bool writeCustomText(ParserData& data, TextId textId)
+        bool isEmpty(const std::optional<std::string>& str)
+        {
+            return !str || str->empty();
+        }
+
+        std::optional<std::string>
+        writeCustomText(ParserData& data, TextId textId,
+                        bool prependNewline = false)
         {
             auto text = getCustomText(data, textId);
-            if (!text)
-                return false;
-            if (!text->empty())
+            if (!isEmpty(text))
             {
+                if (prependNewline)
+                    data.textFormatter.newline();
                 data.textFormatter.writeText(*text);
-                data.textFormatter.newline();
+                if (!data.textFormatter.isCurrentLineEmpty())
+                    data.textFormatter.newline();
             }
-            return true;
+            return text;
         }
 
         void writeStopAndHelpUsage(ParserData& data)
@@ -138,17 +161,17 @@ namespace Argos
             auto nameWidth = nameWidths.back() + 3;
             if (nameWidth + textWidths.back() > lineWidth)
             {
-                // Check if 75% of the names and help texts can fit on
+                // Check if 80% of the names and help texts can fit on
                 // the same line.
-                auto index75 = 3 * nameWidths.size() / 4;
-                nameWidth = nameWidths[index75] + 3;
-                if (nameWidth + textWidths[index75] > lineWidth)
-                    nameWidth = lineWidth / 5;
+                auto index80 = 4 * nameWidths.size() / 5;
+                nameWidth = nameWidths[index80] + 3;
+                if (nameWidth + textWidths[index80] > lineWidth)
+                    return 0;
             }
             return nameWidth;
         }
 
-        void writeArgumentSections(ParserData& data)
+        void writeArgumentSections(ParserData& data, bool prependNewline)
         {
             std::vector<SectionHelpTexts> sections;
 
@@ -189,34 +212,48 @@ namespace Argos
                 return;
             unsigned int nameWidth = getHelpTextLabelWidth(data, sections);
 
+            auto& formatter = data.textFormatter;
             for (auto&[section, txts] : sections)
             {
-                data.textFormatter.writeText(section);
-                data.textFormatter.newline();
-                data.textFormatter.pushIndentation(2);
+                if (prependNewline)
+                    formatter.newline();
+                formatter.writeText(section);
+                formatter.newline();
+                formatter.pushIndentation(2);
                 for (auto& [name, text] : txts)
                 {
-                    data.textFormatter.writeText(name);
-                    if (data.textFormatter.currentLineWidth() >= nameWidth)
-                        data.textFormatter.writeText(" ");
-                    data.textFormatter.pushIndentation(nameWidth);
-                    data.textFormatter.writeText(text);
-                    data.textFormatter.popIndentation();
-                    data.textFormatter.newline();
+                    formatter.writeText(name);
+                    if (nameWidth)
+                    {
+                        if (formatter.currentLineWidth() >= nameWidth)
+                            formatter.writeText("  ");
+                        formatter.pushIndentation(nameWidth);
+                    }
+                    else
+                    {
+                        formatter.newline();
+                        formatter.pushIndentation(8);
+                    }
+                    formatter.writeText(text);
+                    formatter.popIndentation();
+                    formatter.newline();
                 }
-                data.textFormatter.popIndentation();
+                formatter.popIndentation();
+                prependNewline = true;
             }
         }
 
-        void writeBriefUsage(ParserData& data)
+        void writeBriefUsage(ParserData& data, bool prependNewline)
         {
-            data.textFormatter.pushIndentation(2);
+            auto& formatter = data.textFormatter;
+            if (prependNewline)
+                formatter.newline();
 
+            formatter.pushIndentation(2);
             writeStopAndHelpUsage(data);
-
-            data.textFormatter.writeText(data.helpSettings.programName);
-            data.textFormatter.writeText(" ");
-            data.textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
+            formatter.writeText(data.helpSettings.programName);
+            formatter.writeText(" ");
+            formatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
             for (auto& opt : data.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
@@ -225,30 +262,43 @@ namespace Argos
                     || opt->type == OptionType::STOP)
                     continue;
 
-                data.textFormatter.writePreformattedText(getBriefOptionName(*opt));
-                data.textFormatter.writeText(" ");
+                formatter.writePreformattedText(getBriefOptionName(*opt));
+                formatter.writeText(" ");
             }
             for (auto& arg : data.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
-                data.textFormatter.writePreformattedText(getArgumentName(*arg));
-                data.textFormatter.writeText(" ");
+                formatter.writePreformattedText(getArgumentName(*arg));
+                formatter.writeText(" ");
             }
-            data.textFormatter.popIndentation();
-            data.textFormatter.newline();
-            data.textFormatter.popIndentation();
+            formatter.popIndentation();
+            formatter.newline();
+            formatter.popIndentation();
         }
 
-        void writeUsage(ParserData& data)
+        bool writeUsage(ParserData& data, bool prependNewline = false)
         {
-            if (!writeCustomText(data, TextId::USAGE_TITLE))
+            auto text1 = writeCustomText(data, TextId::USAGE_TITLE,
+                                         prependNewline);
+            if (!text1)
             {
+                if (prependNewline)
+                    data.textFormatter.newline();
                 data.textFormatter.writeText("USAGE");
                 data.textFormatter.newline();
+                prependNewline = false;
             }
-            if (!writeCustomText(data, TextId::USAGE))
-                writeBriefUsage(data);
+            else
+            {
+                prependNewline = prependNewline && isEmpty(text1);
+            }
+            auto text2 = writeCustomText(data, TextId::USAGE,
+                                         prependNewline);
+            if (text2)
+                return !isEmpty(text1) || !isEmpty(text2);
+            writeBriefUsage(data, prependNewline);
+            return true;
         }
 
         std::string getName(ParserData& data, ArgumentId argumentId)
@@ -276,11 +326,11 @@ namespace Argos
     {
         if (data.helpSettings.outputStream)
             data.textFormatter.setStream(data.helpSettings.outputStream);
-        writeCustomText(data, TextId::INITIAL_TEXT);
-        writeUsage(data);
-        writeCustomText(data, TextId::TEXT);
-        writeArgumentSections(data);
-        writeCustomText(data, TextId::FINAL_TEXT);
+        bool newline = !isEmpty(writeCustomText(data, TextId::INITIAL_TEXT));
+        newline = writeUsage(data, newline) || newline;
+        newline = !isEmpty(writeCustomText(data, TextId::TEXT, newline)) || newline;
+        writeArgumentSections(data, newline);
+        writeCustomText(data, TextId::FINAL_TEXT, true);
     }
 
     void writeErrorMessage(ParserData& data, const std::string& msg)
