@@ -9,5 +9,6 @@ python3 "$DIR"/mergecpp.py \
 python3 "$DIR"/mergecpp.py \
   "$DIR"/../src/Argos/*.[ch]pp \
   --no-pragma-once \
-  -p '#include "Argos.hpp"\n' \
+  -p '#include "Argos.hpp"
+' \
   -o "$DIR"/../single_src/Argos.cpp
