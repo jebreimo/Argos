@@ -122,19 +122,7 @@ def make_argument_parser():
                          " output file.")
     ap.add_argument("-p", "--prepend", metavar="TEXT", action="append",
                     help="Write TEXT at the start of the output file.")
-    ap.add_argument("--check-time", action="store_const", const=True,
-                    help="Create the output file only if doesn't already"
-                         " exist or is older than any of the input files.")
     return ap
-
-
-def most_recent_modification_time(files):
-    result = 0.0
-    for file in files:
-        t = os.path.getmtime(file)
-        if t > result:
-            result = t
-    return result
 
 
 def main():
@@ -157,13 +145,6 @@ def main():
             print(f"WARNING: {path} is listed more than among the input"
                   f" files. All but the first will be ignored.")
 
-    if args.check_time and args.output and os.path.exists(args.output):
-        mod_time = most_recent_modification_time(paths)
-        if os.path.getmtime(args.output) > mod_time:
-            print(f"{args.output} was updated more recently than any of"
-                  f" the input files.")
-            return 0
-
     includes = make_dependency_map(paths)
     depths = arrange_includes(includes)
     paths.sort(key=lambda n: depths[os.path.basename(n)])
@@ -175,12 +156,17 @@ def main():
     lines = remove_redundant_includes(lines)
     lines = remove_successive_empty_lines(lines)
 
-    file = open(args.output, "w") if args.output else sys.stdout
     if args.prepend:
-        for text in args.prepend:
-            file.write(text)
-    for line in lines:
-        file.write(line)
+        text = "".join(args.prepend) + "".join(lines)
+    else:
+        text = "".join(lines)
+    if args.output:
+        if os.path.exists(args.output) and open(args.output).read() == text:
+            return 0
+        open(args.output, "w").write(text)
+        print(f"Updated {args.output}")
+    else:
+        sys.stdout.write(text)
 
     return 0
 
