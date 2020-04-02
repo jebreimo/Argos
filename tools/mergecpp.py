@@ -8,6 +8,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 import argparse
+import glob
 import os
 import re
 import sys
@@ -109,17 +110,31 @@ def remove_successive_empty_lines(lines):
 
 def make_argument_parser():
     ap = argparse.ArgumentParser(
-        description='Generates source files for a C++ command line argument parser.')
+        description='Generates source files for a C++ command line argument'
+                    ' parser.')
     ap.add_argument("files", metavar="C++ files", nargs="+",
-                    help="C++ files that are to be merged")
+                    help="The C++ files that are to be merged.")
     ap.add_argument("-o", "--output", metavar="FILE",
-                    help="output file")
+                    help="The output file.")
     ap.add_argument("--no-pragma-once", action="store_const", const=True,
                     default=False,
-                    help="don't insert a pragma once at the beginning of the header file")
+                    help="Don't insert a pragma once at the beginning of the"
+                         " output file.")
     ap.add_argument("-p", "--prepend", metavar="TEXT", action="append",
                     help="Write TEXT at the start of the output file.")
+    ap.add_argument("--check-time", action="store_const", const=True,
+                    help="Create the output file only if doesn't already"
+                         " exist or is older than any of the input files.")
     return ap
+
+
+def most_recent_modification_time(files):
+    result = 0.0
+    for file in files:
+        t = os.path.getmtime(file)
+        if t > result:
+            result = t
+    return result
 
 
 def main():
@@ -127,12 +142,27 @@ def main():
     paths = []
     visited = set()
     for path in args.files:
-        if path not in visited:
+        if not os.path.exists(path):
+            tmp = glob.glob(path)
+            if not tmp:
+                print(f"WARNING: {path} not found.")
+            for p in tmp:
+                if p not in visited:
+                    paths.append(p)
+                    visited.add(p)
+        elif path not in visited:
             paths.append(path)
             visited.add(path)
         else:
             print(f"WARNING: {path} is listed more than among the input"
                   f" files. All but the first will be ignored.")
+
+    if args.check_time and args.output and os.path.exists(args.output):
+        mod_time = most_recent_modification_time(paths)
+        if os.path.getmtime(args.output) > mod_time:
+            print(f"{args.output} was updated more recently than any of"
+                  f" the input files.")
+            return 0
 
     includes = make_dependency_map(paths)
     depths = arrange_includes(includes)

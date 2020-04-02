@@ -16,8 +16,10 @@ int main(int argc, char* argv[])
     using namespace Argos;
     /* Define the arguments and options and parse argc and argv */
     auto args = ArgumentParser(argv[0], true)
-        .text("Reads one or more data files, processes their values"
-              " and generates a nice image file.")
+        .text("This program doesn't do anything apart from"
+              " demonstrating command line argument parsing Argos,"
+              " but one can imagine it reads one or more data files,"
+              " analyzes their contents and outputs a nice PNG file.")
         .add(Argument("data file").count(1, 100)
                  .text("Paths to the input files."))
         .add(Argument("output file")

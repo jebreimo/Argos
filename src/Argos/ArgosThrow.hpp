@@ -13,6 +13,6 @@
 
 #define _ARGOS_THROW_2(file, line, msg) \
     _ARGOS_THROW_3(file, line, msg)
-
+    
 #define ARGOS_THROW(msg) \
     _ARGOS_THROW_2(__FILE__, __LINE__, msg)

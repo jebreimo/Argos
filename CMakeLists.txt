@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.15)
-project(Argos VERSION 0.99.8)
+project(Argos VERSION 0.99.9)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -19,8 +19,7 @@ function(TargetEnableAllWarnings target)
             $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endfunction()
 
-configure_file(include/Argos/ArgosVersion.hpp.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/Argos/ArgosVersion.hpp @ONLY)
+configure_file(include/Argos/ArgosVersion.hpp.in ArgosVersion.hpp @ONLY)
 
 add_library(Argos
     include/Argos/ArgosException.hpp
@@ -82,6 +81,7 @@ target_include_directories(Argos
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     )
 
 target_compile_definitions(Argos
@@ -102,3 +102,56 @@ enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
 
 add_subdirectory(tests/ArgosTest)
 add_subdirectory(tests/ArgosTestApp EXCLUDE_FROM_ALL)
+
+if (UPDATE_SINGLE_SRC)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.sh.in
+        make_argos_cpp.sh)
+    add_custom_target(UpdateSingleSrc ALL
+        BYPRODUCTS
+            ${CMAKE_CURRENT_SOURCE_DIR}/single_src/Argos.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/single_src/Argos.cpp
+        COMMAND
+            sh "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.sh"
+    )
+    add_dependencies(UpdateSingleSrc Argos)
+endif ()
+
+export(TARGETS Argos
+    NAMESPACE Argos::
+    FILE ArgosConfig.cmake)
+
+include(GNUInstallDirs)
+
+install(TARGETS Argos
+    EXPORT ArgosConfig
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+
+install(EXPORT ArgosConfig
+    FILE
+        ArgosConfig.cmake
+    NAMESPACE
+        Argos::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
+    )
+
+file(GLOB_RECURSE PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
+install(
+    FILES
+        ${PUBLIC_INCLUDES}
+        ${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/Argos
+    )
+
+write_basic_package_version_file(ArgosConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion
+    )
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ArgosConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
+    )

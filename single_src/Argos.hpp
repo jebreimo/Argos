@@ -1,11 +1,47 @@
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-14.
+// Created by Jan Erik Breimo on 2020-03-12.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+
+/**
+ * @file
+ * @brief Defines the current Argos version.
+ */
+
+/**
+ * @brief String representation of the complete version number.
+ */
+constexpr char ARGOS_VERSION[] = "0.99.9";
+
+/**
+ * @brief Incremented if a new version is significantly incompatible
+ *      with the previous version.
+ */
+constexpr unsigned ARGOS_VERSION_MAJOR = 0;
+
+/**
+ * @brief Incremented when Argos's interface is modified without introducing
+ *      incompatibilities with previous versions.
+ */
+constexpr unsigned ARGOS_VERSION_MINOR = 99;
+
+/**
+ * @brief Incremented when Argos's internals are modified without modifying
+ *      its interface.
+ */
+constexpr unsigned ARGOS_VERSION_PATCH = 9;
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-14.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
 
 #include <stdexcept>
 #include <string>
@@ -42,42 +78,6 @@ namespace Argos
         {}
     };
 }
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-03-12.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-/**
- * @file
- * @brief Defines the current Argos version.
- */
-
-/**
- * @brief String representation of the complete version number.
- */
-constexpr char ARGOS_VERSION[] = "0.99.8";
-
-/**
- * @brief Incremented if a new version is significantly incompatible
- *      with the previous version.
- */
-constexpr unsigned ARGOS_VERSION_MAJOR = 0;
-
-/**
- * @brief Incremented when Argos's interface is modified without introducing
- *      incompatibilities with previous versions.
- */
-constexpr unsigned ARGOS_VERSION_MINOR = 99;
-
-/**
- * @brief Incremented when Argos's internals are modified without modifying
- *      its interface.
- */
-constexpr unsigned ARGOS_VERSION_PATCH = 8;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
