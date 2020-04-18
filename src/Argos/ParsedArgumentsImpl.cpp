@@ -41,8 +41,8 @@ namespace Argos
         for (auto& a : m_Data->arguments)
         {
             m_Ids.emplace_back(a->name, a->valueId, a->argumentId);
-            if (!a->valueName.empty())
-                m_Ids.emplace_back(a->valueName, a->valueId, a->argumentId);
+            if (!a->value.empty())
+                m_Ids.emplace_back(a->value, a->valueId, a->argumentId);
         }
         for (auto& o : m_Data->options)
         {
@@ -51,8 +51,8 @@ namespace Argos
 
             for (auto& f : o->flags)
                 m_Ids.emplace_back(f, o->valueId, o->argumentId);
-            if (!o->valueName.empty())
-                m_Ids.emplace_back(o->valueName, o->valueId, o->argumentId);
+            if (!o->value.empty())
+                m_Ids.emplace_back(o->value, o->valueId, o->argumentId);
         }
         if (!m_Ids.empty())
         {

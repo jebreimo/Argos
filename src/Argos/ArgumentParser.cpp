@@ -97,9 +97,9 @@ namespace Argos
             InternalIdMaker idMaker;
             for (auto& a : data.arguments)
             {
-                if (!a->valueName.empty())
+                if (!a->value.empty())
                 {
-                    a->valueId = idMaker.makeValueId(a->valueName);
+                    a->valueId = idMaker.makeValueId(a->value);
                     idMaker.explicitIds.emplace(a->name, a->valueId);
                 }
                 else
@@ -111,7 +111,7 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeValueId(o->valueName);
+                o->valueId = idMaker.makeValueId(o->value);
                 for (auto& f : o->flags)
                     idMaker.explicitIds.emplace(f, o->valueId);
             }
@@ -247,29 +247,29 @@ namespace Argos
                 ARGOS_THROW("Invalid flag: '" + flag + "'.");
         }
 
-        if (!od->argument.empty() && !od->value.empty())
+        if (!od->argument.empty() && !od->constant.empty())
             ARGOS_THROW("Option cannot have both argument and value set.");
         switch (od->operation)
         {
         case OptionOperation::NONE:
-            if (!od->value.empty())
+            if (!od->constant.empty())
                 ARGOS_THROW("NONE-options cannot have value set.");
-            if (!od->valueName.empty())
+            if (!od->value.empty())
                 ARGOS_THROW("NONE-options cannot have valueName set.");
             if (!od->optional)
                 ARGOS_THROW("NONE-options must be optional.");
             break;
         case OptionOperation::ASSIGN:
-            if (od->argument.empty() && od->value.empty())
-                od->value = "1";
+            if (od->argument.empty() && od->constant.empty())
+                od->constant = "1";
             break;
         case OptionOperation::APPEND:
-            if (od->argument.empty() && od->value.empty())
+            if (od->argument.empty() && od->constant.empty())
                 ARGOS_THROW("Options that appends must have either value or argument set.");
             break;
         case OptionOperation::CLEAR:
-            if (!od->argument.empty() ||!od->value.empty())
-                od->value = "1";
+            if (!od->argument.empty() ||!od->constant.empty())
+                od->constant = "1";
             if (!od->optional)
                 ARGOS_THROW("CLEAR-options must be optional.");
             break;

@@ -17,7 +17,7 @@ namespace Argos
         std::string name;
         std::string text;
         std::string section;
-        std::string valueName;
+        std::string value;
         ArgumentCallback callback;
         unsigned minCount = 1;
         unsigned maxCount = 1;

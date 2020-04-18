@@ -45,7 +45,7 @@ namespace Argos
         /**
          * @brief Returns the argument's value name.
          */
-        const std::string& valueName() const final;
+        const std::string& value() const final;
 
         /**
          * @brief Returns the argument's visibility in

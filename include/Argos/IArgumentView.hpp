@@ -39,7 +39,7 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's value name.
          */
-        virtual const std::string& valueName() const = 0;
+        virtual const std::string& value() const = 0;
 
         /**
          * @brief Returns the argument's or option's visibility in

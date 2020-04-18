@@ -81,7 +81,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Option& valueName(const std::string& id);
+        Option& value(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this option is
@@ -122,11 +122,13 @@ namespace Argos
 
         Option& argument(const std::string& name);
 
-        Option& value(const std::string& value);
+        Option& constant(const std::string& value);
 
-        Option& value(bool value);
+        Option& constant(bool value);
 
-        Option& value(int value);
+        Option& constant(int value);
+
+        Option& constant(long long value);
 
         Option& type(OptionType type);
 

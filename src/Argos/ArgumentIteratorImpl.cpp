@@ -196,9 +196,9 @@ namespace Argos
         switch (opt.operation)
         {
         case OptionOperation::ASSIGN:
-            if (!opt.value.empty())
+            if (!opt.constant.empty())
             {
-                m_ParsedArgs->assignValue(opt.valueId, opt.value,
+                m_ParsedArgs->assignValue(opt.valueId, opt.constant,
                                           opt.argumentId);
             }
             else if (auto value = m_Iterator->nextValue())
@@ -213,9 +213,9 @@ namespace Argos
             }
             break;
         case OptionOperation::APPEND:
-            if (!opt.value.empty())
+            if (!opt.constant.empty())
             {
-                m_ParsedArgs->appendValue(opt.valueId, opt.value,
+                m_ParsedArgs->appendValue(opt.valueId, opt.constant,
                                           opt.argumentId);
             }
             else if (auto value = m_Iterator->nextValue())

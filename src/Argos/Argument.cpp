@@ -66,10 +66,10 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::valueName(const std::string& id)
+    Argument& Argument::value(const std::string& id)
     {
         checkArgument();
-        m_Argument->valueName = id;
+        m_Argument->value = id;
         return *this;
     }
 

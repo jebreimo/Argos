@@ -105,7 +105,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& valueName(const std::string& id);
+        Argument& value(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this argument is

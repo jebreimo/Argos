@@ -29,9 +29,9 @@ namespace Argos
         return m_Option->section;
     }
 
-    const std::string& OptionView::valueName() const
+    const std::string& OptionView::value() const
     {
-        return m_Option->valueName;
+        return m_Option->value;
     }
 
     OptionOperation OptionView::operation() const
@@ -64,9 +64,9 @@ namespace Argos
         return m_Option->argument;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::constant() const
     {
-        return m_Option->value;
+        return m_Option->constant;
     }
 
     OptionType OptionView::type() const

@@ -45,7 +45,7 @@ namespace Argos
         /**
          * @brief Returns the option's value name.
          */
-        const std::string& valueName() const final;
+        const std::string& value() const final;
 
         /**
          * @brief Returns the option's visibility in
@@ -87,7 +87,7 @@ namespace Argos
 
         const std::string& argument() const;
 
-        const std::string& value() const;
+        const std::string& constant() const;
 
         OptionType type() const;
 

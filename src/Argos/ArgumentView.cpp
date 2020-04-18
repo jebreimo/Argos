@@ -29,9 +29,9 @@ namespace Argos
         return m_Argument->section;
     }
 
-    const std::string& ArgumentView::valueName() const
+    const std::string& ArgumentView::value() const
     {
-        return m_Argument->valueName;
+        return m_Argument->value;
     }
 
     Visibility ArgumentView::visibility() const

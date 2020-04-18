@@ -345,7 +345,7 @@ TEST_CASE("CLEAR option")
                          .operation(OptionOperation::APPEND)
                          .id(1))
             .add(Option({"--ben"})
-                         .valueName("--bar")
+                     .value("--bar")
                          .operation(OptionOperation::CLEAR)
                          .id(2))
             .add(Option({"--bud"})
@@ -498,8 +498,8 @@ TEST_CASE("Options ending with =")
     Argv argv{"test", "--f=", "--f=2", "--f"};
     auto it = ArgumentParser("test")
             .autoExit(false)
-            .add(Option({"--f="}).valueName("f").argument("N"))
-            .add(Option({"--f"}).valueName("f").operation(OptionOperation::CLEAR))
+            .add(Option({"--f="}).value("f").value("N"))
+            .add(Option({"--f"}).value("f").operation(OptionOperation::CLEAR))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
@@ -516,7 +516,7 @@ TEST_CASE("NONE option")
 {
     using namespace Argos;
     REQUIRE_THROWS(ArgumentParser("p").add(
-            Option({"-o"}).valueName("f").operation(OptionOperation::NONE)));
+        Option({"-o"}).value("f").operation(OptionOperation::NONE)));
     REQUIRE_THROWS(ArgumentParser("p").add(
             Option({"-o"}).value("f").operation(OptionOperation::NONE)));
     auto args = ArgumentParser("test")

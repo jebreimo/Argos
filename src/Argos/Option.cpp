@@ -66,10 +66,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::valueName(const std::string& id)
+    Option& Option::value(const std::string& id)
     {
         checkOption();
-        m_Option->valueName = id;
+        m_Option->value = id;
         return *this;
     }
 
@@ -115,22 +115,27 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::value(const std::string& value)
+    Option& Option::constant(const std::string& value)
     {
         checkOption();
-        m_Option->value = value;
+        m_Option->constant = value;
         return *this;
     }
 
-    Option& Option::value(bool value)
+    Option& Option::constant(bool value)
     {
-        return this->value(value ? 1 : 0);
+        return this->constant(value ? 1LL : 0LL);
     }
 
-    Option& Option::value(int value)
+    Option& Option::constant(int value)
+    {
+        return this->constant(static_cast<long long>(value));
+    }
+
+    Option& Option::constant(long long value)
     {
         checkOption();
-        m_Option->value = std::to_string(value);
+        m_Option->constant = std::to_string(value);
         return *this;
     }
 

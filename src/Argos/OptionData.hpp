@@ -18,9 +18,9 @@ namespace Argos
         std::vector<std::string> flags;
         std::string text;
         std::string section;
-        std::string valueName;
-        std::string argument;
         std::string value;
+        std::string argument;
+        std::string constant;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
