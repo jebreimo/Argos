@@ -279,6 +279,9 @@ namespace Argos
 
         bool writeUsage(ParserData& data, bool prependNewline = false)
         {
+            if (auto t = getCustomText(data, TextId::USAGE); t && t->empty())
+                return false;
+
             auto text1 = writeCustomText(data, TextId::USAGE_TITLE,
                                          prependNewline);
             if (!text1)
