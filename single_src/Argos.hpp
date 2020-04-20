@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.9";
+constexpr char ARGOS_VERSION[] = "0.99.10";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 9;
+constexpr unsigned ARGOS_VERSION_PATCH = 10;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -371,7 +371,7 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's value name.
          */
-        virtual const std::string& valueName() const = 0;
+        virtual const std::string& value() const = 0;
 
         /**
          * @brief Returns the argument's or option's visibility in
@@ -642,7 +642,7 @@ namespace Argos
         /**
          * @brief Returns the argument's value name.
          */
-        const std::string& valueName() const final;
+        const std::string& value() const final;
 
         /**
          * @brief Returns the argument's visibility in
@@ -732,7 +732,7 @@ namespace Argos
         /**
          * @brief Returns the option's value name.
          */
-        const std::string& valueName() const final;
+        const std::string& value() const final;
 
         /**
          * @brief Returns the option's visibility in
@@ -774,7 +774,7 @@ namespace Argos
 
         const std::string& argument() const;
 
-        const std::string& value() const;
+        const std::string& constant() const;
 
         OptionType type() const;
 
@@ -852,6 +852,8 @@ namespace Argos
         OptionView stopOption() const;
 
         const std::vector<std::string>& unprocessedArguments() const;
+
+        void filterParsedArguments(int& argc, char**& argv);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
@@ -1177,7 +1179,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& valueName(const std::string& id);
+        Argument& value(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this argument is
@@ -1352,7 +1354,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Option& valueName(const std::string& id);
+        Option& value(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this option is
@@ -1393,11 +1395,13 @@ namespace Argos
 
         Option& argument(const std::string& name);
 
-        Option& value(const std::string& value);
+        Option& constant(const std::string& value);
 
-        Option& value(bool value);
+        Option& constant(bool value);
 
-        Option& value(int value);
+        Option& constant(int value);
+
+        Option& constant(long long value);
 
         Option& type(OptionType type);
 

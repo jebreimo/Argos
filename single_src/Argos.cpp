@@ -32,7 +32,7 @@ namespace Argos
         std::string name;
         std::string text;
         std::string section;
-        std::string valueName;
+        std::string value;
         ArgumentCallback callback;
         unsigned minCount = 1;
         unsigned maxCount = 1;
@@ -103,9 +103,9 @@ namespace Argos
         std::vector<std::string> flags;
         std::string text;
         std::string section;
-        std::string valueName;
-        std::string argument;
         std::string value;
+        std::string argument;
+        std::string constant;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
@@ -350,10 +350,10 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::valueName(const std::string& id)
+    Argument& Argument::value(const std::string& id)
     {
         checkArgument();
-        m_Argument->valueName = id;
+        m_Argument->value = id;
         return *this;
     }
 
@@ -500,9 +500,9 @@ namespace Argos
         return m_Argument->section;
     }
 
-    const std::string& ArgumentView::valueName() const
+    const std::string& ArgumentView::value() const
     {
-        return m_Argument->valueName;
+        return m_Argument->value;
     }
 
     Visibility ArgumentView::visibility() const
@@ -667,10 +667,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::valueName(const std::string& id)
+    Option& Option::value(const std::string& id)
     {
         checkOption();
-        m_Option->valueName = id;
+        m_Option->value = id;
         return *this;
     }
 
@@ -716,22 +716,27 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::value(const std::string& value)
+    Option& Option::constant(const std::string& value)
     {
         checkOption();
-        m_Option->value = value;
+        m_Option->constant = value;
         return *this;
     }
 
-    Option& Option::value(bool value)
+    Option& Option::constant(bool value)
     {
-        return this->value(value ? 1 : 0);
+        return this->constant(value ? 1LL : 0LL);
     }
 
-    Option& Option::value(int value)
+    Option& Option::constant(int value)
+    {
+        return this->constant(static_cast<long long>(value));
+    }
+
+    Option& Option::constant(long long value)
     {
         checkOption();
-        m_Option->value = std::to_string(value);
+        m_Option->constant = std::to_string(value);
         return *this;
     }
 
@@ -840,9 +845,9 @@ namespace Argos
         return m_Option->section;
     }
 
-    const std::string& OptionView::valueName() const
+    const std::string& OptionView::value() const
     {
-        return m_Option->valueName;
+        return m_Option->value;
     }
 
     OptionOperation OptionView::operation() const
@@ -875,9 +880,9 @@ namespace Argos
         return m_Option->argument;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::constant() const
     {
-        return m_Option->value;
+        return m_Option->constant;
     }
 
     OptionType OptionView::type() const
@@ -2678,15 +2683,22 @@ namespace Argos
                           && opt.type != OptionType::HELP;
             if (braces)
                 optTxt.push_back('[');
-            auto& flag = opt.flags.front();
+            const auto& flag = opt.flags.front();
             optTxt += flag;
             if (!opt.argument.empty())
             {
                 if (flag.back() != '=')
                     optTxt += " ";
-                optTxt += "<";
-                optTxt += opt.argument;
-                optTxt.push_back('>');
+                if (opt.argument.front() != '<')
+                {
+                    optTxt += "<";
+                    optTxt += opt.argument;
+                    optTxt.push_back('>');
+                }
+                else
+                {
+                    optTxt += opt.argument;
+                }
             }
             if (braces)
                 optTxt.push_back(']');
@@ -2696,7 +2708,7 @@ namespace Argos
         std::string getLongOptionName(const OptionData& opt)
         {
             std::string optTxt;
-            for (auto& flag : opt.flags)
+            for (const auto& flag : opt.flags)
             {
                 if (!optTxt.empty())
                     optTxt.append(", ");
@@ -2775,9 +2787,9 @@ namespace Argos
             // and option flags.
             std::vector<unsigned> nameWidths;
             std::vector<unsigned> textWidths;
-            for (auto& entry : sections)
+            for (const auto& entry : sections)
             {
-                for (auto& [name, txt] : entry.second)
+                for (const auto& [name, txt] : entry.second)
                 {
                     nameWidths.push_back(static_cast<unsigned>(name.size()));
                     textWidths.push_back(static_cast<unsigned>(txt.size()));
@@ -2809,7 +2821,8 @@ namespace Argos
             auto addHelpText = [&](std::string_view s, std::string a, std::string_view b)
             {
                 auto it = find_if(sections.begin(), sections.end(),
-                                  [&](auto& v) {return v.first == s;});
+                                  [&](const auto& v)
+                                  {return v.first == s;});
                 if (it == sections.end())
                 {
                     sections.push_back({s, {}});
@@ -2910,6 +2923,9 @@ namespace Argos
 
         bool writeUsage(ParserData& data, bool prependNewline = false)
         {
+            if (auto t = getCustomText(data, TextId::USAGE); t && t->empty())
+                return false;
+
             auto text1 = writeCustomText(data, TextId::USAGE_TITLE,
                                          prependNewline);
             if (!text1)
@@ -2934,12 +2950,12 @@ namespace Argos
 
         std::string getName(ParserData& data, ArgumentId argumentId)
         {
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
             {
                 if (a->argumentId == argumentId)
                     return a->name;
             }
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
             {
                 if (o->argumentId == argumentId)
                 {
@@ -3091,6 +3107,28 @@ namespace Argos
     const std::vector<std::string>& ParsedArguments::unprocessedArguments() const
     {
         return m_Impl->unprocessedArguments();
+    }
+
+    void ParsedArguments::filterParsedArguments(int& argc, char**& argv)
+    {
+        if (argc <= 1)
+            return;
+        const auto& unprocessed = m_Impl->unprocessedArguments();
+        auto it = unprocessed.begin();
+        int out = 1;
+        if (!unprocessed.empty())
+        {
+            for (int in = 1; in < argc; ++in)
+            {
+                if (argv[in] == *it)
+                {
+                    argv[out++] = argv[in];
+                    if (++it == unprocessed.end())
+                        break;
+                }
+            }
+        }
+        argc = out;
     }
 }
 
@@ -3249,8 +3287,8 @@ namespace Argos
         for (auto& a : m_Data->arguments)
         {
             m_Ids.emplace_back(a->name, a->valueId, a->argumentId);
-            if (!a->valueName.empty())
-                m_Ids.emplace_back(a->valueName, a->valueId, a->argumentId);
+            if (!a->value.empty())
+                m_Ids.emplace_back(a->value, a->valueId, a->argumentId);
         }
         for (auto& o : m_Data->options)
         {
@@ -3259,8 +3297,8 @@ namespace Argos
 
             for (auto& f : o->flags)
                 m_Ids.emplace_back(f, o->valueId, o->argumentId);
-            if (!o->valueName.empty())
-                m_Ids.emplace_back(o->valueName, o->valueId, o->argumentId);
+            if (!o->value.empty())
+                m_Ids.emplace_back(o->value, o->valueId, o->argumentId);
         }
         if (!m_Ids.empty())
         {
@@ -3697,9 +3735,9 @@ namespace Argos
         switch (opt.operation)
         {
         case OptionOperation::ASSIGN:
-            if (!opt.value.empty())
+            if (!opt.constant.empty())
             {
-                m_ParsedArgs->assignValue(opt.valueId, opt.value,
+                m_ParsedArgs->assignValue(opt.valueId, opt.constant,
                                           opt.argumentId);
             }
             else if (auto value = m_Iterator->nextValue())
@@ -3714,9 +3752,9 @@ namespace Argos
             }
             break;
         case OptionOperation::APPEND:
-            if (!opt.value.empty())
+            if (!opt.constant.empty())
             {
-                m_ParsedArgs->appendValue(opt.valueId, opt.value,
+                m_ParsedArgs->appendValue(opt.valueId, opt.constant,
                                           opt.argumentId);
             }
             else if (auto value = m_Iterator->nextValue())
@@ -3994,10 +4032,10 @@ namespace Argos
             result->parserSettings = data.parserSettings;
             result->helpSettings = data.helpSettings;
             result->arguments.reserve(data.arguments.size());
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
                 result->arguments.push_back(std::make_unique<ArgumentData>(*a));
             result->options.reserve(data.options.size());
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
                 result->options.push_back(std::make_unique<OptionData>(*o));
             return result;
         }
@@ -4027,11 +4065,11 @@ namespace Argos
                 }
             };
             InternalIdMaker idMaker;
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
             {
-                if (!a->valueName.empty())
+                if (!a->value.empty())
                 {
-                    a->valueId = idMaker.makeValueId(a->valueName);
+                    a->valueId = idMaker.makeValueId(a->value);
                     idMaker.explicitIds.emplace(a->name, a->valueId);
                 }
                 else
@@ -4039,11 +4077,11 @@ namespace Argos
                     a->valueId = idMaker.makeValueId(a->name);
                 }
             }
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeValueId(o->valueName);
+                o->valueId = idMaker.makeValueId(o->value);
                 for (auto& f : o->flags)
                     idMaker.explicitIds.emplace(f, o->valueId);
             }
@@ -4051,19 +4089,20 @@ namespace Argos
 
         inline bool hasHelpOption(const ParserData& data)
         {
-            for (auto& o : data.options)
-                if (o->type == OptionType::HELP)
-                    return true;
-            return false;
+            return std::any_of(data.options.begin(), data.options.end(),
+                               [](const auto& o)
+                               {return o->type == OptionType::HELP;});
         }
 
         inline bool hasFlag(const ParserData& data, std::string_view flag)
         {
-            for (auto& o : data.options)
-                for (auto& f : o->flags)
-                    if (areEqual(f, flag, data.parserSettings.caseInsensitive))
-                        return true;
-            return false;
+            bool ci = data.parserSettings.caseInsensitive;
+            return any_of(data.options.begin(), data.options.end(),
+                          [&](const auto& o)
+                          {return any_of(o->flags.begin(), o->flags.end(),
+                                         [&](const auto& f)
+                                         {return areEqual(f, flag, ci);});
+                          });
         }
 
         void addMissingHelpOption(ParserData& data)
@@ -4090,7 +4129,7 @@ namespace Argos
 
             auto opt = Option{flag}.type(OptionType::HELP)
                 .text("Show help text.")
-                .value("1").release();
+                .constant("1").release();
             opt->argumentId = ArgumentId(data.options.size()
                                          + data.arguments.size() + 1);
             data.options.push_back(move(opt));
@@ -4159,7 +4198,7 @@ namespace Argos
             ARGOS_THROW("Option must have one or more flags.");
         for (auto& flag : od->flags)
         {
-            bool ok;
+            bool ok = false;
             switch (m_Data->parserSettings.optionStyle)
             {
             case OptionStyle::STANDARD:
@@ -4172,36 +4211,35 @@ namespace Argos
                 ok = checkFlag(flag, '-', *od);
                 break;
             default:
-                ok = false;
                 break;
             }
             if (!ok)
                 ARGOS_THROW("Invalid flag: '" + flag + "'.");
         }
 
-        if (!od->argument.empty() && !od->value.empty())
+        if (!od->argument.empty() && !od->constant.empty())
             ARGOS_THROW("Option cannot have both argument and value set.");
         switch (od->operation)
         {
         case OptionOperation::NONE:
-            if (!od->value.empty())
+            if (!od->constant.empty())
                 ARGOS_THROW("NONE-options cannot have value set.");
-            if (!od->valueName.empty())
+            if (!od->value.empty())
                 ARGOS_THROW("NONE-options cannot have valueName set.");
             if (!od->optional)
                 ARGOS_THROW("NONE-options must be optional.");
             break;
         case OptionOperation::ASSIGN:
-            if (od->argument.empty() && od->value.empty())
-                od->value = "1";
+            if (od->argument.empty() && od->constant.empty())
+                od->constant = "1";
             break;
         case OptionOperation::APPEND:
-            if (od->argument.empty() && od->value.empty())
+            if (od->argument.empty() && od->constant.empty())
                 ARGOS_THROW("Options that appends must have either value or argument set.");
             break;
         case OptionOperation::CLEAR:
-            if (!od->argument.empty() ||!od->value.empty())
-                od->value = "1";
+            if (!od->argument.empty() ||!od->constant.empty())
+                od->constant = "1";
             if (!od->optional)
                 ARGOS_THROW("CLEAR-options must be optional.");
             break;
