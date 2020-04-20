@@ -498,7 +498,7 @@ TEST_CASE("Options ending with =")
     Argv argv{"test", "--f=", "--f=2", "--f"};
     auto it = ArgumentParser("test")
             .autoExit(false)
-            .add(Option({"--f="}).value("f").value("N"))
+            .add(Option({"--f="}).value("f").argument("N"))
             .add(Option({"--f"}).value("f").operation(OptionOperation::CLEAR))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
