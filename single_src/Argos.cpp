@@ -3850,7 +3850,12 @@ namespace Argos
             error("Unknown option: " + std::string(m_Iterator->current()));
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
-        return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
+        else
+        {
+            m_ParsedArgs->addUnprocessedArgument(
+                std::string(m_Iterator->current()));
+            return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
+        }
     }
 
     IteratorResult
