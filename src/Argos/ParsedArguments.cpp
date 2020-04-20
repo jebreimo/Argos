@@ -107,4 +107,26 @@ namespace Argos
     {
         return m_Impl->unprocessedArguments();
     }
+
+    void ParsedArguments::filterParsedArguments(int& argc, char**& argv)
+    {
+        if (argc <= 1)
+            return;
+        const auto& unprocessed = m_Impl->unprocessedArguments();
+        auto it = unprocessed.begin();
+        int out = 1;
+        if (!unprocessed.empty())
+        {
+            for (int in = 1; in < argc; ++in)
+            {
+                if (argv[in] == *it)
+                {
+                    argv[out++] = argv[in];
+                    if (++it == unprocessed.end())
+                        break;
+                }
+            }
+        }
+        argc = out;
+    }
 }
