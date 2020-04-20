@@ -62,10 +62,10 @@ namespace Argos
             result->parserSettings = data.parserSettings;
             result->helpSettings = data.helpSettings;
             result->arguments.reserve(data.arguments.size());
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
                 result->arguments.push_back(std::make_unique<ArgumentData>(*a));
             result->options.reserve(data.options.size());
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
                 result->options.push_back(std::make_unique<OptionData>(*o));
             return result;
         }
@@ -95,7 +95,7 @@ namespace Argos
                 }
             };
             InternalIdMaker idMaker;
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
             {
                 if (!a->value.empty())
                 {
@@ -107,7 +107,7 @@ namespace Argos
                     a->valueId = idMaker.makeValueId(a->name);
                 }
             }
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
@@ -119,19 +119,20 @@ namespace Argos
 
         inline bool hasHelpOption(const ParserData& data)
         {
-            for (auto& o : data.options)
-                if (o->type == OptionType::HELP)
-                    return true;
-            return false;
+            return std::any_of(data.options.begin(), data.options.end(),
+                               [](const auto& o)
+                               {return o->type == OptionType::HELP;});
         }
 
         inline bool hasFlag(const ParserData& data, std::string_view flag)
         {
-            for (auto& o : data.options)
-                for (auto& f : o->flags)
-                    if (areEqual(f, flag, data.parserSettings.caseInsensitive))
-                        return true;
-            return false;
+            bool ci = data.parserSettings.caseInsensitive;
+            return any_of(data.options.begin(), data.options.end(),
+                          [&](const auto& o)
+                          {return any_of(o->flags.begin(), o->flags.end(),
+                                         [&](const auto& f)
+                                         {return areEqual(f, flag, ci);});
+                          });
         }
 
         void addMissingHelpOption(ParserData& data)
@@ -158,7 +159,7 @@ namespace Argos
 
             auto opt = Option{flag}.type(OptionType::HELP)
                 .text("Show help text.")
-                .value("1").release();
+                .constant("1").release();
             opt->argumentId = ArgumentId(data.options.size()
                                          + data.arguments.size() + 1);
             data.options.push_back(move(opt));
@@ -227,7 +228,7 @@ namespace Argos
             ARGOS_THROW("Option must have one or more flags.");
         for (auto& flag : od->flags)
         {
-            bool ok;
+            bool ok = false;
             switch (m_Data->parserSettings.optionStyle)
             {
             case OptionStyle::STANDARD:
@@ -240,7 +241,6 @@ namespace Argos
                 ok = checkFlag(flag, '-', *od);
                 break;
             default:
-                ok = false;
                 break;
             }
             if (!ok)
