@@ -47,15 +47,22 @@ namespace Argos
                           && opt.type != OptionType::HELP;
             if (braces)
                 optTxt.push_back('[');
-            auto& flag = opt.flags.front();
+            const auto& flag = opt.flags.front();
             optTxt += flag;
             if (!opt.argument.empty())
             {
                 if (flag.back() != '=')
                     optTxt += " ";
-                optTxt += "<";
-                optTxt += opt.argument;
-                optTxt.push_back('>');
+                if (opt.argument.front() != '<')
+                {
+                    optTxt += "<";
+                    optTxt += opt.argument;
+                    optTxt.push_back('>');
+                }
+                else
+                {
+                    optTxt += opt.argument;
+                }
             }
             if (braces)
                 optTxt.push_back(']');
@@ -65,7 +72,7 @@ namespace Argos
         std::string getLongOptionName(const OptionData& opt)
         {
             std::string optTxt;
-            for (auto& flag : opt.flags)
+            for (const auto& flag : opt.flags)
             {
                 if (!optTxt.empty())
                     optTxt.append(", ");
@@ -144,9 +151,9 @@ namespace Argos
             // and option flags.
             std::vector<unsigned> nameWidths;
             std::vector<unsigned> textWidths;
-            for (auto& entry : sections)
+            for (const auto& entry : sections)
             {
-                for (auto& [name, txt] : entry.second)
+                for (const auto& [name, txt] : entry.second)
                 {
                     nameWidths.push_back(static_cast<unsigned>(name.size()));
                     textWidths.push_back(static_cast<unsigned>(txt.size()));
@@ -178,7 +185,8 @@ namespace Argos
             auto addHelpText = [&](std::string_view s, std::string a, std::string_view b)
             {
                 auto it = find_if(sections.begin(), sections.end(),
-                                  [&](auto& v) {return v.first == s;});
+                                  [&](const auto& v)
+                                  {return v.first == s;});
                 if (it == sections.end())
                 {
                     sections.push_back({s, {}});
@@ -306,12 +314,12 @@ namespace Argos
 
         std::string getName(ParserData& data, ArgumentId argumentId)
         {
-            for (auto& a : data.arguments)
+            for (const auto& a : data.arguments)
             {
                 if (a->argumentId == argumentId)
                     return a->name;
             }
-            for (auto& o : data.options)
+            for (const auto& o : data.options)
             {
                 if (o->argumentId == argumentId)
                 {
