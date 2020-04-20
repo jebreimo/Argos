@@ -9,30 +9,7 @@
 #include "Argos/ArgumentParser.hpp"
 
 #include <sstream>
-#include <string>
-#include <vector>
-
-struct Argv
-{
-    Argv(std::initializer_list<std::string> args) : strings(args)
-    {
-        for (auto& arg : strings)
-            argv.push_back(arg.data());
-    }
-
-    int size() const
-    {
-        return static_cast<int>(argv.size());
-    }
-
-    char** data()
-    {
-        return argv.data();
-    }
-
-    std::vector<std::string> strings;
-    std::vector<char*> argv;
-};
+#include "Argv.hpp"
 
 TEST_CASE("Test help flag")
 {
@@ -197,9 +174,11 @@ TEST_CASE("Test incorrect slash option")
 {
     using namespace Argos;
     Argv argv{"test", "/benny"};
+    std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
             .autoExit(false)
             .optionStyle(OptionStyle::SLASH)
+            .outputStream(&ss)
             .add(Option({"/bill"}))
             .add(Argument("file"))
             .parse(argv.size(), argv.data());
@@ -279,8 +258,10 @@ TEST_CASE("LAST_ARGUMENT option")
 {
     using namespace Argos;
     Argv argv{"test", "--", "arg 1"};
+    std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
             .autoExit(false)
+            .outputStream(&ss)
             .add(Argument("arg"))
             .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
             .parse(argv.size(), argv.data());
@@ -403,10 +384,12 @@ TEST_CASE("Abbreviated options")
 {
     using namespace Argos;
     ArgumentParser parser("test");
+    std::stringstream ss;
     parser.autoExit(false)
             .allowAbbreviatedOptions(true)
             .caseInsensitive(true)
             .optionStyle(OptionStyle::SLASH)
+            .outputStream(&ss)
             .add(Argos::Option({"/penny"}))
             .add(Argos::Option({"/pentagram"}));
     SECTION("Valid flag 1")
@@ -533,8 +516,10 @@ TEST_CASE("NONE option")
 TEST_CASE("Mandatory option")
 {
     using namespace Argos;
+    std::stringstream ss;
     auto args = ArgumentParser("test")
             .autoExit(false)
+            .outputStream(&ss)
             .add(Option({"--f"}).argument("N").optional(false))
             .add(Argument("arg"))
             .parse({"abcd"});
@@ -570,9 +555,11 @@ TEST_CASE("Unknown option, invalid argument.")
 {
     using namespace Argos;
     Argv argv{{"test", "--opera=foo", "arg", "man"}};
+    std::stringstream ss;
     auto it = ArgumentParser("test")
             .autoExit(false)
             .ignoreUndefinedOptions(true)
+            .outputStream(&ss)
             .add(Argument("FILE"))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
@@ -591,9 +578,11 @@ TEST_CASE("Unknown argument, invalid option.")
 {
     using namespace Argos;
     Argv argv{{"test", "arg", "man", "-o"}};
+    std::stringstream ss;
     auto it = ArgumentParser("test")
             .autoExit(false)
             .ignoreUndefinedArguments(true)
+            .outputStream(&ss)
             .add(Argument("FILE"))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
@@ -612,9 +601,11 @@ TEST_CASE("Unknown argument, invalid short option.")
 {
     using namespace Argos;
     Argv argv{{"test", "-o", "-pq", "-op"}};
+    std::stringstream ss;
     auto it = ArgumentParser("test")
             .autoExit(false)
             .ignoreUndefinedOptions(true)
+            .outputStream(&ss)
             .add(Option{"-o"}.id(1))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
