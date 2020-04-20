@@ -29,7 +29,7 @@ add_executable(ArgosTest
     test_TextFormatter.cpp
     test_TextWriter.cpp
     test_WordSplitter.cpp
-    )
+    test_ParsedArguments.cpp Argv.hpp)
 
 target_link_libraries(ArgosTest
     PRIVATE
