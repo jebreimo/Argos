@@ -2717,9 +2717,16 @@ namespace Argos
                 {
                     if (flag.back() != '=')
                         optTxt.push_back(' ');
-                    optTxt.push_back('<');
-                    optTxt += opt.argument;
-                    optTxt.push_back('>');
+                    if (opt.argument.front() != '<')
+                    {
+                        optTxt += "<";
+                        optTxt += opt.argument;
+                        optTxt.push_back('>');
+                    }
+                    else
+                    {
+                        optTxt += opt.argument;
+                    }
                 }
             }
             return optTxt;
@@ -4432,13 +4439,13 @@ namespace Argos
         return *this;
     }
 
-    std::ostream* ArgumentParser::outputStream() const
+    std::ostream* ArgumentParser::stream() const
     {
         checkData();
         return m_Data->helpSettings.outputStream;
     }
 
-    ArgumentParser& ArgumentParser::outputStream(std::ostream* stream)
+    ArgumentParser& ArgumentParser::stream(std::ostream* stream)
     {
         checkData();
         m_Data->helpSettings.outputStream = stream;

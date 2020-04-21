@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.10";
+constexpr char ARGOS_VERSION[] = "0.99.11";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 10;
+constexpr unsigned ARGOS_VERSION_PATCH = 11;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1616,9 +1616,9 @@ namespace Argos
 
         ArgumentParser& optionCallback(OptionCallback callback);
 
-        std::ostream* outputStream() const;
+        std::ostream* stream() const;
 
-        ArgumentParser& outputStream(std::ostream* stream);
+        ArgumentParser& stream(std::ostream* stream);
 
         const std::string& programName() const;
 

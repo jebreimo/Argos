@@ -196,9 +196,9 @@ namespace Argos
 
         ArgumentParser& optionCallback(OptionCallback callback);
 
-        std::ostream* outputStream() const;
+        std::ostream* stream() const;
 
-        ArgumentParser& outputStream(std::ostream* stream);
+        ArgumentParser& stream(std::ostream* stream);
 
         const std::string& programName() const;
 

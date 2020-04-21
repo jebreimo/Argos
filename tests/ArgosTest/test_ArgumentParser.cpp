@@ -15,7 +15,7 @@ TEST_CASE("Test help flag")
 {
     Argos::ArgumentParser argos("test");
     std::stringstream ss;
-    argos.autoExit(false).outputStream(&ss);
+    argos.autoExit(false).stream(&ss);
     REQUIRE(argos.programName() == "test");
 
     argos.add(Argos::Option({"-h", "--help"})
@@ -59,15 +59,15 @@ TEST_CASE("Section order in help text")
     Argv argv{"test", "-h"};
     std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
-            .autoExit(false)
-            .add(Argument("file").section("Z"))
-            .add(Option({"-h"}).section("A").type(OptionType::HELP))
-            .add(Option({"-s"}).section("Z"))
-            .add(Argument("device").section("A"))
-            .outputStream(&ss)
-            .text(TextId::USAGE_TITLE, "")
-            .text(TextId::USAGE, "")
-            .parse(argv.size(), argv.data());
+        .autoExit(false)
+        .add(Argument("file").section("Z"))
+        .add(Option({"-h"}).section("A").type(OptionType::HELP))
+        .add(Option({"-s"}).section("Z"))
+        .add(Argument("device").section("A"))
+        .stream(&ss)
+        .text(TextId::USAGE_TITLE, "")
+        .text(TextId::USAGE, "")
+        .parse(argv.size(), argv.data());
     REQUIRE(ss.str() == "Z\n  <file>\n  -s\n\nA\n  <device>\n  -h\n");
 }
 
@@ -176,12 +176,12 @@ TEST_CASE("Test incorrect slash option")
     Argv argv{"test", "/benny"};
     std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
-            .autoExit(false)
-            .optionStyle(OptionStyle::SLASH)
-            .outputStream(&ss)
-            .add(Option({"/bill"}))
-            .add(Argument("file"))
-            .parse(argv.size(), argv.data());
+        .autoExit(false)
+        .optionStyle(OptionStyle::SLASH)
+        .stream(&ss)
+        .add(Option({"/bill"}))
+        .add(Argument("file"))
+        .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
 
@@ -260,11 +260,11 @@ TEST_CASE("LAST_ARGUMENT option")
     Argv argv{"test", "--", "arg 1"};
     std::stringstream ss;
     auto args = Argos::ArgumentParser("test")
-            .autoExit(false)
-            .outputStream(&ss)
-            .add(Argument("arg"))
-            .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
-            .parse(argv.size(), argv.data());
+        .autoExit(false)
+        .stream(&ss)
+        .add(Argument("arg"))
+        .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
+        .parse(argv.size(), argv.data());
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
 
@@ -386,12 +386,12 @@ TEST_CASE("Abbreviated options")
     ArgumentParser parser("test");
     std::stringstream ss;
     parser.autoExit(false)
-            .allowAbbreviatedOptions(true)
-            .caseInsensitive(true)
-            .optionStyle(OptionStyle::SLASH)
-            .outputStream(&ss)
-            .add(Argos::Option({"/penny"}))
-            .add(Argos::Option({"/pentagram"}));
+        .allowAbbreviatedOptions(true)
+        .caseInsensitive(true)
+        .optionStyle(OptionStyle::SLASH)
+        .stream(&ss)
+        .add(Argos::Option({"/penny"}))
+        .add(Argos::Option({"/pentagram"}));
     SECTION("Valid flag 1")
     {
         Argv argv{"test", "/PenN"};
@@ -487,7 +487,7 @@ TEST_CASE("Options ending with =")
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
     REQUIRE(it.next(arg, value));
-    REQUIRE(it.parsedArguments().value("f").asString(" ") == "");
+    REQUIRE(it.parsedArguments().value("f").asString(" ").empty());
     REQUIRE(it.next(arg, value));
     REQUIRE(it.parsedArguments().value("f").asString() == "2");
     REQUIRE(it.next(arg, value));
@@ -518,11 +518,11 @@ TEST_CASE("Mandatory option")
     using namespace Argos;
     std::stringstream ss;
     auto args = ArgumentParser("test")
-            .autoExit(false)
-            .outputStream(&ss)
-            .add(Option({"--f"}).argument("N").optional(false))
-            .add(Argument("arg"))
-            .parse({"abcd"});
+        .autoExit(false)
+        .stream(&ss)
+        .add(Option({"--f"}).argument("N").optional(false))
+        .add(Argument("arg"))
+        .parse({"abcd"});
     REQUIRE(args.resultCode() == ParserResultCode::ERROR);
 }
 
@@ -557,11 +557,11 @@ TEST_CASE("Unknown option, invalid argument.")
     Argv argv{{"test", "--opera=foo", "arg", "man"}};
     std::stringstream ss;
     auto it = ArgumentParser("test")
-            .autoExit(false)
-            .ignoreUndefinedOptions(true)
-            .outputStream(&ss)
-            .add(Argument("FILE"))
-            .makeIterator(argv.size(), argv.data());
+        .autoExit(false)
+        .ignoreUndefinedOptions(true)
+        .stream(&ss)
+        .add(Argument("FILE"))
+        .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
     REQUIRE(it.next(arg, value));
@@ -580,11 +580,11 @@ TEST_CASE("Unknown argument, invalid option.")
     Argv argv{{"test", "arg", "man", "-o"}};
     std::stringstream ss;
     auto it = ArgumentParser("test")
-            .autoExit(false)
-            .ignoreUndefinedArguments(true)
-            .outputStream(&ss)
-            .add(Argument("FILE"))
-            .makeIterator(argv.size(), argv.data());
+        .autoExit(false)
+        .ignoreUndefinedArguments(true)
+        .stream(&ss)
+        .add(Argument("FILE"))
+        .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
     REQUIRE(it.next(arg, value));
@@ -603,11 +603,11 @@ TEST_CASE("Unknown argument, invalid short option.")
     Argv argv{{"test", "-o", "-pq", "-op"}};
     std::stringstream ss;
     auto it = ArgumentParser("test")
-            .autoExit(false)
-            .ignoreUndefinedOptions(true)
-            .outputStream(&ss)
-            .add(Option{"-o"}.id(1))
-            .makeIterator(argv.size(), argv.data());
+        .autoExit(false)
+        .ignoreUndefinedOptions(true)
+        .stream(&ss)
+        .add(Option{"-o"}.id(1))
+        .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
     REQUIRE(it.next(arg, value));
@@ -626,7 +626,7 @@ TEST_CASE("Default help")
     std::stringstream ss;
     auto args = ArgumentParser("test")
         .autoExit(false)
-        .outputStream(&ss)
+        .stream(&ss)
         .add(Argument("arg"))
         .parse({"--help"});
     REQUIRE(args.resultCode() == ParserResultCode::STOP);
