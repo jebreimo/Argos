@@ -81,9 +81,16 @@ namespace Argos
                 {
                     if (flag.back() != '=')
                         optTxt.push_back(' ');
-                    optTxt.push_back('<');
-                    optTxt += opt.argument;
-                    optTxt.push_back('>');
+                    if (opt.argument.front() != '<')
+                    {
+                        optTxt += "<";
+                        optTxt += opt.argument;
+                        optTxt.push_back('>');
+                    }
+                    else
+                    {
+                        optTxt += opt.argument;
+                    }
                 }
             }
             return optTxt;
