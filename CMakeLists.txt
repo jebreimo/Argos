@@ -5,8 +5,8 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
-cmake_minimum_required(VERSION 3.15)
-project(Argos VERSION 0.99.11)
+cmake_minimum_required(VERSION 3.13)
+project(Argos VERSION 0.99.12)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -15,7 +15,9 @@ set(CMAKE_CXX_STANDARD 17)
 function(TargetEnableAllWarnings target)
     target_compile_options(${target}
         PRIVATE
-            $<$<CXX_COMPILER_ID:Clang,GNU,AppleClang>:-Wall>
+            $<$<CXX_COMPILER_ID:Clang>:-Wall>
+            $<$<CXX_COMPILER_ID:GNU>:-Wall>
+            $<$<CXX_COMPILER_ID:AppleClang>:-Wall>
             $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endfunction()
 

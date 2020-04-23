@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.11";
+constexpr char ARGOS_VERSION[] = "0.99.12";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 11;
+constexpr unsigned ARGOS_VERSION_PATCH = 12;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.

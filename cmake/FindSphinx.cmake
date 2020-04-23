@@ -5,7 +5,7 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.13)
 
 #
 # Contents are based on https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
