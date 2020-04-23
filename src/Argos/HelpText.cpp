@@ -20,7 +20,7 @@ namespace Argos
                 return arg.name;
 
             std::string result;
-            for (int i = 0; i < arg.minCount; ++i)
+            for (unsigned i = 0; i < arg.minCount; ++i)
             {
                 if (!result.empty())
                     result += " ";
