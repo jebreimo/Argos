@@ -119,7 +119,7 @@ namespace Argos
             {
                 if (prependNewline)
                     data.textFormatter.newline();
-                data.textFormatter.writeText(*text);
+                data.textFormatter.writeWords(*text);
                 if (!data.textFormatter.isCurrentLineEmpty())
                     data.textFormatter.newline();
             }
@@ -136,11 +136,11 @@ namespace Argos
                     && opt->type != OptionType::STOP)
                     continue;
 
-                data.textFormatter.writeText(data.helpSettings.programName);
-                data.textFormatter.writeText(" ");
+                data.textFormatter.writeWords(data.helpSettings.programName);
+                data.textFormatter.writeWords(" ");
                 data.textFormatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
-                data.textFormatter.writePreformattedText(getBriefOptionName(*opt));
-                data.textFormatter.writeText(" ");
+                data.textFormatter.writeLines(getBriefOptionName(*opt));
+                data.textFormatter.writeWords(" ");
                 data.textFormatter.popIndentation();
                 data.textFormatter.newline();
             }
@@ -232,16 +232,16 @@ namespace Argos
             {
                 if (prependNewline)
                     formatter.newline();
-                formatter.writeText(section);
+                formatter.writeWords(section);
                 formatter.newline();
                 formatter.pushIndentation(2);
                 for (auto& [name, text] : txts)
                 {
-                    formatter.writeText(name);
+                    formatter.writeWords(name);
                     if (nameWidth)
                     {
                         if (formatter.currentLineWidth() >= nameWidth)
-                            formatter.writeText("  ");
+                            formatter.writeWords("  ");
                         formatter.pushIndentation(nameWidth);
                     }
                     else
@@ -249,7 +249,7 @@ namespace Argos
                         formatter.newline();
                         formatter.pushIndentation(8);
                     }
-                    formatter.writeText(text);
+                    formatter.writeWords(text);
                     formatter.popIndentation();
                     formatter.newline();
                 }
@@ -266,8 +266,8 @@ namespace Argos
 
             formatter.pushIndentation(2);
             writeStopAndHelpUsage(data);
-            formatter.writeText(data.helpSettings.programName);
-            formatter.writeText(" ");
+            formatter.writeWords(data.helpSettings.programName);
+            formatter.writeWords(" ");
             formatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
             for (auto& opt : data.options)
             {
@@ -277,15 +277,15 @@ namespace Argos
                     || opt->type == OptionType::STOP)
                     continue;
 
-                formatter.writePreformattedText(getBriefOptionName(*opt));
-                formatter.writeText(" ");
+                formatter.writeLines(getBriefOptionName(*opt));
+                formatter.writeWords(" ");
             }
             for (auto& arg : data.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
-                formatter.writePreformattedText(getArgumentName(*arg));
-                formatter.writeText(" ");
+                formatter.writeLines(getArgumentName(*arg));
+                formatter.writeWords(" ");
             }
             formatter.popIndentation();
             formatter.newline();
@@ -303,7 +303,7 @@ namespace Argos
             {
                 if (prependNewline)
                     data.textFormatter.newline();
-                data.textFormatter.writeText("USAGE");
+                data.textFormatter.writeWords("USAGE");
                 data.textFormatter.newline();
                 prependNewline = false;
             }
@@ -357,8 +357,8 @@ namespace Argos
             data.textFormatter.setStream(data.helpSettings.outputStream);
         else
             data.textFormatter.setStream(&std::cerr);
-        data.textFormatter.writeText(data.helpSettings.programName + ": ");
-        data.textFormatter.writeText(msg);
+        data.textFormatter.writeWords(data.helpSettings.programName + ": ");
+        data.textFormatter.writeWords(msg);
         data.textFormatter.newline();
         if (!writeCustomText(data, TextId::ERROR_USAGE))
             writeUsage(data);

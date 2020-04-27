@@ -43,9 +43,9 @@ namespace Argos
 
         void popIndentation();
 
-        void writeText(std::string_view text);
+        void writeWords(std::string_view text);
 
-        void writePreformattedText(std::string_view text);
+        void writeLines(std::string_view text);
 
         void newline();
 

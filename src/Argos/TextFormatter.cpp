@@ -105,7 +105,7 @@ namespace Argos
         m_Writer.setIndentation(m_Indents.back());
     }
 
-    void TextFormatter::writeText(std::string_view text)
+    void TextFormatter::writeWords(std::string_view text)
     {
         while (!text.empty())
         {
@@ -129,7 +129,7 @@ namespace Argos
         }
     }
 
-    void TextFormatter::writePreformattedText(std::string_view text)
+    void TextFormatter::writeLines(std::string_view text)
     {
         auto remainder = text;
         while (!remainder.empty())

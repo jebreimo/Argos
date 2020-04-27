@@ -14,7 +14,7 @@ TEST_CASE("Basic test of TextFormatter")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
 }
@@ -23,12 +23,12 @@ TEST_CASE("Test TextFormatter with indentation")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.pushIndentation(17);
-    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.popIndentation();
-    formatter.writeText(" ");
-    formatter.writeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.writeWords(" ");
+    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == R"*(Lorem ipsum dolor sit amet, consectetur
 adipiscing elit. Lorem ipsum dolor sit
@@ -42,7 +42,7 @@ TEST_CASE("Text with newlines")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeText("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
+    formatter.writeWords("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
 }
@@ -51,9 +51,9 @@ TEST_CASE("Indentation change")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeText("ABCDEFGHIJ");
+    formatter.writeWords("ABCDEFGHIJ");
     formatter.pushIndentation(20);
-    formatter.writeText("ABCDEFGHIJ");
+    formatter.writeWords("ABCDEFGHIJ");
     formatter.flush();
     REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
 }
@@ -62,9 +62,9 @@ TEST_CASE("Indentation change with preformatted text")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writePreformattedText("ABCDEFGHIJ");
+    formatter.writeLines("ABCDEFGHIJ");
     formatter.pushIndentation(20);
-    formatter.writePreformattedText("ABCDEFGHIJ");
+    formatter.writeLines("ABCDEFGHIJ");
     formatter.flush();
     REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
 }
@@ -73,7 +73,7 @@ TEST_CASE("Keep whitespace at the start of a line.")
 {
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeText(" Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
+    formatter.writeWords(" Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == " Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
 }
@@ -83,15 +83,15 @@ TEST_CASE("Preformatted text across several lines")
     std::stringstream ss;
     Argos::TextFormatter formatter(&ss, 30);
     formatter.pushIndentation(5);
-    formatter.writePreformattedText("[abc efg]");
-    formatter.writeText(" ");
-    formatter.writePreformattedText("[abc efg]");
-    formatter.writeText(" ");
-    formatter.writePreformattedText("[abc efg]");
-    formatter.writeText(" ");
-    formatter.writePreformattedText("[abc efg]");
-    formatter.writeText(" ");
-    formatter.writePreformattedText("[abc efg]");
+    formatter.writeLines("[abc efg]");
+    formatter.writeWords(" ");
+    formatter.writeLines("[abc efg]");
+    formatter.writeWords(" ");
+    formatter.writeLines("[abc efg]");
+    formatter.writeWords(" ");
+    formatter.writeLines("[abc efg]");
+    formatter.writeWords(" ");
+    formatter.writeLines("[abc efg]");
     formatter.flush();
     REQUIRE(ss.str() == "     [abc efg] [abc efg]\n     [abc efg] [abc efg]\n     [abc efg]");
 }
