@@ -116,4 +116,37 @@ namespace Argos
         auto pos = str.find_last_of("/\\");
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
+
+    size_t countCodePoints(std::string_view str)
+    {
+        size_t count = 0;
+        size_t charLen = 0;
+        for (auto c : str)
+        {
+            auto u = static_cast<uint8_t>(c);
+            if (charLen == 0)
+            {
+                if ((u & 0x80u) == 0)
+                {
+                    ++count;
+                }
+                else
+                {
+                    for (unsigned bit = 0x40u; (bit & u) != 0; bit >>= 1u)
+                        ++charLen;
+                    if (charLen > 3)
+                        break;
+                }
+            }
+            else if ((u & 0xC0u) == 0x80u)
+            {
+                --charLen;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return charLen ? str.size() : count;
+    }
 }

@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "TextWriter.hpp"
+#include "StringUtilities.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -44,17 +45,20 @@ namespace Argos
     {
         auto width = currentWidth();
         auto remaining = std::max(width, m_LineWidth) - width;
-        if (!force && str.size() > remaining)
+        auto strWidth = countCodePoints(str);
+        if (!force && strWidth > remaining)
             return false;
-        m_Line.append(width - m_Line.size(), ' ');
+        m_Line.append(width - m_CurrentLineWidth, ' ');
         m_Spaces = 0;
         m_Line.append(str);
+        m_CurrentLineWidth += width - m_CurrentLineWidth + strWidth;
         return true;
     }
 
     void TextWriter::newline()
     {
         m_Line.push_back('\n');
+        m_CurrentLineWidth = 0;
         flush();
     }
 
@@ -81,7 +85,7 @@ namespace Argos
 
     unsigned TextWriter::currentWidth() const
     {
-        return std::max(unsigned(m_Line.size()), m_Indent) + m_Spaces;
+        return std::max(m_CurrentLineWidth, m_Indent) + m_Spaces;
     }
 
     unsigned TextWriter::remainingWidth() const

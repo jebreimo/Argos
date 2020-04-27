@@ -95,3 +95,12 @@ TEST_CASE("Preformatted text across several lines")
     formatter.flush();
     REQUIRE(ss.str() == "     [abc efg] [abc efg]\n     [abc efg] [abc efg]\n     [abc efg]");
 }
+
+TEST_CASE("TextFormatter with multi-byte characters")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 40);
+    formatter.writeWords(u8"Lorem ipsum dålår sit åmet, consøctetur adipiscing elit.");
+    formatter.flush();
+    REQUIRE(ss.str() == u8"Lorem ipsum dålår sit åmet, consøctetur\nadipiscing elit.");
+}

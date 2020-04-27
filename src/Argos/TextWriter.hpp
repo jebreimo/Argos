@@ -52,6 +52,7 @@ namespace Argos
         std::ostream* m_Stream;
         std::string m_Line;
         unsigned m_LineWidth;
+        unsigned m_CurrentLineWidth = 0;
         unsigned m_TabSize = 4;
         unsigned m_Indent = 0;
         unsigned m_Spaces = 0;

@@ -33,4 +33,6 @@ namespace Argos
     splitString(std::string_view s, char delimiter, size_t maxSplit);
 
     std::string_view getBaseName(std::string_view str);
+
+    size_t countCodePoints(std::string_view str);
 }
