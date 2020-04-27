@@ -207,7 +207,7 @@ namespace Argos
     {
         writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
-            exit(1);
+            exit(m_Data->parserSettings.errorExitCode);
         else
             ARGOS_THROW("Error while parsing arguments.");
     }
@@ -216,7 +216,7 @@ namespace Argos
     {
         writeErrorMessage(*m_Data, message, argumentId);
         if (m_Data->parserSettings.autoExit)
-            exit(1);
+            exit(m_Data->parserSettings.errorExitCode);
         else
             ARGOS_THROW("Error while parsing arguments.");
     }

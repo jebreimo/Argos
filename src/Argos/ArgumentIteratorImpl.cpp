@@ -435,7 +435,7 @@ namespace Argos
         if (!message.empty())
             writeErrorMessage(*m_Data, message);
         if (m_Data->parserSettings.autoExit)
-            exit(1);
+            exit(m_Data->parserSettings.errorExitCode);
         copyRemainingArgumentsToParserResult();
         m_ParsedArgs->setResultCode(ParserResultCode::ERROR);
         m_State = State::ERROR;

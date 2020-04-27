@@ -14,6 +14,14 @@
 #include "OptionData.hpp"
 #include "TextFormatter.hpp"
 
+#ifndef ARGOS_EX_USAGE
+    #ifdef EX_USAGE
+        #define ARGOS_EX_USAGE EX_USAGE
+    #else
+        #define ARGOS_EX_USAGE 64
+    #endif
+#endif
+
 namespace Argos
 {
     struct ParserSettings
@@ -27,6 +35,7 @@ namespace Argos
         bool ignoreUndefinedArguments = false;
         bool caseInsensitive = false;
         bool generateHelpOption = true;
+        int errorExitCode = ARGOS_EX_USAGE;
     };
 
     struct HelpSettings
