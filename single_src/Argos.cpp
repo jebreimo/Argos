@@ -196,6 +196,8 @@ namespace Argos
     splitString(std::string_view s, char delimiter, size_t maxSplit);
 
     std::string_view getBaseName(std::string_view str);
+
+    size_t countCodePoints(std::string_view str);
 }
 
 //****************************************************************************
@@ -249,6 +251,7 @@ namespace Argos
         std::ostream* m_Stream;
         std::string m_Line;
         unsigned m_LineWidth;
+        unsigned m_CurrentLineWidth = 0;
         unsigned m_TabSize = 4;
         unsigned m_Indent = 0;
         unsigned m_Spaces = 0;
@@ -1205,6 +1208,39 @@ namespace Argos
         auto pos = str.find_last_of("/\\");
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
+
+    size_t countCodePoints(std::string_view str)
+    {
+        size_t count = 0;
+        size_t charLen = 0;
+        for (auto c : str)
+        {
+            auto u = static_cast<uint8_t>(c);
+            if (charLen == 0)
+            {
+                if ((u & 0x80u) == 0)
+                {
+                    ++count;
+                }
+                else
+                {
+                    for (unsigned bit = 0x40u; (bit & u) != 0; bit >>= 1u)
+                        ++charLen;
+                    if (charLen > 3)
+                        break;
+                }
+            }
+            else if ((u & 0xC0u) == 0x80u)
+            {
+                --charLen;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return charLen ? str.size() : count;
+    }
 }
 
 //****************************************************************************
@@ -1304,17 +1340,20 @@ namespace Argos
     {
         auto width = currentWidth();
         auto remaining = std::max(width, m_LineWidth) - width;
-        if (!force && str.size() > remaining)
+        auto strWidth = countCodePoints(str);
+        if (!force && strWidth > remaining)
             return false;
-        m_Line.append(width - m_Line.size(), ' ');
+        m_Line.append(width - m_CurrentLineWidth, ' ');
         m_Spaces = 0;
         m_Line.append(str);
+        m_CurrentLineWidth += width - m_CurrentLineWidth + strWidth;
         return true;
     }
 
     void TextWriter::newline()
     {
         m_Line.push_back('\n');
+        m_CurrentLineWidth = 0;
         flush();
     }
 
@@ -1341,7 +1380,7 @@ namespace Argos
 
     unsigned TextWriter::currentWidth() const
     {
-        return std::max(unsigned(m_Line.size()), m_Indent) + m_Spaces;
+        return std::max(m_CurrentLineWidth, m_Indent) + m_Spaces;
     }
 
     unsigned TextWriter::remainingWidth() const
