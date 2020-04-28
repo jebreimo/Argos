@@ -5,7 +5,7 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.14)
 project(Argos VERSION 0.99.13)
 
 set(CMAKE_CXX_STANDARD 17)

@@ -10,15 +10,15 @@
 #include <algorithm>
 #include <cstring>
 #include "ArgosThrow.hpp"
+#include "StringUtilities.hpp"
 
 namespace Argos
 {
     namespace
     {
-        bool isVowel(char c)
+        bool isUtf8Continuation(char c)
         {
-            constexpr auto VOWELS = "aeiouyAEIOUY";
-            return memchr(VOWELS, c, 6) != nullptr;
+            return (uint8_t(c) & 0xC0u) == 0x80;
         }
     }
 
@@ -66,35 +66,32 @@ namespace Argos
             }
         }
         if (mustSplit)
-            return defaultRule(word.substr(startPos), startPos, maxLength);
+            return defaultRule(word.substr(startPos), maxLength);
         return {{}, '\0', word};
     }
 
     std::tuple<std::string_view, char, std::string_view>
-    WordSplitter::defaultRule(std::string_view word, size_t startPos,
-                              size_t maxLength) const
+    WordSplitter::defaultRule(std::string_view word, size_t maxLength) const
     {
-        if (word.size() - startPos <= maxLength)
-            return {word.substr(startPos), '\0', {}};
+        if (word.size() <= maxLength)
+            return {word, '\0', {}};
         if (maxLength <= 2)
             return {{}, '\0', word};
-        auto index = startPos + maxLength - 1;
-        auto minPos = startPos + (maxLength + 2) / 3;
+        auto index = maxLength - 1;
+        auto minPos = (maxLength + 2) / 3;
+        while (isUtf8Continuation(word[minPos]) && minPos-- > 0)
+            continue;
         while (index-- > minPos)
         {
+            if (isUtf8Continuation(word[index]))
+                continue; // Don't split UTF-8 code points.
             if ((isalnum(word[index - 1]) == 0) != (isalnum(word[index]) == 0))
-                return {word.substr(startPos, index - startPos),
-                        '\0',
-                        word.substr(index)};
+                return {word.substr(0, index), '\0', word.substr(index)};
             if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
-                break;
-            if (isalpha(word[index]) && !isVowel(word[index])
-                && word[index] != word[index - 1]
-                && word[index] != word[index + 1])
-                break;
+                return {word.substr(0, index), '-', word.substr(index)};
         }
-        return {word.substr(startPos, index - startPos),
+        return {word.substr(0, maxLength - 1),
                 '-',
-                word.substr(index)};
+                word.substr(maxLength - 1)};
     }
 }

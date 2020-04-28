@@ -24,8 +24,7 @@ namespace Argos
               bool mustSplit) const;
     private:
         std::tuple<std::string_view, char, std::string_view>
-        defaultRule(std::string_view word, size_t startPos,
-                    size_t maxLength) const;
+        defaultRule(std::string_view word, size_t maxLength) const;
 
         using Split = std::pair<unsigned, char>;
         std::map<std::string_view, std::vector<Split>> m_Splits;

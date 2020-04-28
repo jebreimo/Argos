@@ -45,9 +45,12 @@ TEST_CASE("Check default splitter")
 {
     Argos::WordSplitter splitter;
     testDefaultSplit("decision", 0, 8, {"decision", '\0', {}});
-    testDefaultSplit("decision", 0, 7, {"deci", '-', "sion"});
+    testDefaultSplit("decision", 0, 7, {"decisi", '-', "on"});
     testDefaultSplit("abcdef123456", 0, 9, {"abcdef", '-', "123456"});
-    testDefaultSplit("transmitter", 0, 7, {"trans", '-', "mitter"});
+    testDefaultSplit("bbbbbbbbbbb", 0, 7, {"bbbbbb", '-', "bbbbb"});
+    testDefaultSplit("bbbbbbccccccdddddd", 6, 7, {"cccccc", '-', "dddddd"});
+    testDefaultSplit(u8"æøå•Ωé†µüıœπ˙äöﬁª√˛¸ƒ∂ß", 0, 14,
+                     {u8"æøå•Ωé†µüıœπ˙", '-', u8"äöﬁª√˛¸ƒ∂ß"});
 }
 
 TEST_CASE("Check splitter")
