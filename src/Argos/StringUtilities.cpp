@@ -149,7 +149,7 @@ namespace Argos
                 ++count;
                 --charLen;
             }
-            else if ((static_cast<uint8_t>(c) & 0xC0u) == 0x80u)
+            else if ((unsigned(static_cast<uint8_t>(c)) & 0xC0u) == 0x80u)
             {
                 --charLen;
             }
