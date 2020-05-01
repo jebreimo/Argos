@@ -35,4 +35,6 @@ namespace Argos
     std::string_view getBaseName(std::string_view str);
 
     size_t countCodePoints(std::string_view str);
+
+    size_t findNthCodePoint(std::string_view str, size_t n);
 }

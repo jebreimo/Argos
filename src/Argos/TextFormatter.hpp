@@ -25,6 +25,8 @@ namespace Argos
 
         TextFormatter(std::ostream* stream, unsigned lineWidth);
 
+        WordSplitter& wordSplitter();
+
         std::ostream* stream() const;
 
         void setStream(std::ostream* stream);

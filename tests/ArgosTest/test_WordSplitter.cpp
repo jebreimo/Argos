@@ -41,7 +41,7 @@ namespace
     }
 }
 
-TEST_CASE("Check default splitter")
+TEST_CASE("Test default splitter")
 {
     Argos::WordSplitter splitter;
     testDefaultSplit("decision", 0, 8, {"decision", '\0', {}});
@@ -49,14 +49,40 @@ TEST_CASE("Check default splitter")
     testDefaultSplit("abcdef123456", 0, 9, {"abcdef", '-', "123456"});
     testDefaultSplit("bbbbbbbbbbb", 0, 7, {"bbbbbb", '-', "bbbbb"});
     testDefaultSplit("bbbbbbccccccdddddd", 6, 7, {"cccccc", '-', "dddddd"});
-    testDefaultSplit(u8"æøå•Ωé†µüıœπ˙äöﬁª√˛¸ƒ∂ß", 0, 14,
-                     {u8"æøå•Ωé†µüıœπ˙", '-', u8"äöﬁª√˛¸ƒ∂ß"});
 }
 
-TEST_CASE("Check splitter")
+TEST_CASE("Test default splitter with UTF-8")
+{
+    Argos::WordSplitter splitter;
+    testDefaultSplit(u8"æøå•Ωé†µüıœπ˙äöﬁª√˛¸ƒ∂ß", 0, 14,
+                     {u8"æøå•Ωé†µüıœπ˙", '-', u8"äöﬁª√˛¸ƒ∂ß"});
+    testDefaultSplit(u8"Båidg-hølnow", 0, 8,
+                     {u8"Båidg-", '\0', u8"hølnow"});
+}
+
+TEST_CASE("Test splitter")
 {
     Argos::WordSplitter splitter;
     testSplit("ono mato poe ti con", 2, 8, {"omato", '-', "poeticon"});
     testSplit("ono mato poe ti con", 0, 8, {"onomato", '-', "poeticon"});
     testSplit("ono mato poe ti con", 0, 7, {"ono", '-', "matopoeticon"});
+    testSplit("ono mato poe ti con", 7, 8, {"poeticon", '\0', {}});
+    testSplit("ono mato poe ti con", 7, 7, {"poeti", '-', "con"});
+}
+
+TEST_CASE("Test splitter with hyphens")
+{
+    Argos::WordSplitter splitter;
+    testSplit("multi- tasking", 0, 8, {"multi-", '\0', "tasking"});
+}
+
+TEST_CASE("Test splitter with UTF-8")
+{
+    Argos::WordSplitter splitter;
+    testSplit(u8"Brønn øy sund", 0, 6, {u8"Brønn", '-', u8"øysund"});
+    testSplit(u8"Brønn øy sund", 0, 7, {u8"Brønn", '-', u8"øysund"});
+    testSplit(u8"Brønn øy sund", 0, 8, {u8"Brønnøy", '-', u8"sund"});
+    testSplit(u8"Brønn øy sund", 0, 10, {u8"Brønnøy", '-', u8"sund"});
+    testSplit(u8"Brønn øy sund", 0, 11, {u8"Brønnøysund", '\0', {}});
+    testSplit(u8"Brønn øy sund", 4, 7, {u8"nnøy", '-', u8"sund"});
 }

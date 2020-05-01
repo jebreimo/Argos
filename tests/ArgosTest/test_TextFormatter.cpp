@@ -104,3 +104,22 @@ TEST_CASE("TextFormatter with multi-byte characters")
     formatter.flush();
     REQUIRE(ss.str() == u8"Lorem ipsum dålår sit åmet, consøctetur\nadipiscing elit.");
 }
+
+TEST_CASE("TextFormatter splitting word, no rule")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 10);
+    formatter.writeWords(u8"Brønnøysundsregisteret");
+    formatter.flush();
+    REQUIRE(ss.str() == u8"Brønnøysu-\nndsregist-\neret");
+}
+
+TEST_CASE("TextFormatter splitting word with rule")
+{
+    std::stringstream ss;
+    Argos::TextFormatter formatter(&ss, 12);
+    formatter.wordSplitter().addWord("Brønn øy sunds registeret");
+    formatter.writeWords(u8"Til Brønnøysundsregisteret");
+    formatter.flush();
+    REQUIRE(ss.str() == u8"Til Brønnøy-\nsunds-\nregisteret");
+}

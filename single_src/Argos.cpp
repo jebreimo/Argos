@@ -198,6 +198,8 @@ namespace Argos
     std::string_view getBaseName(std::string_view str);
 
     size_t countCodePoints(std::string_view str);
+
+    size_t findNthCodePoint(std::string_view str, size_t n);
 }
 
 //****************************************************************************
@@ -276,14 +278,17 @@ namespace Argos
         void addWord(std::string wordRule);
 
         std::tuple<std::string_view, char, std::string_view>
-        split(std::string_view word, size_t startPos, size_t maxLength,
+        split(std::string_view word, size_t startIndex, size_t maxLength,
               bool mustSplit) const;
     private:
         std::tuple<std::string_view, char, std::string_view>
-        defaultRule(std::string_view word, size_t startPos,
-                    size_t maxLength) const;
+        defaultRule(std::string_view word, size_t maxLength) const;
 
-        using Split = std::pair<unsigned, char>;
+        struct Split
+        {
+            unsigned index;
+            char separator;
+        };
         std::map<std::string_view, std::vector<Split>> m_Splits;
         std::list<std::string> m_Strings;
     };
@@ -1209,6 +1214,24 @@ namespace Argos
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
 
+    constexpr size_t getCodePointLength(char c) noexcept
+    {
+        auto u = static_cast<uint8_t>(c);
+        if (u < 0x80)
+            return 1;
+        if (u > 0xF7)
+            return 0;
+        switch (unsigned(u >> 4u) & 7u)
+        {
+        case 7: return 4;
+        case 6: return 3;
+        case 5:
+        case 4: return 2;
+        default: break;
+        }
+        return 0;
+    }
+
     size_t countCodePoints(std::string_view str)
     {
         size_t count = 0;
@@ -1218,17 +1241,11 @@ namespace Argos
             auto u = static_cast<uint8_t>(c);
             if (charLen == 0)
             {
-                if ((u & 0x80u) == 0)
-                {
-                    ++count;
-                }
-                else
-                {
-                    for (unsigned bit = 0x40u; (bit & u) != 0; bit >>= 1u)
-                        ++charLen;
-                    if (charLen > 3)
-                        break;
-                }
+                charLen = getCodePointLength(c);
+                if (charLen == 0)
+                    return str.size();
+                ++count;
+                --charLen;
             }
             else if ((u & 0xC0u) == 0x80u)
             {
@@ -1236,10 +1253,41 @@ namespace Argos
             }
             else
             {
-                break;
+                return str.size();
             }
         }
-        return charLen ? str.size() : count;
+        return count;
+    }
+
+    size_t findNthCodePoint(std::string_view str, size_t n)
+    {
+        if (n >= str.size())
+            return std::string_view::npos;
+        size_t count = 0;
+        size_t charLen = 0;
+        for (size_t i = 0; i < str.size(); ++i)
+        {
+            auto u = static_cast<uint8_t>(str[i]);
+            if (charLen == 0)
+            {
+                if (count == n)
+                    return i;
+                charLen = getCodePointLength(str[i]);
+                if (charLen == 0)
+                    return n;
+                ++count;
+                --charLen;
+            }
+            else if ((u & 0xC0u) == 0x80u)
+            {
+                --charLen;
+            }
+            else
+            {
+                return n;
+            }
+        }
+        return charLen ? n : std::string_view::npos;
     }
 }
 
@@ -1261,6 +1309,8 @@ namespace Argos
         explicit TextFormatter(std::ostream* stream);
 
         TextFormatter(std::ostream* stream, unsigned lineWidth);
+
+        WordSplitter& wordSplitter();
 
         std::ostream* stream() const;
 
@@ -1417,16 +1467,13 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
-#include <cstring>
-
 namespace Argos
 {
     namespace
     {
-        bool isVowel(char c)
+        bool isUtf8Continuation(char c)
         {
-            constexpr auto VOWELS = "aeiouyAEIOUY";
-            return memchr(VOWELS, c, 6) != nullptr;
+            return (uint8_t(c) & 0xC0u) == 0x80;
         }
     }
 
@@ -1434,15 +1481,16 @@ namespace Argos
     {
         size_t offset = 0;
         std::vector<Split> splits;
-        for (auto i = wordRule.find_first_of(' '); i != std::string::npos;
-             i = wordRule.find_first_of(' ', i + 1))
+        for (auto pos = wordRule.find_first_of(' '); pos != std::string::npos;
+             pos = wordRule.find_first_of(' ', pos + 1))
         {
-            if (i == 0 || wordRule[i - 1] == ' ')
+            if (pos == 0 || wordRule[pos - 1] == ' ')
                 ARGOS_THROW("Invalid split rule: '" + wordRule + "'");
-            auto sep = wordRule[i - 1] == '-' ? '\0' : '-';
-            splits.emplace_back(unsigned(i - offset), sep);
+            auto sep = wordRule[pos - 1] == '-' ? '\0' : '-';
+            splits.push_back({unsigned(pos - offset), sep});
             ++offset;
         }
+        splits.push_back({unsigned(wordRule.size() - offset), '\0'});
         wordRule.erase(remove(wordRule.begin(), wordRule.end(), ' '),
                        wordRule.end());
         m_Strings.push_back(move(wordRule));
@@ -1450,60 +1498,63 @@ namespace Argos
     }
 
     std::tuple<std::string_view, char, std::string_view>
-    WordSplitter::split(std::string_view word, size_t startPos,
+    WordSplitter::split(std::string_view word, size_t startIndex,
                         size_t maxLength, bool mustSplit) const
     {
-        if (word.size() - startPos <= maxLength)
-            return {word.substr(startPos), '\0', {}};
         auto it = m_Splits.find(word);
         if (it != m_Splits.end())
         {
-            Split prev = {};
+            Split prev = {unsigned(startIndex), '\0'};
+            size_t length = 0;
             for (auto split : it->second)
             {
-                auto length = split.first - startPos + (split.second ? 1 : 0);
-                if (length > maxLength)
-                {
-                    if (prev.first > startPos + 1)
-                        return {word.substr(startPos, prev.first - startPos),
-                                prev.second,
-                                word.substr(prev.first)};
+                if (split.index < startIndex + 1)
+                    continue;
+                length += countCodePoints(word.substr(prev.index, split.index - prev.index));
+                if (length + (split.separator ? 1 : 0) > maxLength)
                     break;
-                }
                 prev = split;
             }
+            if (prev.index > startIndex + 1)
+                return {word.substr(startIndex, prev.index - startIndex),
+                        prev.separator,
+                        word.substr(prev.index)};
         }
         if (mustSplit)
-            return defaultRule(word.substr(startPos), startPos, maxLength);
+            return defaultRule(word.substr(startIndex), maxLength);
         return {{}, '\0', word};
     }
 
     std::tuple<std::string_view, char, std::string_view>
-    WordSplitter::defaultRule(std::string_view word, size_t startPos,
-                              size_t maxLength) const
+    WordSplitter::defaultRule(std::string_view word, size_t maxLength) const
     {
-        if (word.size() - startPos <= maxLength)
-            return {word.substr(startPos), '\0', {}};
         if (maxLength <= 2)
             return {{}, '\0', word};
-        auto index = startPos + maxLength - 1;
-        auto minPos = startPos + (maxLength + 2) / 3;
-        while (index-- > minPos)
+        auto maxPos = findNthCodePoint(word, maxLength);
+        if (maxPos == std::string_view::npos)
+            return {word, '\0', {}};
+        auto ignoreUtf8 = maxPos == maxLength;
+        --maxPos;
+        while (!ignoreUtf8 && isUtf8Continuation(word[maxPos]))
+            --maxPos;
+
+        auto minPos = (maxLength + 2) / 3;
+        auto index = maxPos;
+        for (auto count = maxLength - 1; count-- > minPos;)
         {
+            --index;
+            while (!ignoreUtf8 && isUtf8Continuation(word[index]))
+                --index;
+            if (uint8_t(word[index - 1]) >= 127 || uint8_t(word[index]) >= 127)
+                continue;
             if ((isalnum(word[index - 1]) == 0) != (isalnum(word[index]) == 0))
-                return {word.substr(startPos, index - startPos),
-                        '\0',
-                        word.substr(index)};
+                return {word.substr(0, index), '\0', word.substr(index)};
             if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
-                break;
-            if (isalpha(word[index]) && !isVowel(word[index])
-                && word[index] != word[index - 1]
-                && word[index] != word[index + 1])
-                break;
+                return {word.substr(0, index), '-', word.substr(index)};
         }
-        return {word.substr(startPos, index - startPos),
+        return {word.substr(0, maxPos),
                 '-',
-                word.substr(index)};
+                word.substr(maxPos)};
     }
 }
 
@@ -1988,6 +2039,11 @@ namespace Argos
             ARGOS_THROW("Line width must be greater than 2.");
         m_Writer.setStream(stream);
         m_Indents.push_back(0);
+    }
+
+    WordSplitter& TextFormatter::wordSplitter()
+    {
+        return m_WordSplitter;
     }
 
     std::ostream* TextFormatter::stream() const
@@ -4525,15 +4581,22 @@ namespace Argos
         return *this;
     }
 
-    ArgumentParser&& ArgumentParser::move()
-    {
-        return std::move(*this);
-    }
-
     void ArgumentParser::writeHelpText()
     {
         checkData();
         Argos::writeHelpText(*m_Data);
+    }
+
+    ArgumentParser& ArgumentParser::addWordSplittingRule(std::string str)
+    {
+        checkData();
+        m_Data->textFormatter.wordSplitter().addWord(std::move(str));
+        return *this;
+    }
+
+    ArgumentParser&& ArgumentParser::move()
+    {
+        return std::move(*this);
     }
 
     void ArgumentParser::checkData() const

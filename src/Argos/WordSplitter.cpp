@@ -8,7 +8,6 @@
 #include "WordSplitter.hpp"
 
 #include <algorithm>
-#include <cstring>
 #include "ArgosThrow.hpp"
 #include "StringUtilities.hpp"
 
@@ -26,15 +25,16 @@ namespace Argos
     {
         size_t offset = 0;
         std::vector<Split> splits;
-        for (auto i = wordRule.find_first_of(' '); i != std::string::npos;
-             i = wordRule.find_first_of(' ', i + 1))
+        for (auto pos = wordRule.find_first_of(' '); pos != std::string::npos;
+             pos = wordRule.find_first_of(' ', pos + 1))
         {
-            if (i == 0 || wordRule[i - 1] == ' ')
+            if (pos == 0 || wordRule[pos - 1] == ' ')
                 ARGOS_THROW("Invalid split rule: '" + wordRule + "'");
-            auto sep = wordRule[i - 1] == '-' ? '\0' : '-';
-            splits.emplace_back(unsigned(i - offset), sep);
+            auto sep = wordRule[pos - 1] == '-' ? '\0' : '-';
+            splits.push_back({unsigned(pos - offset), sep});
             ++offset;
         }
+        splits.push_back({unsigned(wordRule.size() - offset), '\0'});
         wordRule.erase(remove(wordRule.begin(), wordRule.end(), ' '),
                        wordRule.end());
         m_Strings.push_back(move(wordRule));
@@ -42,56 +42,62 @@ namespace Argos
     }
 
     std::tuple<std::string_view, char, std::string_view>
-    WordSplitter::split(std::string_view word, size_t startPos,
+    WordSplitter::split(std::string_view word, size_t startIndex,
                         size_t maxLength, bool mustSplit) const
     {
-        if (word.size() - startPos <= maxLength)
-            return {word.substr(startPos), '\0', {}};
         auto it = m_Splits.find(word);
         if (it != m_Splits.end())
         {
-            Split prev = {};
+            Split prev = {unsigned(startIndex), '\0'};
+            size_t length = 0;
             for (auto split : it->second)
             {
-                auto length = split.first - startPos + (split.second ? 1 : 0);
-                if (length > maxLength)
-                {
-                    if (prev.first > startPos + 1)
-                        return {word.substr(startPos, prev.first - startPos),
-                                prev.second,
-                                word.substr(prev.first)};
+                if (split.index < startIndex + 1)
+                    continue;
+                length += countCodePoints(word.substr(prev.index, split.index - prev.index));
+                if (length + (split.separator ? 1 : 0) > maxLength)
                     break;
-                }
                 prev = split;
             }
+            if (prev.index > startIndex + 1)
+                return {word.substr(startIndex, prev.index - startIndex),
+                        prev.separator,
+                        word.substr(prev.index)};
         }
         if (mustSplit)
-            return defaultRule(word.substr(startPos), maxLength);
+            return defaultRule(word.substr(startIndex), maxLength);
         return {{}, '\0', word};
     }
 
     std::tuple<std::string_view, char, std::string_view>
     WordSplitter::defaultRule(std::string_view word, size_t maxLength) const
     {
-        if (word.size() <= maxLength)
-            return {word, '\0', {}};
         if (maxLength <= 2)
             return {{}, '\0', word};
-        auto index = maxLength - 1;
+        auto maxPos = findNthCodePoint(word, maxLength);
+        if (maxPos == std::string_view::npos)
+            return {word, '\0', {}};
+        auto ignoreUtf8 = maxPos == maxLength;
+        --maxPos;
+        while (!ignoreUtf8 && isUtf8Continuation(word[maxPos]))
+            --maxPos;
+
         auto minPos = (maxLength + 2) / 3;
-        while (isUtf8Continuation(word[minPos]) && minPos-- > 0)
-            continue;
-        while (index-- > minPos)
+        auto index = maxPos;
+        for (auto count = maxLength - 1; count-- > minPos;)
         {
-            if (isUtf8Continuation(word[index]))
-                continue; // Don't split UTF-8 code points.
+            --index;
+            while (!ignoreUtf8 && isUtf8Continuation(word[index]))
+                --index;
+            if (uint8_t(word[index - 1]) >= 127 || uint8_t(word[index]) >= 127)
+                continue;
             if ((isalnum(word[index - 1]) == 0) != (isalnum(word[index]) == 0))
                 return {word.substr(0, index), '\0', word.substr(index)};
             if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
                 return {word.substr(0, index), '-', word.substr(index)};
         }
-        return {word.substr(0, maxLength - 1),
+        return {word.substr(0, maxPos),
                 '-',
-                word.substr(maxLength - 1)};
+                word.substr(maxPos)};
     }
 }

@@ -36,3 +36,13 @@ TEST_CASE("Test isLessCI")
     REQUIRE(Argos::isLessCI("abc", "ABCD"));
     REQUIRE_FALSE(Argos::isLessCI("aBCD", "ABC"));
 }
+
+TEST_CASE("Test findNthCodePoint")
+{
+    REQUIRE(Argos::findNthCodePoint(u8"Bæ bæ bø må.", 8) == 11);
+}
+
+TEST_CASE("Test findNthCodePoint non-UTF8")
+{
+    REQUIRE(Argos::findNthCodePoint("Ba boo\200 boo ma.", 8) == 8);
+}

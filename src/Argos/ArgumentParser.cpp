@@ -495,15 +495,22 @@ namespace Argos
         return *this;
     }
 
-    ArgumentParser&& ArgumentParser::move()
-    {
-        return std::move(*this);
-    }
-
     void ArgumentParser::writeHelpText()
     {
         checkData();
         Argos::writeHelpText(*m_Data);
+    }
+
+    ArgumentParser& ArgumentParser::addWordSplittingRule(std::string str)
+    {
+        checkData();
+        m_Data->textFormatter.wordSplitter().addWord(std::move(str));
+        return *this;
+    }
+
+    ArgumentParser&& ArgumentParser::move()
+    {
+        return std::move(*this);
     }
 
     void ArgumentParser::checkData() const

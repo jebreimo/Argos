@@ -76,6 +76,11 @@ namespace Argos
         m_Indents.push_back(0);
     }
 
+    WordSplitter& TextFormatter::wordSplitter()
+    {
+        return m_WordSplitter;
+    }
+
     std::ostream* TextFormatter::stream() const
     {
         return m_Writer.stream();

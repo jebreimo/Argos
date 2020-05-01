@@ -1628,9 +1628,11 @@ namespace Argos
 
         ArgumentParser& text(TextId textId, std::string text);
 
-        ArgumentParser&& move();
-
         void writeHelpText();
+
+        ArgumentParser& addWordSplittingRule(std::string str);
+
+        ArgumentParser&& move();
     private:
         void checkData() const;
 

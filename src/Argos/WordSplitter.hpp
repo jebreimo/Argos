@@ -20,13 +20,17 @@ namespace Argos
         void addWord(std::string wordRule);
 
         std::tuple<std::string_view, char, std::string_view>
-        split(std::string_view word, size_t startPos, size_t maxLength,
+        split(std::string_view word, size_t startIndex, size_t maxLength,
               bool mustSplit) const;
     private:
         std::tuple<std::string_view, char, std::string_view>
         defaultRule(std::string_view word, size_t maxLength) const;
 
-        using Split = std::pair<unsigned, char>;
+        struct Split
+        {
+            unsigned index;
+            char separator;
+        };
         std::map<std::string_view, std::vector<Split>> m_Splits;
         std::list<std::string> m_Strings;
     };

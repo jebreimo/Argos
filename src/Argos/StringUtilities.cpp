@@ -117,6 +117,24 @@ namespace Argos
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
 
+    constexpr size_t getCodePointLength(char c) noexcept
+    {
+        auto u = static_cast<uint8_t>(c);
+        if (u < 0x80)
+            return 1;
+        if (u > 0xF7)
+            return 0;
+        switch (unsigned(u >> 4u) & 7u)
+        {
+        case 7: return 4;
+        case 6: return 3;
+        case 5:
+        case 4: return 2;
+        default: break;
+        }
+        return 0;
+    }
+
     size_t countCodePoints(std::string_view str)
     {
         size_t count = 0;
@@ -126,17 +144,11 @@ namespace Argos
             auto u = static_cast<uint8_t>(c);
             if (charLen == 0)
             {
-                if ((u & 0x80u) == 0)
-                {
-                    ++count;
-                }
-                else
-                {
-                    for (unsigned bit = 0x40u; (bit & u) != 0; bit >>= 1u)
-                        ++charLen;
-                    if (charLen > 3)
-                        break;
-                }
+                charLen = getCodePointLength(c);
+                if (charLen == 0)
+                    return str.size();
+                ++count;
+                --charLen;
             }
             else if ((u & 0xC0u) == 0x80u)
             {
@@ -144,9 +156,40 @@ namespace Argos
             }
             else
             {
-                break;
+                return str.size();
             }
         }
-        return charLen ? str.size() : count;
+        return count;
+    }
+
+    size_t findNthCodePoint(std::string_view str, size_t n)
+    {
+        if (n >= str.size())
+            return std::string_view::npos;
+        size_t count = 0;
+        size_t charLen = 0;
+        for (size_t i = 0; i < str.size(); ++i)
+        {
+            auto u = static_cast<uint8_t>(str[i]);
+            if (charLen == 0)
+            {
+                if (count == n)
+                    return i;
+                charLen = getCodePointLength(str[i]);
+                if (charLen == 0)
+                    return n;
+                ++count;
+                --charLen;
+            }
+            else if ((u & 0xC0u) == 0x80u)
+            {
+                --charLen;
+            }
+            else
+            {
+                return n;
+            }
+        }
+        return charLen ? n : std::string_view::npos;
     }
 }
