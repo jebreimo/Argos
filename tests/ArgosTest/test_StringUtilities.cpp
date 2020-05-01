@@ -37,6 +37,11 @@ TEST_CASE("Test isLessCI")
     REQUIRE_FALSE(Argos::isLessCI("aBCD", "ABC"));
 }
 
+TEST_CASE("Test countCodePoints")
+{
+    REQUIRE(Argos::countCodePoints(u8"Bæ bæ bø må.") == 12);
+}
+
 TEST_CASE("Test findNthCodePoint")
 {
     REQUIRE(Argos::findNthCodePoint(u8"Bæ bæ bø må.", 8) == 11);
