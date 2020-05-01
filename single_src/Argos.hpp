@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.13";
+constexpr char ARGOS_VERSION[] = "0.99.14";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 13;
+constexpr unsigned ARGOS_VERSION_PATCH = 14;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1641,3 +1641,12 @@ namespace Argos
         std::unique_ptr<ParserData> m_Data;
     };
 }
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-05-01.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+

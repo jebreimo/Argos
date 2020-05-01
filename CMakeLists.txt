@@ -5,8 +5,8 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
-cmake_minimum_required(VERSION 3.14)
-project(Argos VERSION 0.99.13)
+cmake_minimum_required(VERSION 3.13)
+project(Argos VERSION 0.99.14)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -24,6 +24,7 @@ endfunction()
 configure_file(include/Argos/ArgosVersion.hpp.in ArgosVersion.hpp @ONLY)
 
 add_library(Argos
+    include/Argos/Argos.hpp
     include/Argos/ArgosException.hpp
     include/Argos/Argument.hpp
     include/Argos/ArgumentIterator.hpp

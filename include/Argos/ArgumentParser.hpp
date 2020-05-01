@@ -8,8 +8,6 @@
 #pragma once
 #include <iosfwd>
 #include <memory>
-#include "ArgosException.hpp"
-#include "ArgosVersion.hpp"
 #include "Argument.hpp"
 #include "ArgumentIterator.hpp"
 #include "Option.hpp"

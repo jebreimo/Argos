@@ -6,7 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include <catch2/catch.hpp>
-#include "Argos/ArgumentParser.hpp"
+#include "Argos/Argos.hpp"
 
 #include "Argv.hpp"
 
