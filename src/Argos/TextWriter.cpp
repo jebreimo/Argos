@@ -45,7 +45,7 @@ namespace Argos
     {
         auto width = currentWidth();
         auto remaining = std::max(width, m_LineWidth) - width;
-        auto strWidth = countCodePoints(str);
+        auto strWidth = static_cast<unsigned>(countCodePoints(str));
         if (!force && strWidth > remaining)
             return false;
         m_Line.append(width - m_CurrentLineWidth, ' ');

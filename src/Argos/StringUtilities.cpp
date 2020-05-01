@@ -119,7 +119,7 @@ namespace Argos
 
     constexpr size_t getCodePointLength(char c) noexcept
     {
-        auto u = static_cast<uint8_t>(c);
+        auto u = unsigned(static_cast<uint8_t>(c));
         if (u < 0x80)
             return 1;
         if (u > 0xF7)
@@ -141,7 +141,6 @@ namespace Argos
         size_t charLen = 0;
         for (auto c : str)
         {
-            auto u = static_cast<uint8_t>(c);
             if (charLen == 0)
             {
                 charLen = getCodePointLength(c);
@@ -150,7 +149,7 @@ namespace Argos
                 ++count;
                 --charLen;
             }
-            else if ((u & 0xC0u) == 0x80u)
+            else if ((static_cast<uint8_t>(c) & 0xC0u) == 0x80u)
             {
                 --charLen;
             }
@@ -170,7 +169,6 @@ namespace Argos
         size_t charLen = 0;
         for (size_t i = 0; i < str.size(); ++i)
         {
-            auto u = static_cast<uint8_t>(str[i]);
             if (charLen == 0)
             {
                 if (count == n)
@@ -181,7 +179,7 @@ namespace Argos
                 ++count;
                 --charLen;
             }
-            else if ((u & 0xC0u) == 0x80u)
+            else if ((static_cast<uint8_t>(str[i]) & 0xC0u) == 0x80u)
             {
                 --charLen;
             }
