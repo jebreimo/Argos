@@ -37,6 +37,11 @@ target_link_libraries(ArgosTest
         Catch2::Catch2
     )
 
+target_compile_options(ArgosTest
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
+    )
+
 target_include_directories(ArgosTest
     PRIVATE
         ../../src
