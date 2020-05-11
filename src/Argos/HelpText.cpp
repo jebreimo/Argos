@@ -173,15 +173,8 @@ namespace Argos
             // Check if both the longest name and the longest help text
             // can fit on the same line.
             auto nameWidth = nameWidths.back() + 3;
-            if (nameWidth + textWidths.back() > lineWidth)
-            {
-                // Check if 80% of the names and help texts can fit on
-                // the same line.
-                auto index80 = 4 * nameWidths.size() / 5;
-                nameWidth = nameWidths[index80] + 3;
-                if (nameWidth + textWidths[index80] > lineWidth)
-                    return 0;
-            }
+            if (nameWidth > 24 || nameWidth + textWidths.back() > lineWidth)
+                return 0;
             return nameWidth;
         }
 

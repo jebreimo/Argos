@@ -1216,7 +1216,7 @@ namespace Argos
 
     constexpr size_t getCodePointLength(char c) noexcept
     {
-        auto u = static_cast<uint8_t>(c);
+        auto u = unsigned(static_cast<uint8_t>(c));
         if (u < 0x80)
             return 1;
         if (u > 0xF7)
@@ -1238,7 +1238,6 @@ namespace Argos
         size_t charLen = 0;
         for (auto c : str)
         {
-            auto u = static_cast<uint8_t>(c);
             if (charLen == 0)
             {
                 charLen = getCodePointLength(c);
@@ -1247,7 +1246,7 @@ namespace Argos
                 ++count;
                 --charLen;
             }
-            else if ((u & 0xC0u) == 0x80u)
+            else if ((unsigned(static_cast<uint8_t>(c)) & 0xC0u) == 0x80u)
             {
                 --charLen;
             }
@@ -1267,7 +1266,6 @@ namespace Argos
         size_t charLen = 0;
         for (size_t i = 0; i < str.size(); ++i)
         {
-            auto u = static_cast<uint8_t>(str[i]);
             if (charLen == 0)
             {
                 if (count == n)
@@ -1278,7 +1276,7 @@ namespace Argos
                 ++count;
                 --charLen;
             }
-            else if ((u & 0xC0u) == 0x80u)
+            else if ((static_cast<uint8_t>(str[i]) & 0xC0u) == 0x80u)
             {
                 --charLen;
             }
@@ -1390,7 +1388,7 @@ namespace Argos
     {
         auto width = currentWidth();
         auto remaining = std::max(width, m_LineWidth) - width;
-        auto strWidth = countCodePoints(str);
+        auto strWidth = static_cast<unsigned>(countCodePoints(str));
         if (!force && strWidth > remaining)
             return false;
         m_Line.append(width - m_CurrentLineWidth, ' ');
@@ -2913,15 +2911,8 @@ namespace Argos
             // Check if both the longest name and the longest help text
             // can fit on the same line.
             auto nameWidth = nameWidths.back() + 3;
-            if (nameWidth + textWidths.back() > lineWidth)
-            {
-                // Check if 80% of the names and help texts can fit on
-                // the same line.
-                auto index80 = 4 * nameWidths.size() / 5;
-                nameWidth = nameWidths[index80] + 3;
-                if (nameWidth + textWidths[index80] > lineWidth)
-                    return 0;
-            }
+            if (nameWidth > 24 || nameWidth + textWidths.back() > lineWidth)
+                return 0;
             return nameWidth;
         }
 
