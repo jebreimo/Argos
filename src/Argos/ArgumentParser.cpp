@@ -111,7 +111,10 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeValueId(o->value);
+                if (!o->value.empty())
+                    o->valueId = idMaker.makeValueId(o->value);
+                else
+                    o->valueId = idMaker.makeValueId(o->flags.front());
                 for (auto& f : o->flags)
                     idMaker.explicitIds.emplace(f, o->valueId);
             }
