@@ -195,10 +195,16 @@ namespace Argos
         TEXT,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
+         *
+         * @note This will only be used for arguments without the section
+         *      property.
          */
         ARGUMENTS_TITLE,
         /**
          * @brief The title of the list of options (default is "OPTIONS").
+
+         * @note This will only be used for options without the section
+         *      property.
          */
         OPTIONS_TITLE,
         /**
@@ -249,7 +255,13 @@ namespace Argos
         return Visibility(unsigned(a) & unsigned(b));
     }
 
+    /**
+     * @brief Strong integer type for value ids.
+     */
     enum ValueId : int;
 
+    /**
+     * @brief Strong integer type for argumnet ids.
+     */
     enum ArgumentId : int;
 }

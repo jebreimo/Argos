@@ -10,3 +10,8 @@
 #include "ArgosException.hpp"
 #include "ArgosVersion.hpp"
 #include "ArgumentParser.hpp"
+
+/**
+ * @file
+ * @brief Include this file to make all of Argos's public interface available.
+ */
