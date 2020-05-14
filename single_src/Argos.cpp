@@ -4154,21 +4154,34 @@ namespace Argos
                 ValueId n = ValueId(0);
                 std::map<std::string_view, ValueId> explicitIds;
 
-                ValueId makeValueId(std::string_view valueName)
+                std::optional<ValueId> findValueId(std::string_view name)
                 {
-                    if (valueName.empty())
-                    {
-                        n = ValueId(n + 1);
-                        return n;
-                    }
-
-                    auto it = explicitIds.find(valueName);
+                    auto it = explicitIds.find(name);
                     if (it == explicitIds.end())
-                    {
-                        n = ValueId(n + 1);
-                        it = explicitIds.emplace(valueName, n).first;
-                    }
+                        return {};
                     return it->second;
+                }
+
+                ValueId makeValueId(std::string_view name)
+                {
+                    if (auto id = findValueId(name))
+                        return *id;
+                    n = ValueId(n + 1);
+                    explicitIds.emplace(name, n);
+                    return n;
+                }
+
+                ValueId makeValueId(const std::vector<std::string>& names)
+                {
+                    for (const auto& name : names)
+                    {
+                        if (auto id = findValueId(name))
+                            return *id;
+                    }
+                    n = ValueId(n + 1);
+                    for (const auto& name : names)
+                        explicitIds.emplace(name, n);
+                    return n;
                 }
             };
             InternalIdMaker idMaker;
@@ -4188,9 +4201,16 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                o->valueId = idMaker.makeValueId(o->value);
-                for (auto& f : o->flags)
-                    idMaker.explicitIds.emplace(f, o->valueId);
+                if (!o->value.empty())
+                {
+                    o->valueId = idMaker.makeValueId(o->value);
+                    for (auto& f : o->flags)
+                        idMaker.explicitIds.emplace(f, o->valueId);
+                }
+                else
+                {
+                    o->valueId = idMaker.makeValueId(o->flags);
+                }
             }
         }
 

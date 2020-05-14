@@ -12,18 +12,13 @@ set(CMAKE_CXX_STANDARD 17)
 include(FetchContent)
 FetchContent_Declare(argos
     GIT_REPOSITORY "https://github.com/jebreimo/Argos.git"
-    )
+    GIT_TAG v1.0.0)
 FetchContent_GetProperties(argos)
 if (NOT argos_POPULATED)
     FetchContent_Populate(argos)
     add_subdirectory(${argos_SOURCE_DIR} ${argos_BINARY_DIR})
 endif ()
 
-add_executable(tutorial
-    Tutorial.cpp
-    )
+add_executable(tutorial Tutorial.cpp)
 
-target_link_libraries(tutorial
-    PRIVATE
-        Argos::Argos
-    )
+target_link_libraries(tutorial Argos::Argos)

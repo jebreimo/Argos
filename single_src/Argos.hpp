@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.15";
+constexpr char ARGOS_VERSION[] = "0.99.16";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 15;
+constexpr unsigned ARGOS_VERSION_PATCH = 16;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -275,10 +275,16 @@ namespace Argos
         TEXT,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
+         *
+         * @note This will only be used for arguments without the section
+         *      property.
          */
         ARGUMENTS_TITLE,
         /**
          * @brief The title of the list of options (default is "OPTIONS").
+
+         * @note This will only be used for options without the section
+         *      property.
          */
         OPTIONS_TITLE,
         /**
@@ -329,8 +335,14 @@ namespace Argos
         return Visibility(unsigned(a) & unsigned(b));
     }
 
+    /**
+     * @brief Strong integer type for value ids.
+     */
     enum ValueId : int;
 
+    /**
+     * @brief Strong integer type for argumnet ids.
+     */
     enum ArgumentId : int;
 }
 
@@ -460,6 +472,13 @@ namespace Argos
 
         bool hasValue() const;
 
+        /**
+         * @brief Returns the value as it was found on the command line.
+         *
+         * The optional is empty if the value was not given. The optional
+         * will never be empty if the current ArgumentValue instance
+         * was returned by ArgumentValues::value(n).
+         */
         std::optional<std::string_view> value() const;
 
         bool asBool(bool defaultValue = false) const;
@@ -1523,9 +1542,10 @@ namespace Argos
          * strings and @a argc is the number of strings in @a argv. @a argv
          * must have at least one value (i.e. the name of the program itself).
          *
-         * @note After this non-const version of parse() has been called, the
-         * ArgumentParser is no longer valid.
+         * @note The ArgumentParser instance is no longer valid after calling
+         *      the non-const version of parse().
          */
+        [[nodiscard]]
         ParsedArguments parse(int argc, char* argv[]);
 
         /**
@@ -1536,52 +1556,121 @@ namespace Argos
          * strings and @a argc is the number of strings in @a argv. @a argv
          * must have at least one value (i.e. the name of the program itself).
          */
+        [[nodiscard]]
         ParsedArguments parse(int argc, char* argv[]) const;
 
         /**
          * @brief Parses the arguments and options in @a args.
          *
-         * Unlike when parse is invoked with @a argc and @a argv, @a args
-         * should not have the name of the program itself as its first value.
+         * @note @a args should not have the name of the program itself as its
+         *      first value, unlike when parse is called with argc and argv.
          *
-         * @note After this non-const version of parse() has been called, the
-         * ArgumentParser is no longer valid.
+         * @note The ArgumentParser instance is no longer valid after calling
+         *      the non-const version of parse().
          */
+        [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args);
 
         /**
          * @brief Parses the arguments and options in @a args.
          *
-         * Unlike when parse is invoked with @a argc and @a argv, @a args
-         * should not have the name of the program itself as its first value.
+         * @note @a args should not have the name of the program itself as its
+         *      first value, unlike when parse is called with argc and argv.
          */
+        [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args) const;
 
+        /**
+         * @brief Creates an ArgumentIterator to iterate over the arguments
+         *      in argv.
+         *
+         * @note The ArgumentParser instance is no longer valid after calling
+         *      the non-const version of makeIterator().
+         */
+        [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]);
 
+        /**
+         * @brief Creates an ArgumentIterator to iterate over the arguments
+         *      in argv.
+         */
+        [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
 
+        /**
+         * @brief Creates an ArgumentIterator to iterate over the arguments
+         *      in argv.
+         *
+         * @note @a args should not have the name of the program itself as its
+         *      first value, unlike when parse is called with argc and argv.
+         *
+         * @note The ArgumentParser instance is no longer valid after calling
+         *      the non-const version of makeIterator().
+         */
+        [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args);
 
+        /**
+         * @brief Creates an ArgumentIterator to iterate over the arguments
+         *      in argv.
+         *
+         * @note @a args should not have the name of the program itself as its
+         *      first value, unlike when parse is called with argc and argv.
+         */
+        [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args) const;
 
-        bool allowAbbreviatedOptions() const;
+        /**
+         * @brief Returns true if the ArgumentParser allows abbreviated options.
+         */
+        [[nodiscard]] bool allowAbbreviatedOptions() const;
 
+        /**
+         * @brief Enable or disable abbreviated options.
+         *
+         * Abbreviated options means that for options with flags that consist of
+         * multiple characters (e.g. "--verbose" or "/file") it is not necessary
+         * to type the whole flag, but only the number of leading characters
+         * that is sufficient to uniquely identify the flag.
+         * If the program has only three options, --file, --foo and --bar, it is
+         * sufficient to write "--b" on the command line to enable the latter,
+         * and "--fo" and "--fi" for the first two.
+         */
         ArgumentParser& allowAbbreviatedOptions(bool value);
 
-        bool autoExit() const;
+        /**
+         * @brief Returns true if the program automatically exits if the
+         *      command line has invalid options or arguments, or the help
+         *      option is given.
+         */
+        [[nodiscard]] bool autoExit() const;
 
+        /**
+         * @brief Enable or disable automatic exit when the command line has
+         *      invalid options or arguments, or the help option is given.
+         *
+         * Automatic exit is on by default.
+         */
         ArgumentParser& autoExit(bool value);
 
-        bool caseInsensitive() const;
+        /**
+         * @brief Returns true if option flags are case insensitive.
+         */
+        [[nodiscard]] bool caseInsensitive() const;
 
+        /**
+         * @brief Enable or disable case insensitive option flags.
+         *
+         * @note Case-insensitivity will only work for ASCII-letters (i.e.
+         *      a-z and A-Z).
+         */
         ArgumentParser& caseInsensitive(bool value);
 
         /**
          * @brief Returns whether or not a help option will be auto-generated
-         *      if none has been added.
+         *      if none has been added explicitly.
          */
-        bool generateHelpOption() const;
+        [[nodiscard]] bool generateHelpOption() const;
 
         /**
          * @brief Turn auto-generation of help option on or off.
@@ -1596,47 +1685,147 @@ namespace Argos
          */
         ArgumentParser& generateHelpOption(bool value);
 
-        OptionStyle optionStyle() const;
+        /**
+         * @brief Returns the current option style.
+         */
+        [[nodiscard]] OptionStyle optionStyle() const;
 
+        /**
+         * @brief Set the option style.
+         *
+         * @note The option style can not be changed once any options have been
+         *      added.
+         */
         ArgumentParser& optionStyle(OptionStyle value);
 
-        bool ignoreUndefinedArguments() const;
+        /**
+         * @brief Returns true if undefined arguments on the command line
+         *      will not be treated as errors.
+         */
+        [[nodiscard]] bool ignoreUndefinedArguments() const;
 
+        /**
+         * @brief Enable or disable treating undefined arguments on the command
+         *      line as errors.
+         *
+         * Ignoring undefined arguments can be useful when more than one
+         * function are interpreting the command line.
+         */
         ArgumentParser& ignoreUndefinedArguments(bool value);
 
-        bool ignoreUndefinedOptions() const;
+        /**
+         * @brief Returns true if undefined options on the command line
+         *      will not be treated as errors.
+         */
+        [[nodiscard]] bool ignoreUndefinedOptions() const;
 
+        /**
+         * @brief Enable or disable treating undefined options on the command
+         *      line as errors.
+         *
+         * Ignoring undefined options can be useful when more than one function
+         * are interpreting the command line.
+         */
         ArgumentParser& ignoreUndefinedOptions(bool value);
 
-        const ArgumentCallback& argumentCallback() const;
+        /**
+         * @brief Returns the callback function that will be called for every
+         *      argument.
+         *
+         * By default this is an empty function object.
+         */
+        [[nodiscard]] const ArgumentCallback& argumentCallback() const;
 
+        /**
+         * @brief Set the callback function that will be called for every
+         *      argument.
+         */
         ArgumentParser& argumentCallback(ArgumentCallback callback);
 
-        const OptionCallback& optionCallback() const;
+        /**
+         * @brief Returns the callback function that will be called for every
+         *      option.
+         *
+         * By default this is an empty function object.
+         */
+        [[nodiscard]] const OptionCallback& optionCallback() const;
 
+        /**
+         * @brief Set the callback function that will be called for every
+         *      option.
+         */
         ArgumentParser& optionCallback(OptionCallback callback);
 
-        std::ostream* stream() const;
+        /**
+         * @brief Returns the stream that the help text and error messages are
+         *      written to.
+         *
+         * The default value is nullptr.
+         */
+        [[nodiscard]] std::ostream* stream() const;
 
+        /**
+         * @brief Set the stream that the help text and error messages are
+         *      written to.
+         *
+         * By default std::cout is used for the help text and std::cerr for
+         * error messages.
+         */
         ArgumentParser& stream(std::ostream* stream);
 
-        const std::string& programName() const;
+        /**
+         * @brief Return the program name.
+         */
+        [[nodiscard]] const std::string& programName() const;
 
+        /**
+         * @brief Set the program name.
+         *
+         * @note The program name can also be set by the constructor.
+         */
         ArgumentParser& programName(const std::string& name);
 
+        /**
+         * @brief Set the help text that will appear between the usage section
+         *      and the argument and option sections.
+         */
         ArgumentParser& text(std::string text);
 
+        /**
+         * @brief Set the given part of the help text.
+         */
         ArgumentParser& text(TextId textId, std::string text);
 
+        /**
+         * @brief Write the help text.
+         *
+         * @note The help text is displayed automatically when a help option
+         *      is used.
+         */
         void writeHelpText();
 
+        /**
+         * @brief Inform Argos how a long word can be split over multiple lines.
+         *
+         * By default, Argos will not split a word if it is at all possible to
+         * make it fit on a single line. In some cases this can make the help
+         * text appear "untidy". Use this function to tell Argos how a
+         * particular word can be split, by writing the word with spaces at each
+         * potential split point, e.g. "compre hen sive"  will allow Argos to
+         * split the word "comprehensive" as either "compre-" "hensive"
+         * or "comprehen-" "sive".
+         */
         ArgumentParser& addWordSplittingRule(std::string str);
 
+        /**
+         * @brief Makes it possible to construct an ArgumentParser with chained
+         *      method calls and assign it to a variable.
+         */
         ArgumentParser&& move();
     private:
         void checkData() const;
 
-        ArgumentId nextArgumentId() const;
+        [[nodiscard]] ArgumentId nextArgumentId() const;
 
         std::unique_ptr<ParserData> m_Data;
     };
@@ -1650,3 +1839,7 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+/**
+ * @file
+ * @brief Include this file to make all of Argos's public interface available.
+ */
