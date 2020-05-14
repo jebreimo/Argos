@@ -52,6 +52,13 @@ namespace Argos
 
         bool hasValue() const;
 
+        /**
+         * @brief Returns the value as it was found on the command line.
+         *
+         * The optional is empty if the value was not given. The optional
+         * will never be empty if the current ArgumentValue instance
+         * was returned by ArgumentValues::value(n).
+         */
         std::optional<std::string_view> value() const;
 
         bool asBool(bool defaultValue = false) const;

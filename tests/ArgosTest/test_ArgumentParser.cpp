@@ -631,3 +631,14 @@ TEST_CASE("Default help")
         .parse({"--help"});
     REQUIRE(args.resultCode() == ParserResultCode::STOP);
 }
+
+TEST_CASE("Add option with reference before the option that is referred to")
+{
+    using namespace Argos;
+    auto parser = ArgumentParser("test");
+    parser.add(Option{"-f"}.value("-h").constant(2));
+    parser.add(Option{"-g"}.value("-h").constant(1));
+    parser.add(Option{"-h"}.constant(3));
+    auto args = parser.parse({"-h"});
+    REQUIRE(args.value("-h").asInt() == 3);
+}
