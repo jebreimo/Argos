@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Argos.hpp"
+#include <Argos/Argos.hpp>
 
 /*
     ... more includes ...
@@ -17,23 +17,24 @@ int main(int argc, char* argv[])
     /* Define the arguments and options and parse argc and argv */
     auto args = ArgumentParser(argv[0], true)
         .text("This program doesn't do anything apart from"
-              " demonstrating command line argument parsing Argos,"
-              " but one can imagine it reads one or more data files,"
-              " analyzes their contents and outputs a nice PNG file.")
+              " demonstrating command line argument parsing with"
+              " Argos, but one can imagine it reads one or more data"
+              " files, analyzes their contents and outputs"
+              " a PNG file.")
         .add(Argument("data file").count(1, 100)
                  .text("Paths to the input files."))
         .add(Argument("output file")
                  .text("Path to the output file."))
-        .add(Option{"-s", "--size"}.argument("WID,HEI")
+        .add(Option{"-s", "--size"}.argument("<WIDTH>,<HEIGHT>")
                  .text("Width and height of the image, separated by a"
                        " comma. Default: 800,600."))
-        .add(Option{"-c", "--color"}.argument("COL")
+        .add(Option{"-c", "--color"}.argument("RGB")
                  .text("Foreground color as RGB integer value."
                        " Default: 0xFF0000 (red)."))
-        .add(Option{"-b", "--bgcolor"}.argument("COL")
+        .add(Option{"-b", "--bgcolor"}.argument("RGB")
                  .text("Background color as RGB integer value."
                        " Default: 0 (black)."))
-        .add(Option{"--quiet"}.valueName("--verbose").value(false)
+        .add(Option{"--quiet"}.value("--verbose").constant(false)
                  .text("Opposite of verbose, the program will not"
                        " display additional run-time information."))
         .add(Option{"--verbose"}
