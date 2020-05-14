@@ -104,6 +104,7 @@ namespace Argos
          * @note The ArgumentParser instance is no longer valid after calling
          *      the non-const version of parse().
          */
+        [[nodiscard]]
         ParsedArguments parse(int argc, char* argv[]);
 
         /**
@@ -114,6 +115,7 @@ namespace Argos
          * strings and @a argc is the number of strings in @a argv. @a argv
          * must have at least one value (i.e. the name of the program itself).
          */
+        [[nodiscard]]
         ParsedArguments parse(int argc, char* argv[]) const;
 
         /**
@@ -125,6 +127,7 @@ namespace Argos
          * @note The ArgumentParser instance is no longer valid after calling
          *      the non-const version of parse().
          */
+        [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args);
 
         /**
@@ -133,6 +136,7 @@ namespace Argos
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
          */
+        [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args) const;
 
         /**
@@ -142,12 +146,14 @@ namespace Argos
          * @note The ArgumentParser instance is no longer valid after calling
          *      the non-const version of makeIterator().
          */
+        [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
          *      in argv.
          */
+        [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
 
         /**
@@ -160,6 +166,7 @@ namespace Argos
          * @note The ArgumentParser instance is no longer valid after calling
          *      the non-const version of makeIterator().
          */
+        [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args);
 
         /**
@@ -169,12 +176,13 @@ namespace Argos
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
          */
+        [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args) const;
 
         /**
          * @brief Returns true if the ArgumentParser allows abbreviated options.
          */
-        bool allowAbbreviatedOptions() const;
+        [[nodiscard]] bool allowAbbreviatedOptions() const;
 
         /**
          * @brief Enable or disable abbreviated options.
@@ -194,7 +202,7 @@ namespace Argos
          *      command line has invalid options or arguments, or the help
          *      option is given.
          */
-        bool autoExit() const;
+        [[nodiscard]] bool autoExit() const;
 
         /**
          * @brief Enable or disable automatic exit when the command line has
@@ -207,7 +215,7 @@ namespace Argos
         /**
          * @brief Returns true if option flags are case insensitive.
          */
-        bool caseInsensitive() const;
+        [[nodiscard]] bool caseInsensitive() const;
 
         /**
          * @brief Enable or disable case insensitive option flags.
@@ -221,7 +229,7 @@ namespace Argos
          * @brief Returns whether or not a help option will be auto-generated
          *      if none has been added explicitly.
          */
-        bool generateHelpOption() const;
+        [[nodiscard]] bool generateHelpOption() const;
 
         /**
          * @brief Turn auto-generation of help option on or off.
@@ -239,7 +247,7 @@ namespace Argos
         /**
          * @brief Returns the current option style.
          */
-        OptionStyle optionStyle() const;
+        [[nodiscard]] OptionStyle optionStyle() const;
 
         /**
          * @brief Set the option style.
@@ -253,7 +261,7 @@ namespace Argos
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.
          */
-        bool ignoreUndefinedArguments() const;
+        [[nodiscard]] bool ignoreUndefinedArguments() const;
 
         /**
          * @brief Enable or disable treating undefined arguments on the command
@@ -268,7 +276,7 @@ namespace Argos
          * @brief Returns true if undefined options on the command line
          *      will not be treated as errors.
          */
-        bool ignoreUndefinedOptions() const;
+        [[nodiscard]] bool ignoreUndefinedOptions() const;
 
         /**
          * @brief Enable or disable treating undefined options on the command
@@ -285,7 +293,7 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        const ArgumentCallback& argumentCallback() const;
+        [[nodiscard]] const ArgumentCallback& argumentCallback() const;
 
         /**
          * @brief Set the callback function that will be called for every
@@ -299,7 +307,7 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        const OptionCallback& optionCallback() const;
+        [[nodiscard]] const OptionCallback& optionCallback() const;
 
         /**
          * @brief Set the callback function that will be called for every
@@ -313,7 +321,7 @@ namespace Argos
          *
          * The default value is nullptr.
          */
-        std::ostream* stream() const;
+        [[nodiscard]] std::ostream* stream() const;
 
         /**
          * @brief Set the stream that the help text and error messages are
@@ -327,7 +335,7 @@ namespace Argos
         /**
          * @brief Return the program name.
          */
-        const std::string& programName() const;
+        [[nodiscard]] const std::string& programName() const;
 
         /**
          * @brief Set the program name.
@@ -369,13 +377,14 @@ namespace Argos
         ArgumentParser& addWordSplittingRule(std::string str);
 
         /**
-         * @private
+         * @brief Makes it possible to construct an ArgumentParser with chained
+         *      method calls and assign it to a variable.
          */
         ArgumentParser&& move();
     private:
         void checkData() const;
 
-        ArgumentId nextArgumentId() const;
+        [[nodiscard]] ArgumentId nextArgumentId() const;
 
         std::unique_ptr<ParserData> m_Data;
     };
