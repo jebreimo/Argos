@@ -3295,7 +3295,7 @@ namespace Argos
         return *this;
     }
 
-    ArgumentValue ParsedArgumentsBuilder::value(const std::string& name)
+    ArgumentValue ParsedArgumentsBuilder::value(const std::string& name) const
     {
         auto id = m_Impl->getValueId(name);
         auto value = m_Impl->getValue(id);
@@ -3306,7 +3306,7 @@ namespace Argos
     }
 
     ArgumentValue
-    ParsedArgumentsBuilder::value(const IArgumentView& arg)
+    ParsedArgumentsBuilder::value(const IArgumentView& arg) const
     {
         auto value = m_Impl->getValue(arg.valueId());
         if (value)
@@ -3316,7 +3316,7 @@ namespace Argos
     }
 
     ArgumentValues
-    ParsedArgumentsBuilder::values(const std::string& name)
+    ParsedArgumentsBuilder::values(const std::string& name) const
     {
         auto id = m_Impl->getValueId(name);
         auto values = m_Impl->getValues(id);
@@ -3324,18 +3324,18 @@ namespace Argos
     }
 
     ArgumentValues
-    ParsedArgumentsBuilder::values(const IArgumentView& arg)
+    ParsedArgumentsBuilder::values(const IArgumentView& arg) const
     {
         auto values = m_Impl->getValues(arg.valueId());
         return {move(values), m_Impl, arg.valueId()};
     }
 
-    bool ParsedArgumentsBuilder::has(const std::string& name)
+    bool ParsedArgumentsBuilder::has(const std::string& name) const
     {
         return m_Impl->has(m_Impl->getValueId(name));
     }
 
-    bool ParsedArgumentsBuilder::has(const IArgumentView& arg)
+    bool ParsedArgumentsBuilder::has(const IArgumentView& arg) const
     {
         return m_Impl->has(arg.valueId());
     }

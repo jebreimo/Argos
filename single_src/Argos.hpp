@@ -445,7 +445,8 @@ namespace Argos
     /**
      * @brief Wrapper class for the value of an argument or option.
      *
-     * ParsedArguments returns instances of ArgumentValue.
+     * @a ParsedArguments and @a ArgumentValues returns instances of
+     * @a ArgumentValue.
      */
     class ArgumentValue
     {
@@ -458,19 +459,42 @@ namespace Argos
                       ValueId valueId,
                       ArgumentId argumentId);
 
+        /**
+         * @private
+         */
         ArgumentValue(const ArgumentValue&);
 
+        /**
+         * @private
+         */
         ArgumentValue(ArgumentValue&&) noexcept;
 
+        /**
+         * @private
+         */
         ~ArgumentValue();
 
+        /**
+         * @private
+         */
         ArgumentValue& operator=(const ArgumentValue&);
 
+        /**
+         * @private
+         */
         ArgumentValue& operator=(ArgumentValue&&) noexcept;
 
-        std::unique_ptr<IArgumentView> argument() const;
+        /**
+         * @brief Returns the @a IArgumentView instance which identifies
+         *      the argument or option that is the source of this value.
+         */
+        [[nodiscard]] std::unique_ptr<IArgumentView> argument() const;
 
-        bool hasValue() const;
+        /**
+         * @brief Returns true if this argument or option was given on the
+         *      command line.
+         */
+        [[nodiscard]] bool hasValue() const;
 
         /**
          * @brief Returns the value as it was found on the command line.
@@ -479,35 +503,186 @@ namespace Argos
          * will never be empty if the current ArgumentValue instance
          * was returned by ArgumentValues::value(n).
          */
-        std::optional<std::string_view> value() const;
+        [[nodiscard]] std::optional<std::string_view> value() const;
 
-        bool asBool(bool defaultValue = false) const;
+        /**
+         * @brief Returns defaultValue if the value was not given on the
+         *      command line, otherwise it returns true unless the given value
+         *      is "0" or "false".
+         */
+        [[nodiscard]] bool asBool(bool defaultValue = false) const;
 
-        int asInt(int defaultValue = 0, int base = 10) const;
+        /**
+         * @brief Converts the value from the command line to int and returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to int, an error message
+         * is displayed and the program either exits (autoExit is true) or
+         * the function throws an exception (autoExit is false). The actual
+         * conversion is performed by @a strtol and @a base is passed unmodified
+         * to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to int.
+         */
+        [[nodiscard]] int asInt(int defaultValue = 0, int base = 10) const;
 
+        /**
+         * @brief Converts the value from the command line to unsigned int
+         *      and returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to unsigned int, an error
+         * message is displayed and the program either exits (autoExit is true)
+         * or the function throws an exception (autoExit is false). The actual
+         * conversion is performed by @a strtoul and @a base is passed
+         * unmodified to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to unsigned int.
+         */
+        [[nodiscard]]
         unsigned asUInt(unsigned defaultValue = 0, int base = 10) const;
 
-        long asLong(long defaultValue = 0, int base = 10) const;
+        /**
+         * @brief Converts the value from the command line to long and
+         *      returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to long, an error
+         * message is displayed and the program either exits (autoExit is true)
+         * or the function throws an exception (autoExit is false). The actual
+         * conversion is performed by @a strtol and @a base is passed
+         * unmodified to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to long.
+         */
+        [[nodiscard]] long asLong(long defaultValue = 0, int base = 10) const;
 
+        /**
+         * @brief Converts the value from the command line to long long and
+         *      returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to long long, an error
+         * message is displayed and the program either exits (autoExit is true)
+         * or the function throws an exception (autoExit is false). The actual
+         * conversion is performed by @a strtoll and @a base is passed
+         * unmodified to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to long long.
+         */
+        [[nodiscard]]
         long long asLLong(long long defaultValue = 0, int base = 10) const;
 
-        unsigned long
+        /**
+         * @brief Converts the value from the command line to unsigned long and
+         *      returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to unsigned long, an error
+         * message is displayed and the program either exits (autoExit is true)
+         * or the function throws an exception (autoExit is false). The actual
+         * conversion is performed by @a strtoul and @a base is passed
+         * unmodified to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to unsigned long.
+         */
+        [[nodiscard]] unsigned long
         asULong(unsigned long defaultValue = 0, int base = 10) const;
 
-        unsigned long long
+        /**
+         * @brief Converts the value from the command line to unsigned long
+         *      long and returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to unsigned long long,
+         * an error message is displayed and the program either exits (autoExit
+         * is true) or the function throws an exception (autoExit is false).
+         * The actual conversion is performed by @a strtoul and @a base is
+         * passed unmodified to that function.
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to unsigned long.
+         */
+        [[nodiscard]] unsigned long long
         asULLong(unsigned long long defaultValue = 0, int base = 10) const;
 
-        float asFloat(float defaultValue = 0) const;
+        /**
+         * @brief Converts the value from the command line to float and
+         *      returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to float, an error message
+         * is displayed and the program either exits (autoExit is true) or the
+         * function throws an exception (autoExit is false).
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to float.
+         */
+        [[nodiscard]] float asFloat(float defaultValue = 0) const;
 
-        double asDouble(double defaultValue = 0) const;
+        /**
+         * @brief Converts the value from the command line to double and
+         *      returns it.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         *
+         * If the given value can not be converted to double, an error message
+         * is displayed and the program either exits (autoExit is true) or the
+         * function throws an exception (autoExit is false).
+         *
+         * @throw ArgosException if @a autoExit is false and the given value
+         *      can not be converted to double.
+         */
+        [[nodiscard]] double asDouble(double defaultValue = 0) const;
 
-        std::string asString(const std::string& defaultValue = {}) const;
+        /**
+         * @brief Returns the value from the command line as a string.
+         *
+         * Returns defaultValue if the value was not given on the command line.
+         */
+        [[nodiscard]] std::string
+        asString(const std::string& defaultValue = {}) const;
 
-        ArgumentValues
+        /**
+         * @brief Splits the string from the command line on @a separator and
+         *      returns the resulting parts.
+         *
+         * An error message is displayed if the result has less than @a minParts
+         * parts (i.e. number of separators is less than minParts - 1). The
+         * result will never consist of more than @a maxParts parts even if
+         * there are more occurrences of @a separator in the value, it just
+         * means that the final part will contain one or more separators.
+         *
+         * @throw ArgosException if @a autoExit is false and the result consists
+         *      of less than @a minParts parts.
+         */
+        [[nodiscard]] ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
 
+        /**
+         * Display @a message as if it was an error produced within Argos
+         * itself, including a reference to the argument or option this value
+         * comes from and the usage section from the help text. If autoExit is
+         * true the program will exit after displaying the message.
+         */
         void error(const std::string& message) const;
 
+        /**
+         * Calls error(message) with a message that says the given value
+         * is invalid.
+         */
         void error() const;
     private:
         std::optional<std::string_view> m_Value;
@@ -741,28 +916,28 @@ namespace Argos
         /**
          * @brief Returns the option's or option's help text.
          */
-        const std::string& text() const final;
+        [[nodiscard]] const std::string& text() const final;
 
         /**
          * @brief Returns the option's section name.
          */
-        const std::string& section() const final;
+        [[nodiscard]] const std::string& section() const final;
 
         /**
          * @brief Returns the option's value name.
          */
-        const std::string& value() const final;
+        [[nodiscard]] const std::string& value() const final;
 
         /**
          * @brief Returns the option's visibility in
          *      the help text and error messages.
          */
-        Visibility visibility() const final;
+        [[nodiscard]] Visibility visibility() const final;
 
         /**
          * @brief Returns the option's custom id.
          */
-        int id() const final;
+        [[nodiscard]] int id() const final;
 
         /**
          * @brief Returns the numeric id of the value the argument assigns
@@ -777,7 +952,7 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        ValueId valueId() const final;
+        [[nodiscard]] ValueId valueId() const final;
 
         /**
          * @brief Returns the option's argumentId().
@@ -785,19 +960,19 @@ namespace Argos
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argumentId() const final;
 
-        OptionOperation operation() const;
+        [[nodiscard]] OptionOperation operation() const;
 
-        const std::vector<std::string>& flags() const;
+        [[nodiscard]] const std::vector<std::string>& flags() const;
 
-        const std::string& argument() const;
+        [[nodiscard]] const std::string& argument() const;
 
-        const std::string& constant() const;
+        [[nodiscard]] const std::string& constant() const;
 
-        OptionType type() const;
+        [[nodiscard]] OptionType type() const;
 
-        bool optional() const;
+        [[nodiscard]] bool optional() const;
     private:
         const OptionData* m_Option;
     };
@@ -832,15 +1007,21 @@ namespace Argos
         /**
          * @private
          */
-        ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
+        explicit ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
 
         /**
          * @private
          */
         ParsedArguments(const ParsedArguments&) = delete;
 
+        /**
+         * @private
+         */
         ParsedArguments(ParsedArguments&&) noexcept;
 
+        /**
+         * @private
+         */
         ~ParsedArguments();
 
         /**
@@ -850,26 +1031,29 @@ namespace Argos
 
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
-        bool has(const std::string& name) const;
+        [[nodiscard]] bool has(const std::string& name) const;
 
-        bool has(const IArgumentView& arg) const;
+        [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        ArgumentValue value(const std::string& name) const;
+        [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
-        ArgumentValue value(const IArgumentView& arg) const;
+        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
-        ArgumentValues values(const std::string& name) const;
+        [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
-        ArgumentValues values(const IArgumentView& arg) const;
+        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
+        [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
 
+        [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> allOptions() const;
 
-        ParserResultCode resultCode() const;
+        [[nodiscard]] ParserResultCode resultCode() const;
 
-        OptionView stopOption() const;
+        [[nodiscard]] OptionView stopOption() const;
 
+        [[nodiscard]]
         const std::vector<std::string>& unprocessedArguments() const;
 
         void filterParsedArguments(int& argc, char**& argv);
@@ -924,22 +1108,21 @@ namespace Argos
 
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
-        ArgumentValue value(const std::string& name);
+        [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
-        ArgumentValue value(const IArgumentView& arg);
+        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
-        ArgumentValues values(const std::string& name);
+        [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
-        ArgumentValues values(const IArgumentView& arg);
+        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
-        bool has(const std::string& name);
+        [[nodiscard]] bool has(const std::string& name) const;
 
-        bool has(const IArgumentView& arg);
+        [[nodiscard]] bool has(const IArgumentView& arg) const;
 
         void error(const std::string& errorMessage);
 
-        void error(const std::string& errorMessage,
-                   const IArgumentView& arg);
+        void error(const std::string& errorMessage, const IArgumentView& arg);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
@@ -1327,14 +1510,29 @@ namespace Argos
 
         explicit Option(std::initializer_list<std::string> flags);
 
+        /**
+         * @private
+         */
         Option(const Option&);
 
+        /**
+         * @private
+         */
         Option(Option&&) noexcept;
 
+        /**
+         * @private
+         */
         ~Option();
 
+        /**
+         * @private
+         */
         Option& operator=(const Option&);
 
+        /**
+         * @private
+         */
         Option& operator=(Option&&) noexcept;
 
         /**
@@ -1543,10 +1741,13 @@ namespace Argos
          * must have at least one value (i.e. the name of the program itself).
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of parse().
+         *      the non-const version of parse(). All method calls on an invalid
+         *      ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(int argc, char* argv[]);
+        [[nodiscard]] ParsedArguments parse(int argc, char* argv[]);
 
         /**
          * @brief Parses the arguments and options in @a argv.
@@ -1555,9 +1756,11 @@ namespace Argos
          * function receives: @a argv is a list of zero-terminated
          * strings and @a argc is the number of strings in @a argv. @a argv
          * must have at least one value (i.e. the name of the program itself).
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(int argc, char* argv[]) const;
+        [[nodiscard]] ParsedArguments parse(int argc, char* argv[]) const;
 
         /**
          * @brief Parses the arguments and options in @a args.
@@ -1566,16 +1769,22 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of parse().
+         *      the non-const version of parse(). All method calls on an invalid
+         *      ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(std::vector<std::string_view> args);
+        [[nodiscard]] ParsedArguments parse(std::vector<std::string_view> args);
 
         /**
          * @brief Parses the arguments and options in @a args.
          *
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
         [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args) const;
@@ -1585,14 +1794,20 @@ namespace Argos
          *      in argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator().
+         *      the non-const version of makeIterator(). All method calls on an
+         *      invalid ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
-        [[nodiscard]]
-        ArgumentIterator makeIterator(int argc, char* argv[]);
+        [[nodiscard]] ArgumentIterator makeIterator(int argc, char* argv[]);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
          *      in argv.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
@@ -1605,7 +1820,11 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator().
+         *      the non-const version of makeIterator(). All method calls on an
+         *      invalid ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args);
@@ -1616,6 +1835,9 @@ namespace Argos
          *
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args) const;

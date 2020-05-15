@@ -47,22 +47,21 @@ namespace Argos
 
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
-        ArgumentValue value(const std::string& name);
+        [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
-        ArgumentValue value(const IArgumentView& arg);
+        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
-        ArgumentValues values(const std::string& name);
+        [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
-        ArgumentValues values(const IArgumentView& arg);
+        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
-        bool has(const std::string& name);
+        [[nodiscard]] bool has(const std::string& name) const;
 
-        bool has(const IArgumentView& arg);
+        [[nodiscard]] bool has(const IArgumentView& arg) const;
 
         void error(const std::string& errorMessage);
 
-        void error(const std::string& errorMessage,
-                   const IArgumentView& arg);
+        void error(const std::string& errorMessage, const IArgumentView& arg);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };

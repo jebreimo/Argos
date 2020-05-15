@@ -33,15 +33,21 @@ namespace Argos
         /**
          * @private
          */
-        ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
+        explicit ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
 
         /**
          * @private
          */
         ParsedArguments(const ParsedArguments&) = delete;
 
+        /**
+         * @private
+         */
         ParsedArguments(ParsedArguments&&) noexcept;
 
+        /**
+         * @private
+         */
         ~ParsedArguments();
 
         /**
@@ -51,26 +57,29 @@ namespace Argos
 
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
-        bool has(const std::string& name) const;
+        [[nodiscard]] bool has(const std::string& name) const;
 
-        bool has(const IArgumentView& arg) const;
+        [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        ArgumentValue value(const std::string& name) const;
+        [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
-        ArgumentValue value(const IArgumentView& arg) const;
+        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
-        ArgumentValues values(const std::string& name) const;
+        [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
-        ArgumentValues values(const IArgumentView& arg) const;
+        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
+        [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
 
+        [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> allOptions() const;
 
-        ParserResultCode resultCode() const;
+        [[nodiscard]] ParserResultCode resultCode() const;
 
-        OptionView stopOption() const;
+        [[nodiscard]] OptionView stopOption() const;
 
+        [[nodiscard]]
         const std::vector<std::string>& unprocessedArguments() const;
 
         void filterParsedArguments(int& argc, char**& argv);
