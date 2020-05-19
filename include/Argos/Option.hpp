@@ -35,14 +35,29 @@ namespace Argos
 
         explicit Option(std::initializer_list<std::string> flags);
 
+        /**
+         * @private
+         */
         Option(const Option&);
 
+        /**
+         * @private
+         */
         Option(Option&&) noexcept;
 
+        /**
+         * @private
+         */
         ~Option();
 
+        /**
+         * @private
+         */
         Option& operator=(const Option&);
 
+        /**
+         * @private
+         */
         Option& operator=(Option&&) noexcept;
 
         /**

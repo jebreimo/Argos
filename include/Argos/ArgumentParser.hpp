@@ -102,10 +102,13 @@ namespace Argos
          * must have at least one value (i.e. the name of the program itself).
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of parse().
+         *      the non-const version of parse(). All method calls on an invalid
+         *      ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(int argc, char* argv[]);
+        [[nodiscard]] ParsedArguments parse(int argc, char* argv[]);
 
         /**
          * @brief Parses the arguments and options in @a argv.
@@ -114,9 +117,11 @@ namespace Argos
          * function receives: @a argv is a list of zero-terminated
          * strings and @a argc is the number of strings in @a argv. @a argv
          * must have at least one value (i.e. the name of the program itself).
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(int argc, char* argv[]) const;
+        [[nodiscard]] ParsedArguments parse(int argc, char* argv[]) const;
 
         /**
          * @brief Parses the arguments and options in @a args.
@@ -125,16 +130,22 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of parse().
+         *      the non-const version of parse(). All method calls on an invalid
+         *      ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
-        [[nodiscard]]
-        ParsedArguments parse(std::vector<std::string_view> args);
+        [[nodiscard]] ParsedArguments parse(std::vector<std::string_view> args);
 
         /**
          * @brief Parses the arguments and options in @a args.
          *
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
+         *
+         * @throw ArgosException if argc is 0 or if there are two or more
+         *      options that use the same flag.
          */
         [[nodiscard]]
         ParsedArguments parse(std::vector<std::string_view> args) const;
@@ -144,14 +155,20 @@ namespace Argos
          *      in argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator().
+         *      the non-const version of makeIterator(). All method calls on an
+         *      invalid ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
-        [[nodiscard]]
-        ArgumentIterator makeIterator(int argc, char* argv[]);
+        [[nodiscard]] ArgumentIterator makeIterator(int argc, char* argv[]);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
          *      in argv.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(int argc, char* argv[]) const;
@@ -164,7 +181,11 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator().
+         *      the non-const version of makeIterator(). All method calls on an
+         *      invalid ArgumentParser will throw an exception.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args);
@@ -175,6 +196,9 @@ namespace Argos
          *
          * @note @a args should not have the name of the program itself as its
          *      first value, unlike when parse is called with argc and argv.
+         *
+         * @throw ArgosException if there are two or more options that use
+         *      the same flag.
          */
         [[nodiscard]]
         ArgumentIterator makeIterator(std::vector<std::string_view> args) const;

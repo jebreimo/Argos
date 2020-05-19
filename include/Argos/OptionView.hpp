@@ -35,28 +35,28 @@ namespace Argos
         /**
          * @brief Returns the option's or option's help text.
          */
-        const std::string& text() const final;
+        [[nodiscard]] const std::string& text() const final;
 
         /**
          * @brief Returns the option's section name.
          */
-        const std::string& section() const final;
+        [[nodiscard]] const std::string& section() const final;
 
         /**
          * @brief Returns the option's value name.
          */
-        const std::string& value() const final;
+        [[nodiscard]] const std::string& value() const final;
 
         /**
          * @brief Returns the option's visibility in
          *      the help text and error messages.
          */
-        Visibility visibility() const final;
+        [[nodiscard]] Visibility visibility() const final;
 
         /**
          * @brief Returns the option's custom id.
          */
-        int id() const final;
+        [[nodiscard]] int id() const final;
 
         /**
          * @brief Returns the numeric id of the value the argument assigns
@@ -71,7 +71,7 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        ValueId valueId() const final;
+        [[nodiscard]] ValueId valueId() const final;
 
         /**
          * @brief Returns the option's argumentId().
@@ -79,19 +79,19 @@ namespace Argos
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argumentId() const final;
 
-        OptionOperation operation() const;
+        [[nodiscard]] OptionOperation operation() const;
 
-        const std::vector<std::string>& flags() const;
+        [[nodiscard]] const std::vector<std::string>& flags() const;
 
-        const std::string& argument() const;
+        [[nodiscard]] const std::string& argument() const;
 
-        const std::string& constant() const;
+        [[nodiscard]] const std::string& constant() const;
 
-        OptionType type() const;
+        [[nodiscard]] OptionType type() const;
 
-        bool optional() const;
+        [[nodiscard]] bool optional() const;
     private:
         const OptionData* m_Option;
     };
