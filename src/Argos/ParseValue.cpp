@@ -49,6 +49,8 @@ namespace Argos
         template <typename T>
         std::optional<T> parseIntegerImpl(const std::string& str, int base)
         {
+            if (str.empty())
+                return {};
             char* endp = nullptr;
             errno = 0;
             auto value = strToInt<T>(str.c_str(), &endp, base);
@@ -135,6 +137,8 @@ namespace Argos
         template <typename T>
         std::optional<T> parseFloatingPointImpl(const std::string& str)
         {
+            if (str.empty())
+                return {};
             char* endp = nullptr;
             errno = 0;
             auto value = strToFloat<T>(str.c_str(), &endp);
