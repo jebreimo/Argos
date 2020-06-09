@@ -6,7 +6,22 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.13)
-project(Argos VERSION 0.99.17)
+project(Argos VERSION 0.99.18)
+
+# Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
+if (NOT DEFINED ARGOS_MASTER_PROJECT)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(ARGOS_MASTER_PROJECT ON)
+    else()
+        set(ARGOS_MASTER_PROJECT OFF)
+    endif()
+endif ()
+
+# Test option
+option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
+
+# Install option
+option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -94,17 +109,19 @@ target_compile_definitions(Argos
 
 TargetEnableAllWarnings(Argos)
 
-include(CodeCoverage)
-TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
-
 add_library(Argos::Argos ALIAS Argos)
 
 add_subdirectory(docs/doxygen EXCLUDE_FROM_ALL)
 
-enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
+if (ARGOS_BUILD_TEST)
+    include(CodeCoverage)
+    TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
 
-add_subdirectory(tests/ArgosTest)
-add_subdirectory(tests/ArgosTestApp EXCLUDE_FROM_ALL)
+    enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
+
+    add_subdirectory(tests/ArgosTest)
+    add_subdirectory(tests/ArgosTestApp EXCLUDE_FROM_ALL)
+endif()
 
 if (UPDATE_SINGLE_SRC)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -125,36 +142,38 @@ export(TARGETS Argos
     NAMESPACE Argos::
     FILE ArgosConfig.cmake)
 
-include(GNUInstallDirs)
+if (ARGOS_INSTALL)
+    include(GNUInstallDirs)
 
-install(TARGETS Argos
-    EXPORT ArgosConfig
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
+    install(TARGETS Argos
+        EXPORT ArgosConfig
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
 
-install(EXPORT ArgosConfig
-    FILE
-        ArgosConfig.cmake
-    NAMESPACE
-        Argos::
-    DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
-    )
+    install(EXPORT ArgosConfig
+        FILE
+            ArgosConfig.cmake
+        NAMESPACE
+            Argos::
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
+        )
 
-file(GLOB_RECURSE PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
-install(
-    FILES
-        ${PUBLIC_INCLUDES}
-        ${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp
-    DESTINATION
-        ${CMAKE_INSTALL_INCLUDEDIR}/Argos
-    )
+    file(GLOB_RECURSE PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
+    install(
+        FILES
+            ${PUBLIC_INCLUDES}
+            ${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp
+        DESTINATION
+            ${CMAKE_INSTALL_INCLUDEDIR}/Argos
+        )
 
-write_basic_package_version_file(ArgosConfigVersion.cmake
-    COMPATIBILITY SameMajorVersion
-    )
+    write_basic_package_version_file(ArgosConfigVersion.cmake
+        COMPATIBILITY SameMajorVersion
+        )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ArgosConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
-    )
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ArgosConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
+        )
+endif()
