@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.13)
-project(Argos VERSION 0.99.18)
+project(Argos VERSION 0.99.19)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if (NOT DEFINED ARGOS_MASTER_PROJECT)

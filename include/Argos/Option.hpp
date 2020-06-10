@@ -137,6 +137,8 @@ namespace Argos
 
         Option& argument(const std::string& name);
 
+        Option& constant(const char* value);
+
         Option& constant(const std::string& value);
 
         Option& constant(bool value);

@@ -724,6 +724,11 @@ namespace Argos
         return *this;
     }
 
+    Option& Option::constant(const char* value)
+    {
+        return this->constant(std::string(value));
+    }
+
     Option& Option::constant(const std::string& value)
     {
         checkOption();

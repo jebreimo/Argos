@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.17";
+constexpr char ARGOS_VERSION[] = "0.99.19";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 17;
+constexpr unsigned ARGOS_VERSION_PATCH = 19;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1611,6 +1611,8 @@ namespace Argos
         Option& flags(std::vector<std::string> f);
 
         Option& argument(const std::string& name);
+
+        Option& constant(const char* value);
 
         Option& constant(const std::string& value);
 

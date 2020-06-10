@@ -642,3 +642,13 @@ TEST_CASE("Add option with reference before the option that is referred to")
     auto args = parser.parse({"-h"});
     REQUIRE(args.value("-h").asInt() == 3);
 }
+
+TEST_CASE("Test using char* string as constant")
+{
+    using namespace Argos;
+    auto args = ArgumentParser("test")
+        .add(Option{"-f"}.constant("foo"))
+        .add(Option{"-g"}.value("-f").constant("goo"))
+        .parse({"-f"});
+    REQUIRE(args.value("-f").asString() == "foo");
+}
