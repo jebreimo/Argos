@@ -169,6 +169,8 @@ if (ARGOS_INSTALL)
             ${CMAKE_INSTALL_INCLUDEDIR}/Argos
         )
 
+    include(CMakePackageConfigHelpers)
+
     write_basic_package_version_file(ArgosConfigVersion.cmake
         COMPATIBILITY SameMajorVersion
         )
