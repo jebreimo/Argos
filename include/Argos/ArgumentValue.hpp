@@ -212,7 +212,6 @@ namespace Argos
          */
         [[nodiscard]] float asFloat(float defaultValue = 0) const;
 
-
         /**
          * @brief Converts the value from the command line to double and
          *      returns it.
@@ -240,14 +239,17 @@ namespace Argos
          * @brief Splits the string from the command line on @a separator and
          *      returns the resulting parts.
          *
-         * An error message is displayed if the result has less than @a minParts
-         * parts (i.e. number of separators is less than minParts - 1). The
-         * result will never consist of more than @a maxParts parts even if
-         * there are more occurrences of @a separator in the value, it just
-         * means that the final part will contain one or more separators.
+         * An error message is displayed if the result has less than
+         * @a minParts parts (i.e. number of separators is less than
+         * minParts - 1). The result will never consist of more than
+         * @a maxParts parts, even if there are more occurrences of
+         * @a separator in the value, it just means that the final part will
+         * contain one or more separators. The only exception is if
+         * @a maxParts is zero (the default), which means there is no upper
+         * limit to the number of parts.
          *
-         * @throw ArgosException if @a autoExit is false and the result consists
-         *      of less than @a minParts parts.
+         * @throw ArgosException if @a autoExit is false and the result
+         *      has less than @a minParts parts.
          */
         [[nodiscard]] ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
@@ -259,7 +261,6 @@ namespace Argos
          * true the program will exit after displaying the message.
          */
         void error(const std::string& message) const;
-
 
         /**
          * Calls error(message) with a message that says the given value
