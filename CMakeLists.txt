@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.13)
-project(Argos VERSION 0.99.19)
+project(Argos VERSION 0.99.20)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if (NOT DEFINED ARGOS_MASTER_PROJECT)
@@ -24,6 +24,8 @@ option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
 option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
 
 set(CMAKE_CXX_STANDARD 17)
+
+include(GNUInstallDirs)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -97,7 +99,7 @@ add_library(Argos
 
 target_include_directories(Argos
     PUBLIC
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     )
@@ -143,10 +145,9 @@ export(TARGETS Argos
     FILE ArgosConfig.cmake)
 
 if (ARGOS_INSTALL)
-    include(GNUInstallDirs)
-
     install(TARGETS Argos
         EXPORT ArgosConfig
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
