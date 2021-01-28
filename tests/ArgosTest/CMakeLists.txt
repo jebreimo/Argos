@@ -20,16 +20,19 @@ endif ()
 
 add_executable(ArgosTest
     ArgosTestMain.cpp
+    Argv.hpp
     test_ArgumentCounter.cpp
     test_ArgumentParser.cpp
     test_ArgumentValue.cpp
     test_HelpWriter.cpp
+    test_ParsedArguments.cpp
+    test_ParseValue.cpp
     test_StandardOptionIterator.cpp
     test_StringUtilities.cpp
     test_TextFormatter.cpp
     test_TextWriter.cpp
     test_WordSplitter.cpp
-    test_ParsedArguments.cpp Argv.hpp test_ParseValue.cpp)
+    )
 
 target_link_libraries(ArgosTest
     PRIVATE

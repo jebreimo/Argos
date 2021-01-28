@@ -231,19 +231,22 @@ namespace Argos
                 for (auto& [name, text] : txts)
                 {
                     formatter.writeWords(name);
-                    if (nameWidth)
+                    if (!text.empty())
                     {
-                        if (formatter.currentLineWidth() >= nameWidth)
-                            formatter.writeWords("  ");
-                        formatter.pushIndentation(nameWidth);
+                        if (nameWidth)
+                        {
+                            if (formatter.currentLineWidth() >= nameWidth)
+                                formatter.writeWords("  ");
+                            formatter.pushIndentation(nameWidth);
+                        }
+                        else
+                        {
+                            formatter.newline();
+                            formatter.pushIndentation(8);
+                        }
+                        formatter.writeWords(text);
+                        formatter.popIndentation();
                     }
-                    else
-                    {
-                        formatter.newline();
-                        formatter.pushIndentation(8);
-                    }
-                    formatter.writeWords(text);
-                    formatter.popIndentation();
                     formatter.newline();
                 }
                 formatter.popIndentation();

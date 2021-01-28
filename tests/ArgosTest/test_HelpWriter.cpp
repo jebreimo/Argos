@@ -28,3 +28,29 @@ TEST_CASE("Separate lines for STOP options")
   prog [--option] <arg>
 )-");
 }
+
+TEST_CASE("No empty line after undocumented arguments and options.")
+{
+    using namespace Argos;
+    std::stringstream ss;
+    auto parser = ArgumentParser("prog")
+        .add(Option({"--option1"}).text("A text that is too long to fit on a single line. This makes the help text appear on the next line."))
+        .add(Option({"--option2"}))
+        .add(Argument("arg"))
+        .generateHelpOption(false)
+        .stream(&ss)
+        .move();
+    parser.writeHelpText();
+    REQUIRE(ss.str() == R"-(USAGE
+  prog [--option1] [--option2] <arg>
+
+ARGUMENTS
+  <arg>
+
+OPTIONS
+  --option1
+        A text that is too long to fit on a single line. This makes the help
+        text appear on the next line.
+  --option2
+)-");
+}
