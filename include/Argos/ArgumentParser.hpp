@@ -385,7 +385,7 @@ namespace Argos
          * @note The help text is displayed automatically when a help option
          *      is used.
          */
-        void writeHelpText();
+        void writeHelpText() const;
 
         /**
          * @brief Inform Argos how a long word can be split over multiple lines.

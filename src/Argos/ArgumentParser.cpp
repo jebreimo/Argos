@@ -74,8 +74,8 @@ namespace Argos
         {
             struct InternalIdMaker
             {
-                ValueId n = ValueId(0);
                 std::map<std::string_view, ValueId> explicitIds;
+                ValueId n = ValueId(0);
 
                 std::optional<ValueId> findValueId(std::string_view name)
                 {
@@ -107,6 +107,7 @@ namespace Argos
                     return n;
                 }
             };
+
             InternalIdMaker idMaker;
             for (const auto& a : data.arguments)
             {
@@ -243,9 +244,11 @@ namespace Argos
     ArgumentParser& ArgumentParser::add(Option option)
     {
         checkData();
+
         auto od = option.release();
         if (od->flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
+
         for (auto& flag : od->flags)
         {
             bool ok = false;
@@ -269,6 +272,7 @@ namespace Argos
 
         if (!od->argument.empty() && !od->constant.empty())
             ARGOS_THROW("Option cannot have both argument and value set.");
+
         switch (od->operation)
         {
         case OptionOperation::NONE:
@@ -315,8 +319,7 @@ namespace Argos
 
     ParsedArguments ArgumentParser::parse(std::vector<std::string_view> args)
     {
-        if (!m_Data)
-            ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
+        checkData();
         return parseImpl(std::move(args), std::move(m_Data));
     }
 
@@ -515,10 +518,12 @@ namespace Argos
         return *this;
     }
 
-    void ArgumentParser::writeHelpText()
+    void ArgumentParser::writeHelpText() const
     {
         checkData();
-        Argos::writeHelpText(*m_Data);
+        auto data = makeCopy(*m_Data);
+        addMissingHelpOption(*data);
+        Argos::writeHelpText(*data);
     }
 
     ArgumentParser& ArgumentParser::addWordSplittingRule(std::string str)
