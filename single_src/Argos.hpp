@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.19";
+constexpr char ARGOS_VERSION[] = "0.99.21";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr unsigned ARGOS_VERSION_MINOR = 99;
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 19;
+constexpr unsigned ARGOS_VERSION_PATCH = 21;
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -845,14 +845,17 @@ namespace Argos
          * @brief Splits the string from the command line on @a separator and
          *      returns the resulting parts.
          *
-         * An error message is displayed if the result has less than @a minParts
-         * parts (i.e. number of separators is less than minParts - 1). The
-         * result will never consist of more than @a maxParts parts even if
-         * there are more occurrences of @a separator in the value, it just
-         * means that the final part will contain one or more separators.
+         * An error message is displayed if the result has less than
+         * @a minParts parts (i.e. number of separators is less than
+         * minParts - 1). The result will never consist of more than
+         * @a maxParts parts, even if there are more occurrences of
+         * @a separator in the value, it just means that the final part will
+         * contain one or more separators. The only exception is if
+         * @a maxParts is zero (the default), which means there is no upper
+         * limit to the number of parts.
          *
-         * @throw ArgosException if @a autoExit is false and the result consists
-         *      of less than @a minParts parts.
+         * @throw ArgosException if @a autoExit is false and the result
+         *      has less than @a minParts parts.
          */
         [[nodiscard]] ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
@@ -2026,7 +2029,7 @@ namespace Argos
          * @note The help text is displayed automatically when a help option
          *      is used.
          */
-        void writeHelpText();
+        void writeHelpText() const;
 
         /**
          * @brief Inform Argos how a long word can be split over multiple lines.

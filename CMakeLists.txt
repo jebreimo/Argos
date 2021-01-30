@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.13)
-project(Argos VERSION 0.99.21)
+project(Argos VERSION 0.99.22)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if (NOT DEFINED ARGOS_MASTER_PROJECT)
@@ -38,7 +38,7 @@ function(TargetEnableAllWarnings target)
             $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endfunction()
 
-configure_file(include/Argos/ArgosVersion.hpp.in ArgosVersion.hpp @ONLY)
+configure_file(src/Argos/ArgosVersion.hpp.in ArgosVersion.hpp @ONLY)
 
 add_library(Argos
     include/Argos/Argos.hpp
@@ -161,14 +161,19 @@ if (ARGOS_INSTALL)
             ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
         )
 
-    file(GLOB_RECURSE PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
+    install(
+        DIRECTORY
+            include/Argos
+        DESTINATION
+            ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+
     install(
         FILES
-            ${PUBLIC_INCLUDES}
             ${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp
         DESTINATION
             ${CMAKE_INSTALL_INCLUDEDIR}/Argos
-        )
+    )
 
     include(CMakePackageConfigHelpers)
 
