@@ -258,9 +258,11 @@ namespace Argos
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
             writeHelpText(*m_Data);
+            [[fallthrough]];
+        case OptionType::EXIT:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&opt);
-            return {OptionResult::HELP, arg};
+            return {OptionResult::EXIT, arg};
         case OptionType::STOP:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&opt);
@@ -287,7 +289,7 @@ namespace Argos
             auto optRes = processOption(*option, flag);
             switch (optRes.first)
             {
-            case OptionResult::HELP:
+            case OptionResult::EXIT:
                 if (m_Data->parserSettings.autoExit)
                     exit(0);
                 copyRemainingArgumentsToParserResult();

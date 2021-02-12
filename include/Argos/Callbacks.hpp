@@ -45,7 +45,7 @@ namespace Argos
      *   options).
      * - std::string_view: the raw value of the option if the option actually
      *   has one. Note that this value can also be retrieved via the
-     *   ParsedArgumentsBuilder.
+     *   ParsedArgumentsBuilder if the option operation is ASSIGN or APPEND.
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */

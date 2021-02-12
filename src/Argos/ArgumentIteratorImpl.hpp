@@ -48,7 +48,7 @@ namespace Argos
             NORMAL,
             LAST_ARGUMENT,
             STOP,
-            HELP,
+            EXIT,
             ERROR
         };
 

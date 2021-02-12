@@ -124,6 +124,17 @@ namespace Argos
          */
         STOP,
         /**
+         * @brief Similar to STOP, but program will exit if
+         *  ArgumentParser::autoExit is true.
+         *
+         * Any callbacks assigned to the option or argument parser will be
+         * executed first, then the program exits. Use this option type for
+         * "--version" options etc.
+         *
+         * Identical to STOP if ArgumentParser::autoExit is false.
+         */
+        EXIT,
+        /**
          * @brief The last argument that will be treated as a normal
          *  argument or option.
          *
@@ -161,7 +172,7 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or HELP of autoExit is false).
+         *      of type STOP (or EXIT of autoExit is false).
          */
         STOP,
         /**

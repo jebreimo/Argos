@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "Argos/ParsedArgumentsBuilder.hpp"
 
+#include <iostream>
 #include "ParsedArgumentsImpl.hpp"
 
 namespace Argos
@@ -116,5 +117,16 @@ namespace Argos
                                        const IArgumentView& arg)
     {
         m_Impl->error(errorMessage, arg.argumentId());
+    }
+
+    std::ostream &ParsedArgumentsBuilder::stream() const
+    {
+        auto customStream = m_Impl->parserData()->helpSettings.outputStream;
+        return customStream ? *customStream : std::cout;
+    }
+
+    const std::string& ParsedArgumentsBuilder::programName() const
+    {
+      return m_Impl->parserData()->helpSettings.programName;
     }
 }

@@ -62,6 +62,10 @@ namespace Argos
         void error(const std::string& errorMessage);
 
         void error(const std::string& errorMessage, const IArgumentView& arg);
+
+        [[nodiscard]] std::ostream& stream() const;
+
+        [[nodiscard]] const std::string& programName() const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
