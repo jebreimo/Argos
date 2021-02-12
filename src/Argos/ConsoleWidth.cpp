@@ -40,7 +40,7 @@ namespace Argos
         if (!GetConsoleScreenBufferInfo(hCon, &conInfo))
             return 0;
 
-        return unsigned(conInfo.srWindow.Right - conInfo.srWindow.Left + 1);
+        return unsigned(conInfo.srWindow.Right - conInfo.srWindow.Left);
     }
 
 #else
