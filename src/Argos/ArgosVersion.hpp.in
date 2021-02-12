@@ -21,16 +21,16 @@ constexpr char ARGOS_VERSION[] = "@Argos_VERSION@";
  * @brief Incremented if a new version is significantly incompatible
  *      with the previous version.
  */
-constexpr unsigned ARGOS_VERSION_MAJOR = @Argos_VERSION_MAJOR@;
+#define ARGOS_VERSION_MAJOR @Argos_VERSION_MAJOR@
 
 /**
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-constexpr unsigned ARGOS_VERSION_MINOR = @Argos_VERSION_MINOR@;
+#define ARGOS_VERSION_MINOR @Argos_VERSION_MINOR@
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = @Argos_VERSION_PATCH@;
+#define ARGOS_VERSION_PATCH @Argos_VERSION_PATCH@
