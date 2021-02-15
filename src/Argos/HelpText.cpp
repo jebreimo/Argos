@@ -342,7 +342,7 @@ namespace Argos
             data.textFormatter.setStream(data.helpSettings.outputStream);
         bool newline = !isEmpty(writeCustomText(data, TextId::INITIAL_TEXT));
         newline = writeUsage(data, newline) || newline;
-        newline = !isEmpty(writeCustomText(data, TextId::TEXT, newline)) || newline;
+        newline = !isEmpty(writeCustomText(data, TextId::ABOUT, newline)) || newline;
         writeArgumentSections(data, newline);
         writeCustomText(data, TextId::FINAL_TEXT, true);
     }

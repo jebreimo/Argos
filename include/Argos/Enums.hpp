@@ -203,7 +203,7 @@ namespace Argos
          * @brief Text that appears between the usage section and the lists of
          *      arguments and options (empty by default).
          */
-        TEXT,
+        ABOUT,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *

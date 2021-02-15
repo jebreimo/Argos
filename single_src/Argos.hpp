@@ -15,25 +15,25 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.99.21";
+constexpr char ARGOS_VERSION[] = "0.100.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
  *      with the previous version.
  */
-constexpr unsigned ARGOS_VERSION_MAJOR = 0;
+#define ARGOS_VERSION_MAJOR 0
 
 /**
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-constexpr unsigned ARGOS_VERSION_MINOR = 99;
+#define ARGOS_VERSION_MINOR 100
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-constexpr unsigned ARGOS_VERSION_PATCH = 21;
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -204,6 +204,17 @@ namespace Argos
          */
         STOP,
         /**
+         * @brief Similar to STOP, but program will exit if
+         *  ArgumentParser::autoExit is true.
+         *
+         * Any callbacks assigned to the option or argument parser will be
+         * executed first, then the program exits. Use this option type for
+         * "--version" options etc.
+         *
+         * Identical to STOP if ArgumentParser::autoExit is false.
+         */
+        EXIT,
+        /**
          * @brief The last argument that will be treated as a normal
          *  argument or option.
          *
@@ -241,7 +252,7 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or HELP of autoExit is false).
+         *      of type STOP (or EXIT of autoExit is false).
          */
         STOP,
         /**
@@ -272,7 +283,7 @@ namespace Argos
          * @brief Text that appears between the usage section and the lists of
          *      arguments and options (empty by default).
          */
-        TEXT,
+        ABOUT,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *
@@ -1042,6 +1053,21 @@ namespace Argos
         void error(const std::string& errorMessage);
 
         void error(const std::string& errorMessage, const IArgumentView& arg);
+
+        /**
+         * @brief Returns the stream that was assigned to the
+         *  ArgumentParser.
+         *
+         * Returns a reference to the default stream (std::cout) if none
+         * has been assigned.
+         */
+        [[nodiscard]] std::ostream& stream() const;
+
+        /**
+         * @brief Returns the program name that was assigned to the
+         *  ArgumentParser.
+         */
+        [[nodiscard]] const std::string& programName() const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
@@ -1090,7 +1116,7 @@ namespace Argos
      *   options).
      * - std::string_view: the raw value of the option if the option actually
      *   has one. Note that this value can also be retrieved via the
-     *   ParsedArgumentsBuilder.
+     *   ParsedArgumentsBuilder if the option operation is ASSIGN or APPEND.
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */
@@ -2016,7 +2042,7 @@ namespace Argos
          * @brief Set the help text that will appear between the usage section
          *      and the argument and option sections.
          */
-        ArgumentParser& text(std::string text);
+        ArgumentParser& about(std::string text);
 
         /**
          * @brief Set the given part of the help text.

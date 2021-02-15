@@ -63,8 +63,19 @@ namespace Argos
 
         void error(const std::string& errorMessage, const IArgumentView& arg);
 
+        /**
+         * @brief Returns the stream that was assigned to the
+         *  ArgumentParser.
+         *
+         * Returns a reference to the default stream (std::cout) if none
+         * has been assigned.
+         */
         [[nodiscard]] std::ostream& stream() const;
 
+        /**
+         * @brief Returns the program name that was assigned to the
+         *  ArgumentParser.
+         */
         [[nodiscard]] const std::string& programName() const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;

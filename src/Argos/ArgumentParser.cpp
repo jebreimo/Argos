@@ -506,9 +506,9 @@ namespace Argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::text(std::string text)
+    ArgumentParser& ArgumentParser::about(std::string text)
     {
-        return this->text(TextId::TEXT, std::move(text));
+        return this->text(TextId::ABOUT, std::move(text));
     }
 
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)

@@ -789,7 +789,7 @@ namespace Argos
             NORMAL,
             LAST_ARGUMENT,
             STOP,
-            HELP,
+            EXIT,
             ERROR
         };
 
@@ -1249,9 +1249,11 @@ namespace Argos
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
             writeHelpText(*m_Data);
+            [[fallthrough]];
+        case OptionType::EXIT:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&opt);
-            return {OptionResult::HELP, arg};
+            return {OptionResult::EXIT, arg};
         case OptionType::STOP:
             m_State = State::DONE;
             m_ParsedArgs->setBreakingOption(&opt);
@@ -1278,7 +1280,7 @@ namespace Argos
             auto optRes = processOption(*option, flag);
             switch (optRes.first)
             {
-            case OptionResult::HELP:
+            case OptionResult::EXIT:
                 if (m_Data->parserSettings.autoExit)
                     exit(0);
                 copyRemainingArgumentsToParserResult();
@@ -1933,9 +1935,9 @@ namespace Argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::text(std::string text)
+    ArgumentParser& ArgumentParser::about(std::string text)
     {
-        return this->text(TextId::TEXT, std::move(text));
+        return this->text(TextId::ABOUT, std::move(text));
     }
 
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
@@ -2535,7 +2537,7 @@ namespace Argos
         if (!GetConsoleScreenBufferInfo(hCon, &conInfo))
             return 0;
 
-        return unsigned(conInfo.srWindow.Right - conInfo.srWindow.Left + 1);
+        return unsigned(conInfo.srWindow.Right - conInfo.srWindow.Left);
     }
 
 #else
@@ -2898,7 +2900,7 @@ namespace Argos
             data.textFormatter.setStream(data.helpSettings.outputStream);
         bool newline = !isEmpty(writeCustomText(data, TextId::INITIAL_TEXT));
         newline = writeUsage(data, newline) || newline;
-        newline = !isEmpty(writeCustomText(data, TextId::TEXT, newline)) || newline;
+        newline = !isEmpty(writeCustomText(data, TextId::ABOUT, newline)) || newline;
         writeArgumentSections(data, newline);
         writeCustomText(data, TextId::FINAL_TEXT, true);
     }
@@ -3690,6 +3692,17 @@ namespace Argos
                                        const IArgumentView& arg)
     {
         m_Impl->error(errorMessage, arg.argumentId());
+    }
+
+    std::ostream &ParsedArgumentsBuilder::stream() const
+    {
+        auto customStream = m_Impl->parserData()->helpSettings.outputStream;
+        return customStream ? *customStream : std::cout;
+    }
+
+    const std::string& ParsedArgumentsBuilder::programName() const
+    {
+      return m_Impl->parserData()->helpSettings.programName;
     }
 }
 

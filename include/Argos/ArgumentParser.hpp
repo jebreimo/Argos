@@ -372,7 +372,7 @@ namespace Argos
          * @brief Set the help text that will appear between the usage section
          *      and the argument and option sections.
          */
-        ArgumentParser& text(std::string text);
+        ArgumentParser& about(std::string text);
 
         /**
          * @brief Set the given part of the help text.
