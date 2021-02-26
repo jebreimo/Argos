@@ -110,7 +110,8 @@ namespace Argos
         /**
          * @brief Set a callback that will be called when this argument is
          *      encountered.
-         * @param callback A function pointer or callable object.
+         * @param callback A function pointer or callable object accepting the
+         *      parameters (ArgumentView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
