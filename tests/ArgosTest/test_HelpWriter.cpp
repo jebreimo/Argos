@@ -17,6 +17,7 @@ TEST_CASE("Separate lines for STOP options")
     auto parser = ArgumentParser("prog")
         .add(Option({"--help"}).type(OptionType::HELP).visibility(Visibility::USAGE))
         .add(Option({"--version"}).type(OptionType::STOP).visibility(Visibility::USAGE))
+        .add(Option({"--do"}).argument("STUFF").type(OptionType::EXIT).visibility(Visibility::USAGE))
         .add(Option({"--option"}).visibility(Visibility::USAGE))
         .add(Argument("arg").visibility(Visibility::USAGE))
         .stream(&ss)
@@ -25,6 +26,7 @@ TEST_CASE("Separate lines for STOP options")
     REQUIRE(ss.str() == R"-(USAGE
   prog --help
   prog --version
+  prog --do <STUFF>
   prog [--option] <arg>
 )-");
 }
