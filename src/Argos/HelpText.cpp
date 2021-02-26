@@ -132,9 +132,13 @@ namespace Argos
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
+
                 if (opt->type != OptionType::HELP
-                    && opt->type != OptionType::STOP)
+                    && opt->type != OptionType::STOP
+                    && opt->type != OptionType::EXIT)
+                {
                     continue;
+                }
 
                 data.textFormatter.writeWords(data.helpSettings.programName);
                 data.textFormatter.writeWords(" ");
