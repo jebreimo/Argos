@@ -26,10 +26,6 @@ namespace Argos
     class ArgosException : public std::runtime_error
     {
     public:
-        ArgosException() noexcept
-            : std::runtime_error("Unspecified error.")
-        {}
-
         /**
          * @brief Passes @a message on to the base class.
          */
