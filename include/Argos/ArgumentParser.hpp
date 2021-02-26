@@ -43,7 +43,7 @@ namespace Argos
          *      @a argv[0] is used as the programName.
          */
         explicit ArgumentParser(std::string_view programName,
-                                bool extractFileName = false);
+                                bool extractFileName = true);
 
         /**
          * @brief Moves the innards of the old object to the new one.
