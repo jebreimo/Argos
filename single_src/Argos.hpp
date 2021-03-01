@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.100.0";
+constexpr char ARGOS_VERSION[] = "0.100.1";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "0.100.0";
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-#define ARGOS_VERSION_PATCH 0
+#define ARGOS_VERSION_PATCH 1
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -62,10 +62,6 @@ namespace Argos
     class ArgosException : public std::runtime_error
     {
     public:
-        ArgosException() noexcept
-            : std::runtime_error("Unspecified error.")
-        {}
-
         /**
          * @brief Passes @a message on to the base class.
          */
@@ -1232,7 +1228,8 @@ namespace Argos
         /**
          * @brief Set a callback that will be called when this argument is
          *      encountered.
-         * @param callback A function pointer or callable object.
+         * @param callback A function pointer or callable object accepting the
+         *      parameters (ArgumentView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
@@ -1605,7 +1602,8 @@ namespace Argos
         /**
          * @brief Set a callback that will be called when this option is
          *      encountered.
-         * @param callback A function pointer or callable object.
+         * @param callback A function pointer or callable object accepting the
+         *      parameters (OptionView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
@@ -1713,7 +1711,7 @@ namespace Argos
          *      @a argv[0] is used as the programName.
          */
         explicit ArgumentParser(std::string_view programName,
-                                bool extractFileName = false);
+                                bool extractFileName = true);
 
         /**
          * @brief Moves the innards of the old object to the new one.

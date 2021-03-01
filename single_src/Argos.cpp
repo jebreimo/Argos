@@ -2597,12 +2597,18 @@ namespace Argos
             return result;
         }
 
+        bool isStopOption(OptionType type)
+        {
+            return type == OptionType::HELP
+                   || type == OptionType::STOP
+                   || type == OptionType::EXIT;
+        }
+
         std::string getBriefOptionName(const OptionData& opt)
         {
             std::string optTxt;
             bool braces = opt.optional
-                          && opt.type != OptionType::STOP
-                          && opt.type != OptionType::HELP;
+                          && !isStopOption(opt.type);
             if (braces)
                 optTxt.push_back('[');
             const auto& flag = opt.flags.front();
@@ -2688,11 +2694,11 @@ namespace Argos
         {
             for (auto& opt : data.options)
             {
-                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
+                    || !isStopOption(opt->type))
+                {
                     continue;
-                if (opt->type != OptionType::HELP
-                    && opt->type != OptionType::STOP)
-                    continue;
+                }
 
                 data.textFormatter.writeWords(data.helpSettings.programName);
                 data.textFormatter.writeWords(" ");
@@ -2825,11 +2831,11 @@ namespace Argos
             formatter.pushIndentation(TextFormatter::CURRENT_COLUMN);
             for (auto& opt : data.options)
             {
-                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
+                    || isStopOption(opt->type))
+                {
                     continue;
-                if (opt->type == OptionType::HELP
-                    || opt->type == OptionType::STOP)
-                    continue;
+                }
 
                 formatter.writeLines(getBriefOptionName(*opt));
                 formatter.writeWords(" ");
