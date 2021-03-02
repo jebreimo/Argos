@@ -6,16 +6,16 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 0.100.1)
+project(Argos VERSION 0.100.2)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
-if (NOT DEFINED ARGOS_MASTER_PROJECT)
-    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+if(NOT DEFINED ARGOS_MASTER_PROJECT)
+    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
         set(ARGOS_MASTER_PROJECT ON)
     else()
         set(ARGOS_MASTER_PROJECT OFF)
     endif()
-endif ()
+endif()
 
 # Test option
 option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
@@ -115,7 +115,7 @@ add_library(Argos::Argos ALIAS Argos)
 
 add_subdirectory(docs/doxygen EXCLUDE_FROM_ALL)
 
-if (ARGOS_BUILD_TEST)
+if(ARGOS_BUILD_TEST)
     include(CodeCoverage)
     TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
 
@@ -125,7 +125,7 @@ if (ARGOS_BUILD_TEST)
     add_subdirectory(tests/ArgosTestApp EXCLUDE_FROM_ALL)
 endif()
 
-if (UPDATE_SINGLE_SRC)
+if(UPDATE_SINGLE_SRC)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.sh.in
@@ -138,13 +138,13 @@ if (UPDATE_SINGLE_SRC)
             sh "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.sh"
     )
     add_dependencies(UpdateSingleSrc Argos)
-endif ()
+endif()
 
 export(TARGETS Argos
     NAMESPACE Argos::
     FILE ArgosConfig.cmake)
 
-if (ARGOS_INSTALL)
+if(ARGOS_INSTALL)
     install(TARGETS Argos
         EXPORT ArgosConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

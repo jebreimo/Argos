@@ -83,6 +83,8 @@ namespace Argos
         const std::vector<std::string>& unprocessedArguments() const;
 
         void filterParsedArguments(int& argc, char**& argv);
+
+        void error(const std::string& msg);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
