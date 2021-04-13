@@ -1591,23 +1591,31 @@ namespace Argos
                 return;
             if (hasHelpOption(data))
                 return;
-            std::string flag;
+            std::vector<std::string> flags;
             switch (data.parserSettings.optionStyle)
             {
             case OptionStyle::STANDARD:
-                flag = "--help";
+                if (!hasFlag(data, "-h"))
+                    flags.emplace_back("-h");
+                if (!hasFlag(data, "--help"))
+                    flags.emplace_back("--help");
                 break;
             case OptionStyle::SLASH:
-                flag = "/?";
+                if (!hasFlag(data, "/?"))
+                    flags.emplace_back("/?");
                 break;
             case OptionStyle::DASH:
-                flag = "-help";
+                if (!hasFlag(data, "-h"))
+                    flags.emplace_back("-h");
+                else if (!hasFlag(data, "-help"))
+                    flags.emplace_back("-help");
                 break;
             }
-            if (hasFlag(data, flag))
+
+            if (flags.empty())
                 return;
 
-            auto opt = Option{flag}.type(OptionType::HELP)
+            auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
                 .text("Show help text.")
                 .constant("1").release();
             opt->argumentId = ArgumentId(data.options.size()
