@@ -3589,6 +3589,11 @@ namespace Argos
         }
         argc = out;
     }
+
+    void ParsedArguments::error(const std::string& msg)
+    {
+        m_Impl->error(msg);
+    }
 }
 
 //****************************************************************************

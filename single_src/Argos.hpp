@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.100.2";
+constexpr char ARGOS_VERSION[] = "0.100.3";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "0.100.2";
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-#define ARGOS_VERSION_PATCH 2
+#define ARGOS_VERSION_PATCH 3
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1400,6 +1400,8 @@ namespace Argos
         const std::vector<std::string>& unprocessedArguments() const;
 
         void filterParsedArguments(int& argc, char**& argv);
+
+        void error(const std::string& msg);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
