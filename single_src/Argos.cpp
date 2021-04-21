@@ -3978,8 +3978,12 @@ namespace Argos
         else if (m_Pos != 0)
         {
             if (m_Pos < m_ArgsIt->size() && (*m_ArgsIt)[1] != '-')
-                return std::string{'-', (*m_ArgsIt)[m_Pos++]};
-
+            {
+                auto c = (*m_ArgsIt)[m_Pos++];
+                if (m_Pos == m_ArgsIt->size())
+                    m_Pos = std::string_view::npos;
+                return std::string{'-', c};
+            }
             ++m_ArgsIt;
             m_Pos = 0;
         }

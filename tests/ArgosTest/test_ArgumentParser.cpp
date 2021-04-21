@@ -652,3 +652,44 @@ TEST_CASE("Test using char* string as constant")
         .parse({"-f"});
     REQUIRE(args.value("-f").asString() == "foo");
 }
+
+TEST_CASE("Short options with argument")
+{
+    Argos::ArgumentParser argos("test");
+    argos.add(Argos::Option({"-e"})
+                  .argument("FOO"));
+    argos.add(Argos::Option({"-x"}));
+    argos.add(Argos::Option({"-y"}));
+    SECTION("Separate flags, joined value")
+    {
+        Argv argv{"test", "-x", "-e10"};
+        auto args = argos.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-x").asBool());
+        REQUIRE(!args.value("-y").asBool());
+        REQUIRE(args.value("-e").asInt() == 10);
+    }
+    SECTION("Separate flags, separate value")
+    {
+        Argv argv{"test", "-x", "-e", "10"};
+        auto args = argos.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-x").asBool());
+        REQUIRE(!args.value("-y").asBool());
+        REQUIRE(args.value("-e").asInt() == 10);
+    }
+    SECTION("Joined flags, joined value")
+    {
+        Argv argv{"test", "-xe10"};
+        auto args = argos.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-x").asBool());
+        REQUIRE(!args.value("-y").asBool());
+        REQUIRE(args.value("-e").asInt() == 10);
+    }
+    SECTION("Joined flags, separate value")
+    {
+        Argv argv{"test", "-xe", "10"};
+        auto args = argos.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-x").asBool());
+        REQUIRE(!args.value("-y").asBool());
+        REQUIRE(args.value("-e").asInt() == 10);
+    }
+}
