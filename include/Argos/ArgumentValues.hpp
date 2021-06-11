@@ -37,16 +37,35 @@ namespace Argos
                        std::shared_ptr<ParsedArgumentsImpl> args,
                        ValueId valueId);
 
+        /**
+         * @private
+         */
         ArgumentValues(const ArgumentValues&);
 
+        /**
+         * @private
+         */
         ArgumentValues(ArgumentValues&&) noexcept;
 
+        /**
+         * @private
+         */
         ~ArgumentValues();
 
+        /**
+         * @private
+         */
         ArgumentValues& operator=(const ArgumentValues&);
 
+        /**
+         * @private
+         */
         ArgumentValues& operator=(ArgumentValues&&) noexcept;
 
+        /**
+         * @brief Returns instances of IArgumentView that identifies the
+         *  origins of the values.
+         */
         std::vector<std::unique_ptr<IArgumentView>> arguments() const;
 
         void error(const std::string& message) const;
