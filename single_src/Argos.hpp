@@ -949,22 +949,55 @@ namespace Argos
 
         /**
          * @brief Returns instances of IArgumentView that identifies the
-         *  origins of the values.
+         *  command line arguments that produced these values.
          */
         std::vector<std::unique_ptr<IArgumentView>> arguments() const;
 
+        /**
+         * Display @a message as if it was an error produced within Argos
+         * itself, including a reference to the argument or option this value
+         * comes from and the usage section from the help text. If autoExit is
+         * true the program will exit after displaying the message, an
+         * exception is thrown if it's not.
+         */
+        [[noreturn]]
         void error(const std::string& message) const;
 
+        /**
+         * @brief Returns true if there are no values.
+         */
         bool empty() const;
 
+        /**
+         * @brief Returns the number of values.
+         */
         size_t size() const;
 
+        /**
+         * @brief Returns a vector with all the values.
+         */
         std::vector<ArgumentValue> values() const;
 
+        /**
+         * @brief Returns a vector with all the raw string_view values.
+         */
         std::vector<std::string_view> rawValues() const;
 
+        /**
+         * @brief Returns the value with the given index.
+         *
+         * If index is to large, an error message is written to stderr, the
+         * program also automatically exits if autoExit is true.
+         */
         ArgumentValue value(size_t index) const;
 
+        /**
+         * @brief Returns a vector where all values have been converted
+         *  to ints.
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base
+         * @return
+         */
         std::vector<int>
         asInts(const std::vector<int>& defaultValue = {},
                int base = 10) const;

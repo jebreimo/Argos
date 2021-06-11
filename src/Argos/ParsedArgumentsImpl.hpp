@@ -59,8 +59,10 @@ namespace Argos
 
         void setBreakingOption(const OptionData* option);
 
+        [[noreturn]]
         void error(const std::string& message);
 
+        [[noreturn]]
         void error(const std::string& message, ArgumentId argumentId);
     private:
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;

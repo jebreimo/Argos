@@ -733,8 +733,10 @@ namespace Argos
 
         void setBreakingOption(const OptionData* option);
 
+        [[noreturn]]
         void error(const std::string& message);
 
+        [[noreturn]]
         void error(const std::string& message, ArgumentId argumentId);
     private:
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
@@ -2241,7 +2243,8 @@ namespace Argos
                 auto value = parseFloatingPoint<T>(std::string(v));
                 if (!value)
                     error(values, v);
-                result.push_back(*value);
+                else
+                    result.push_back(*value);
             }
             return result;
         }
@@ -2261,7 +2264,8 @@ namespace Argos
                 auto value = parseInteger<T>(std::string(v), base);
                 if (!value)
                     error(values, v);
-                result.push_back(*value);
+                else
+                    result.push_back(*value);
             }
             return result;
         }
@@ -2312,7 +2316,7 @@ namespace Argos
     std::vector<ArgumentValue> ArgumentValues::values() const
     {
         std::vector<ArgumentValue> result;
-        for (auto& v : m_Values)
+        for (const auto& v : m_Values)
             result.emplace_back(v.first, m_Args, m_ValueId, v.second);
         return result;
     }
@@ -2320,7 +2324,7 @@ namespace Argos
     std::vector<std::string_view> ArgumentValues::rawValues() const
     {
         std::vector<std::string_view> result;
-        for (auto& s : m_Values)
+        for (const auto& s : m_Values)
             result.push_back(s.first);
         return result;
     }
@@ -2330,7 +2334,7 @@ namespace Argos
         if (m_Values.empty())
             return {{}, m_Args, m_ValueId, {}};
 
-        auto& v = m_Values.at(index);
+        const auto& v = m_Values.at(index);
         return {v.first, m_Args, m_ValueId, v.second};
     }
 
@@ -2396,7 +2400,7 @@ namespace Argos
 
         std::vector<std::string> result;
         result.reserve(m_Values.size());
-        for (auto& v : m_Values)
+        for (const auto& v : m_Values)
             result.emplace_back(v.first);
         return result;
     }
