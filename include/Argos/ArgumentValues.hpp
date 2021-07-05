@@ -101,50 +101,155 @@ namespace Argos
         /**
          * @brief Returns the value with the given index.
          *
-         * If index is to large, an error message is written to stderr, the
+         * If @a index is to great, an error message is written to stderr, the
          * program also automatically exits if autoExit is true.
+         *
+         * @throw ArgosException if @a index is too great and autoExit
+         *  is false.
          */
         ArgumentValue value(size_t index) const;
 
         /**
-         * @brief Returns a vector where all values have been converted
-         *  to ints.
+         * @brief Returns a vector where every argument value has been
+         *  converted to int.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
          * @param defaultValue This vector is returned if there are no values.
-         * @param base
-         * @return
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
          */
         std::vector<int>
         asInts(const std::vector<int>& defaultValue = {},
                int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to unsigned.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<unsigned>
         asUInts(const std::vector<unsigned>& defaultValue = {},
                int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<long>
         asLongs(const std::vector<long>& defaultValue = {},
                 int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to unsigned long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<unsigned long>
         asULongs(const std::vector<unsigned long>& defaultValue = {},
                  int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to long long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<long long>
         asLLongs(const std::vector<long long>& defaultValue = {},
                  int base = 10) const;
 
+        /**
+        * @brief Returns a vector where every argument value has been
+        *  converted to unsigned long long.
+        *
+        * If any of the argument values can't be converted, an error
+        * message is written to stderr, the program also automatically exits
+        * if autoExit is true.
+        *
+        * @param defaultValue This vector is returned if there are no values.
+        * @param base See the documentation for std::strtoint for details.
+        * @throw ArgosException if the conversion fails for any value and
+        *  autoExit is false.
+        */
         std::vector<unsigned long long>
         asULLongs(const std::vector<unsigned long long>& defaultValue = {},
                   int base = 10) const;
 
-        std::vector<float> asFloats(
-                const std::vector<float>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to float.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<float>
+        asFloats(const std::vector<float>& defaultValue = {}) const;
 
-        std::vector<double> asDoubles(
-                const std::vector<double>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to double.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<double>
+        asDoubles(const std::vector<double>& defaultValue = {}) const;
 
-        std::vector<std::string> asStrings(
-                const std::vector<std::string>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector with the argument values.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<std::string>
+        asStrings(const std::vector<std::string>& defaultValue = {}) const;
 
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;

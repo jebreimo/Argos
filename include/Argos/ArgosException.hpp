@@ -33,6 +33,9 @@ namespace Argos
             : std::runtime_error(message)
         {}
 
+        /**
+         * @brief Passes @a message on to the base class.
+         */
         explicit ArgosException(const char* message) noexcept
             : std::runtime_error(message)
         {}
