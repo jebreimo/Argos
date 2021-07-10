@@ -55,10 +55,27 @@ namespace Argos
          */
         ParsedArguments& operator=(const ParsedArguments&) = delete;
 
+        /**
+         * @private
+         */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        /**
+         * @brief Returns true if the argument or option named @a name
+         *  was given on command line.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
         [[nodiscard]] bool has(const std::string& name) const;
 
+        /**
+         * @brief Returns true if the given argument instance was given a
+         *  value on command line.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
         [[nodiscard]] ArgumentValue value(const std::string& name) const;

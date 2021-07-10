@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.100.4";
+constexpr char ARGOS_VERSION[] = "0.101.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -27,13 +27,13 @@ constexpr char ARGOS_VERSION[] = "0.100.4";
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-#define ARGOS_VERSION_MINOR 100
+#define ARGOS_VERSION_MINOR 101
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-#define ARGOS_VERSION_PATCH 4
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -69,6 +69,9 @@ namespace Argos
             : std::runtime_error(message)
         {}
 
+        /**
+         * @brief Passes @a message on to the base class.
+         */
         explicit ArgosException(const char* message) noexcept
             : std::runtime_error(message)
         {}
@@ -647,6 +650,11 @@ namespace Argos
         /**
          * @private
          */
+        ArgumentValue();
+
+        /**
+         * @private
+         */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId valueId,
@@ -678,16 +686,17 @@ namespace Argos
         ArgumentValue& operator=(ArgumentValue&&) noexcept;
 
         /**
+         * @brief Returns true if this argument or option was given on the
+         *      command line.
+         */
+        [[nodiscard]]
+        explicit operator bool() const;
+
+        /**
          * @brief Returns the @a IArgumentView instance which identifies
          *      the argument or option that is the source of this value.
          */
         [[nodiscard]] std::unique_ptr<IArgumentView> argument() const;
-
-        /**
-         * @brief Returns true if this argument or option was given on the
-         *      command line.
-         */
-        [[nodiscard]] bool hasValue() const;
 
         /**
          * @brief Returns the value as it was found on the command line.
@@ -889,6 +898,58 @@ namespace Argos
 }
 
 //****************************************************************************
+// Copyright © 2021 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2021-07-06.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+#include <iterator>
+#include <string_view>
+
+namespace Argos
+{
+    class ArgumentValue;
+    class ParsedArgumentsImpl;
+
+    class ArgumentValueIterator
+    {
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using pointer = void;
+        using reference = ArgumentValue;
+        using value_type = ArgumentValue;
+        using difference_type = void;
+
+        using It = typename std::vector<std::pair<std::string_view, ArgumentId>>::const_iterator;
+
+        ArgumentValueIterator();
+
+        ArgumentValueIterator(const It& internalIterator,
+                              std::shared_ptr<ParsedArgumentsImpl> args,
+                              ValueId valueId);
+
+        ArgumentValueIterator& operator++();
+
+        ArgumentValueIterator operator++(int);
+
+        ArgumentValue operator*() const;
+
+        It internalIterator() const;
+    private:
+        It m_Iterator = {};
+        std::shared_ptr<ParsedArgumentsImpl> m_Args;
+        ValueId m_ValueId = {};
+    };
+
+    bool operator==(const ArgumentValueIterator& a,
+                    const ArgumentValueIterator& b);
+
+    bool operator!=(const ArgumentValueIterator& a,
+                    const ArgumentValueIterator& b);
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-17.
 //
@@ -948,6 +1009,12 @@ namespace Argos
         ArgumentValues& operator=(ArgumentValues&&) noexcept;
 
         /**
+         * @brief Returns true if there is at least one value.
+         */
+        [[nodiscard]]
+        explicit operator bool() const;
+
+        /**
          * @brief Returns instances of IArgumentView that identifies the
          *  command line arguments that produced these values.
          */
@@ -986,53 +1053,162 @@ namespace Argos
         /**
          * @brief Returns the value with the given index.
          *
-         * If index is to large, an error message is written to stderr, the
+         * If @a index is to great, an error message is written to stderr, the
          * program also automatically exits if autoExit is true.
+         *
+         * @throw ArgosException if @a index is too great and autoExit
+         *  is false.
          */
         ArgumentValue value(size_t index) const;
 
         /**
-         * @brief Returns a vector where all values have been converted
-         *  to ints.
+         * @brief Returns a vector where every argument value has been
+         *  converted to int.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
          * @param defaultValue This vector is returned if there are no values.
-         * @param base
-         * @return
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
          */
         std::vector<int>
         asInts(const std::vector<int>& defaultValue = {},
                int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to unsigned.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<unsigned>
         asUInts(const std::vector<unsigned>& defaultValue = {},
                int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<long>
         asLongs(const std::vector<long>& defaultValue = {},
                 int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to unsigned long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<unsigned long>
         asULongs(const std::vector<unsigned long>& defaultValue = {},
                  int base = 10) const;
 
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to long long.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @param base See the documentation for std::strtoint for details.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
         std::vector<long long>
         asLLongs(const std::vector<long long>& defaultValue = {},
                  int base = 10) const;
 
+        /**
+        * @brief Returns a vector where every argument value has been
+        *  converted to unsigned long long.
+        *
+        * If any of the argument values can't be converted, an error
+        * message is written to stderr, the program also automatically exits
+        * if autoExit is true.
+        *
+        * @param defaultValue This vector is returned if there are no values.
+        * @param base See the documentation for std::strtoint for details.
+        * @throw ArgosException if the conversion fails for any value and
+        *  autoExit is false.
+        */
         std::vector<unsigned long long>
         asULLongs(const std::vector<unsigned long long>& defaultValue = {},
                   int base = 10) const;
 
-        std::vector<float> asFloats(
-                const std::vector<float>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to float.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<float>
+        asFloats(const std::vector<float>& defaultValue = {}) const;
 
-        std::vector<double> asDoubles(
-                const std::vector<double>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector where every argument value has been
+         *  converted to double.
+         *
+         * If any of the argument values can't be converted, an error
+         * message is written to stderr, the program also automatically exits
+         * if autoExit is true.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<double>
+        asDoubles(const std::vector<double>& defaultValue = {}) const;
 
-        std::vector<std::string> asStrings(
-                const std::vector<std::string>& defaultValue = {}) const;
+        /**
+         * @brief Returns a vector with the argument values.
+         *
+         * @param defaultValue This vector is returned if there are no values.
+         * @throw ArgosException if the conversion fails for any value and
+         *  autoExit is false.
+         */
+        std::vector<std::string>
+        asStrings(const std::vector<std::string>& defaultValue = {}) const;
 
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+
+        ArgumentValueIterator begin() const;
+
+        ArgumentValueIterator end() const;
     private:
         std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;

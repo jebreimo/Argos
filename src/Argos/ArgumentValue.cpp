@@ -8,6 +8,7 @@
 #include "Argos/ArgumentValue.hpp"
 
 #include "Argos/ArgumentValues.hpp"
+#include "ArgosThrow.hpp"
 #include "ParseValue.hpp"
 #include "ParsedArgumentsImpl.hpp"
 #include "StringUtilities.hpp"
@@ -41,6 +42,11 @@ namespace Argos
         }
     }
 
+    ArgumentValue::ArgumentValue()
+        : m_ValueId(),
+          m_ArgumentId()
+    {}
+
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
                                  ValueId valueId,
@@ -63,15 +69,17 @@ namespace Argos
     ArgumentValue&
     ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
 
+    ArgumentValue::operator bool() const
+    {
+        return m_Value.has_value();
+    }
+
     std::unique_ptr<IArgumentView>
     ArgumentValue::argument() const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         return m_Args->getArgumentView(m_ArgumentId);
-    }
-
-    bool ArgumentValue::hasValue() const
-    {
-        return m_Value.has_value();
     }
 
     std::optional<std::string_view> ArgumentValue::value() const
@@ -137,6 +145,8 @@ namespace Argos
     ArgumentValue::split(char separator,
                          size_t minParts, size_t maxParts) const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         if (!m_Value)
             return ArgumentValues({}, m_Args, m_ValueId);
         auto parts = splitString(*m_Value, separator, maxParts - 1);
@@ -156,11 +166,15 @@ namespace Argos
 
     void ArgumentValue::error(const std::string& message) const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         m_Args->error(message, m_ArgumentId);
     }
 
     void ArgumentValue::error() const
     {
+        if (!m_Value)
+            ARGOS_THROW("ArgumentValue has no value.");
         error("Invalid value: " + std::string(*m_Value) + ".");
     }
 }

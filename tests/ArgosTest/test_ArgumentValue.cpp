@@ -38,6 +38,28 @@ TEST_CASE("Double values")
         .add(Argument("ARG1"))
         .add(Option{"-v"}.argument("N"))
         .parse({"1.567"});
+    REQUIRE(args.value("ARG1"));
     REQUIRE(args.value("ARG1").asDouble() == 1.567);
+    REQUIRE(!args.value("-v"));
     REQUIRE(args.value("-v").asDouble(1e-10) == 1e-10);
+}
+
+TEST_CASE("ArgumentValueIterator")
+{
+    using namespace Argos;
+    auto args = ArgumentParser("test")
+        .autoExit(false)
+        .add(Option{"-i"}
+            .argument("STR[:STR]*")
+            .operation(Argos::OptionOperation::APPEND))
+        .parse({"-i A:B", "-i C:D:E"});
+    const char expected[] = "ABCDE";
+    auto values = args.values("-i").split(':');
+    REQUIRE(bool(values));
+    REQUIRE(values.size() == strlen(expected));
+    int i = 0;
+    for (auto v : values)
+    {
+        REQUIRE(v.asString() == std::string(expected[i++], 1));
+    }
 }

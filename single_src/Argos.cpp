@@ -2075,6 +2075,11 @@ namespace Argos
         }
     }
 
+    ArgumentValue::ArgumentValue()
+        : m_ValueId(),
+          m_ArgumentId()
+    {}
+
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
                                  ValueId valueId,
@@ -2097,15 +2102,17 @@ namespace Argos
     ArgumentValue&
     ArgumentValue::operator=(ArgumentValue&&) noexcept = default;
 
+    ArgumentValue::operator bool() const
+    {
+        return m_Value.has_value();
+    }
+
     std::unique_ptr<IArgumentView>
     ArgumentValue::argument() const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         return m_Args->getArgumentView(m_ArgumentId);
-    }
-
-    bool ArgumentValue::hasValue() const
-    {
-        return m_Value.has_value();
     }
 
     std::optional<std::string_view> ArgumentValue::value() const
@@ -2171,6 +2178,8 @@ namespace Argos
     ArgumentValue::split(char separator,
                          size_t minParts, size_t maxParts) const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         if (!m_Value)
             return ArgumentValues({}, m_Args, m_ValueId);
         auto parts = splitString(*m_Value, separator, maxParts - 1);
@@ -2190,12 +2199,72 @@ namespace Argos
 
     void ArgumentValue::error(const std::string& message) const
     {
+        if (!m_Args)
+            ARGOS_THROW("ArgumentValue has not been initialized.");
         m_Args->error(message, m_ArgumentId);
     }
 
     void ArgumentValue::error() const
     {
+        if (!m_Value)
+            ARGOS_THROW("ArgumentValue has no value.");
         error("Invalid value: " + std::string(*m_Value) + ".");
+    }
+}
+
+//****************************************************************************
+// Copyright © 2021 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2021-07-07.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace Argos
+{
+    ArgumentValueIterator::ArgumentValueIterator() = default;
+
+    ArgumentValueIterator::ArgumentValueIterator(
+        const ArgumentValueIterator::It& internalIterator,
+        std::shared_ptr<ParsedArgumentsImpl> args,
+        ValueId valueId)
+    : m_Iterator(internalIterator),
+      m_Args(std::move(args)),
+      m_ValueId(valueId)
+    {}
+
+    ArgumentValueIterator& ArgumentValueIterator::operator++()
+    {
+        ++m_Iterator;
+        return *this;
+    }
+
+    ArgumentValueIterator ArgumentValueIterator::operator++(int)
+    {
+        auto it = *this;
+        ++m_Iterator;
+        return it;
+    }
+
+    ArgumentValue ArgumentValueIterator::operator*() const
+    {
+        return ArgumentValue(m_Iterator->first, m_Args,
+                             m_ValueId, m_Iterator->second);
+    }
+
+    ArgumentValueIterator::It ArgumentValueIterator::internalIterator() const
+    {
+        return Argos::ArgumentValueIterator::It();
+    }
+
+    bool operator==(const ArgumentValueIterator& a, const ArgumentValueIterator& b)
+    {
+        return a.internalIterator() == b.internalIterator();
+    }
+
+    bool operator!=(const ArgumentValueIterator& a, const ArgumentValueIterator& b)
+    {
+        return a.internalIterator() != b.internalIterator();
     }
 }
 
@@ -2291,6 +2360,11 @@ namespace Argos
 
     ArgumentValues&
     ArgumentValues::operator=(ArgumentValues&&) noexcept = default;
+
+    ArgumentValues::operator bool() const
+    {
+        return !m_Values.empty();
+    }
 
     std::vector<std::unique_ptr<IArgumentView>>
     ArgumentValues::arguments() const
@@ -2424,6 +2498,16 @@ namespace Argos
                 values.emplace_back(part, value.second);
         }
         return {move(values), m_Args, m_ValueId};
+    }
+
+    ArgumentValueIterator ArgumentValues::begin() const
+    {
+        return ArgumentValueIterator(m_Values.begin(), m_Args, m_ValueId);
+    }
+
+    ArgumentValueIterator ArgumentValues::end() const
+    {
+        return ArgumentValueIterator(m_Values.end(), m_Args, m_ValueId);
     }
 }
 
@@ -4580,7 +4664,7 @@ namespace Argos
     }
 }
 
-    //****************************************************************************
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //

@@ -97,6 +97,11 @@ namespace Argos
     ArgumentValues&
     ArgumentValues::operator=(ArgumentValues&&) noexcept = default;
 
+    ArgumentValues::operator bool() const
+    {
+        return !m_Values.empty();
+    }
+
     std::vector<std::unique_ptr<IArgumentView>>
     ArgumentValues::arguments() const
     {
@@ -229,5 +234,15 @@ namespace Argos
                 values.emplace_back(part, value.second);
         }
         return {move(values), m_Args, m_ValueId};
+    }
+
+    ArgumentValueIterator ArgumentValues::begin() const
+    {
+        return ArgumentValueIterator(m_Values.begin(), m_Args, m_ValueId);
+    }
+
+    ArgumentValueIterator ArgumentValues::end() const
+    {
+        return ArgumentValueIterator(m_Values.end(), m_Args, m_ValueId);
     }
 }

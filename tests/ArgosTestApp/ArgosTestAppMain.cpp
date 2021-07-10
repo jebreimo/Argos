@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <Argos/ArgumentParser.hpp>
+#include <Argos/Argos.hpp>
 
 //#include <algorithm>
 //#include <iostream>

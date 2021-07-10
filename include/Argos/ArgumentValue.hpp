@@ -34,6 +34,11 @@ namespace Argos
         /**
          * @private
          */
+        ArgumentValue();
+
+        /**
+         * @private
+         */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId valueId,
@@ -65,16 +70,17 @@ namespace Argos
         ArgumentValue& operator=(ArgumentValue&&) noexcept;
 
         /**
+         * @brief Returns true if this argument or option was given on the
+         *      command line.
+         */
+        [[nodiscard]]
+        explicit operator bool() const;
+
+        /**
          * @brief Returns the @a IArgumentView instance which identifies
          *      the argument or option that is the source of this value.
          */
         [[nodiscard]] std::unique_ptr<IArgumentView> argument() const;
-
-        /**
-         * @brief Returns true if this argument or option was given on the
-         *      command line.
-         */
-        [[nodiscard]] bool hasValue() const;
 
         /**
          * @brief Returns the value as it was found on the command line.

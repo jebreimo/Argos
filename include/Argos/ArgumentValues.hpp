@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "IArgumentView.hpp"
+#include "ArgumentValueIterator.hpp"
 
 /**
  * @file
@@ -61,6 +62,12 @@ namespace Argos
          * @private
          */
         ArgumentValues& operator=(ArgumentValues&&) noexcept;
+
+        /**
+         * @brief Returns true if there is at least one value.
+         */
+        [[nodiscard]]
+        explicit operator bool() const;
 
         /**
          * @brief Returns instances of IArgumentView that identifies the
@@ -251,8 +258,29 @@ namespace Argos
         std::vector<std::string>
         asStrings(const std::vector<std::string>& defaultValue = {}) const;
 
+        /**
+         * @brief Splits each value on @a separator and returns the parts in
+         *  a single list.
+         * @param separator The separator.
+         * @param minParts The minimum number of parts each value must
+         *  consist of.
+         * @param maxParts The maximum number of parts any value can
+         *  consist of. The final part will retain all excessive separators.
+         * @throw ArgosException if any value consists of less than
+         *  @a minParts parts.
+         */
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+
+        /**
+         * @brief Returns an iterator pointing to the first value.
+         */
+        ArgumentValueIterator begin() const;
+
+        /**
+         * @brief Returns an iterator pointing to the end of the last value.
+         */
+        ArgumentValueIterator end() const;
     private:
         std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
         std::shared_ptr<ParsedArgumentsImpl> m_Args;

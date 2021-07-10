@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 0.100.4)
+project(Argos VERSION 0.101.0)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if(NOT DEFINED ARGOS_MASTER_PROJECT)
@@ -48,6 +48,7 @@ add_library(Argos
     include/Argos/ArgumentParser.hpp
     include/Argos/ArgumentValue.hpp
     include/Argos/ArgumentValues.hpp
+    include/Argos/ArgumentValueIterator.hpp
     include/Argos/ArgumentView.hpp
     include/Argos/Callbacks.hpp
     include/Argos/Enums.hpp
@@ -67,6 +68,7 @@ add_library(Argos
     src/Argos/ArgumentParser.cpp
     src/Argos/ArgumentValue.cpp
     src/Argos/ArgumentValues.cpp
+    src/Argos/ArgumentValueIterator.cpp
     src/Argos/ArgumentView.cpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
