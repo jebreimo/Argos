@@ -8,6 +8,8 @@
 #include <catch2/catch.hpp>
 #include "Argos/ArgumentParser.hpp"
 
+#include <cstring>
+
 TEST_CASE("Test ArgumentValue split")
 {
     using namespace Argos;
