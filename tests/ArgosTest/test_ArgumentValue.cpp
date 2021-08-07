@@ -54,7 +54,7 @@ TEST_CASE("ArgumentValueIterator")
         .add(Option{"-i"}
             .argument("STR[:STR]*")
             .operation(Argos::OptionOperation::APPEND))
-        .parse({"-i A:B", "-i C:D:E"});
+        .parse({"-i", "A:B", "-i", "C:D:E"});
     const char expected[] = "ABCDE";
     auto values = args.values("-i").split(':');
     REQUIRE(bool(values));
@@ -62,6 +62,8 @@ TEST_CASE("ArgumentValueIterator")
     int i = 0;
     for (auto v : values)
     {
-        REQUIRE(v.asString() == std::string(expected[i++], 1));
+        CAPTURE(i);
+        REQUIRE(v.asString() == std::string(1, expected[i++]));
     }
+    REQUIRE(i == strlen(expected));
 }

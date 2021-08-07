@@ -140,7 +140,9 @@ namespace Argos
         std::vector<std::pair<std::string_view, ArgumentId>> result;
         for (auto it = m_Values.lower_bound(valueId);
              it != m_Values.end() && it->first == valueId; ++it)
+        {
             result.emplace_back(it->second);
+        }
         return result;
     }
 

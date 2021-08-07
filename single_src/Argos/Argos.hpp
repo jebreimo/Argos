@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.101.0";
+constexpr char ARGOS_VERSION[] = "0.102.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -27,7 +27,7 @@ constexpr char ARGOS_VERSION[] = "0.101.0";
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-#define ARGOS_VERSION_MINOR 101
+#define ARGOS_VERSION_MINOR 102
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
@@ -251,7 +251,7 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or EXIT of autoExit is false).
+         *      of type STOP (or EXIT if autoExit is false).
          */
         STOP,
         /**
@@ -267,7 +267,8 @@ namespace Argos
     enum class TextId
     {
         /**
-         * @brief Text that appears before the usage section (empty by default).
+         * @brief Text that appears before the usage section (empty
+         *  by default).
          */
         INITIAL_TEXT,
         /**
@@ -275,7 +276,8 @@ namespace Argos
          */
         USAGE_TITLE,
         /**
-         * @brief The command usage text or synopsis (normally auto-generated).
+         * @brief The command usage text or synopsis (normally
+         *  auto-generated).
          */
         USAGE,
         /**
@@ -907,11 +909,20 @@ namespace Argos
 #include <iterator>
 #include <string_view>
 
+/**
+ * @file
+ * Defines ArgumentValueIterator, an input iterator suitable for range-based
+ * for loops over the values in instances of ArgumentValues.
+ */
+
 namespace Argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
 
+    /**
+     * @brief Iterator for the values in an instance of ArgumentValues.
+     */
     class ArgumentValueIterator
     {
     public:
@@ -1203,11 +1214,28 @@ namespace Argos
         std::vector<std::string>
         asStrings(const std::vector<std::string>& defaultValue = {}) const;
 
+        /**
+         * @brief Splits each value on @a separator and returns the parts in
+         *  a single list.
+         * @param separator The separator.
+         * @param minParts The minimum number of parts each value must
+         *  consist of.
+         * @param maxParts The maximum number of parts any value can
+         *  consist of. The final part will retain all excessive separators.
+         * @throw ArgosException if any value consists of less than
+         *  @a minParts parts.
+         */
         ArgumentValues
         split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
 
+        /**
+         * @brief Returns an iterator pointing to the first value.
+         */
         ArgumentValueIterator begin() const;
 
+        /**
+         * @brief Returns an iterator pointing to the end of the last value.
+         */
         ArgumentValueIterator end() const;
     private:
         std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
@@ -1451,7 +1479,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& value(const std::string& id);
+        Argument& alias(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this argument is
@@ -1600,28 +1628,81 @@ namespace Argos
          */
         ParsedArguments& operator=(const ParsedArguments&) = delete;
 
+        /**
+         * @private
+         */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        /**
+         * @brief Returns true if the argument or option named @a name
+         *  was given on command line.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
         [[nodiscard]] bool has(const std::string& name) const;
 
+        /**
+         * @brief Returns true if the given argument instance was given a
+         *  value on command line.
+         */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
+        /**
+         * @brief Returns the value of the argument with the given name.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
         [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
+        /**
+         * @brief Returns the value of the given argument.
+         */
         [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
+        /**
+         * @brief Returns the values of the argument with the given name.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
         [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
+        /**
+         * @brief Returns the value of the given argument.
+         */
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
         [[nodiscard]]
+        /**
+         * @brief Returns all argument definitions that were registered with
+         *  ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined arguments along with their given values.
+         */
         std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
 
+        /**
+         * @brief Returns all option definitions that were registered with
+         *  ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined options along with their given values.
+         */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> allOptions() const;
 
+        /**
+         * @brief Returns the parser result code.
+         */
         [[nodiscard]] ParserResultCode resultCode() const;
 
+        /**
+         * @brief If the parser stopped early because it encountered an option
+         *  of type, this function returns that option.
+         */
         [[nodiscard]] OptionView stopOption() const;
 
         [[nodiscard]]
@@ -1629,6 +1710,7 @@ namespace Argos
 
         void filterParsedArguments(int& argc, char**& argv);
 
+        [[noreturn]]
         void error(const std::string& msg);
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
@@ -1821,13 +1903,16 @@ namespace Argos
          * ParsedArgument using one of its flags, but sometimes this
          * is inconvenient, for instance if the same option has different
          * names in different languages, or multiple options share the same
-         * value.
+         * value. In the latter case, for instance if there are two options
+         * --verbose and --quiet that negates each other, one of them, but not
+         * both, should have the other option as an alias (e.g. --verbose has
+         * an alias("--quiet") and
          * @param id An alternative name that can be used to retrieve the
          *      option's value.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Option& value(const std::string& id);
+        Option& alias(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this option is
@@ -1853,7 +1938,7 @@ namespace Argos
          *      to quickly distinguish between different options.
          *
          * The id purely is intended for client code, Argos itself ignores
-         * this value.
+         * this value, but makes it available through IArgumentView.
          *
          * @param id Can be any integer value.
          * @return Reference to itself. This makes it possible to chain

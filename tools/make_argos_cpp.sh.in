@@ -5,7 +5,7 @@
   "${CMAKE_CURRENT_BINARY_DIR}"/ArgosVersion.hpp \
   "${CMAKE_CURRENT_SOURCE_DIR}"/include/Argos/Argos.hpp \
   -i "${CMAKE_CURRENT_BINARY_DIR}" \
-  -o "${CMAKE_CURRENT_SOURCE_DIR}"/single_src/Argos.hpp
+  -o "${CMAKE_CURRENT_SOURCE_DIR}"/single_src/Argos/Argos.hpp
 
 "${Python3_EXECUTABLE}" \
   "${CMAKE_CURRENT_SOURCE_DIR}"/tools/mergecpp.py \
@@ -17,4 +17,4 @@
   --no-pragma-once \
   -p '#include "Argos.hpp"
 ' \
-  -o "${CMAKE_CURRENT_SOURCE_DIR}"/single_src/Argos.cpp
+  -o "${CMAKE_CURRENT_SOURCE_DIR}"/single_src/Argos/Argos.cpp

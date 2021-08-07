@@ -90,13 +90,16 @@ namespace Argos
          * ParsedArgument using one of its flags, but sometimes this
          * is inconvenient, for instance if the same option has different
          * names in different languages, or multiple options share the same
-         * value.
+         * value. In the latter case, for instance if there are two options
+         * --verbose and --quiet that negates each other, one of them, but not
+         * both, should have the other option as an alias (e.g. --verbose has
+         * an alias("--quiet") and
          * @param id An alternative name that can be used to retrieve the
          *      option's value.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Option& value(const std::string& id);
+        Option& alias(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this option is
@@ -122,7 +125,7 @@ namespace Argos
          *      to quickly distinguish between different options.
          *
          * The id purely is intended for client code, Argos itself ignores
-         * this value.
+         * this value, but makes it available through IArgumentView.
          *
          * @param id Can be any integer value.
          * @return Reference to itself. This makes it possible to chain

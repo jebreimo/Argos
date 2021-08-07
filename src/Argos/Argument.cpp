@@ -66,7 +66,7 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::value(const std::string& id)
+    Argument& Argument::alias(const std::string& id)
     {
         checkArgument();
         m_Argument->value = id;

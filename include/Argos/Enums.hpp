@@ -172,7 +172,7 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or EXIT of autoExit is false).
+         *      of type STOP (or EXIT if autoExit is false).
          */
         STOP,
         /**
@@ -188,7 +188,8 @@ namespace Argos
     enum class TextId
     {
         /**
-         * @brief Text that appears before the usage section (empty by default).
+         * @brief Text that appears before the usage section (empty
+         *  by default).
          */
         INITIAL_TEXT,
         /**
@@ -196,7 +197,8 @@ namespace Argos
          */
         USAGE_TITLE,
         /**
-         * @brief The command usage text or synopsis (normally auto-generated).
+         * @brief The command usage text or synopsis (normally
+         *  auto-generated).
          */
         USAGE,
         /**

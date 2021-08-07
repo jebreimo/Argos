@@ -43,7 +43,7 @@ namespace Argos
 
     ArgumentValueIterator::It ArgumentValueIterator::internalIterator() const
     {
-        return Argos::ArgumentValueIterator::It();
+        return m_Iterator;
     }
 
     bool operator==(const ArgumentValueIterator& a, const ArgumentValueIterator& b)

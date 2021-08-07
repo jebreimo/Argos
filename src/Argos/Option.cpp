@@ -66,7 +66,7 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::value(const std::string& id)
+    Option& Option::alias(const std::string& id)
     {
         checkOption();
         m_Option->value = id;

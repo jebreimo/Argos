@@ -326,7 +326,7 @@ TEST_CASE("CLEAR option")
                          .operation(OptionOperation::APPEND)
                          .id(1))
             .add(Option({"--ben"})
-                     .value("--bar")
+                     .alias("--bar")
                          .operation(OptionOperation::CLEAR)
                          .id(2))
             .add(Option({"--bud"})
@@ -481,8 +481,8 @@ TEST_CASE("Options ending with =")
     Argv argv{"test", "--f=", "--f=2", "--f"};
     auto it = ArgumentParser("test")
             .autoExit(false)
-            .add(Option({"--f="}).value("f").argument("N"))
-            .add(Option({"--f"}).value("f").operation(OptionOperation::CLEAR))
+            .add(Option({"--f="}).alias("f").argument("N"))
+            .add(Option({"--f"}).alias("f").operation(OptionOperation::CLEAR))
             .makeIterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
@@ -499,9 +499,9 @@ TEST_CASE("NONE option")
 {
     using namespace Argos;
     REQUIRE_THROWS(ArgumentParser("p").add(
-        Option({"-o"}).value("f").operation(OptionOperation::NONE)));
+        Option({"-o"}).alias("f").operation(OptionOperation::NONE)));
     REQUIRE_THROWS(ArgumentParser("p").add(
-            Option({"-o"}).value("f").operation(OptionOperation::NONE)));
+        Option({"-o"}).alias("f").operation(OptionOperation::NONE)));
     auto args = ArgumentParser("test")
             .autoExit(false)
             .add(Option({"--f"}).argument("N").operation(OptionOperation::NONE))
@@ -636,8 +636,8 @@ TEST_CASE("Add option with reference before the option that is referred to")
 {
     using namespace Argos;
     auto parser = ArgumentParser("test");
-    parser.add(Option{"-f"}.value("-h").constant(2));
-    parser.add(Option{"-g"}.value("-h").constant(1));
+    parser.add(Option{"-f"}.alias("-h").constant(2));
+    parser.add(Option{"-g"}.alias("-h").constant(1));
     parser.add(Option{"-h"}.constant(3));
     auto args = parser.parse({"-h"});
     REQUIRE(args.value("-h").asInt() == 3);
@@ -648,7 +648,7 @@ TEST_CASE("Test using char* string as constant")
     using namespace Argos;
     auto args = ArgumentParser("test")
         .add(Option{"-f"}.constant("foo"))
-        .add(Option{"-g"}.value("-f").constant("goo"))
+        .add(Option{"-g"}.alias("-f").constant("goo"))
         .parse({"-f"});
     REQUIRE(args.value("-f").asString() == "foo");
 }

@@ -351,7 +351,7 @@ namespace Argos
         }
         else
         {
-            error("Too many arguments, starting with \"" + name + "\"");
+            error("Too many arguments, starting with \"" + name + "\".");
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
         return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};

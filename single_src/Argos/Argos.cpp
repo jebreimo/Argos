@@ -107,7 +107,7 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::value(const std::string& id)
+    Argument& Argument::alias(const std::string& id)
     {
         checkArgument();
         m_Argument->value = id;
@@ -1344,7 +1344,7 @@ namespace Argos
         }
         else
         {
-            error("Too many arguments, starting with \"" + name + "\"");
+            error("Too many arguments, starting with \"" + name + "\".");
             return {IteratorResultCode::ERROR, nullptr, {}};
         }
         return {IteratorResultCode::UNKNOWN, nullptr, m_Iterator->current()};
@@ -2254,7 +2254,7 @@ namespace Argos
 
     ArgumentValueIterator::It ArgumentValueIterator::internalIterator() const
     {
-        return Argos::ArgumentValueIterator::It();
+        return m_Iterator;
     }
 
     bool operator==(const ArgumentValueIterator& a, const ArgumentValueIterator& b)
@@ -3094,7 +3094,7 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::value(const std::string& id)
+    Option& Option::alias(const std::string& id)
     {
         checkOption();
         m_Option->value = id;
@@ -3947,7 +3947,9 @@ namespace Argos
         std::vector<std::pair<std::string_view, ArgumentId>> result;
         for (auto it = m_Values.lower_bound(valueId);
              it != m_Values.end() && it->first == valueId; ++it)
+        {
             result.emplace_back(it->second);
+        }
         return result;
     }
 

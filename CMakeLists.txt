@@ -6,7 +6,9 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 0.101.0)
+project(Argos VERSION 0.102.0)
+
+set(CMAKE_CXX_STANDARD 17)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if(NOT DEFINED ARGOS_MASTER_PROJECT)
@@ -22,8 +24,6 @@ option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
 
 # Install option
 option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
-
-set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 
@@ -124,7 +124,6 @@ if(ARGOS_BUILD_TEST)
     enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
 
     add_subdirectory(tests/ArgosTest)
-    add_subdirectory(tests/ArgosTestApp EXCLUDE_FROM_ALL)
 endif()
 
 if(UPDATE_SINGLE_SRC)
@@ -134,8 +133,8 @@ if(UPDATE_SINGLE_SRC)
         make_argos_cpp.sh)
     add_custom_target(UpdateSingleSrc ALL
         BYPRODUCTS
-            ${CMAKE_CURRENT_SOURCE_DIR}/single_src/Argos.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/single_src/Argos.cpp
+            single_src/Argos/Argos.hpp
+            single_src/Argos/Argos.cpp
         COMMAND
             sh "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.sh"
     )
