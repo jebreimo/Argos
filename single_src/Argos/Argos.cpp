@@ -3645,13 +3645,14 @@ namespace Argos
 
     OptionView ParsedArguments::stopOption() const
     {
-        auto option = m_Impl->stopOption();
+        const auto* option = m_Impl->stopOption();
         if (!option)
             ARGOS_THROW("There is no special option.");
         return OptionView(option);
     }
 
-    const std::vector<std::string>& ParsedArguments::unprocessedArguments() const
+    const std::vector<std::string>&
+    ParsedArguments::unprocessedArguments() const
     {
         return m_Impl->unprocessedArguments();
     }
@@ -3681,6 +3682,64 @@ namespace Argos
     void ParsedArguments::error(const std::string& msg)
     {
         m_Impl->error(msg);
+    }
+
+    namespace
+    {
+        std::string getName(const IArgumentView& arg)
+        {
+            if (const auto* a = dynamic_cast<const ArgumentView*>(&arg))
+                return a->name();
+
+            if (const auto* o = dynamic_cast<const OptionView*>(&arg))
+            {
+                std::string s;
+                for (const auto& f : o->flags())
+                {
+                    if (!s.empty())
+                        s += ", ";
+                    s += f;
+                }
+                return s;
+            }
+            return {};
+        }
+
+        void printArgument(std::ostream& stream,
+                           const std::string& label,
+                           const ArgumentValues& values)
+        {
+            stream << label << ":";
+            for (const auto value : values)
+                stream << " \"" << value.asString() << "\"";
+            stream << "\n";
+        }
+    }
+
+    void print(std::ostream& stream, const ParsedArguments& args)
+    {
+        std::vector<const IArgumentView*> argViews;
+        auto a = args.allArguments();
+        std::transform(a.begin(), a.end(), back_inserter(argViews),
+                       [](auto& av) {return av.get();});
+        auto o = args.allOptions();
+        std::transform(o.begin(), o.end(), back_inserter(argViews),
+                       [](auto& ov) {return ov.get();});
+
+        stable_sort(argViews.begin(), argViews.end(),
+                    [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+
+        std::vector<std::pair<const IArgumentView*, std::string>> labels;
+        for (const auto* arg : argViews)
+        {
+            if (!labels.empty() && labels.back().first->valueId() == arg->valueId())
+                labels.back().second += ", " + getName(*arg);
+            else
+                labels.emplace_back(arg, getName(*arg));
+        }
+
+        for (const auto&[arg, label] : labels)
+            printArgument(stream, label, args.values(*arg));
     }
 }
 

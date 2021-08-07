@@ -1584,6 +1584,7 @@ namespace Argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <ostream>
 
 /**
  * @file
@@ -1715,6 +1716,14 @@ namespace Argos
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_Impl;
     };
+
+    /**
+     * @brief Write a list of all arguments and options along with theirs
+     *  values to @a stream.
+     *
+     * This function is intended for testing and debugging.
+     */
+    void print(std::ostream& stream, const ParsedArguments& args);
 }
 
 //****************************************************************************

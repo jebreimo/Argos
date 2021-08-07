@@ -7,63 +7,7 @@
 //****************************************************************************
 #include <Argos/Argos.hpp>
 
-#include <algorithm>
 #include <iostream>
-
-std::string getName(const Argos::IArgumentView& arg)
-{
-    if (const auto* a = dynamic_cast<const Argos::ArgumentView*>(&arg))
-        return a->name();
-
-    if (const auto* o = dynamic_cast<const Argos::OptionView*>(&arg))
-    {
-        std::string s;
-        for (auto& f : o->flags())
-        {
-            if (!s.empty())
-                s += ", ";
-            s += f;
-        }
-        return s;
-    }
-    return {};
-}
-
-void printArgument(std::ostream& stream,
-                   const std::string& label,
-                   const Argos::ArgumentValues& values)
-{
-    stream << label << ":";
-    for (auto value : values)
-        stream << " \"" << value.asString() << "\"";
-    stream << "\n";
-}
-
-void printArguments(std::ostream& stream, const Argos::ParsedArguments& args)
-{
-    std::vector<const Argos::IArgumentView*> argViews;
-    auto a = args.allArguments();
-    std::transform(a.begin(), a.end(), back_inserter(argViews),
-                   [](auto& av) {return av.get();});
-    auto o = args.allOptions();
-    std::transform(o.begin(), o.end(), back_inserter(argViews),
-                   [](auto& ov) {return ov.get();});
-
-    stable_sort(argViews.begin(), argViews.end(),
-                [](auto& a, auto& b) {return a->valueId() < b->valueId();});
-
-    std::vector<std::pair<const Argos::IArgumentView*, std::string>> labels;
-    for (const auto* arg : argViews)
-    {
-        if (!labels.empty() && labels.back().first->valueId() == arg->valueId())
-            labels.back().second += ", " + getName(*arg);
-        else
-            labels.push_back({arg, getName(*arg)});
-    }
-
-    for (const auto& [arg, label] : labels)
-        printArgument(stream, label, args.values(*arg));
-}
 
 int main(int argc, char* argv[])
 {
@@ -87,7 +31,7 @@ int main(int argc, char* argv[])
             .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
 
-    printArguments(std::cout, args);
+    print(std::cout, args);
 
     return 0;
 }
