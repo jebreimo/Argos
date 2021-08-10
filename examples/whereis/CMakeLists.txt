@@ -17,15 +17,26 @@ add_executable(whereis
 set(SINGLE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../single_src)
 
 if (EXISTS ${SINGLE_SRC_DIR}/Argos/Argos.hpp)
+
     target_sources(whereis
         PRIVATE
             ${SINGLE_SRC_DIR}/Argos/Argos.cpp)
     target_include_directories(whereis
         PRIVATE
             ${SINGLE_SRC_DIR})
-endif()
 
-#target_link_libraries(whereis
-#    PRIVATE
-#        Argos::Argos
-#    )
+else()
+
+    include(FetchContent)
+    FetchContent_Declare(argos
+        GIT_REPOSITORY "https://github.com/jebreimo/Argos.git"
+        GIT_TAG "master"
+        )
+    FetchContent_MakeAvailable(argos)
+
+    target_link_libraries(whereis
+        PRIVATE
+            Argos::Argos
+        )
+
+endif()
