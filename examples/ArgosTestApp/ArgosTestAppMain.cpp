@@ -28,6 +28,8 @@ int main(int argc, char* argv[])
                 .text("Mark end of options. Allows arguments starting with '-'."))
             .add(Option({"--version"}).type(OptionType::STOP)
                 .text("Show version."))
+            .add(Option({"--none"}).operation(OptionOperation::NONE)
+                .text("Nothing."))
             .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
 

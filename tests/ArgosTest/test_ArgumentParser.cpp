@@ -693,3 +693,33 @@ TEST_CASE("Short options with argument")
         REQUIRE(args.value("-e").asInt() == 10);
     }
 }
+
+TEST_CASE("Test options with initialValue")
+{
+    using namespace Argos;
+    using V = std::vector<std::string>;
+    auto parser = ArgumentParser("test")
+        .autoExit(false)
+        .add(Option{"-a"}
+            .initialValue("a:b")
+            .argument("A"))
+        .add(Option{"-b"}
+            .initialValue("o:p")
+            .argument("B")
+            .operation(OptionOperation::APPEND))
+        .move();
+    SECTION("Defaults")
+    {
+        Argv argv{"test"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-a").split(':').asStrings() == V{"a", "b"});
+        REQUIRE(args.values("-b").split(':').asStrings() == V{"o", "p"});
+    }
+    SECTION("With options")
+    {
+        Argv argv{"test", "-ac:d", "-bq:r"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.value("-a").split(':').asStrings() == V{"c", "d"});
+        REQUIRE(args.values("-b").split(':').asStrings() == V{"o", "p", "q", "r"});
+    }
+}

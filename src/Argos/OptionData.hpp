@@ -21,6 +21,7 @@ namespace Argos
         std::string alias;
         std::string argument;
         std::string constant;
+        std::string initialValue;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;

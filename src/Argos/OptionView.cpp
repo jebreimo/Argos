@@ -64,6 +64,11 @@ namespace Argos
         return m_Option->argument;
     }
 
+    const std::string& OptionView::initialValue() const
+    {
+        return m_Option->initialValue;
+    }
+
     const std::string& OptionView::constant() const
     {
         return m_Option->constant;

@@ -130,6 +130,16 @@ namespace Argos
           m_ParsedArgs(std::make_shared<ParsedArgumentsImpl>(m_Data)),
           m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle, move(args)))
     {
+        for (const auto& option : m_Data->options)
+        {
+            if (!option->initialValue.empty())
+            {
+                m_ParsedArgs->appendValue(option->valueId,
+                                          option->initialValue,
+                                          option->argumentId);
+            }
+        }
+
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter = ArgumentCounter(m_Data->arguments);
         else

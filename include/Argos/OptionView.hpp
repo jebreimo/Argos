@@ -87,6 +87,8 @@ namespace Argos
 
         [[nodiscard]] const std::string& argument() const;
 
+        [[nodiscard]] const std::string& initialValue() const;
+
         [[nodiscard]] const std::string& constant() const;
 
         [[nodiscard]] OptionType type() const;

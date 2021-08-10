@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.102.0";
+constexpr char ARGOS_VERSION[] = "0.103.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -27,7 +27,7 @@ constexpr char ARGOS_VERSION[] = "0.102.0";
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-#define ARGOS_VERSION_MINOR 102
+#define ARGOS_VERSION_MINOR 103
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
@@ -609,6 +609,8 @@ namespace Argos
         [[nodiscard]] const std::vector<std::string>& flags() const;
 
         [[nodiscard]] const std::string& argument() const;
+
+        [[nodiscard]] const std::string& initialValue() const;
 
         [[nodiscard]] const std::string& constant() const;
 
@@ -1962,6 +1964,24 @@ namespace Argos
         Option& flags(std::vector<std::string> f);
 
         Option& argument(const std::string& name);
+
+        /**
+         * @brief Sets a value that will be assigned to the option before
+         *  arguments are parsed.
+         *
+         * @note This is not the recommended way to specify a default value,
+         *  prefer instead to use the defaultValue argument to ArgumentValue's
+         *  asString() et al. ParsedArguments can not distinguish between
+         *  values assigned through initialValue() and actual command line
+         *  arguments. APPEND-options will not overwrite the initial value,
+         *  but add its values after it.
+         *
+         *  The initialValue can be useful if for instance one wants to use
+         *  ArgumentValue's split function on a default value read from a
+         *  file or an environment variable, or want to prepend
+         *  a value to a list built by options of operation "APPEND".
+         */
+        Option& initialValue(const std::string& value);
 
         Option& constant(const char* value);
 

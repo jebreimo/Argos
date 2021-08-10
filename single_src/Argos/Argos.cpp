@@ -402,6 +402,7 @@ namespace Argos
         std::string alias;
         std::string argument;
         std::string constant;
+        std::string initialValue;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
@@ -1123,6 +1124,16 @@ namespace Argos
           m_ParsedArgs(std::make_shared<ParsedArgumentsImpl>(m_Data)),
           m_Iterator(makeOptionIterator(m_Data->parserSettings.optionStyle, move(args)))
     {
+        for (const auto& option : m_Data->options)
+        {
+            if (!option->initialValue.empty())
+            {
+                m_ParsedArgs->appendValue(option->valueId,
+                                          option->initialValue,
+                                          option->argumentId);
+            }
+        }
+
         if (!ArgumentCounter::requiresArgumentCount(m_Data->arguments))
             m_ArgumentCounter = ArgumentCounter(m_Data->arguments);
         else
@@ -3143,6 +3154,13 @@ namespace Argos
         return *this;
     }
 
+    Option& Option::initialValue(const std::string& value)
+    {
+        checkOption();
+        m_Option->initialValue = value;
+        return *this;
+    }
+
     Option& Option::constant(const char* value)
     {
         return this->constant(std::string(value));
@@ -3369,6 +3387,11 @@ namespace Argos
     const std::string& OptionView::argument() const
     {
         return m_Option->argument;
+    }
+
+    const std::string& OptionView::initialValue() const
+    {
+        return m_Option->initialValue;
     }
 
     const std::string& OptionView::constant() const

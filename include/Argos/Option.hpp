@@ -141,6 +141,24 @@ namespace Argos
 
         Option& argument(const std::string& name);
 
+        /**
+         * @brief Sets a value that will be assigned to the option before
+         *  arguments are parsed.
+         *
+         * @note This is not the recommended way to specify a default value,
+         *  prefer instead to use the defaultValue argument to ArgumentValue's
+         *  asString() et al. ParsedArguments can not distinguish between
+         *  values assigned through initialValue() and actual command line
+         *  arguments. APPEND-options will not overwrite the initial value,
+         *  but add its values after it.
+         *
+         *  The initialValue can be useful if for instance one wants to use
+         *  ArgumentValue's split function on a default value read from a
+         *  file or an environment variable, or want to prepend
+         *  a value to a list built by options of operation "APPEND".
+         */
+        Option& initialValue(const std::string& value);
+
         Option& constant(const char* value);
 
         Option& constant(const std::string& value);

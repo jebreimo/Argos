@@ -5,18 +5,14 @@
 # This file is distributed under the BSD License.
 # License text is included with the source distribution.
 # ===========================================================================
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.14)
 
 include(FetchContent)
 FetchContent_Declare(catch
     GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
     GIT_TAG "v2.11.1"
     )
-FetchContent_GetProperties(catch)
-if (NOT catch_POPULATED)
-    FetchContent_Populate(catch)
-    add_subdirectory(${catch_SOURCE_DIR} ${catch_BINARY_DIR})
-endif ()
+FetchContent_MakeAvailable(catch)
 
 add_executable(ArgosTest
     ArgosTestMain.cpp
