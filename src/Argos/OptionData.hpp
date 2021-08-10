@@ -18,7 +18,7 @@ namespace Argos
         std::vector<std::string> flags;
         std::string text;
         std::string section;
-        std::string value;
+        std::string alias;
         std::string argument;
         std::string constant;
         OptionCallback callback;

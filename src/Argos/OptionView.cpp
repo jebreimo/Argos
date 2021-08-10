@@ -31,7 +31,7 @@ namespace Argos
 
     const std::string& OptionView::value() const
     {
-        return m_Option->value;
+        return m_Option->alias;
     }
 
     OptionOperation OptionView::operation() const

@@ -51,8 +51,8 @@ namespace Argos
 
             for (auto& f : o->flags)
                 m_Ids.emplace_back(f, o->valueId, o->argumentId);
-            if (!o->value.empty())
-                m_Ids.emplace_back(o->value, o->valueId, o->argumentId);
+            if (!o->alias.empty())
+                m_Ids.emplace_back(o->alias, o->valueId, o->argumentId);
         }
         if (!m_Ids.empty())
         {

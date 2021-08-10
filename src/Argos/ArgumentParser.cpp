@@ -125,9 +125,9 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                if (!o->value.empty())
+                if (!o->alias.empty())
                 {
-                    o->valueId = idMaker.makeValueId(o->value);
+                    o->valueId = idMaker.makeValueId(o->alias);
                     for (auto& f : o->flags)
                         idMaker.explicitIds.emplace(f, o->valueId);
                 }
@@ -279,15 +279,15 @@ namespace Argos
         }
 
         if (!od->argument.empty() && !od->constant.empty())
-            ARGOS_THROW("Option cannot have both argument and value set.");
+            ARGOS_THROW("Option cannot have both argument and constant.");
 
         switch (od->operation)
         {
         case OptionOperation::NONE:
             if (!od->constant.empty())
-                ARGOS_THROW("NONE-options cannot have value set.");
-            if (!od->value.empty())
-                ARGOS_THROW("NONE-options cannot have valueName set.");
+                ARGOS_THROW("NONE-options cannot have constant.");
+            if (!od->alias.empty())
+                ARGOS_THROW("NONE-options cannot have alias.");
             if (!od->optional)
                 ARGOS_THROW("NONE-options must be optional.");
             break;
@@ -297,7 +297,7 @@ namespace Argos
             break;
         case OptionOperation::APPEND:
             if (od->argument.empty() && od->constant.empty())
-                ARGOS_THROW("Options that appends must have either value or argument set.");
+                ARGOS_THROW("Options that appends must have either constant or argument.");
             break;
         case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->constant.empty())

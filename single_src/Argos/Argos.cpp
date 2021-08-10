@@ -399,7 +399,7 @@ namespace Argos
         std::vector<std::string> flags;
         std::string text;
         std::string section;
-        std::string value;
+        std::string alias;
         std::string argument;
         std::string constant;
         OptionCallback callback;
@@ -1556,9 +1556,9 @@ namespace Argos
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
-                if (!o->value.empty())
+                if (!o->alias.empty())
                 {
-                    o->valueId = idMaker.makeValueId(o->value);
+                    o->valueId = idMaker.makeValueId(o->alias);
                     for (auto& f : o->flags)
                         idMaker.explicitIds.emplace(f, o->valueId);
                 }
@@ -1710,15 +1710,15 @@ namespace Argos
         }
 
         if (!od->argument.empty() && !od->constant.empty())
-            ARGOS_THROW("Option cannot have both argument and value set.");
+            ARGOS_THROW("Option cannot have both argument and constant.");
 
         switch (od->operation)
         {
         case OptionOperation::NONE:
             if (!od->constant.empty())
-                ARGOS_THROW("NONE-options cannot have value set.");
-            if (!od->value.empty())
-                ARGOS_THROW("NONE-options cannot have valueName set.");
+                ARGOS_THROW("NONE-options cannot have constant.");
+            if (!od->alias.empty())
+                ARGOS_THROW("NONE-options cannot have alias.");
             if (!od->optional)
                 ARGOS_THROW("NONE-options must be optional.");
             break;
@@ -1728,7 +1728,7 @@ namespace Argos
             break;
         case OptionOperation::APPEND:
             if (od->argument.empty() && od->constant.empty())
-                ARGOS_THROW("Options that appends must have either value or argument set.");
+                ARGOS_THROW("Options that appends must have either constant or argument.");
             break;
         case OptionOperation::CLEAR:
             if (!od->argument.empty() ||!od->constant.empty())
@@ -3097,7 +3097,7 @@ namespace Argos
     Option& Option::alias(const std::string& id)
     {
         checkOption();
-        m_Option->value = id;
+        m_Option->alias = id;
         return *this;
     }
 
@@ -3338,7 +3338,7 @@ namespace Argos
 
     const std::string& OptionView::value() const
     {
-        return m_Option->value;
+        return m_Option->alias;
     }
 
     OptionOperation OptionView::operation() const
@@ -3917,8 +3917,8 @@ namespace Argos
 
             for (auto& f : o->flags)
                 m_Ids.emplace_back(f, o->valueId, o->argumentId);
-            if (!o->value.empty())
-                m_Ids.emplace_back(o->value, o->valueId, o->argumentId);
+            if (!o->alias.empty())
+                m_Ids.emplace_back(o->alias, o->valueId, o->argumentId);
         }
         if (!m_Ids.empty())
         {
