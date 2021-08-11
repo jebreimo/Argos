@@ -16,27 +16,31 @@ int main(int argc, char* argv[])
     auto pathEnv = std::getenv("PATH");
 
     using namespace Argos;
-    auto args = ArgumentParser(argv[0])
-        .about("Displays the path (or paths) where the given commands are"
-               " located.")
-        .add(Argument("COMMAND").count(1, UINT_MAX)
-            .text("The command or commands to locate."))
+    auto args = ArgumentParser("whereis")
+        .about("Searches the directories in the PATH environment variable for"
+               " the given file (or files).")
+        .add(Argument("FILE").count(1, UINT_MAX)
+            .text("The file or files to locate."))
+        .add(Option{"-p", "--paths"}.argument("<PATH>[:<PATH>]...")
+            .initialValue(pathEnv ? pathEnv : std::string())
+            .text("Search the given path or paths rather than the ones in"
+                  " the PATH environment variable. Use : as separator between"
+                  " the different paths."))
         .add(Option{"-q", "--quiet"}.alias("--verbose").constant(false)
             .text("Do not show additional information (negates --verbose)."))
         .add(Option{"-v", "--verbose"}
             .text("Show additional information."))
-        .add(Option{"-p", "--paths"}.argument("<PATH>[:<PATH>]...")
-            .initialValue(pathEnv ? pathEnv : std::string())
-            .text("Search the given path or paths rather than the ones in"
-                  " the PATH environment variable."))
         .add(Option{"--version"}
-            .callback([](auto, auto, auto pab)
+            .callback([](auto, auto, auto)
             {
-                std::cout << pab.programName() << " v" << VERSION << "\n";
+                std::cout << "whereis v" << VERSION << "\n";
                 return true;
             })
             .type(OptionType::STOP)
             .text("Display the program version and exit."))
+        .add(Option{"--"}.type(OptionType::LAST_OPTION)
+             .text("Marks the end of the options. Makes it possible to look"
+                   " for file names starting with dashes ('-')."))
         .parse(argc, argv);
 
     auto dirs = args.values("--paths").split(':').asStrings();
@@ -44,7 +48,7 @@ int main(int argc, char* argv[])
 
     for (const auto& dir : dirs)
     {
-        for (auto command : args.values("COMMAND").asStrings())
+        for (auto command : args.values("FILE").asStrings())
         {
             auto path = std::filesystem::path(dir) / command;
             if (std::filesystem::exists(path))
