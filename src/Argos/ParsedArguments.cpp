@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "Argos/ParsedArguments.hpp"
 
+#include <algorithm>
 #include "ArgosThrow.hpp"
 #include "ParsedArgumentsImpl.hpp"
 

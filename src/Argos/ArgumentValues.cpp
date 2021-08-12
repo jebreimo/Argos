@@ -228,7 +228,6 @@ namespace Argos
                 error("Invalid value: \"" + std::string(value.first)
                       + "\". Must be at least " + std::to_string(minParts)
                       + " values separated by \"" + separator + "\".");
-                return {{}, m_Args, m_ValueId};
             }
             for (auto& part : parts)
                 values.emplace_back(part, value.second);
