@@ -83,13 +83,14 @@ namespace Argos
          * @brief Add a new option definition to the ArgumentParser.
          *
          * @throw ArgosException if the option doesn't have any flags
-         *      or the flags don't match the current option style.
+         *      or any of the flags doesn't match the current option style.
          * @throw ArgosException if certain meaningless combinations of
          *      option operation and properties are found:
-         *      - an option with operation NONE is mandatory or has value
-         *        or valueName.
+         *      - an option with operation NONE has constant
+         *        or alias.
          *      - an option with operation CLEAR is mandatory.
-         *      - an option
+         *      - an option with operation APPEND has neither argument nor
+         *        constant.
          */
         ArgumentParser& add(Option option);
 
@@ -388,15 +389,17 @@ namespace Argos
         void writeHelpText() const;
 
         /**
-         * @brief Inform Argos how a long word can be split over multiple lines.
+         * @brief Inform Argos how a long word is to be split over multiple
+         *  lines.
          *
-         * By default, Argos will not split a word if it is at all possible to
-         * make it fit on a single line. In some cases this can make the help
-         * text appear "untidy". Use this function to tell Argos how a
-         * particular word can be split, by writing the word with spaces at each
-         * potential split point, e.g. "compre hen sive"  will allow Argos to
-         * split the word "comprehensive" as either "compre-" "hensive"
-         * or "comprehen-" "sive".
+         * By default, Argos will not split words in the help text if it is at
+         * all possible to fit them on a single line. In some cases this can
+         * make the help text appear untidy. Use this function to tell Argos
+         * how a particular word can be split by writing the word with spaces
+         * at each potential split point. For instance, calling this function
+         * with argument "compre hen sive" will inform Argos that
+         * it can split the word "comprehensive" as either "compre-" "hensive"
+         * or "comprehen-" "sive" (or even "compre-" "hen-" "sive").
          */
         ArgumentParser& addWordSplittingRule(std::string str);
 

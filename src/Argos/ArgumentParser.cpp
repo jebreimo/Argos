@@ -285,11 +285,9 @@ namespace Argos
         {
         case OptionOperation::NONE:
             if (!od->constant.empty())
-                ARGOS_THROW("NONE-options cannot have constant.");
+                ARGOS_THROW("NONE-options cannot have a constant.");
             if (!od->alias.empty())
-                ARGOS_THROW("NONE-options cannot have alias.");
-            if (!od->optional)
-                ARGOS_THROW("NONE-options must be optional.");
+                ARGOS_THROW("NONE-options cannot have an alias.");
             break;
         case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->constant.empty())

@@ -21,11 +21,11 @@ namespace Argos
     {
         /**
          * @brief Options starts with either one dash (`-`) followed by
-         *  exactly one character (short) or two dashes (`--`) followed by
-         *  one or more characters (long).
+         *  exactly one character (short option) or two dashes (`--`) followed by
+         *  one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
-         * equivalent.
+         * equivalent as long as neither of them take an argument.
          */
         STANDARD,
         /**
@@ -47,6 +47,8 @@ namespace Argos
     {
         /**
          * @brief The option will not affect any value.
+         *
+         * A NONE option can make sense if the option has a callback function.
          */
         NONE,
         /**
@@ -72,11 +74,11 @@ namespace Argos
          * Operation CLEAR only makes sense when it shares its value with
          * options that ASSIGNs or APPENDs. It removes the current value or
          * values from ParsedArguments, which can be useful in certain
-         * situations where the program is run via a shell alias or script.
+         * situations when the program is run via a shell alias or script.
          *
          * An example of how this operation can be used:
          *
-         * ```
+         * ~~~{.cpp}
          *  ArgumentParser()
          *      ...
          *      .add(Option({"--include="}).argument("FILE")
@@ -85,7 +87,7 @@ namespace Argos
          *      .add(Option({"--include"}).operation(OptionOperation::CLEAR)
          *          .text("Clear the list of included files.")
          *      ...
-         * ```
+         * ~~~
          */
         CLEAR
     };

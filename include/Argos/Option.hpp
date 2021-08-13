@@ -22,11 +22,11 @@ namespace Argos
     struct OptionData;
 
     /**
-     * @brief Class for defining command line arguments.
+     * @brief Class for defining command line options.
      *
-     * The minimum requirement for a command line argument is that it has a
-     * name. Once the argument has been defined it must be *added* to the
-     * ArgumentParser with ArgumentParser::add.
+     * The minimum requirement for a command line option is that it has at
+     * least one flag. Once the option has been defined it must be *added* to
+     * the ArgumentParser with ArgumentParser::add.
      */
     class Option
     {
@@ -66,7 +66,7 @@ namespace Argos
          *      lines if it doesn't fit fit inside the terminal window.
          *      Text formatting using newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& text(const std::string& text);
 
@@ -78,7 +78,7 @@ namespace Argos
          * @param name All arguments and options with the same section name
          *      will be listed under the same heading.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& section(const std::string& name);
 
@@ -97,7 +97,7 @@ namespace Argos
          * @param id An alternative name that can be used to retrieve the
          *      option's value.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& alias(const std::string& id);
 
@@ -107,7 +107,7 @@ namespace Argos
          * @param callback A function pointer or callable object accepting the
          *      parameters (OptionView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& callback(OptionCallback callback);
 
@@ -116,7 +116,7 @@ namespace Argos
          *      auto-generated help text.
          * @param visibility
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& visibility(Visibility visibility);
 
@@ -129,16 +129,50 @@ namespace Argos
          *
          * @param id Can be any integer value.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& id(int id);
 
+        /**
+         * @brief Specify which operation the option performs. The default
+         *  operations is ASSIGN.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& operation(OptionOperation operation);
 
+        /**
+         * @brief Set the flag of a single-flag option.
+         * @param f a flag with one or two leading dashes or a slash depending
+         *  on the option style (ArgumentParser::optionStyle).
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& flag(const std::string& f);
 
+        /**
+         * @brief Set the flag of a multi-flag option.
+         * @param f flags with one or two leading dashes or a slash depending
+         *  on the option style (ArgumentParser::optionStyle).
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& flags(std::vector<std::string> f);
 
+        /**
+         * @brief Set the name of the option's argument (a value given on
+         *  the command line).
+         *
+         * The argument is displayed in the help text and error messages.
+         * Setting the argument is how one informs the ArgumentParser that
+         * this option takes an argument from the command line rather than
+         * assign a constant.
+         *
+         * @param name a string that will appear in the help text, typically
+         *  something like FILE or NUMBER.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& argument(const std::string& name);
 
         /**
@@ -156,6 +190,9 @@ namespace Argos
          *  ArgumentValue's split function on a default value read from a
          *  file or an environment variable, or want to prepend
          *  a value to a list built by options of operation "APPEND".
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
          */
         Option& initialValue(const std::string& value);
 
@@ -171,6 +208,14 @@ namespace Argos
 
         Option& type(OptionType type);
 
+        /**
+         * @brief Set whether this option is optional or mandatory.
+         *
+         * @param optional
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& optional(bool optional);
 
         const OptionData& data() const;
@@ -181,6 +226,7 @@ namespace Argos
          *
          * The object is no longer usable after this function has
          * been called.
+         *
          * @return Pointer to the option implementation.
          */
         std::unique_ptr<OptionData> release();
