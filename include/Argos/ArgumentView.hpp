@@ -35,28 +35,28 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        const std::string& text() const final;
+        [[nodiscard]] const std::string& text() const final;
 
         /**
          * @brief Returns the argument's section name.
          */
-        const std::string& section() const final;
+        [[nodiscard]] const std::string& section() const final;
 
         /**
          * @brief Returns the argument's value name.
          */
-        const std::string& value() const final;
+        [[nodiscard]] const std::string& value() const final;
 
         /**
          * @brief Returns the argument's visibility in
          *      the help text and error messages.
          */
-        Visibility visibility() const final;
+        [[nodiscard]] Visibility visibility() const final;
 
         /**
          * @brief Returns the argument's custom id.
          */
-        int id() const final;
+        [[nodiscard]] int id() const final;
 
         /**
          * @brief Returns the numeric id of the value the argument assigns
@@ -71,7 +71,7 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        ValueId valueId() const final;
+        [[nodiscard]] ValueId valueId() const final;
 
         /**
          * @brief Returns the argument's argumentId().
@@ -79,13 +79,25 @@ namespace Argos
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argumentId() const final;
 
-        const std::string& name() const;
+        /**
+         * @brief Returns the argument's name.
+         */
+        [[nodiscard]] const std::string& name() const;
 
-        bool optional() const;
+        /**
+         * @brief Returns true if the argument is optional (i.e. its minimum
+         *  count is 0).
+         */
+        [[nodiscard]] bool optional() const;
 
-        std::pair<unsigned, unsigned> count() const;
+        /**
+         * @brief Returns the argument's minimum and maximum counts.
+         *
+         * Normal arguments have both set to 1.
+         */
+        [[nodiscard]] std::pair<unsigned, unsigned> count() const;
     private:
         const ArgumentData* m_Argument;
     };

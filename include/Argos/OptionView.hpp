@@ -81,18 +81,42 @@ namespace Argos
          */
         [[nodiscard]] ArgumentId argumentId() const final;
 
+        /**
+         * @brief Returns the option's operation.
+         */
         [[nodiscard]] OptionOperation operation() const;
 
+        /**
+         * @brief Returns the option's flags.
+         */
         [[nodiscard]] const std::vector<std::string>& flags() const;
 
+        /**
+         * @brief Returns the option's argument.
+         */
         [[nodiscard]] const std::string& argument() const;
 
+        /**
+         * @brief Returns the option's initial value.
+         */
         [[nodiscard]] const std::string& initialValue() const;
 
+        /**
+         * @brief Returns the option's constant.
+         *
+         * @note The constant is stored as a string internally, even if the
+         *  option was assigned an integer or boolean value.
+         */
         [[nodiscard]] const std::string& constant() const;
 
+        /**
+         * @brief Returns the option's type.
+         */
         [[nodiscard]] OptionType type() const;
 
+        /**
+         * @brief Returns false if the option is mandatory.
+         */
         [[nodiscard]] bool optional() const;
     private:
         const OptionData* m_Option;

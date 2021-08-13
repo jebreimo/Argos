@@ -25,6 +25,9 @@ namespace Argos
     /**
      * @brief The result of the ArgumentParser. Gives access to all argument
      *      and option values.
+     *
+     * Instances of this class is returned by ArgumentParser::parse and
+     * ArgumentIterator::parsedArguments.
      */
     class ParsedArguments
     {
@@ -133,11 +136,39 @@ namespace Argos
          */
         [[nodiscard]] OptionView stopOption() const;
 
+        /**
+         * @brief Returns the command line arguments that were ignored by the
+         *  argument parser.
+         *
+         * This function will always return an empty vector unless at least
+         * one of the following is true:
+         *
+         * - ArgumentParser::ignoreUndefinedArguments is true.
+         * - ArgumentParser::ignoreUndefinedOptions is true.
+         * - ArgumentParser::autoExit is false and there are options with type
+         *   set to OptionType::STOP.
+         */
         [[nodiscard]]
         const std::vector<std::string>& unprocessedArguments() const;
 
+        /**
+         * @brief Removes parsed arguments and options from @a argv and
+         *  decrements @a argc correspondingly.
+         *
+         * The first value in @a argv is assumed to be the program name and
+         * is ignored, the remainder should be identical to the command line
+         * given to ArgumentParser::parse or ArgumentParser::makeIterator.
+         *
+         * @note No memory is freed, the function only rearranges the pointers
+         *  @a in argv.
+         */
         void filterParsedArguments(int& argc, char**& argv);
 
+        /**
+         * @brief Print @a msg along with a brief help text and exit.
+         *
+         * @throw ArgosException if ArgumentParser::autoExit is false.
+         */
         [[noreturn]]
         void error(const std::string& msg);
     private:

@@ -31,8 +31,18 @@ namespace Argos
     class Option
     {
     public:
+        /**
+         * @brief Creates a new option without any flags.
+         *
+         * And option created this way must be assigned at least one flag with
+         * Option::flag or Option::flags before it can be added to the
+         * ArgumentParser.
+         */
         Option();
 
+        /**
+         * @brief Creates a new option with the given flags.
+         */
         explicit Option(std::initializer_list<std::string> flags);
 
         /**
@@ -63,8 +73,8 @@ namespace Argos
         /**
          * @brief Set the option's help text.
          * @param text The text will be automatically divided into multiple
-         *      lines if it doesn't fit fit inside the terminal window.
-         *      Text formatting using newlines, spaces and tabs is possible.
+         *  lines if it doesn't fit fit inside the terminal window.
+         *  Text formatting using newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -72,11 +82,11 @@ namespace Argos
 
         /**
          * @brief Specifies under which heading the option will appear
-         *      in the help text.
+         *  in the help text.
          *
          * The default heading for options is "OPTIONS".
          * @param name All arguments and options with the same section name
-         *      will be listed under the same heading.
+         *  will be listed under the same heading.
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -84,18 +94,40 @@ namespace Argos
 
         /**
          * @brief Set an alternative name for the value this option
-         *      assigns to.
+         *  assigns to.
          *
          * The value or values of the option can be retrieved from
          * ParsedArgument using one of its flags, but sometimes this
          * is inconvenient, for instance if the same option has different
          * names in different languages, or multiple options share the same
-         * value. In the latter case, for instance if there are two options
+         * value.
+         *
+         *
+         * The alias can be any string, including a flag or the name of
+         * an argument. If two options, or an option and and argument, refer to
+         * each other through an alias, their values become linked. For instance
+         * if there are two options
          * --verbose and --quiet that negates each other, one of them, but not
-         * both, should have the other option as an alias (e.g. --verbose has
-         * an alias("--quiet") and
+         * both, should have the other option as an alias (e.g. --quiet has
+         * an alias("--verbose")).
+         *
+         * ~~~{.cpp}
+         * ArgumentParser()
+         *     .add(Option{"-q", "--quiet"}.alias("--verbose").constant(false))
+         *     .add(Option{"-v", "--verbose"})
+         *     ...
+         * ~~~
+         *
+         * The same effect is also produced if they have a common alias:
+         * ~~~{.cpp}
+         * ArgumentParser()
+         *     .add(Option{"-q", "--quiet"}.alias("Verbose").constant(false))
+         *     .add(Option{"-v", "--verbose"}.alias("Verbose"))
+         *     ...
+         * ~~~
+         *
          * @param id An alternative name that can be used to retrieve the
-         *      option's value.
+         *  option's value.
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -103,9 +135,9 @@ namespace Argos
 
         /**
          * @brief Set a callback that will be called when this option is
-         *      encountered.
+         *  encountered.
          * @param callback A function pointer or callable object accepting the
-         *      parameters (OptionView, string_view, ParsedArgumentsBuilder).
+         *  parameters (OptionView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -113,7 +145,7 @@ namespace Argos
 
         /**
          * @brief Set restrictions for where this option is displayed in the
-         *      auto-generated help text.
+         *  auto-generated help text.
          * @param visibility
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
@@ -122,7 +154,7 @@ namespace Argos
 
         /**
          * @brief Set a custom id that can be used in callback functions etc.
-         *      to quickly distinguish between different options.
+         *  to quickly distinguish between different options.
          *
          * The id purely is intended for client code, Argos itself ignores
          * this value, but makes it available through IArgumentView.
@@ -196,28 +228,82 @@ namespace Argos
          */
         Option& initialValue(const std::string& value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(const char* value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(const std::string& value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * Options that have no argument and no explicit constant will
+         * automatically have the constant *true*.
+
+         * @note All values are stored as strings internally, true and false are
+         *  converted to "1" and "0" respectively..
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(bool value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @note All values are stored as strings internally, i.e. constant(123) and
+         *  constant("123") are equivalent.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(int value);
 
+        /**
+         * @brief Sets the value that this option will assign to the underlying value.
+         *
+         * @note All values are stored as strings internally, i.e. constant(123LL) and
+         *  constant("123") are equivalent.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(long long value);
 
+        /**
+         * @brief Sets the option type.
+         *
+         * All options have the type OptionType::NORMAL by default.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& type(OptionType type);
 
         /**
          * @brief Set whether this option is optional or mandatory.
-         *
-         * @param optional
          *
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
         Option& optional(bool optional);
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         */
+        [[nodiscard]]
         const OptionData& data() const;
 
         /**
