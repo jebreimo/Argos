@@ -2617,6 +2617,7 @@ namespace Argos
     #include <sys/ioctl.h>
     #include <unistd.h>
 #elif defined(WIN32)
+    #define NOMINMAX
     #include <Windows.h>
 #endif
 
@@ -2660,7 +2661,7 @@ namespace Argos
     {
         auto width = getConsoleWidth();
         if (width == 0)
-            return std::max(minWidth, defaultWidth);
+            return defaultWidth;
         return width < minWidth ? minWidth : width;
     }
 }

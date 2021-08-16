@@ -106,11 +106,6 @@ target_include_directories(Argos
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     )
 
-target_compile_definitions(Argos
-    PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
-    )
-
 TargetEnableAllWarnings(Argos)
 
 add_library(Argos::Argos ALIAS Argos)

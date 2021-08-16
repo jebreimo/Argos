@@ -40,3 +40,8 @@ else()
         )
 
 endif()
+
+target_compile_definitions(whereis
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    )
