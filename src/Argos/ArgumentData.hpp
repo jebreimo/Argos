@@ -15,7 +15,7 @@ namespace Argos
     struct ArgumentData
     {
         std::string name;
-        std::string text;
+        std::string help;
         std::string section;
         std::string value;
         ArgumentCallback callback;

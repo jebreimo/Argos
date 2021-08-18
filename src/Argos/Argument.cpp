@@ -52,10 +52,10 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::text(const std::string& text)
+    Argument& Argument::help(const std::string& text)
     {
         checkArgument();
-        m_Argument->text = text;
+        m_Argument->help = text;
         return *this;
     }
 

@@ -16,7 +16,7 @@ namespace Argos
     struct OptionData
     {
         std::vector<std::string> flags;
-        std::string text;
+        std::string help;
         std::string section;
         std::string alias;
         std::string argument;

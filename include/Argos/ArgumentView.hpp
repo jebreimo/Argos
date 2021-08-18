@@ -35,7 +35,7 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        [[nodiscard]] const std::string& text() const final;
+        [[nodiscard]] const std::string& help() const final;
 
         /**
          * @brief Returns the argument's section name.

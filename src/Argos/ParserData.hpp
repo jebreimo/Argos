@@ -41,6 +41,7 @@ namespace Argos
     struct HelpSettings
     {
         std::string programName;
+        std::string version;
         std::map<TextId, std::string> texts;
         std::ostream* outputStream = nullptr;
     };

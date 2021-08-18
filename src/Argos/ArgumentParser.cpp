@@ -8,6 +8,7 @@
 #include "Argos/ArgumentParser.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include "ArgosThrow.hpp"
 #include "ArgumentIteratorImpl.hpp"
 #include "HelpText.hpp"
@@ -187,8 +188,50 @@ namespace Argos
                 return;
 
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .text("Show help text.")
+                .help("Show help text.")
                 .constant("1").release();
+            opt->argumentId = ArgumentId(data.options.size()
+                                         + data.arguments.size() + 1);
+            data.options.push_back(move(opt));
+        }
+
+        void addVersionOption(ParserData& data)
+        {
+            if (data.helpSettings.version.empty())
+                return;
+            std::string flag;
+            switch (data.parserSettings.optionStyle)
+            {
+            case OptionStyle::STANDARD:
+                if (!hasFlag(data, "--version"))
+                    flag = "--version";
+                break;
+            case OptionStyle::SLASH:
+                if (!hasFlag(data, "/VERSION"))
+                    flag = "/VERSION";
+                break;
+            case OptionStyle::DASH:
+                if (!hasFlag(data, "-version"))
+                    flag = "-version";
+                break;
+            }
+
+            if (flag.empty())
+                return;
+
+            auto stream = data.helpSettings.outputStream
+                        ? data.helpSettings.outputStream
+                        : &std::cout;
+            auto opt = Option().flag(flag).type(OptionType::STOP)
+                .help("Show program version.")
+                .constant("1")
+                .callback([v = data.helpSettings.version, stream]
+                              (auto, auto, auto pa)
+                          {
+                              *stream << pa.programName() << " " << v << "\n";
+                              return true;
+                          })
+                .release();
             opt->argumentId = ArgumentId(data.options.size()
                                          + data.arguments.size() + 1);
             data.options.push_back(move(opt));
@@ -198,6 +241,7 @@ namespace Argos
                                   const std::shared_ptr<ParserData>& data)
         {
             addMissingHelpOption(*data);
+            addVersionOption(*data);
             setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
@@ -208,6 +252,7 @@ namespace Argos
                          const std::shared_ptr<ParserData>& data)
         {
             addMissingHelpOption(*data);
+            addVersionOption(*data);
             setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
@@ -521,6 +566,13 @@ namespace Argos
     {
         checkData();
         m_Data->helpSettings.texts[textId] = std::move(text);
+        return *this;
+    }
+
+    ArgumentParser& ArgumentParser::version(const std::string& version)
+    {
+        checkData();
+        m_Data->helpSettings.version = version;
         return *this;
     }
 

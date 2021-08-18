@@ -25,30 +25,57 @@ namespace Argos
 
     /**
      * @brief Iterator for the values in an instance of ArgumentValues.
+     *
+     * Direct use of this iterator should be avoided, it is intended to
+     * be used in range-based for loops. For algorithms etc. it is recommended
+     * to use the vector returned by ArgumentValues::values.
      */
     class ArgumentValueIterator
     {
     public:
-        using iterator_category = std::input_iterator_tag;
-        using pointer = void;
-        using reference = ArgumentValue;
-        using value_type = ArgumentValue;
-        using difference_type = void;
+        /**
+         * @private
+         */
+        using It = typename std::vector<
+            std::pair<std::string_view, ArgumentId>
+            >::const_iterator;
 
-        using It = typename std::vector<std::pair<std::string_view, ArgumentId>>::const_iterator;
-
+        /**
+         * @brief Construct an empty iterator.
+         *
+         * The iterator has to be assigned the result of ArgumentValues::begin
+         * or ArgumentValues::end before it can be used.
+         */
         ArgumentValueIterator();
 
+        /**
+         * @private
+         * Only called from ArgumentValues
+         */
         ArgumentValueIterator(const It& internalIterator,
                               std::shared_ptr<ParsedArgumentsImpl> args,
                               ValueId valueId);
 
+        /**
+         * @brief Prefix increment operator.
+         */
         ArgumentValueIterator& operator++();
 
+        /**
+         * @brief Postfix increment operator.
+         */
         ArgumentValueIterator operator++(int);
 
+        /**
+         * @brief Returns the current value.
+         *
+         * @note The returned value is not a reference.
+         */
         ArgumentValue operator*() const;
 
+        /**
+         * @private
+         */
         It internalIterator() const;
     private:
         It m_Iterator = {};
@@ -56,9 +83,15 @@ namespace Argos
         ValueId m_ValueId = {};
     };
 
+    /**
+     * @brief Returns true @a a and @a b point to the same argument.
+     */
     bool operator==(const ArgumentValueIterator& a,
                     const ArgumentValueIterator& b);
 
+    /**
+     * @brief Returns false unless @a a and @a b point to the same argument.
+     */
     bool operator!=(const ArgumentValueIterator& a,
                     const ArgumentValueIterator& b);
 }

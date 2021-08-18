@@ -381,6 +381,13 @@ namespace Argos
         ArgumentParser& text(TextId textId, std::string text);
 
         /**
+         * @brief Sets the program version and enables the --version option.
+         * @param version The version is typically 2-4 numbers separated
+         *  by periods, e.g. 1.0.3.
+         */
+        ArgumentParser& version(const std::string& version);
+
+        /**
          * @brief Write the help text.
          *
          * @note The help text is displayed automatically when a help option

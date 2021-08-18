@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.103.0";
+constexpr char ARGOS_VERSION[] = "0.104.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -27,7 +27,7 @@ constexpr char ARGOS_VERSION[] = "0.103.0";
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-#define ARGOS_VERSION_MINOR 103
+#define ARGOS_VERSION_MINOR 104
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
@@ -100,11 +100,11 @@ namespace Argos
     {
         /**
          * @brief Options starts with either one dash (`-`) followed by
-         *  exactly one character (short) or two dashes (`--`) followed by
-         *  one or more characters (long).
+         *  exactly one character (short option) or two dashes (`--`) followed by
+         *  one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
-         * equivalent.
+         * equivalent as long as neither of them take an argument.
          */
         STANDARD,
         /**
@@ -126,6 +126,8 @@ namespace Argos
     {
         /**
          * @brief The option will not affect any value.
+         *
+         * A NONE option can make sense if the option has a callback function.
          */
         NONE,
         /**
@@ -151,11 +153,11 @@ namespace Argos
          * Operation CLEAR only makes sense when it shares its value with
          * options that ASSIGNs or APPENDs. It removes the current value or
          * values from ParsedArguments, which can be useful in certain
-         * situations where the program is run via a shell alias or script.
+         * situations when the program is run via a shell alias or script.
          *
          * An example of how this operation can be used:
          *
-         * ```
+         * ~~~{.cpp}
          *  ArgumentParser()
          *      ...
          *      .add(Option({"--include="}).argument("FILE")
@@ -164,7 +166,7 @@ namespace Argos
          *      .add(Option({"--include"}).operation(OptionOperation::CLEAR)
          *          .text("Clear the list of included files.")
          *      ...
-         * ```
+         * ~~~
          */
         CLEAR
     };
@@ -385,7 +387,7 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        virtual const std::string& text() const = 0;
+        virtual const std::string& help() const = 0;
 
         /**
          * @brief Returns the argument's or option's section name.
@@ -467,28 +469,28 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        const std::string& text() const final;
+        [[nodiscard]] const std::string& help() const final;
 
         /**
          * @brief Returns the argument's section name.
          */
-        const std::string& section() const final;
+        [[nodiscard]] const std::string& section() const final;
 
         /**
          * @brief Returns the argument's value name.
          */
-        const std::string& value() const final;
+        [[nodiscard]] const std::string& value() const final;
 
         /**
          * @brief Returns the argument's visibility in
          *      the help text and error messages.
          */
-        Visibility visibility() const final;
+        [[nodiscard]] Visibility visibility() const final;
 
         /**
          * @brief Returns the argument's custom id.
          */
-        int id() const final;
+        [[nodiscard]] int id() const final;
 
         /**
          * @brief Returns the numeric id of the value the argument assigns
@@ -503,7 +505,7 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        ValueId valueId() const final;
+        [[nodiscard]] ValueId valueId() const final;
 
         /**
          * @brief Returns the argument's argumentId().
@@ -511,13 +513,25 @@ namespace Argos
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argumentId() const final;
 
-        const std::string& name() const;
+        /**
+         * @brief Returns the argument's name.
+         */
+        [[nodiscard]] const std::string& name() const;
 
-        bool optional() const;
+        /**
+         * @brief Returns true if the argument is optional (i.e. its minimum
+         *  count is 0).
+         */
+        [[nodiscard]] bool optional() const;
 
-        std::pair<unsigned, unsigned> count() const;
+        /**
+         * @brief Returns the argument's minimum and maximum counts.
+         *
+         * Normal arguments have both set to 1.
+         */
+        [[nodiscard]] std::pair<unsigned, unsigned> count() const;
     private:
         const ArgumentData* m_Argument;
     };
@@ -558,7 +572,7 @@ namespace Argos
         /**
          * @brief Returns the option's or option's help text.
          */
-        [[nodiscard]] const std::string& text() const final;
+        [[nodiscard]] const std::string& help() const final;
 
         /**
          * @brief Returns the option's section name.
@@ -604,18 +618,42 @@ namespace Argos
          */
         [[nodiscard]] ArgumentId argumentId() const final;
 
+        /**
+         * @brief Returns the option's operation.
+         */
         [[nodiscard]] OptionOperation operation() const;
 
+        /**
+         * @brief Returns the option's flags.
+         */
         [[nodiscard]] const std::vector<std::string>& flags() const;
 
+        /**
+         * @brief Returns the option's argument.
+         */
         [[nodiscard]] const std::string& argument() const;
 
+        /**
+         * @brief Returns the option's initial value.
+         */
         [[nodiscard]] const std::string& initialValue() const;
 
+        /**
+         * @brief Returns the option's constant.
+         *
+         * @note The constant is stored as a string internally, even if the
+         *  option was assigned an integer or boolean value.
+         */
         [[nodiscard]] const std::string& constant() const;
 
+        /**
+         * @brief Returns the option's type.
+         */
         [[nodiscard]] OptionType type() const;
 
+        /**
+         * @brief Returns false if the option is mandatory.
+         */
         [[nodiscard]] bool optional() const;
     private:
         const OptionData* m_Option;
@@ -924,30 +962,57 @@ namespace Argos
 
     /**
      * @brief Iterator for the values in an instance of ArgumentValues.
+     *
+     * Direct use of this iterator should be avoided, it is intended to
+     * be used in range-based for loops. For algorithms etc. it is recommended
+     * to use the vector returned by ArgumentValues::values.
      */
     class ArgumentValueIterator
     {
     public:
-        using iterator_category = std::input_iterator_tag;
-        using pointer = void;
-        using reference = ArgumentValue;
-        using value_type = ArgumentValue;
-        using difference_type = void;
+        /**
+         * @private
+         */
+        using It = typename std::vector<
+            std::pair<std::string_view, ArgumentId>
+            >::const_iterator;
 
-        using It = typename std::vector<std::pair<std::string_view, ArgumentId>>::const_iterator;
-
+        /**
+         * @brief Construct an empty iterator.
+         *
+         * The iterator has to be assigned the result of ArgumentValues::begin
+         * or ArgumentValues::end before it can be used.
+         */
         ArgumentValueIterator();
 
+        /**
+         * @private
+         * Only called from ArgumentValues
+         */
         ArgumentValueIterator(const It& internalIterator,
                               std::shared_ptr<ParsedArgumentsImpl> args,
                               ValueId valueId);
 
+        /**
+         * @brief Prefix increment operator.
+         */
         ArgumentValueIterator& operator++();
 
+        /**
+         * @brief Postfix increment operator.
+         */
         ArgumentValueIterator operator++(int);
 
+        /**
+         * @brief Returns the current value.
+         *
+         * @note The returned value is not a reference.
+         */
         ArgumentValue operator*() const;
 
+        /**
+         * @private
+         */
         It internalIterator() const;
     private:
         It m_Iterator = {};
@@ -955,9 +1020,15 @@ namespace Argos
         ValueId m_ValueId = {};
     };
 
+    /**
+     * @brief Returns true @a a and @a b point to the same argument.
+     */
     bool operator==(const ArgumentValueIterator& a,
                     const ArgumentValueIterator& b);
 
+    /**
+     * @brief Returns false unless @a a and @a b point to the same argument.
+     */
     bool operator!=(const ArgumentValueIterator& a,
                     const ArgumentValueIterator& b);
 }
@@ -1266,6 +1337,23 @@ namespace Argos
     /**
      * @brief An interface to ParsedArguments that lets argument and option
      *      callbacks query and modify the parsed argument values
+     *
+     * Eaxmple:
+     * ~~~{.cpp}
+     * ArgumentParser()
+     *     .add(Option{"--foo"}...)
+     *     .add(Option{"--bar"}...)
+     *     .add(Option{"--baz"}.argument("NUMBER")...)
+     *     .add(Option{"--all"}
+     *         .text("Enables --foo and --bar, and sets --baz to 11.")
+     *         .callback([](auto, auto, ParsedArguments pa)
+     *             {
+     *                 pa.assign("--foo", "true").assign("--bar", "true")
+     *                   .assign("--baz", "11");
+     *                 return true;
+     *             }))
+     *         ...
+     * ~~~
      */
     class ParsedArgumentsBuilder
     {
@@ -1276,36 +1364,136 @@ namespace Argos
         explicit ParsedArgumentsBuilder(
                 std::shared_ptr<ParsedArgumentsImpl> impl);
 
+        /**
+         * @brief Add @a value to the named argument or option.
+         * @param name The name (flag, alias etc.) of an argument or option.
+         * @param value Even if the values will be read as integers or floats,
+         *  they must be given as strings. Boolean values must be given as
+         *  "0" or "false" for *false* and "1" or "true" for *true*.
+         * @throw ArgosException if the name doesn't match any of names,
+         *  flags or aliases of the arguments and options added
+         *  to ArgumentParser.
+         */
         ParsedArgumentsBuilder& append(const std::string& name,
                                        const std::string& value);
 
+        /**
+         * @brief Add @a value to the given argument or option.
+         * @param arg An argument or option.
+         * @param value Even if the values will be read as integers or floats,
+         *  they must be given as strings. Boolean values must be given as
+         *  "0" for *false* and "1" for *true*.
+         */
         ParsedArgumentsBuilder& append(const IArgumentView& arg,
                                        const std::string& value);
 
+        /**
+         * @brief Set the value of the named argument or option.
+         *
+         * Any previous value or values are replaced by @a value.
+         *
+         * @param name The name (flag, alias etc.) of an argument or option.
+         * @param value Even if the values will be read as integers or floats,
+         *  they must be given as strings. Boolean values must be given as
+         *  "0" for *false* and "1" for *true*.
+         * @throw ArgosException if the name doesn't match any of names,
+         *  flags or aliases of the arguments and options added
+         *  to ArgumentParser.
+         */
         ParsedArgumentsBuilder& assign(const std::string& name,
                                        const std::string& value);
 
+        /**
+         * @brief Set the value of the given argument or option.
+         *
+         * Any previous value or values are replaced by @a value.
+         *
+         * @param arg An argument or option.
+         * @param value Even if the values will be read as integers or floats,
+         *  they must be given as strings. Boolean values must be given as
+         *  "0" for *false* and "1" for *true*.
+         */
         ParsedArgumentsBuilder& assign(const IArgumentView& arg,
                                        const std::string& value);
 
+        /**
+         * @brief Removes the value or values of the named argument or option.
+         *
+         * After it's been cleared, the argument or value will be treated as
+         * if it hasn't been given any value at all, i.e. the default value
+         * will be returned when its value is retrieved with
+         * ArgumentValue::asString et al.
+         *
+         * @param name The name (flag, alias etc.) of an argument or option.
+         * @throw ArgosException if the name doesn't match any of names,
+         *  flags or aliases of the arguments and options added
+         *  to ArgumentParser.
+         */
         ParsedArgumentsBuilder& clear(const std::string& name);
 
+        /**
+         * @brief Removes the value or values of the named argument or option.
+         *
+         * After it's been cleared, the argument or value will be treated as
+         * if it hasn't been given any value at all, i.e. the default value
+         * will be returned when its value is retrieved with
+         * ArgumentValue::asString et al.
+         */
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
+        /**
+         * @brief Returns the value of the named argument or option.
+         * @throw ArgosException if the argument or option has multiple
+         *  values, or the name doesn't match any of names, flags or aliases
+         *  of the arguments and options added to ArgumentParser.
+         */
         [[nodiscard]] ArgumentValue value(const std::string& name) const;
 
+        /**
+         * @brief Returns the value of the given argument or option.
+         * @throw ArgosException if the argument or option has multiple
+         *  values.
+         */
         [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
 
+        /**
+         * @brief Returns the value of the named argument or option.
+         * @throw ArgosException if the name doesn't match any of names,
+         *  flags or aliases of the arguments and options added
+         *  to ArgumentParser.
+         */
         [[nodiscard]] ArgumentValues values(const std::string& name) const;
 
+        /**
+         * @brief Returns the values of the given argument or option.
+         */
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
+        /**
+         * @brief Returns true if the named argument or option has been
+         *  assigned a value.
+         */
         [[nodiscard]] bool has(const std::string& name) const;
 
+        /**
+         * @brief Returns true if the @a arg has been assigned a value.
+         */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        void error(const std::string& errorMessage);
+        /**
+         * @brief Print @a msg along with a brief help text and exit.
+         *
+         * @throw ArgosException if ArgumentParser::autoExit is false.
+         */
+        [[noreturn]] void error(const std::string& errorMessage);
 
+        /**
+         * @brief Print @a msg prefixed by the argument's name or option's
+         *  flags along with a brief help text and exit.
+         *
+         * @throw ArgosException if ArgumentParser::autoExit is false.
+         */
+        [[noreturn]]
         void error(const std::string& errorMessage, const IArgumentView& arg);
 
         /**
@@ -1454,7 +1642,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& text(const std::string& text);
+        Argument& help(const std::string& text);
 
         /**
          * @brief Specifies under which heading the argument will appear
@@ -1600,6 +1788,9 @@ namespace Argos
     /**
      * @brief The result of the ArgumentParser. Gives access to all argument
      *      and option values.
+     *
+     * Instances of this class is returned by ArgumentParser::parse and
+     * ArgumentIterator::parsedArguments.
      */
     class ParsedArguments
     {
@@ -1708,11 +1899,39 @@ namespace Argos
          */
         [[nodiscard]] OptionView stopOption() const;
 
+        /**
+         * @brief Returns the command line arguments that were ignored by the
+         *  argument parser.
+         *
+         * This function will always return an empty vector unless at least
+         * one of the following is true:
+         *
+         * - ArgumentParser::ignoreUndefinedArguments is true.
+         * - ArgumentParser::ignoreUndefinedOptions is true.
+         * - ArgumentParser::autoExit is false and there are options with type
+         *   set to OptionType::STOP.
+         */
         [[nodiscard]]
         const std::vector<std::string>& unprocessedArguments() const;
 
+        /**
+         * @brief Removes parsed arguments and options from @a argv and
+         *  decrements @a argc correspondingly.
+         *
+         * The first value in @a argv is assumed to be the program name and
+         * is ignored, the remainder should be identical to the command line
+         * given to ArgumentParser::parse or ArgumentParser::makeIterator.
+         *
+         * @note No memory is freed, the function only rearranges the pointers
+         *  @a in argv.
+         */
         void filterParsedArguments(int& argc, char**& argv);
 
+        /**
+         * @brief Print @a msg along with a brief help text and exit.
+         *
+         * @throw ArgosException if ArgumentParser::autoExit is false.
+         */
         [[noreturn]]
         void error(const std::string& msg);
     private:
@@ -1720,7 +1939,7 @@ namespace Argos
     };
 
     /**
-     * @brief Write a list of all arguments and options along with theirs
+     * @brief Write a list of all arguments and options along with their
      *  values to @a stream.
      *
      * This function is intended for testing and debugging.
@@ -1846,17 +2065,27 @@ namespace Argos
     struct OptionData;
 
     /**
-     * @brief Class for defining command line arguments.
+     * @brief Class for defining command line options.
      *
-     * The minimum requirement for a command line argument is that it has a
-     * name. Once the argument has been defined it must be *added* to the
-     * ArgumentParser with ArgumentParser::add.
+     * The minimum requirement for a command line option is that it has at
+     * least one flag. Once the option has been defined it must be *added* to
+     * the ArgumentParser with ArgumentParser::add.
      */
     class Option
     {
     public:
+        /**
+         * @brief Creates a new option without any flags.
+         *
+         * And option created this way must be assigned at least one flag with
+         * Option::flag or Option::flags before it can be added to the
+         * ArgumentParser.
+         */
         Option();
 
+        /**
+         * @brief Creates a new option with the given flags.
+         */
         explicit Option(std::initializer_list<std::string> flags);
 
         /**
@@ -1887,82 +2116,138 @@ namespace Argos
         /**
          * @brief Set the option's help text.
          * @param text The text will be automatically divided into multiple
-         *      lines if it doesn't fit fit inside the terminal window.
-         *      Text formatting using newlines, spaces and tabs is possible.
+         *  lines if it doesn't fit fit inside the terminal window.
+         *  Text formatting using newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
-        Option& text(const std::string& text);
+        Option& help(const std::string& text);
 
         /**
          * @brief Specifies under which heading the option will appear
-         *      in the help text.
+         *  in the help text.
          *
          * The default heading for options is "OPTIONS".
          * @param name All arguments and options with the same section name
-         *      will be listed under the same heading.
+         *  will be listed under the same heading.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& section(const std::string& name);
 
         /**
          * @brief Set an alternative name for the value this option
-         *      assigns to.
+         *  assigns to.
          *
          * The value or values of the option can be retrieved from
          * ParsedArgument using one of its flags, but sometimes this
          * is inconvenient, for instance if the same option has different
          * names in different languages, or multiple options share the same
-         * value. In the latter case, for instance if there are two options
+         * value.
+         *
+         *
+         * The alias can be any string, including a flag or the name of
+         * an argument. If two options, or an option and and argument, refer to
+         * each other through an alias, their values become linked. For instance
+         * if there are two options
          * --verbose and --quiet that negates each other, one of them, but not
-         * both, should have the other option as an alias (e.g. --verbose has
-         * an alias("--quiet") and
+         * both, should have the other option as an alias (e.g. --quiet has
+         * an alias("--verbose")).
+         *
+         * ~~~{.cpp}
+         * ArgumentParser()
+         *     .add(Option{"-q", "--quiet"}.alias("--verbose").constant(false))
+         *     .add(Option{"-v", "--verbose"})
+         *     ...
+         * ~~~
+         *
+         * The same effect is also produced if they have a common alias:
+         * ~~~{.cpp}
+         * ArgumentParser()
+         *     .add(Option{"-q", "--quiet"}.alias("Verbose").constant(false))
+         *     .add(Option{"-v", "--verbose"}.alias("Verbose"))
+         *     ...
+         * ~~~
+         *
          * @param id An alternative name that can be used to retrieve the
-         *      option's value.
+         *  option's value.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& alias(const std::string& id);
 
         /**
          * @brief Set a callback that will be called when this option is
-         *      encountered.
+         *  encountered.
          * @param callback A function pointer or callable object accepting the
-         *      parameters (OptionView, string_view, ParsedArgumentsBuilder).
+         *  parameters (OptionView, string_view, ParsedArgumentsBuilder).
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& callback(OptionCallback callback);
 
         /**
          * @brief Set restrictions for where this option is displayed in the
-         *      auto-generated help text.
+         *  auto-generated help text.
          * @param visibility
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& visibility(Visibility visibility);
 
         /**
          * @brief Set a custom id that can be used in callback functions etc.
-         *      to quickly distinguish between different options.
+         *  to quickly distinguish between different options.
          *
          * The id purely is intended for client code, Argos itself ignores
          * this value, but makes it available through IArgumentView.
          *
          * @param id Can be any integer value.
          * @return Reference to itself. This makes it possible to chain
-         *      method calls.
+         *  method calls.
          */
         Option& id(int id);
 
+        /**
+         * @brief Specify which operation the option performs. The default
+         *  operations is ASSIGN.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& operation(OptionOperation operation);
 
+        /**
+         * @brief Set the flag of a single-flag option.
+         * @param f a flag with one or two leading dashes or a slash depending
+         *  on the option style (ArgumentParser::optionStyle).
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& flag(const std::string& f);
 
+        /**
+         * @brief Set the flag of a multi-flag option.
+         * @param f flags with one or two leading dashes or a slash depending
+         *  on the option style (ArgumentParser::optionStyle).
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& flags(std::vector<std::string> f);
 
+        /**
+         * @brief Set the name of the option's argument (a value given on
+         *  the command line).
+         *
+         * The argument is displayed in the help text and error messages.
+         * Setting the argument is how one informs the ArgumentParser that
+         * this option takes an argument from the command line rather than
+         * assign a constant.
+         *
+         * @param name a string that will appear in the help text, typically
+         *  something like FILE or NUMBER.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& argument(const std::string& name);
 
         /**
@@ -1980,23 +2265,88 @@ namespace Argos
          *  ArgumentValue's split function on a default value read from a
          *  file or an environment variable, or want to prepend
          *  a value to a list built by options of operation "APPEND".
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
          */
         Option& initialValue(const std::string& value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(const char* value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(const std::string& value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * Options that have no argument and no explicit constant will
+         * automatically have the constant *true*.
+
+         * @note All values are stored as strings internally, true and false are
+         *  converted to "1" and "0" respectively..
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(bool value);
 
+        /**
+         * @brief Sets the value that this option will assign to the
+         *  corresponding value in ParsedArguments.
+         *
+         * @note All values are stored as strings internally, i.e. constant(123) and
+         *  constant("123") are equivalent.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(int value);
 
+        /**
+         * @brief Sets the value that this option will assign to the underlying value.
+         *
+         * @note All values are stored as strings internally, i.e. constant(123LL) and
+         *  constant("123") are equivalent.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& constant(long long value);
 
+        /**
+         * @brief Sets the option type.
+         *
+         * All options have the type OptionType::NORMAL by default.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& type(OptionType type);
 
+        /**
+         * @brief Set whether this option is optional or mandatory.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
         Option& optional(bool optional);
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         */
+        [[nodiscard]]
         const OptionData& data() const;
 
         /**
@@ -2005,6 +2355,7 @@ namespace Argos
          *
          * The object is no longer usable after this function has
          * been called.
+         *
          * @return Pointer to the option implementation.
          */
         std::unique_ptr<OptionData> release();
@@ -2095,13 +2446,14 @@ namespace Argos
          * @brief Add a new option definition to the ArgumentParser.
          *
          * @throw ArgosException if the option doesn't have any flags
-         *      or the flags don't match the current option style.
+         *      or any of the flags doesn't match the current option style.
          * @throw ArgosException if certain meaningless combinations of
          *      option operation and properties are found:
-         *      - an option with operation NONE is mandatory or has value
-         *        or valueName.
+         *      - an option with operation NONE has constant
+         *        or alias.
          *      - an option with operation CLEAR is mandatory.
-         *      - an option
+         *      - an option with operation APPEND has neither argument nor
+         *        constant.
          */
         ArgumentParser& add(Option option);
 
@@ -2392,6 +2744,13 @@ namespace Argos
         ArgumentParser& text(TextId textId, std::string text);
 
         /**
+         * @brief Sets the program version and enables the --version option.
+         * @param version The version is typically 2-4 numbers separated
+         *  by periods, e.g. 1.0.3.
+         */
+        ArgumentParser& version(const std::string& version);
+
+        /**
          * @brief Write the help text.
          *
          * @note The help text is displayed automatically when a help option
@@ -2400,15 +2759,17 @@ namespace Argos
         void writeHelpText() const;
 
         /**
-         * @brief Inform Argos how a long word can be split over multiple lines.
+         * @brief Inform Argos how a long word is to be split over multiple
+         *  lines.
          *
-         * By default, Argos will not split a word if it is at all possible to
-         * make it fit on a single line. In some cases this can make the help
-         * text appear "untidy". Use this function to tell Argos how a
-         * particular word can be split, by writing the word with spaces at each
-         * potential split point, e.g. "compre hen sive"  will allow Argos to
-         * split the word "comprehensive" as either "compre-" "hensive"
-         * or "comprehen-" "sive".
+         * By default, Argos will not split words in the help text if it is at
+         * all possible to fit them on a single line. In some cases this can
+         * make the help text appear untidy. Use this function to tell Argos
+         * how a particular word can be split by writing the word with spaces
+         * at each potential split point. For instance, calling this function
+         * with argument "compre hen sive" will inform Argos that
+         * it can split the word "comprehensive" as either "compre-" "hensive"
+         * or "comprehen-" "sive" (or even "compre-" "hen-" "sive").
          */
         ArgumentParser& addWordSplittingRule(std::string str);
 

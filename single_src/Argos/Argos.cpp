@@ -30,7 +30,7 @@ namespace Argos
     struct ArgumentData
     {
         std::string name;
-        std::string text;
+        std::string help;
         std::string section;
         std::string value;
         ArgumentCallback callback;
@@ -93,10 +93,10 @@ namespace Argos
         return *this;
     }
 
-    Argument& Argument::text(const std::string& text)
+    Argument& Argument::help(const std::string& text)
     {
         checkArgument();
-        m_Argument->text = text;
+        m_Argument->help = text;
         return *this;
     }
 
@@ -397,7 +397,7 @@ namespace Argos
     struct OptionData
     {
         std::vector<std::string> flags;
-        std::string text;
+        std::string help;
         std::string section;
         std::string alias;
         std::string argument;
@@ -599,6 +599,7 @@ namespace Argos
     struct HelpSettings
     {
         std::string programName;
+        std::string version;
         std::map<TextId, std::string> texts;
         std::ostream* outputStream = nullptr;
     };
@@ -1456,6 +1457,8 @@ namespace Argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+#include <iostream>
+
 namespace Argos
 {
     namespace
@@ -1629,8 +1632,50 @@ namespace Argos
                 return;
 
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .text("Show help text.")
+                .help("Show help text.")
                 .constant("1").release();
+            opt->argumentId = ArgumentId(data.options.size()
+                                         + data.arguments.size() + 1);
+            data.options.push_back(move(opt));
+        }
+
+        void addVersionOption(ParserData& data)
+        {
+            if (data.helpSettings.version.empty())
+                return;
+            std::string flag;
+            switch (data.parserSettings.optionStyle)
+            {
+            case OptionStyle::STANDARD:
+                if (!hasFlag(data, "--version"))
+                    flag = "--version";
+                break;
+            case OptionStyle::SLASH:
+                if (!hasFlag(data, "/VERSION"))
+                    flag = "/VERSION";
+                break;
+            case OptionStyle::DASH:
+                if (!hasFlag(data, "-version"))
+                    flag = "-version";
+                break;
+            }
+
+            if (flag.empty())
+                return;
+
+            auto stream = data.helpSettings.outputStream
+                        ? data.helpSettings.outputStream
+                        : &std::cout;
+            auto opt = Option().flag(flag).type(OptionType::STOP)
+                .help("Show program version.")
+                .constant("1")
+                .callback([v = data.helpSettings.version, stream]
+                              (auto, auto, auto pa)
+                          {
+                              *stream << pa.programName() << " " << v << "\n";
+                              return true;
+                          })
+                .release();
             opt->argumentId = ArgumentId(data.options.size()
                                          + data.arguments.size() + 1);
             data.options.push_back(move(opt));
@@ -1640,6 +1685,7 @@ namespace Argos
                                   const std::shared_ptr<ParserData>& data)
         {
             addMissingHelpOption(*data);
+            addVersionOption(*data);
             setValueIds(*data);
             return ParsedArguments(
                     ArgumentIteratorImpl::parse(std::move(args), data));
@@ -1650,6 +1696,7 @@ namespace Argos
                          const std::shared_ptr<ParserData>& data)
         {
             addMissingHelpOption(*data);
+            addVersionOption(*data);
             setValueIds(*data);
             return ArgumentIterator(std::move(args), data);
         }
@@ -1727,11 +1774,9 @@ namespace Argos
         {
         case OptionOperation::NONE:
             if (!od->constant.empty())
-                ARGOS_THROW("NONE-options cannot have constant.");
+                ARGOS_THROW("NONE-options cannot have a constant.");
             if (!od->alias.empty())
-                ARGOS_THROW("NONE-options cannot have alias.");
-            if (!od->optional)
-                ARGOS_THROW("NONE-options must be optional.");
+                ARGOS_THROW("NONE-options cannot have an alias.");
             break;
         case OptionOperation::ASSIGN:
             if (od->argument.empty() && od->constant.empty())
@@ -1968,6 +2013,13 @@ namespace Argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::version(const std::string& version)
+    {
+        checkData();
+        m_Data->helpSettings.version = version;
+        return *this;
+    }
+
     void ArgumentParser::writeHelpText() const
     {
         checkData();
@@ -2135,7 +2187,7 @@ namespace Argos
     {
         if (!m_Value)
             return defaultValue;
-        return m_Value != "0" && m_Value != "false";
+        return !m_Value->empty() && m_Value != "0" && m_Value != "false";
     }
 
     int ArgumentValue::asInt(int defaultValue, int base) const
@@ -2503,7 +2555,6 @@ namespace Argos
                 error("Invalid value: \"" + std::string(value.first)
                       + "\". Must be at least " + std::to_string(minParts)
                       + " values separated by \"" + separator + "\".");
-                return {{}, m_Args, m_ValueId};
             }
             for (auto& part : parts)
                 values.emplace_back(part, value.second);
@@ -2539,9 +2590,9 @@ namespace Argos
             ARGOS_THROW("data can not be null");
     }
 
-    const std::string& ArgumentView::text() const
+    const std::string& ArgumentView::help() const
     {
-        return m_Argument->text;
+        return m_Argument->help;
     }
 
     const std::string& ArgumentView::section() const
@@ -2673,8 +2724,6 @@ namespace Argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-
-#include <iostream>
 
 namespace Argos
 {
@@ -2875,7 +2924,7 @@ namespace Argos
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *argTitle : a->section;
-                addHelpText(section, getArgumentName(*a), a->text);
+                addHelpText(section, getArgumentName(*a), a->help);
             }
             auto optTitle = getCustomText(data, TextId::OPTIONS_TITLE);
             if (!optTitle)
@@ -2885,7 +2934,7 @@ namespace Argos
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = o->section.empty() ? *optTitle : o->section;
-                addHelpText(section, getLongOptionName(*o), o->text);
+                addHelpText(section, getLongOptionName(*o), o->help);
             }
 
             if (sections.empty())
@@ -3092,10 +3141,10 @@ namespace Argos
         return *this;
     }
 
-    Option& Option::text(const std::string& text)
+    Option& Option::help(const std::string& text)
     {
         checkOption();
-        m_Option->text = text;
+        m_Option->help = text;
         return *this;
     }
 
@@ -3345,9 +3394,9 @@ namespace Argos
             ARGOS_THROW("data can not be null");
     }
 
-    const std::string& OptionView::text() const
+    const std::string& OptionView::help() const
     {
-        return m_Option->text;
+        return m_Option->help;
     }
 
     const std::string& OptionView::section() const

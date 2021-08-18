@@ -78,7 +78,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
-        Option& text(const std::string& text);
+        Option& help(const std::string& text);
 
         /**
          * @brief Specifies under which heading the option will appear

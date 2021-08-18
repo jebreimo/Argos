@@ -19,9 +19,9 @@ namespace Argos
             ARGOS_THROW("data can not be null");
     }
 
-    const std::string& OptionView::text() const
+    const std::string& OptionView::help() const
     {
-        return m_Option->text;
+        return m_Option->help;
     }
 
     const std::string& OptionView::section() const

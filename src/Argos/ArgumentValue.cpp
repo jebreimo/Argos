@@ -91,7 +91,7 @@ namespace Argos
     {
         if (!m_Value)
             return defaultValue;
-        return m_Value != "0" && m_Value != "false";
+        return !m_Value->empty() && m_Value != "0" && m_Value != "false";
     }
 
     int ArgumentValue::asInt(int defaultValue, int base) const

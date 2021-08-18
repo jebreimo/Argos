@@ -29,7 +29,7 @@ namespace Argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        virtual const std::string& text() const = 0;
+        virtual const std::string& help() const = 0;
 
         /**
          * @brief Returns the argument's or option's section name.

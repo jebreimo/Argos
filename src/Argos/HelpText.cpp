@@ -209,7 +209,7 @@ namespace Argos
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *argTitle : a->section;
-                addHelpText(section, getArgumentName(*a), a->text);
+                addHelpText(section, getArgumentName(*a), a->help);
             }
             auto optTitle = getCustomText(data, TextId::OPTIONS_TITLE);
             if (!optTitle)
@@ -219,7 +219,7 @@ namespace Argos
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = o->section.empty() ? *optTitle : o->section;
-                addHelpText(section, getLongOptionName(*o), o->text);
+                addHelpText(section, getLongOptionName(*o), o->help);
             }
 
             if (sections.empty())

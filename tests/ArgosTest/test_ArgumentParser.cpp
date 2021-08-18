@@ -19,8 +19,8 @@ TEST_CASE("Test help flag")
     REQUIRE(argos.programName() == "test");
 
     argos.add(Argos::Option({"-h", "--help"})
-            .type(Argos::OptionType::HELP)
-            .text("Show help message.")
+                  .type(Argos::OptionType::HELP)
+                  .help("Show help message.")
             .id(10));
     Argv argv{"test", "--help"};
     auto result = argos.parse(argv.size(), argv.data());
@@ -34,10 +34,10 @@ TEST_CASE("Conflicting flags")
 {
     Argos::ArgumentParser argos("test");
     argos.add(Argos::Option({"-h", "--help"})
-                      .type(Argos::OptionType::HELP)
-                      .text("Show help message."));
+                  .type(Argos::OptionType::HELP)
+                  .help("Show help message."));
     argos.add(Argos::Option({"-h"})
-                      .text("Output height."));
+                  .help("Output height."));
     Argv argv{"test", "--help"};
     REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
 }
@@ -357,10 +357,10 @@ TEST_CASE("Conflicting case-insensitive options")
     Argos::ArgumentParser argos("test");
     argos.caseInsensitive(true)
             .add(Argos::Option({"-h", "--help"})
-                         .type(Argos::OptionType::HELP)
-                         .text("Show help message."))
+                     .type(Argos::OptionType::HELP)
+                     .help("Show help message."))
             .add(Argos::Option({"-H"})
-                         .text("Output height."));
+                     .help("Output height."));
     Argv argv{"test", "--help"};
     REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
 }
@@ -722,4 +722,18 @@ TEST_CASE("Test options with initialValue")
         REQUIRE(args.value("-a").split(':').asStrings() == V{"c", "d"});
         REQUIRE(args.values("-b").split(':').asStrings() == V{"o", "p", "q", "r"});
     }
+}
+
+TEST_CASE("Version option")
+{
+    using namespace Argos;
+    Argv argv{"test", "--version"};
+    std::stringstream ss;
+    auto args = ArgumentParser("test")
+        .stream(&ss)
+        .version("1.2.3")
+        .autoExit(false)
+        .parse(argv.size(), argv.data());
+    REQUIRE(args.resultCode() == ParserResultCode::STOP);
+    REQUIRE(ss.str() == "test 1.2.3\n");
 }
