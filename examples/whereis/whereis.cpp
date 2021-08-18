@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
                    " for file names starting with dashes ('-')."))
         .parse(argc, argv);
 
+    auto fileNames = args.values("FILE").asStrings();
     auto dirs = args.values("--paths").split(PATH_SEPARATOR[0]).asStrings();
     auto verbose = args.value("--verbose").asBool();
     auto extensions = args.values("--extensions").split(PATH_SEPARATOR[0])
@@ -63,12 +64,12 @@ int main(int argc, char* argv[])
     for (const auto& dir : dirs)
     {
         std::filesystem::path dirPath(dir);
-        for (auto cmd : args.values("FILE").asStrings())
+        for (auto fileName : fileNames)
         {
             bool found = false;
             for (const auto& extension : extensions)
             {
-                auto path = dirPath / (cmd + extension);
+                auto path = dirPath / (fileName + extension);
                 if (std::filesystem::exists(path))
                 {
                     std::cout << path.string() << '\n';
