@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 0.104.0)
+project(Argos VERSION 0.104.1)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -38,7 +38,7 @@ function(TargetEnableAllWarnings target)
             $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endfunction()
 
-configure_file(src/Argos/ArgosVersion.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/Argos/ArgosVersion.hpp @ONLY)
+configure_file(src/Argos/ArgosVersion.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp @ONLY)
 
 add_library(Argos
     include/Argos/Argos.hpp
