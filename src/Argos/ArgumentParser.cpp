@@ -576,6 +576,13 @@ namespace Argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::lineWidth(unsigned int lineWidth)
+    {
+        checkData();
+        m_Data->textFormatter.setLineWidth(lineWidth);
+        return *this;
+    }
+
     void ArgumentParser::writeHelpText() const
     {
         checkData();

@@ -388,6 +388,14 @@ namespace Argos
         ArgumentParser& version(const std::string& version);
 
         /**
+         * @brief Sets the line width for help text and error messages.
+         *
+         * The line width defaults to the width of the console or terminal
+         * window.
+         */
+        ArgumentParser& lineWidth(unsigned lineWidth);
+
+        /**
          * @brief Write the help text.
          *
          * @note The help text is displayed automatically when a help option
