@@ -14,12 +14,11 @@ const char VERSION[] = "1.0.0";
 #ifdef _WIN32
     #define PATH_SEPARATOR ";"
     const std::vector<std::string> EXTENSIONS = {"", ".exe", ".com",
-                                                   ".bat", ".cmd"};
+                                                 ".bat", ".cmd"};
 #else
     #define PATH_SEPARATOR ":"
     const std::vector<std::string> EXTENSIONS = {""};
 #endif
-
 
 int main(int argc, char* argv[])
 {
@@ -56,10 +55,11 @@ int main(int argc, char* argv[])
         .parse(argc, argv);
 
     auto fileNames = args.values("FILE").asStrings();
-    auto dirs = args.values("--paths").split(PATH_SEPARATOR[0]).asStrings();
+    auto dirs = args.values("--paths")
+        .split(PATH_SEPARATOR[0]).asStrings();
     auto verbose = args.value("--verbose").asBool();
-    auto extensions = args.values("--extensions").split(PATH_SEPARATOR[0])
-                          .asStrings(EXTENSIONS);
+    auto extensions = args.values("--extensions")
+        .split(PATH_SEPARATOR[0]).asStrings(EXTENSIONS);
 
     for (const auto& dir : dirs)
     {
