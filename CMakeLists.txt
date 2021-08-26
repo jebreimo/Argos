@@ -38,7 +38,7 @@ function(TargetEnableAllWarnings target)
             $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endfunction()
 
-configure_file(src/Argos/ArgosVersion.hpp.in ArgosVersion.hpp @ONLY)
+configure_file(src/Argos/ArgosVersion.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/Argos/ArgosVersion.hpp @ONLY)
 
 add_library(Argos
     include/Argos/Argos.hpp
