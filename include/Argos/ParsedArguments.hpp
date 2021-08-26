@@ -181,5 +181,5 @@ namespace Argos
      *
      * This function is intended for testing and debugging.
      */
-    void print(std::ostream& stream, const ParsedArguments& args);
+    void print(const ParsedArguments& args, std::ostream& stream);
 }

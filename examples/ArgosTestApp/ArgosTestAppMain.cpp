@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
             .add(Option({"-a", "--anonymous"}).visibility(Visibility::USAGE))
             .parse(argc, argv);
 
-    print(std::cout, args);
+    print(args, std::cout);
 
     return 0;
 }
