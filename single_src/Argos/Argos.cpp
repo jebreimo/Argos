@@ -2020,6 +2020,13 @@ namespace Argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::lineWidth(unsigned int lineWidth)
+    {
+        checkData();
+        m_Data->textFormatter.setLineWidth(lineWidth);
+        return *this;
+    }
+
     void ArgumentParser::writeHelpText() const
     {
         checkData();
@@ -3789,7 +3796,7 @@ namespace Argos
         }
     }
 
-    void print(std::ostream& stream, const ParsedArguments& args)
+    void print(const ParsedArguments& args, std::ostream& stream)
     {
         std::vector<const IArgumentView*> argViews;
         auto a = args.allArguments();
@@ -3813,6 +3820,13 @@ namespace Argos
 
         for (const auto&[arg, label] : labels)
             printArgument(stream, label, args.values(*arg));
+
+        if (!args.unprocessedArguments().empty())
+        {
+            stream << "Unprocessed arguments:";
+            for (auto& arg : args.unprocessedArguments())
+                stream << " \"" << arg << "\"";
+        }
     }
 }
 

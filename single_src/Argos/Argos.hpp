@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.104.0";
+constexpr char ARGOS_VERSION[] = "0.104.1";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "0.104.0";
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-#define ARGOS_VERSION_PATCH 0
+#define ARGOS_VERSION_PATCH 1
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1944,7 +1944,7 @@ namespace Argos
      *
      * This function is intended for testing and debugging.
      */
-    void print(std::ostream& stream, const ParsedArguments& args);
+    void print(const ParsedArguments& args, std::ostream& stream);
 }
 
 //****************************************************************************
@@ -2749,6 +2749,14 @@ namespace Argos
          *  by periods, e.g. 1.0.3.
          */
         ArgumentParser& version(const std::string& version);
+
+        /**
+         * @brief Sets the line width for help text and error messages.
+         *
+         * The line width defaults to the width of the console or terminal
+         * window.
+         */
+        ArgumentParser& lineWidth(unsigned lineWidth);
 
         /**
          * @brief Write the help text.
