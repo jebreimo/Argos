@@ -8,12 +8,12 @@
 #include "Argos/ParseValue.hpp"
 #include <catch2/catch.hpp>
 
-TEST_CASE("parseInteger on empty string")
+TEST_CASE("parse_integer on empty string")
 {
-    REQUIRE(!Argos::parseInteger<int>({}, 0).has_value());
+    REQUIRE(!argos::parse_integer<int>({}, 0).has_value());
 }
 
-TEST_CASE("parseFloatingPoint on empty string")
+TEST_CASE("parse_floating_point on empty string")
 {
-    REQUIRE(!Argos::parseFloatingPoint<double>({}).has_value());
+    REQUIRE(!argos::parse_floating_point<double>({}).has_value());
 }

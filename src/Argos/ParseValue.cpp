@@ -13,47 +13,47 @@
 #include <cstdlib>
 #include "StringUtilities.hpp"
 
-namespace Argos
+namespace argos
 {
     namespace
     {
         template <typename T>
-        T strToInt(const char* str, char** endp, int base);
+        T str_to_int(const char* str, char** endp, int base);
 
         template <>
-        long strToInt<long>(const char* str, char** endp, int base)
+        long str_to_int<long>(const char* str, char** endp, int base)
         {
             return strtol(str, endp, base);
         }
 
         template <>
-        long long strToInt<long long>(const char* str, char** endp, int base)
+        long long str_to_int<long long>(const char* str, char** endp, int base)
         {
             return strtoll(str, endp, base);
         }
 
         template <>
         unsigned long
-        strToInt<unsigned long>(const char* str, char** endp, int base)
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
         {
             return strtoul(str, endp, base);
         }
 
         template <>
         unsigned long long
-        strToInt<unsigned long long>(const char* str, char** endp, int base)
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
         {
             return strtoull(str, endp, base);
         }
 
         template <typename T>
-        std::optional<T> parseIntegerImpl(const std::string& str, int base)
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
         {
             if (str.empty())
                 return {};
             char* endp = nullptr;
             errno = 0;
-            auto value = strToInt<T>(str.c_str(), &endp, base);
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
             if (endp == str.c_str() + str.size() && errno == 0)
                 return value;
             return {};
@@ -61,9 +61,9 @@ namespace Argos
     }
 
     template <>
-    std::optional<int> parseInteger<int>(const std::string& str, int base)
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
     {
-        auto n = parseIntegerImpl<long>(str, base);
+        auto n = parse_integer_impl<long>(str, base);
         if (!n)
             return {};
 
@@ -76,9 +76,10 @@ namespace Argos
     }
 
     template <>
-    std::optional<unsigned> parseInteger<unsigned>(const std::string& str, int base)
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
     {
-        auto n = parseIntegerImpl<unsigned long>(str, base);
+        auto n = parse_integer_impl<unsigned long>(str, base);
         if (!n)
             return {};
 
@@ -91,57 +92,57 @@ namespace Argos
     }
 
     template <>
-    std::optional<long> parseInteger<long>(const std::string& str, int base)
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
     {
-        return parseIntegerImpl<long>(str, base);
+        return parse_integer_impl<long>(str, base);
     }
 
     template <>
     std::optional<long long>
-    parseInteger<long long>(const std::string& str, int base)
+    parse_integer<long long>(const std::string& str, int base)
     {
-        return parseIntegerImpl<long long>(str, base);
+        return parse_integer_impl<long long>(str, base);
     }
 
     template <>
     std::optional<unsigned long>
-    parseInteger<unsigned long>(const std::string& str, int base)
+    parse_integer<unsigned long>(const std::string& str, int base)
     {
-        return parseIntegerImpl<unsigned long>(str, base);
+        return parse_integer_impl<unsigned long>(str, base);
     }
 
     template <>
     std::optional<unsigned long long>
-    parseInteger<unsigned long long>(const std::string& str, int base)
+    parse_integer<unsigned long long>(const std::string& str, int base)
     {
-        return parseIntegerImpl<unsigned long long>(str, base);
+        return parse_integer_impl<unsigned long long>(str, base);
     }
 
     namespace
     {
         template <typename T>
-        T strToFloat(const char* str, char** endp);
+        T str_to_float(const char* str, char** endp);
 
         template <>
-        float strToFloat<float>(const char* str, char** endp)
+        float str_to_float<float>(const char* str, char** endp)
         {
             return strtof(str, endp);
         }
 
         template <>
-        double strToFloat<double>(const char* str, char** endp)
+        double str_to_float<double>(const char* str, char** endp)
         {
             return strtod(str, endp);
         }
 
         template <typename T>
-        std::optional<T> parseFloatingPointImpl(const std::string& str)
+        std::optional<T> parse_floating_point_impl(const std::string& str)
         {
             if (str.empty())
                 return {};
             char* endp = nullptr;
             errno = 0;
-            auto value = strToFloat<T>(str.c_str(), &endp);
+            auto value = str_to_float<T>(str.c_str(), &endp);
             if (endp == str.c_str() + str.size() && errno == 0)
                 return value;
             return {};
@@ -149,14 +150,14 @@ namespace Argos
     }
 
     template <>
-    std::optional<float> parseFloatingPoint<float>(const std::string& str)
+    std::optional<float> parse_floating_point<float>(const std::string& str)
     {
-        return parseFloatingPointImpl<float>(str);
+        return parse_floating_point_impl<float>(str);
     }
 
     template <>
-    std::optional<double> parseFloatingPoint<double>(const std::string& str)
+    std::optional<double> parse_floating_point<double>(const std::string& str)
     {
-        return parseFloatingPointImpl<double>(str);
+        return parse_floating_point_impl<double>(str);
     }
 }

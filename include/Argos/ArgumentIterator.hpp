@@ -13,7 +13,7 @@
  * @file
  * @brief Defines the ArgumentIterator class.
  */
-namespace Argos
+namespace argos
 {
     class ArgumentIteratorImpl;
     struct ParserData;
@@ -26,12 +26,13 @@ namespace Argos
     {
     public:
         /**
+         * @private
          * @brief Constructs a new instance of ArgumentIterator.
          *
-         * Client code must use ArgumentParser::makeIterator().
+         * Client code must use ArgumentParser::make_iterator().
          */
         ArgumentIterator(std::vector<std::string_view> args,
-                         std::shared_ptr<ParserData> parserData);
+                         std::shared_ptr<ParserData> parser_data);
 
         /**
          * @private
@@ -66,8 +67,8 @@ namespace Argos
          * ParsedArguments has been updated when the function returns.
          *
          * @param arg The definition (ArgumentView or OptionView) of the
-         *      processed argument or option. If ignoreUndefinedArguments
-         *      or ignoreUndefinedOptions is true, this pointer can be empty.
+         *      processed argument or option. If ignore_undefined_arguments
+         *      or ignore_undefined_options is true, this pointer can be empty.
          * @param value If @a arg is an argument then this is the argument's
          *      value. If @a arg is an option that take an argument then this
          *      is the option's value. If @a arg is empty (i.e. this is an
@@ -90,12 +91,12 @@ namespace Argos
          * the returned object.
          */
         [[nodiscard]]
-        ParsedArguments parsedArguments() const;
+        ParsedArguments parsed_arguments() const;
     private:
         ArgumentIteratorImpl& impl();
 
         const ArgumentIteratorImpl& impl() const;
 
-        std::unique_ptr<ArgumentIteratorImpl> m_Impl;
+        std::unique_ptr<ArgumentIteratorImpl> m_impl;
     };
 }

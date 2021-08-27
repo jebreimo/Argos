@@ -14,7 +14,7 @@
  * @brief Defines the OptionView class.
  */
 
-namespace Argos
+namespace argos
 {
     struct OptionData;
 
@@ -71,15 +71,15 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        [[nodiscard]] ValueId valueId() const final;
+        [[nodiscard]] ValueId value_id() const final;
 
         /**
-         * @brief Returns the option's argumentId().
+         * @brief Returns the option's argument id.
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        [[nodiscard]] ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argument_id() const final;
 
         /**
          * @brief Returns the option's operation.
@@ -99,7 +99,7 @@ namespace Argos
         /**
          * @brief Returns the option's initial value.
          */
-        [[nodiscard]] const std::string& initialValue() const;
+        [[nodiscard]] const std::string& initial_value() const;
 
         /**
          * @brief Returns the option's constant.
@@ -119,6 +119,6 @@ namespace Argos
          */
         [[nodiscard]] bool optional() const;
     private:
-        const OptionData* m_Option;
+        const OptionData* m_option;
     };
 }

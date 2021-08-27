@@ -7,9 +7,9 @@
 //****************************************************************************
 #pragma once
 
-namespace Argos
+namespace argos
 {
-    unsigned getConsoleWidth();
+    unsigned get_console_width();
 
-    unsigned getConsoleWidth(unsigned minWidth, unsigned defaultWidth = 80);
+    unsigned get_console_width(unsigned min_width, unsigned default_width = 80);
 }

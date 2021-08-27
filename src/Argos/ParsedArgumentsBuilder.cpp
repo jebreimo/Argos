@@ -10,18 +10,18 @@
 #include <iostream>
 #include "ParsedArgumentsImpl.hpp"
 
-namespace Argos
+namespace argos
 {
     ParsedArgumentsBuilder::ParsedArgumentsBuilder(
             std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_Impl(move(impl))
+        : m_impl(move(impl))
     {}
 
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::append(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->appendValue(m_Impl->getValueId(name), value, {});
+        m_impl->append_value(m_impl->get_value_id(name), value, {});
         return *this;
     }
 
@@ -29,7 +29,7 @@ namespace Argos
     ParsedArgumentsBuilder::append(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->appendValue(arg.valueId(), value, arg.argumentId());
+        m_impl->append_value(arg.value_id(), value, arg.argument_id());
         return *this;
     }
 
@@ -37,7 +37,7 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const std::string& name,
                                    const std::string& value)
     {
-        m_Impl->assignValue(m_Impl->getValueId(name), value, {});
+        m_impl->assign_value(m_impl->get_value_id(name), value, {});
         return *this;
     }
 
@@ -45,88 +45,88 @@ namespace Argos
     ParsedArgumentsBuilder::assign(const IArgumentView& arg,
                                    const std::string& value)
     {
-        m_Impl->assignValue(arg.valueId(), value, arg.argumentId());
+        m_impl->assign_value(arg.value_id(), value, arg.argument_id());
         return *this;
     }
 
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::clear(const std::string& name)
     {
-        m_Impl->clearValue(m_Impl->getValueId(name));
+        m_impl->clear_value(m_impl->get_value_id(name));
         return *this;
     }
 
     ParsedArgumentsBuilder&
     ParsedArgumentsBuilder::clear(const IArgumentView& arg)
     {
-        m_Impl->clearValue(arg.valueId());
+        m_impl->clear_value(arg.value_id());
         return *this;
     }
 
     ArgumentValue ParsedArgumentsBuilder::value(const std::string& name) const
     {
-        auto id = m_Impl->getValueId(name);
-        auto value = m_Impl->getValue(id);
+        auto id = m_impl->get_value_id(name);
+        auto value = m_impl->get_value(id);
         if (value)
-            return {value->first, m_Impl, id, value->second};
+            return {value->first, m_impl, id, value->second};
         else
-            return {{}, m_Impl, id, {}};
+            return {{}, m_impl, id, {}};
     }
 
     ArgumentValue
     ParsedArgumentsBuilder::value(const IArgumentView& arg) const
     {
-        auto value = m_Impl->getValue(arg.valueId());
+        auto value = m_impl->get_value(arg.value_id());
         if (value)
-            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+            return {value->first, m_impl, arg.value_id(), arg.argument_id()};
         else
-            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
+            return {{}, m_impl, arg.value_id(), arg.argument_id()};
     }
 
     ArgumentValues
     ParsedArgumentsBuilder::values(const std::string& name) const
     {
-        auto id = m_Impl->getValueId(name);
-        auto values = m_Impl->getValues(id);
-        return {move(values), m_Impl, id};
+        auto id = m_impl->get_value_id(name);
+        auto values = m_impl->get_values(id);
+        return {move(values), m_impl, id};
     }
 
     ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg) const
     {
-        auto values = m_Impl->getValues(arg.valueId());
-        return {move(values), m_Impl, arg.valueId()};
+        auto values = m_impl->get_values(arg.value_id());
+        return {move(values), m_impl, arg.value_id()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name) const
     {
-        return m_Impl->has(m_Impl->getValueId(name));
+        return m_impl->has(m_impl->get_value_id(name));
     }
 
     bool ParsedArgumentsBuilder::has(const IArgumentView& arg) const
     {
-        return m_Impl->has(arg.valueId());
+        return m_impl->has(arg.value_id());
     }
 
-    void ParsedArgumentsBuilder::error(const std::string& errorMessage)
+    void ParsedArgumentsBuilder::error(const std::string& msg)
     {
-         m_Impl->error(errorMessage);
+         m_impl->error(msg);
     }
 
-    void ParsedArgumentsBuilder::error(const std::string& errorMessage,
+    void ParsedArgumentsBuilder::error(const std::string& msg,
                                        const IArgumentView& arg)
     {
-        m_Impl->error(errorMessage, arg.argumentId());
+        m_impl->error(msg, arg.argument_id());
     }
 
-    std::ostream &ParsedArgumentsBuilder::stream() const
+    std::ostream& ParsedArgumentsBuilder::stream() const
     {
-        auto customStream = m_Impl->parserData()->helpSettings.outputStream;
-        return customStream ? *customStream : std::cout;
+        auto custom_stream = m_impl->parser_data()->help_settings.output_stream;
+        return custom_stream ? *custom_stream : std::cout;
     }
 
-    const std::string& ParsedArgumentsBuilder::programName() const
+    const std::string& ParsedArgumentsBuilder::program_name() const
     {
-      return m_Impl->parserData()->helpSettings.programName;
+      return m_impl->parser_data()->help_settings.program_name;
     }
 }

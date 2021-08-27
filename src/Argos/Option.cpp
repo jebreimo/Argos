@@ -10,26 +10,26 @@
 #include "ArgosThrow.hpp"
 #include "OptionData.hpp"
 
-namespace Argos
+namespace argos
 {
     Option::Option()
-        : m_Option(std::make_unique<OptionData>())
+        : m_option(std::make_unique<OptionData>())
     {}
 
     Option::Option(std::initializer_list<std::string> flags)
-        : m_Option(std::make_unique<OptionData>())
+        : m_option(std::make_unique<OptionData>())
     {
-        m_Option->flags = flags;
+        m_option->flags = flags;
     }
 
     Option::Option(const Option& rhs)
-        : m_Option(rhs.m_Option
-                   ? std::make_unique<OptionData>(*rhs.m_Option)
+        : m_option(rhs.m_option
+                   ? std::make_unique<OptionData>(*rhs.m_option)
                    : std::unique_ptr<OptionData>())
     {}
 
     Option::Option(Option&& rhs) noexcept
-        : m_Option(std::move(rhs.m_Option))
+        : m_option(std::move(rhs.m_option))
     {}
 
     Option::~Option() = default;
@@ -38,87 +38,87 @@ namespace Argos
     {
         if (this != &rhs)
         {
-            if (rhs.m_Option)
-                m_Option = std::make_unique<OptionData>(*rhs.m_Option);
+            if (rhs.m_option)
+                m_option = std::make_unique<OptionData>(*rhs.m_option);
             else
-                m_Option = {};
+                m_option = {};
         }
         return *this;
     }
 
     Option& Option::operator=(Option&& rhs) noexcept
     {
-        m_Option = std::move(rhs.m_Option);
+        m_option = std::move(rhs.m_option);
         return *this;
     }
 
     Option& Option::help(const std::string& text)
     {
-        checkOption();
-        m_Option->help = text;
+        check_option();
+        m_option->help = text;
         return *this;
     }
 
     Option& Option::section(const std::string& name)
     {
-        checkOption();
-        m_Option->section = name;
+        check_option();
+        m_option->section = name;
         return *this;
     }
 
     Option& Option::alias(const std::string& id)
     {
-        checkOption();
-        m_Option->alias = id;
+        check_option();
+        m_option->alias = id;
         return *this;
     }
 
     Option& Option::operation(OptionOperation operation)
     {
-        checkOption();
-        m_Option->operation = operation;
+        check_option();
+        m_option->operation = operation;
         return *this;
     }
 
     Option& Option::visibility(Visibility visibility)
     {
-        checkOption();
-        m_Option->visibility = visibility;
+        check_option();
+        m_option->visibility = visibility;
         return *this;
     }
 
     Option& Option::id(int id)
     {
-        checkOption();
-        m_Option->id = id;
+        check_option();
+        m_option->id = id;
         return *this;
     }
 
     Option& Option::flag(const std::string& f)
     {
-        checkOption();
-        m_Option->flags = {f};
+        check_option();
+        m_option->flags = {f};
         return *this;
     }
 
     Option& Option::flags(std::vector<std::string> f)
     {
-        checkOption();
-        m_Option->flags = std::move(f);
+        check_option();
+        m_option->flags = std::move(f);
         return *this;
     }
 
     Option& Option::argument(const std::string& name)
     {
-        checkOption();
-        m_Option->argument = name;
+        check_option();
+        m_option->argument = name;
         return *this;
     }
 
-    Option& Option::initialValue(const std::string& value)
+    Option& Option::initial_value(const std::string& value)
     {
-        checkOption();
-        m_Option->initialValue = value;
+        check_option();
+        m_option->initial_value = value;
         return *this;
     }
 
@@ -129,8 +129,8 @@ namespace Argos
 
     Option& Option::constant(const std::string& value)
     {
-        checkOption();
-        m_Option->constant = value;
+        check_option();
+        m_option->constant = value;
         return *this;
     }
 
@@ -146,47 +146,47 @@ namespace Argos
 
     Option& Option::constant(long long value)
     {
-        checkOption();
-        m_Option->constant = std::to_string(value);
+        check_option();
+        m_option->constant = std::to_string(value);
         return *this;
     }
 
     Option& Option::callback(OptionCallback callback)
     {
-        checkOption();
-        m_Option->callback = move(callback);
+        check_option();
+        m_option->callback = move(callback);
         return *this;
     }
 
     Option& Option::type(OptionType type)
     {
-        checkOption();
-        m_Option->type = type;
+        check_option();
+        m_option->type = type;
         return *this;
     }
 
     Option& Option::optional(bool optional)
     {
-        checkOption();
-        m_Option->optional = optional;
+        check_option();
+        m_option->optional = optional;
         return *this;
     }
 
     const OptionData& Option::data() const
     {
-        checkOption();
-        return *m_Option;
+        check_option();
+        return *m_option;
     }
 
     std::unique_ptr<OptionData> Option::release()
     {
-        checkOption();
-        return std::move(m_Option);
+        check_option();
+        return std::move(m_option);
     }
 
-    void Option::checkOption() const
+    void Option::check_option() const
     {
-        if (!m_Option)
+        if (!m_option)
             ARGOS_THROW("Cannot use Option instance after"
                         " release() has been called.");
     }

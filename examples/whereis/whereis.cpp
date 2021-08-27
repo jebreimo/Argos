@@ -22,9 +22,9 @@ const char VERSION[] = "1.0.0";
 
 int main(int argc, char* argv[])
 {
-    auto pathEnv = std::getenv("PATH");
+    auto path_env = std::getenv("PATH");
 
-    using namespace Argos;
+    using namespace argos;
     auto args = ArgumentParser("whereis")
         .about("Searches the directories in the PATH environment variable"
                " for the given file (or files).")
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
             .help("The file or files to locate."))
         .add(Option{"-p", "--paths"}
             .argument("<PATH>[" PATH_SEPARATOR "<PATH>]...")
-            .initialValue(pathEnv ? pathEnv : std::string())
+            .initial_value(path_env ? path_env : std::string())
             .help("Search the given path or paths rather than the ones in"
                   " the PATH environment variable. Use " PATH_SEPARATOR
                   " as separator between the different paths."))
@@ -54,22 +54,22 @@ int main(int argc, char* argv[])
                    " for file names starting with dashes ('-')."))
         .parse(argc, argv);
 
-    auto fileNames = args.values("FILE").asStrings();
+    auto file_names = args.values("FILE").as_strings();
     auto dirs = args.values("--paths")
-        .split(PATH_SEPARATOR[0]).asStrings();
-    auto verbose = args.value("--verbose").asBool();
+        .split(PATH_SEPARATOR[0]).as_strings();
+    auto verbose = args.value("--verbose").as_bool();
     auto extensions = args.values("--extensions")
-        .split(PATH_SEPARATOR[0]).asStrings(EXTENSIONS);
+        .split(PATH_SEPARATOR[0]).as_strings(EXTENSIONS);
 
     for (const auto& dir : dirs)
     {
-        std::filesystem::path dirPath(dir);
-        for (auto fileName : fileNames)
+        std::filesystem::path dir_path(dir);
+        for (auto file_name : file_names)
         {
             bool found = false;
             for (const auto& extension : extensions)
             {
-                auto path = dirPath / (fileName + extension);
+                auto path = dir_path / (file_name + extension);
                 if (std::filesystem::exists(path))
                 {
                     std::cout << path.string() << '\n';
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
                 }
             }
             if (!found && verbose)
-                std::cout << "not found: " << dirPath.string() << '\n';
+                std::cout << "not found: " << dir_path.string() << '\n';
         }
     }
     return 0;

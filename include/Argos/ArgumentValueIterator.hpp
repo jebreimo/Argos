@@ -18,7 +18,7 @@
  * for loops over the values in instances of ArgumentValues.
  */
 
-namespace Argos
+namespace argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
@@ -52,9 +52,9 @@ namespace Argos
          * @private
          * Only called from ArgumentValues
          */
-        ArgumentValueIterator(const It& internalIterator,
+        ArgumentValueIterator(const It& internal_iterator,
                               std::shared_ptr<ParsedArgumentsImpl> args,
-                              ValueId valueId);
+                              ValueId value_id);
 
         /**
          * @brief Prefix increment operator.
@@ -76,11 +76,11 @@ namespace Argos
         /**
          * @private
          */
-        It internalIterator() const;
+        It internal_iterator() const;
     private:
-        It m_Iterator = {};
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId = {};
+        It m_iterator = {};
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id = {};
     };
 
     /**

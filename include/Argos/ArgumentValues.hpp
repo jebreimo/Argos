@@ -17,7 +17,7 @@
  * @brief Defines the ArgumentValues class.
  */
 
-namespace Argos
+namespace argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
@@ -36,7 +36,7 @@ namespace Argos
          */
         ArgumentValues(std::vector<std::pair<std::string_view, ArgumentId>> values,
                        std::shared_ptr<ParsedArgumentsImpl> args,
-                       ValueId valueId);
+                       ValueId value_id);
 
         /**
          * @private
@@ -78,7 +78,7 @@ namespace Argos
         /**
          * Display @a message as if it was an error produced within Argos
          * itself, including a reference to the argument or option this value
-         * comes from and the usage section from the help text. If autoExit is
+         * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message, an
          * exception is thrown if it's not.
          */
@@ -103,15 +103,15 @@ namespace Argos
         /**
          * @brief Returns a vector with all the raw string_view values.
          */
-        std::vector<std::string_view> rawValues() const;
+        std::vector<std::string_view> raw_values() const;
 
         /**
          * @brief Returns the value with the given index.
          *
          * If @a index is to great, an error message is written to stderr, the
-         * program also automatically exits if autoExit is true.
+         * program also automatically exits if auto_exit is true.
          *
-         * @throw ArgosException if @a index is too great and autoExit
+         * @throw ArgosException if @a index is too great and auto_exit
          *  is false.
          */
         ArgumentValue value(size_t index) const;
@@ -122,16 +122,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<int>
-        asInts(const std::vector<int>& defaultValue = {},
-               int base = 10) const;
+        as_ints(const std::vector<int>& default_value = {},
+                int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -139,16 +139,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<unsigned>
-        asUInts(const std::vector<unsigned>& defaultValue = {},
-               int base = 10) const;
+        as_uints(const std::vector<unsigned>& default_value = {},
+                 int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -156,16 +156,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<long>
-        asLongs(const std::vector<long>& defaultValue = {},
-                int base = 10) const;
+        as_longs(const std::vector<long>& default_value = {},
+                 int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -173,16 +173,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<unsigned long>
-        asULongs(const std::vector<unsigned long>& defaultValue = {},
-                 int base = 10) const;
+        as_ulongs(const std::vector<unsigned long>& default_value = {},
+                  int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -190,16 +190,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<long long>
-        asLLongs(const std::vector<long long>& defaultValue = {},
-                 int base = 10) const;
+        as_llongs(const std::vector<long long>& default_value = {},
+                  int base = 10) const;
 
         /**
         * @brief Returns a vector where every argument value has been
@@ -207,16 +207,16 @@ namespace Argos
         *
         * If any of the argument values can't be converted, an error
         * message is written to stderr, the program also automatically exits
-        * if autoExit is true.
+        * if auto_exit is true.
         *
-        * @param defaultValue This vector is returned if there are no values.
+        * @param default_value This vector is returned if there are no values.
         * @param base See the documentation for std::strtoint for details.
         * @throw ArgosException if the conversion fails for any value and
-        *  autoExit is false.
+        *  auto_exit is false.
         */
         std::vector<unsigned long long>
-        asULLongs(const std::vector<unsigned long long>& defaultValue = {},
-                  int base = 10) const;
+        as_ullongs(const std::vector<unsigned long long>& default_value = {},
+                   int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -224,14 +224,14 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<float>
-        asFloats(const std::vector<float>& defaultValue = {}) const;
+        as_floats(const std::vector<float>& default_value = {}) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -239,38 +239,39 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<double>
-        asDoubles(const std::vector<double>& defaultValue = {}) const;
+        as_doubles(const std::vector<double>& default_value = {}) const;
 
         /**
          * @brief Returns a vector with the argument values.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<std::string>
-        asStrings(const std::vector<std::string>& defaultValue = {}) const;
+        as_strings(const std::vector<std::string>& default_value = {}) const;
 
         /**
          * @brief Splits each value on @a separator and returns the parts in
          *  a single list.
          * @param separator The separator.
-         * @param minParts The minimum number of parts each value must
+         * @param min_parts The minimum number of parts each value must
          *  consist of.
-         * @param maxParts The maximum number of parts any value can
+         * @param max_parts The maximum number of parts any value can
          *  consist of. The final part will retain all excessive separators.
          * @throw ArgosException if any value consists of less than
-         *  @a minParts parts.
+         *  @a min_parts parts.
          */
         ArgumentValues
-        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+        split(char separator, size_t min_parts = 0,
+              size_t max_parts = 0) const;
 
         /**
          * @brief Returns an iterator pointing to the first value.
@@ -282,8 +283,8 @@ namespace Argos
          */
         ArgumentValueIterator end() const;
     private:
-        std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId;
+        std::vector<std::pair<std::string_view, ArgumentId>> m_values;
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id;
     };
 }

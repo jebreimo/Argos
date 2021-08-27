@@ -10,31 +10,31 @@
 #include <string_view>
 #include <vector>
 
-namespace Argos
+namespace argos
 {
-    bool areEqualCI(std::string_view str1, std::string_view str2);
+    bool are_equal_ci(std::string_view str1, std::string_view str2);
 
-    bool areEqual(std::string_view str1, std::string_view str2,
-                  bool caseInsensitive);
+    bool are_equal(std::string_view str1, std::string_view str2,
+                   bool case_insensitive);
 
-    bool startsWith(std::string_view str, std::string_view prefix);
+    bool starts_with(std::string_view str, std::string_view prefix);
 
-    bool startsWithCI(std::string_view str, std::string_view prefix);
+    bool starts_with_ci(std::string_view str, std::string_view prefix);
 
-    bool startsWith(std::string_view str, std::string_view prefix,
-                    bool caseInsensitive);
+    bool starts_with(std::string_view str, std::string_view prefix,
+                     bool case_insensitive);
 
-    bool isLessCI(std::string_view str1, std::string_view str2);
+    bool is_less_ci(std::string_view str1, std::string_view str2);
 
-    bool isLess(std::string_view str1, std::string_view str2,
-                bool caseInsensitive);
+    bool is_less(std::string_view str1, std::string_view str2,
+                 bool case_insensitive);
 
     std::vector<std::string_view>
-    splitString(std::string_view s, char delimiter, size_t maxSplit);
+    split_string(std::string_view s, char delimiter, size_t max_split);
 
-    std::string_view getBaseName(std::string_view str);
+    std::string_view get_base_name(std::string_view str);
 
-    size_t countCodePoints(std::string_view str);
+    size_t count_code_points(std::string_view str);
 
-    size_t findNthCodePoint(std::string_view str, size_t n);
+    size_t find_nth_code_point(std::string_view str, size_t n);
 }

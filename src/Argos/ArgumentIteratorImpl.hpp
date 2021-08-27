@@ -13,7 +13,7 @@
 #include "OptionData.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
-namespace Argos
+namespace argos
 {
     enum class IteratorResultCode
     {
@@ -41,7 +41,7 @@ namespace Argos
         parse(std::vector<std::string_view> args,
               const std::shared_ptr<ParserData>& data);
 
-        const std::shared_ptr<ParsedArgumentsImpl>& parsedArguments() const;
+        const std::shared_ptr<ParsedArgumentsImpl>& parsed_arguments() const;
     private:
         enum class OptionResult
         {
@@ -53,25 +53,25 @@ namespace Argos
         };
 
         std::pair<OptionResult, std::string_view>
-        processOption(const OptionData& opt, const std::string& flag);
+        process_option(const OptionData& opt, const std::string& flag);
 
-        IteratorResult processOption(const std::string& flag);
+        IteratorResult process_option(const std::string& flag);
 
-        IteratorResult processArgument(const std::string& name);
+        IteratorResult process_argument(const std::string& name);
 
-        void copyRemainingArgumentsToParserResult();
+        void copy_remaining_arguments_to_parser_result();
 
-        size_t countArguments() const;
+        size_t count_arguments() const;
 
-        bool checkArgumentAndOptionCounts();
+        bool check_argument_and_option_counts();
 
         void error(const std::string& message = {});
 
-        std::shared_ptr<ParserData> m_Data;
-        std::vector<std::pair<std::string_view, const OptionData*>> m_Options;
-        std::shared_ptr<ParsedArgumentsImpl> m_ParsedArgs;
-        std::unique_ptr<IOptionIterator> m_Iterator;
-        ArgumentCounter m_ArgumentCounter;
+        std::shared_ptr<ParserData> m_data;
+        std::vector<std::pair<std::string_view, const OptionData*>> m_options;
+        std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
+        std::unique_ptr<IOptionIterator> m_iterator;
+        ArgumentCounter m_argument_counter;
         enum class State
         {
             ARGUMENTS_AND_OPTIONS,
@@ -79,6 +79,6 @@ namespace Argos
             DONE,
             ERROR
         };
-        State m_State = State::ARGUMENTS_AND_OPTIONS;
+        State m_state = State::ARGUMENTS_AND_OPTIONS;
     };
 }

@@ -11,7 +11,7 @@
 #include "Argos/Callbacks.hpp"
 #include "Argos/Enums.hpp"
 
-namespace Argos
+namespace argos
 {
     struct OptionData
     {
@@ -21,14 +21,14 @@ namespace Argos
         std::string alias;
         std::string argument;
         std::string constant;
-        std::string initialValue;
+        std::string initial_value;
         OptionCallback callback;
         OptionOperation operation = OptionOperation::ASSIGN;
         OptionType type = OptionType::NORMAL;
         Visibility visibility = Visibility::NORMAL;
         bool optional = true;
         int id = 0;
-        ArgumentId argumentId = {};
-        ValueId valueId = {};
+        ArgumentId argument_id = {};
+        ValueId value_id = {};
     };
 }

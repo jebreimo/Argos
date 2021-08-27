@@ -10,10 +10,10 @@
 #include "ArgosThrow.hpp"
 #include "OptionData.hpp"
 
-namespace Argos
+namespace argos
 {
     OptionView::OptionView(const OptionData* data)
-        : m_Option(data)
+        : m_option(data)
     {
         if (!data)
             ARGOS_THROW("data can not be null");
@@ -21,71 +21,71 @@ namespace Argos
 
     const std::string& OptionView::help() const
     {
-        return m_Option->help;
+        return m_option->help;
     }
 
     const std::string& OptionView::section() const
     {
-        return m_Option->section;
+        return m_option->section;
     }
 
     const std::string& OptionView::value() const
     {
-        return m_Option->alias;
+        return m_option->alias;
     }
 
     OptionOperation OptionView::operation() const
     {
-        return m_Option->operation;
+        return m_option->operation;
     }
 
     Visibility OptionView::visibility() const
     {
-        return m_Option->visibility;
+        return m_option->visibility;
     }
 
     int OptionView::id() const
     {
-        return m_Option->id;
+        return m_option->id;
     }
 
-    ValueId OptionView::valueId() const
+    ValueId OptionView::value_id() const
     {
-        return m_Option->valueId;
+        return m_option->value_id;
     }
 
     const std::vector<std::string>& OptionView::flags() const
     {
-        return m_Option->flags;
+        return m_option->flags;
     }
 
     const std::string& OptionView::argument() const
     {
-        return m_Option->argument;
+        return m_option->argument;
     }
 
-    const std::string& OptionView::initialValue() const
+    const std::string& OptionView::initial_value() const
     {
-        return m_Option->initialValue;
+        return m_option->initial_value;
     }
 
     const std::string& OptionView::constant() const
     {
-        return m_Option->constant;
+        return m_option->constant;
     }
 
     OptionType OptionView::type() const
     {
-        return m_Option->type;
+        return m_option->type;
     }
 
     bool OptionView::optional() const
     {
-        return m_Option->optional;
+        return m_option->optional;
     }
 
-    ArgumentId OptionView::argumentId() const
+    ArgumentId OptionView::argument_id() const
     {
-        return m_Option->argumentId;
+        return m_option->argument_id;
     }
 }

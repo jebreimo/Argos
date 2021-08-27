@@ -11,110 +11,110 @@
 #include "ArgosThrow.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
-namespace Argos
+namespace argos
 {
     ParsedArguments::ParsedArguments() = default;
 
     ParsedArguments::ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_Impl(move(impl))
+        : m_impl(move(impl))
     {}
 
     ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_Impl(move(rhs.m_Impl))
+        : m_impl(move(rhs.m_impl))
     {}
 
     ParsedArguments::~ParsedArguments() = default;
 
     ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
     {
-        m_Impl = move(rhs.m_Impl);
+        m_impl = move(rhs.m_impl);
         return *this;
     }
 
     bool ParsedArguments::has(const std::string& name) const
     {
-        return m_Impl->has(m_Impl->getValueId(name));
+        return m_impl->has(m_impl->get_value_id(name));
     }
 
     bool ParsedArguments::has(const IArgumentView& arg) const
     {
-        return m_Impl->has(arg.valueId());
+        return m_impl->has(arg.value_id());
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const
     {
-        auto id = m_Impl->getValueId(name);
-        auto value = m_Impl->getValue(id);
+        auto id = m_impl->get_value_id(name);
+        auto value = m_impl->get_value(id);
         if (value)
-            return {value->first, m_Impl, id, value->second};
+            return {value->first, m_impl, id, value->second};
         else
-            return {{}, m_Impl, id, {}};
+            return {{}, m_impl, id, {}};
     }
 
     ArgumentValue ParsedArguments::value(const IArgumentView& arg) const
     {
-        auto value = m_Impl->getValue(arg.valueId());
+        auto value = m_impl->get_value(arg.value_id());
         if (value)
-            return {value->first, m_Impl, arg.valueId(), arg.argumentId()};
+            return {value->first, m_impl, arg.value_id(), arg.argument_id()};
         else
-            return {{}, m_Impl, arg.valueId(), arg.argumentId()};
+            return {{}, m_impl, arg.value_id(), arg.argument_id()};
     }
 
     ArgumentValues ParsedArguments::values(const std::string& name) const
     {
-        auto id = m_Impl->getValueId(name);
-        auto values = m_Impl->getValues(id);
-        return {values, m_Impl, id};
+        auto id = m_impl->get_value_id(name);
+        auto values = m_impl->get_values(id);
+        return {values, m_impl, id};
     }
 
     ArgumentValues ParsedArguments::values(const IArgumentView& arg) const
     {
-        auto values = m_Impl->getValues(arg.valueId());
-        return {values, m_Impl, arg.valueId()};
+        auto values = m_impl->get_values(arg.value_id());
+        return {values, m_impl, arg.value_id()};
     }
 
     std::vector<std::unique_ptr<ArgumentView>>
-    ParsedArguments::allArguments() const
+    ParsedArguments::all_arguments() const
     {
         std::vector<std::unique_ptr<ArgumentView>> result;
-        for (auto& a : m_Impl->parserData()->arguments)
+        for (auto& a : m_impl->parser_data()->arguments)
             result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         return result;
     }
 
     std::vector<std::unique_ptr<OptionView>>
-    ParsedArguments::allOptions() const
+    ParsedArguments::all_options() const
     {
         std::vector<std::unique_ptr<OptionView>> result;
-        for (auto& o : m_Impl->parserData()->options)
+        for (auto& o : m_impl->parser_data()->options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
         return result;
     }
 
-    ParserResultCode ParsedArguments::resultCode() const
+    ParserResultCode ParsedArguments::result_code() const
     {
-        return m_Impl->resultCode();
+        return m_impl->result_code();
     }
 
-    OptionView ParsedArguments::stopOption() const
+    OptionView ParsedArguments::stop_option() const
     {
-        const auto* option = m_Impl->stopOption();
+        const auto* option = m_impl->stop_option();
         if (!option)
             ARGOS_THROW("There is no special option.");
         return OptionView(option);
     }
 
     const std::vector<std::string>&
-    ParsedArguments::unprocessedArguments() const
+    ParsedArguments::unprocessed_arguments() const
     {
-        return m_Impl->unprocessedArguments();
+        return m_impl->unprocessed_arguments();
     }
 
-    void ParsedArguments::filterParsedArguments(int& argc, char**& argv)
+    void ParsedArguments::filter_parsed_arguments(int& argc, char**& argv)
     {
         if (argc <= 1)
             return;
-        const auto& unprocessed = m_Impl->unprocessedArguments();
+        const auto& unprocessed = m_impl->unprocessed_arguments();
         auto it = unprocessed.begin();
         int out = 1;
         if (!unprocessed.empty())
@@ -134,12 +134,12 @@ namespace Argos
 
     void ParsedArguments::error(const std::string& msg)
     {
-        m_Impl->error(msg);
+        m_impl->error(msg);
     }
 
     namespace
     {
-        std::string getName(const IArgumentView& arg)
+        std::string get_name(const IArgumentView& arg)
         {
             if (const auto* a = dynamic_cast<const ArgumentView*>(&arg))
                 return a->name();
@@ -158,13 +158,13 @@ namespace Argos
             return {};
         }
 
-        void printArgument(std::ostream& stream,
-                           const std::string& label,
-                           const ArgumentValues& values)
+        void print_argument(std::ostream& stream,
+                            const std::string& label,
+                            const ArgumentValues& values)
         {
             stream << label << ":";
             for (const auto value : values)
-                stream << " \"" << value.asString() << "\"";
+                stream << " \"" << value.as_string() << "\"";
             stream << "\n";
         }
     }
@@ -172,32 +172,32 @@ namespace Argos
     void print(const ParsedArguments& args, std::ostream& stream)
     {
         std::vector<const IArgumentView*> argViews;
-        auto a = args.allArguments();
+        auto a = args.all_arguments();
         std::transform(a.begin(), a.end(), back_inserter(argViews),
                        [](auto& av) {return av.get();});
-        auto o = args.allOptions();
+        auto o = args.all_options();
         std::transform(o.begin(), o.end(), back_inserter(argViews),
                        [](auto& ov) {return ov.get();});
 
         stable_sort(argViews.begin(), argViews.end(),
-                    [](auto& a, auto& b) {return a->valueId() < b->valueId();});
+                    [](auto& a, auto& b) {return a->value_id() < b->value_id();});
 
         std::vector<std::pair<const IArgumentView*, std::string>> labels;
         for (const auto* arg : argViews)
         {
-            if (!labels.empty() && labels.back().first->valueId() == arg->valueId())
-                labels.back().second += ", " + getName(*arg);
+            if (!labels.empty() && labels.back().first->value_id() == arg->value_id())
+                labels.back().second += ", " + get_name(*arg);
             else
-                labels.emplace_back(arg, getName(*arg));
+                labels.emplace_back(arg, get_name(*arg));
         }
 
         for (const auto&[arg, label] : labels)
-            printArgument(stream, label, args.values(*arg));
+            print_argument(stream, label, args.values(*arg));
 
-        if (!args.unprocessedArguments().empty())
+        if (!args.unprocessed_arguments().empty())
         {
             stream << "Unprocessed arguments:";
-            for (auto& arg : args.unprocessedArguments())
+            for (auto& arg : args.unprocessed_arguments())
                 stream << " \"" << arg << "\"";
         }
     }

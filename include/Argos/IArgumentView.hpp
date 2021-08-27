@@ -15,7 +15,7 @@
  * @brief Defines the IArgumentView interface class.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief Interface class with the functions ArgumentView and OptionView
@@ -65,14 +65,14 @@ namespace Argos
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
-        virtual ValueId valueId() const = 0;
+        virtual ValueId value_id() const = 0;
 
         /**
-         * @brief Returns the argument's or option's argumentId().
+         * @brief Returns the argument's or option's argument_id().
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        virtual ArgumentId argumentId() const = 0;
+        virtual ArgumentId argument_id() const = 0;
     };
 }

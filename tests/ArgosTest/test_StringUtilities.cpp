@@ -8,46 +8,46 @@
 #include <catch2/catch.hpp>
 #include "Argos/StringUtilities.hpp"
 
-TEST_CASE("Test startsWith")
+TEST_CASE("Test starts_with")
 {
-    REQUIRE(Argos::startsWith("ABCDEF", "A"));
-    REQUIRE(Argos::startsWith("ABCDEF", "ABC"));
-    REQUIRE(Argos::startsWith("ABCDEF", "ABCDEF"));
-    REQUIRE_FALSE(Argos::startsWith("ABCDEF", "abc"));
-    REQUIRE_FALSE(Argos::startsWith("ABCDEF", "ABCDEFG"));
+    REQUIRE(argos::starts_with("ABCDEF", "A"));
+    REQUIRE(argos::starts_with("ABCDEF", "ABC"));
+    REQUIRE(argos::starts_with("ABCDEF", "ABCDEF"));
+    REQUIRE_FALSE(argos::starts_with("ABCDEF", "abc"));
+    REQUIRE_FALSE(argos::starts_with("ABCDEF", "ABCDEFG"));
 }
 
-TEST_CASE("Test startsWithCI")
+TEST_CASE("Test starts_with_ci")
 {
-    REQUIRE(Argos::startsWithCI("ABCDEF", "A"));
-    REQUIRE(Argos::startsWithCI("ABCDEF", "ABC"));
-    REQUIRE(Argos::startsWithCI("ABCDEF", "ABcDEF"));
-    REQUIRE(Argos::startsWithCI("ABCDEF", "abc"));
-    REQUIRE_FALSE(Argos::startsWithCI("ABCDEF", "ABCDEFG"));
-    REQUIRE(Argos::startsWithCI("@ABCDYZ", "@abcdyz"));
-    REQUIRE_FALSE(Argos::startsWithCI("@ABCDYZ", "`abcdyz"));
-    REQUIRE_FALSE(Argos::startsWithCI("{ABCDYZ", "[abcdyz"));
+    REQUIRE(argos::starts_with_ci("ABCDEF", "A"));
+    REQUIRE(argos::starts_with_ci("ABCDEF", "ABC"));
+    REQUIRE(argos::starts_with_ci("ABCDEF", "ABcDEF"));
+    REQUIRE(argos::starts_with_ci("ABCDEF", "abc"));
+    REQUIRE_FALSE(argos::starts_with_ci("ABCDEF", "ABCDEFG"));
+    REQUIRE(argos::starts_with_ci("@ABCDYZ", "@abcdyz"));
+    REQUIRE_FALSE(argos::starts_with_ci("@ABCDYZ", "`abcdyz"));
+    REQUIRE_FALSE(argos::starts_with_ci("{ABCDYZ", "[abcdyz"));
 }
 
-TEST_CASE("Test isLessCI")
+TEST_CASE("Test is_less_ci")
 {
-    REQUIRE(Argos::isLessCI("abc", "ABD"));
-    REQUIRE_FALSE(Argos::isLessCI("abc", "ABC"));
-    REQUIRE(Argos::isLessCI("abc", "ABCD"));
-    REQUIRE_FALSE(Argos::isLessCI("aBCD", "ABC"));
+    REQUIRE(argos::is_less_ci("abc", "ABD"));
+    REQUIRE_FALSE(argos::is_less_ci("abc", "ABC"));
+    REQUIRE(argos::is_less_ci("abc", "ABCD"));
+    REQUIRE_FALSE(argos::is_less_ci("aBCD", "ABC"));
 }
 
-TEST_CASE("Test countCodePoints")
+TEST_CASE("Test count_code_points")
 {
-    REQUIRE(Argos::countCodePoints(u8"Bæ bæ bø må.") == 12);
+    REQUIRE(argos::count_code_points(u8"Bæ bæ bø må.") == 12);
 }
 
-TEST_CASE("Test findNthCodePoint")
+TEST_CASE("Test find_nth_code_point")
 {
-    REQUIRE(Argos::findNthCodePoint(u8"Bæ bæ bø må.", 8) == 11);
+    REQUIRE(argos::find_nth_code_point(u8"Bæ bæ bø må.", 8) == 11);
 }
 
-TEST_CASE("Test findNthCodePoint non-UTF8")
+TEST_CASE("Test find_nth_code_point non-UTF8")
 {
-    REQUIRE(Argos::findNthCodePoint("Ba boo\200 boo ma.", 8) == 8);
+    REQUIRE(argos::find_nth_code_point("Ba boo\200 boo ma.", 8) == 8);
 }

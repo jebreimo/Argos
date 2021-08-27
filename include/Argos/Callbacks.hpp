@@ -16,7 +16,7 @@
  * @brief Defines ArgumentCallback and OptionCallback.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief A callback that is called each time given arguments appear

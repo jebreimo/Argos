@@ -10,26 +10,26 @@
 #include "ArgosThrow.hpp"
 #include "ArgumentData.hpp"
 
-namespace Argos
+namespace argos
 {
     Argument::Argument()
-        : m_Argument(std::make_unique<ArgumentData>())
+        : m_argument(std::make_unique<ArgumentData>())
     {}
 
     Argument::Argument(const std::string& name)
-        : m_Argument(std::make_unique<ArgumentData>())
+        : m_argument(std::make_unique<ArgumentData>())
     {
-        m_Argument->name = name;
+        m_argument->name = name;
     }
 
     Argument::Argument(const Argument& rhs)
-        : m_Argument(rhs.m_Argument
-                     ? std::make_unique<ArgumentData>(*rhs.m_Argument)
+        : m_argument(rhs.m_argument
+                     ? std::make_unique<ArgumentData>(*rhs.m_argument)
                      : std::unique_ptr<ArgumentData>())
     {}
 
     Argument::Argument(Argument&& rhs) noexcept
-        : m_Argument(std::move(rhs.m_Argument))
+        : m_argument(std::move(rhs.m_argument))
     {}
 
     Argument::~Argument() = default;
@@ -38,76 +38,76 @@ namespace Argos
     {
         if (this != &rhs)
         {
-            if (rhs.m_Argument)
-                m_Argument = std::make_unique<ArgumentData>(*rhs.m_Argument);
+            if (rhs.m_argument)
+                m_argument = std::make_unique<ArgumentData>(*rhs.m_argument);
             else
-                m_Argument = {};
+                m_argument = {};
         }
         return *this;
     }
 
     Argument& Argument::operator=(Argument&& rhs) noexcept
     {
-        m_Argument = std::move(rhs.m_Argument);
+        m_argument = std::move(rhs.m_argument);
         return *this;
     }
 
     Argument& Argument::help(const std::string& text)
     {
-        checkArgument();
-        m_Argument->help = text;
+        check_argument();
+        m_argument->help = text;
         return *this;
     }
 
     Argument& Argument::section(const std::string& name)
     {
-        checkArgument();
-        m_Argument->section = name;
+        check_argument();
+        m_argument->section = name;
         return *this;
     }
 
     Argument& Argument::alias(const std::string& id)
     {
-        checkArgument();
-        m_Argument->value = id;
+        check_argument();
+        m_argument->value = id;
         return *this;
     }
 
     Argument& Argument::callback(ArgumentCallback callback)
     {
-        checkArgument();
-        m_Argument->callback = move(callback);
+        check_argument();
+        m_argument->callback = move(callback);
         return *this;
     }
 
     Argument& Argument::visibility(Visibility visibility)
     {
-        checkArgument();
-        m_Argument->visibility = visibility;
+        check_argument();
+        m_argument->visibility = visibility;
         return *this;
     }
 
     Argument& Argument::id(int id)
     {
-        checkArgument();
-        m_Argument->id = id;
+        check_argument();
+        m_argument->id = id;
         return *this;
     }
 
     Argument& Argument::name(const std::string& name)
     {
-        checkArgument();
-        m_Argument->name = name;
+        check_argument();
+        m_argument->name = name;
         return *this;
     }
 
     Argument& Argument::optional(bool optional)
     {
-        checkArgument();
+        check_argument();
         if (optional)
-            m_Argument->minCount = 0;
-        else if (m_Argument->minCount == 0)
-            m_Argument->minCount = 1;
+            m_argument->min_count = 0;
+        else if (m_argument->min_count == 0)
+            m_argument->min_count = 1;
         return *this;
     }
 
@@ -115,32 +115,32 @@ namespace Argos
     {
         if (n <= 0)
             ARGOS_THROW("Argument's count must be greater than 0.");
-        checkArgument();
-        m_Argument->minCount = m_Argument->maxCount = n;
+        check_argument();
+        m_argument->min_count = m_argument->max_count = n;
         return *this;
     }
 
-    Argument& Argument::count(unsigned minCount, unsigned maxCount)
+    Argument& Argument::count(unsigned min_count, unsigned max_count)
     {
-        if (maxCount == 0)
+        if (max_count == 0)
             ARGOS_THROW("Argument's max count must be greater than 0.");
-        if (maxCount < minCount)
+        if (max_count < min_count)
             ARGOS_THROW("Argument's max count cannot be less than its min count.");
-        checkArgument();
-        m_Argument->minCount = minCount;
-        m_Argument->maxCount = maxCount;
+        check_argument();
+        m_argument->min_count = min_count;
+        m_argument->max_count = max_count;
         return *this;
     }
 
     std::unique_ptr<ArgumentData> Argument::release()
     {
-        checkArgument();
-        return std::move(m_Argument);
+        check_argument();
+        return std::move(m_argument);
     }
 
-    void Argument::checkArgument() const
+    void Argument::check_argument() const
     {
-        if (!m_Argument)
+        if (!m_argument)
             ARGOS_THROW("Cannot use Argument instance after"
                         " release() has been called.");
     }

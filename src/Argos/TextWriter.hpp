@@ -10,20 +10,20 @@
 #include <string>
 #include <string_view>
 
-namespace Argos
+namespace argos
 {
     class TextWriter
     {
     public:
-        explicit TextWriter(unsigned lineWidth = 80);
+        explicit TextWriter(unsigned line_width = 80);
 
         std::ostream* stream() const;
 
-        void setStream(std::ostream* stream);
+        void set_stream(std::ostream* stream);
 
         unsigned indentation() const;
 
-        bool setIndentation(unsigned indent);
+        bool set_indentation(unsigned indent);
 
         bool write(std::string_view str, bool force = false);
 
@@ -35,26 +35,26 @@ namespace Argos
 
         unsigned spaces() const;
 
-        void setSpaces(unsigned n);
+        void set_spaces(unsigned n);
 
-        unsigned currentWidth() const;
+        unsigned current_width() const;
 
-        unsigned remainingWidth() const;
+        unsigned remaining_width() const;
 
-        bool isCurrentLineEmpty() const;
+        bool is_current_line_empty() const;
 
-        unsigned lineWidth() const;
+        unsigned line_width() const;
 
-        void setLineWidth(unsigned width);
+        void set_line_width(unsigned width);
 
         std::string_view currentLine() const;
     private:
-        std::ostream* m_Stream;
-        std::string m_Line;
-        unsigned m_LineWidth;
-        unsigned m_CurrentLineWidth = 0;
-        unsigned m_TabSize = 4;
-        unsigned m_Indent = 0;
-        unsigned m_Spaces = 0;
+        std::ostream* m_stream;
+        std::string m_line;
+        unsigned m_line_width;
+        unsigned m_current_line_width = 0;
+        unsigned m_tab_size = 4;
+        unsigned m_indent = 0;
+        unsigned m_spaces = 0;
     };
 }

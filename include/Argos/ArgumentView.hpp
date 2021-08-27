@@ -14,7 +14,7 @@
  * @brief Defines the ArgumentView class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ArgumentData;
 
@@ -71,15 +71,15 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        [[nodiscard]] ValueId valueId() const final;
+        [[nodiscard]] ValueId value_id() const final;
 
         /**
-         * @brief Returns the argument's argumentId().
+         * @brief Returns the argument's argument id.
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        [[nodiscard]] ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argument_id() const final;
 
         /**
          * @brief Returns the argument's name.
@@ -99,6 +99,6 @@ namespace Argos
          */
         [[nodiscard]] std::pair<unsigned, unsigned> count() const;
     private:
-        const ArgumentData* m_Argument;
+        const ArgumentData* m_argument;
     };
 }

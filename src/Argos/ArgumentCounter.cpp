@@ -8,48 +8,49 @@
 #include <optional>
 #include "ArgumentCounter.hpp"
 
-namespace Argos
+namespace argos
 {
     namespace
     {
-        size_t findFirstOptional(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+        size_t find_first_optional(
+            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
         {
             size_t result = 0;
             for (size_t i = 0; i < arguments.size(); ++i)
             {
-                if (arguments[i]->minCount > 0)
+                if (arguments[i]->min_count > 0)
                     result = i + 1;
             }
             return result;
         }
 
-        void makeArgumentCounters(
+        void make_argument_counters(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments,
                 std::vector<std::pair<size_t, const ArgumentData*>>& counters,
-                size_t& firstOptional)
+                size_t& first_optional)
         {
-            firstOptional = findFirstOptional(arguments);
+            first_optional = find_first_optional(arguments);
             for (size_t i = 0; i < arguments.size(); ++i)
             {
                 auto& a = arguments[i];
-                if (i + 1 == firstOptional && a->minCount != a->maxCount)
+                if (i + 1 == first_optional && a->min_count != a->max_count)
                 {
-                    counters.emplace_back(a->minCount, a.get());
-                    counters.emplace_back(a->maxCount - a->minCount, a.get());
+                    counters.emplace_back(a->min_count, a.get());
+                    counters.emplace_back(a->max_count - a->min_count, a.get());
                 }
                 else
                 {
-                    counters.emplace_back(a->maxCount, a.get());
+                    counters.emplace_back(a->max_count, a.get());
                 }
             }
         }
 
         std::vector<std::pair<size_t, const ArgumentData*>>
-        makeArgumentCounters(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t n)
+        make_argument_counters(
+            const std::vector<std::unique_ptr<ArgumentData>>& arguments,
+            size_t n)
         {
-            auto minmax = ArgumentCounter::getMinMaxCount(arguments);
+            auto minmax = ArgumentCounter::get_min_max_count(arguments);
             if (n < minmax.first)
                 n = 0;
             else if (n > minmax.second)
@@ -60,19 +61,19 @@ namespace Argos
             std::vector<std::pair<size_t, const ArgumentData*>> result;
             for (auto& arg : arguments)
             {
-                if (n == 0 || arg->minCount == arg->maxCount)
+                if (n == 0 || arg->min_count == arg->max_count)
                 {
-                    result.emplace_back(arg->minCount, arg.get());
+                    result.emplace_back(arg->min_count, arg.get());
                 }
-                else if (arg->minCount + n <= arg->maxCount)
+                else if (arg->min_count + n <= arg->max_count)
                 {
-                    result.emplace_back(arg->minCount + n, arg.get());
+                    result.emplace_back(arg->min_count + n, arg.get());
                     n = 0;
                 }
                 else
                 {
-                    result.emplace_back(arg->maxCount, arg.get());
-                    n -= arg->maxCount - arg->minCount;
+                    result.emplace_back(arg->max_count, arg.get());
+                    n -= arg->max_count - arg->min_count;
                 }
             }
             return result;
@@ -80,64 +81,67 @@ namespace Argos
     }
 
     ArgumentCounter::ArgumentCounter()
-        : m_Counters()
+        : m_counters()
     {}
 
-    ArgumentCounter::ArgumentCounter(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::ArgumentCounter(
+        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
-        makeArgumentCounters(arguments, m_Counters, m_FirstOptional);
+        make_argument_counters(arguments, m_counters, m_first_optional);
     }
 
-    ArgumentCounter::ArgumentCounter(const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                                     size_t argumentCount)
-        : m_Counters(makeArgumentCounters(arguments, argumentCount)),
-          m_FirstOptional(m_Counters.size())
+    ArgumentCounter::ArgumentCounter(
+        const std::vector<std::unique_ptr<ArgumentData>>& arguments,
+        size_t argument_count)
+        : m_counters(make_argument_counters(arguments, argument_count)),
+          m_first_optional(m_counters.size())
     {}
 
-    const ArgumentData* ArgumentCounter::nextArgument()
+    const ArgumentData* ArgumentCounter::next_argument()
     {
-        while (m_Index != m_Counters.size() && m_Counters[m_Index].first == 0)
-            ++m_Index;
+        while (m_index != m_counters.size() && m_counters[m_index].first == 0)
+            ++m_index;
 
-        if (m_Index == m_Counters.size())
+        if (m_index == m_counters.size())
             return nullptr;
 
-        ++m_Counter;
-        --m_Counters[m_Index].first;
-        return m_Counters[m_Index].second;
+        ++m_counter;
+        --m_counters[m_index].first;
+        return m_counters[m_index].second;
     }
 
     size_t ArgumentCounter::count() const
     {
-        return m_Counter;
+        return m_counter;
     }
 
-    bool ArgumentCounter::isComplete() const
+    bool ArgumentCounter::is_complete() const
     {
-        return m_Index >= m_FirstOptional
-               || (m_Index + 1 == m_FirstOptional
-                   && m_Counters[m_Index].first == 0);
+        return m_index >= m_first_optional
+               || (m_index + 1 == m_first_optional
+                   && m_counters[m_index].first == 0);
     }
 
     std::pair<size_t, size_t>
-    ArgumentCounter::getMinMaxCount(const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::get_min_max_count(
+        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
         size_t lo = 0, hi = 0;
         for (auto& arg : arguments)
         {
-            lo += arg->minCount;
+            lo += arg->min_count;
             if (hi != SIZE_MAX)
             {
-                if (arg->maxCount > SIZE_MAX - hi)
+                if (arg->max_count > SIZE_MAX - hi)
                     hi = SIZE_MAX;
                 else
-                    hi += arg->maxCount;
+                    hi += arg->max_count;
             }
         }
         return {lo, hi};
     }
 
-    bool ArgumentCounter::requiresArgumentCount(
+    bool ArgumentCounter::requires_argument_count(
             const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
         bool deterministic = true;
@@ -145,7 +149,7 @@ namespace Argos
         {
             if (!deterministic)
                 return true;
-            if (arg->minCount != arg->maxCount)
+            if (arg->min_count != arg->max_count)
                 deterministic = false;
         }
         return false;

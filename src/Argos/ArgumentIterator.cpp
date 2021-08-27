@@ -10,23 +10,24 @@
 #include "ArgosThrow.hpp"
 #include "ArgumentIteratorImpl.hpp"
 
-namespace Argos
+namespace argos
 {
     ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args,
-                                       std::shared_ptr<ParserData> parserData)
-        : m_Impl(std::make_unique<ArgumentIteratorImpl>(move(args),
-                                                        move(parserData)))
+                                       std::shared_ptr<ParserData> parser_data)
+        : m_impl(std::make_unique<ArgumentIteratorImpl>(move(args),
+                                                        move(parser_data)))
     {}
 
     ArgumentIterator::ArgumentIterator(ArgumentIterator&& rhs) noexcept
-        : m_Impl(move(rhs.m_Impl))
+        : m_impl(move(rhs.m_impl))
     {}
 
     ArgumentIterator::~ArgumentIterator() = default;
 
-    ArgumentIterator& ArgumentIterator::operator=(ArgumentIterator&& rhs) noexcept
+    ArgumentIterator&
+    ArgumentIterator::operator=(ArgumentIterator&& rhs) noexcept
     {
-        m_Impl = move(rhs.m_Impl);
+        m_impl = move(rhs.m_impl);
         return *this;
     }
 
@@ -59,22 +60,22 @@ namespace Argos
         return false;
     }
 
-    ParsedArguments ArgumentIterator::parsedArguments() const
+    ParsedArguments ArgumentIterator::parsed_arguments() const
     {
-        return ParsedArguments(impl().parsedArguments());
+        return ParsedArguments(impl().parsed_arguments());
     }
 
     ArgumentIteratorImpl& ArgumentIterator::impl()
     {
-        if (!m_Impl)
+        if (!m_impl)
             ARGOS_THROW("This ArgumentIterator has been moved from.");
-        return *m_Impl;
+        return *m_impl;
     }
 
     const ArgumentIteratorImpl& ArgumentIterator::impl() const
     {
-        if (!m_Impl)
+        if (!m_impl)
             ARGOS_THROW("This ArgumentIterator has been moved from.");
-        return *m_Impl;
+        return *m_impl;
     }
 }

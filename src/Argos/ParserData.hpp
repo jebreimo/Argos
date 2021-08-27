@@ -22,28 +22,28 @@
     #endif
 #endif
 
-namespace Argos
+namespace argos
 {
     struct ParserSettings
     {
-        ArgumentCallback argumentCallback;
-        OptionCallback optionCallback;
-        OptionStyle optionStyle = OptionStyle::STANDARD;
-        bool autoExit = true;
-        bool allowAbbreviatedOptions = false;
-        bool ignoreUndefinedOptions = false;
-        bool ignoreUndefinedArguments = false;
-        bool caseInsensitive = false;
-        bool generateHelpOption = true;
-        int errorExitCode = ARGOS_EX_USAGE;
+        ArgumentCallback argument_callback;
+        OptionCallback option_callback;
+        OptionStyle option_style = OptionStyle::STANDARD;
+        bool auto_exit = true;
+        bool allow_abbreviated_options = false;
+        bool ignore_undefined_options = false;
+        bool ignore_undefined_arguments = false;
+        bool case_insensitive = false;
+        bool generate_help_option = true;
+        int error_exit_code = ARGOS_EX_USAGE;
     };
 
     struct HelpSettings
     {
-        std::string programName;
+        std::string program_name;
         std::string version;
         std::map<TextId, std::string> texts;
-        std::ostream* outputStream = nullptr;
+        std::ostream* output_stream = nullptr;
     };
 
     struct ParserData
@@ -51,9 +51,9 @@ namespace Argos
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
 
-        ParserSettings parserSettings;
-        HelpSettings helpSettings;
+        ParserSettings parser_settings;
+        HelpSettings help_settings;
 
-        TextFormatter textFormatter;
+        TextFormatter text_formatter;
     };
 }

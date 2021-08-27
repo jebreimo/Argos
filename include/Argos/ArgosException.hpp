@@ -18,7 +18,7 @@
 /**
  * @brief The namespace for all Argos classes and functions.
  */
-namespace Argos
+namespace argos
 {
     /**
      * @brief The exception class used throughout Argos.

@@ -9,13 +9,13 @@
 
 #include "ParserData.hpp"
 
-namespace Argos
+namespace argos
 {
-    void writeHelpText(ParserData& data);
+    void write_help_text(ParserData& data);
 
-    void writeErrorMessage(ParserData& data, const std::string& msg);
+    void write_error_message(ParserData& data, const std::string& msg);
 
-    void writeErrorMessage(ParserData& data,
-                           const std::string& msg,
-                           ArgumentId argumentId);
+    void write_error_message(ParserData& data,
+                             const std::string& msg,
+                             ArgumentId argument_id);
 }

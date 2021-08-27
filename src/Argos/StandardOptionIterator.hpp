@@ -8,7 +8,7 @@
 #pragma once
 #include "IOptionIterator.hpp"
 
-namespace Argos
+namespace argos
 {
     class StandardOptionIterator : public IOptionIterator
     {
@@ -21,16 +21,16 @@ namespace Argos
 
         std::optional<std::string> next() final;
 
-        std::optional<std::string> nextValue() final;
+        std::optional<std::string> next_value() final;
 
         std::string_view current() const final;
 
-        std::vector<std::string_view> remainingArguments() const final;
+        std::vector<std::string_view> remaining_arguments() const final;
 
         IOptionIterator* clone() const final;
     private:
-        std::vector<std::string_view> m_Args;
-        std::vector<std::string_view>::const_iterator m_ArgsIt;
-        size_t m_Pos = 0;
+        std::vector<std::string_view> m_args;
+        std::vector<std::string_view>::const_iterator m_args_it;
+        size_t m_pos = 0;
     };
 }

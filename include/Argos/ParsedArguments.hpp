@@ -18,7 +18,7 @@
  * @brief Defines the ParsedArguments class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
 
@@ -27,7 +27,7 @@ namespace Argos
      *      and option values.
      *
      * Instances of this class is returned by ArgumentParser::parse and
-     * ArgumentIterator::parsedArguments.
+     * ArgumentIterator::parsed_arguments.
      */
     class ParsedArguments
     {
@@ -105,7 +105,6 @@ namespace Argos
          */
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
-        [[nodiscard]]
         /**
          * @brief Returns all argument definitions that were registered with
          *  ArgumentParser.
@@ -113,7 +112,8 @@ namespace Argos
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
          */
-        std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
+        [[nodiscard]]
+        std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
 
         /**
          * @brief Returns all option definitions that were registered with
@@ -123,18 +123,18 @@ namespace Argos
          * defined options along with their given values.
          */
         [[nodiscard]]
-        std::vector<std::unique_ptr<OptionView>> allOptions() const;
+        std::vector<std::unique_ptr<OptionView>> all_options() const;
 
         /**
          * @brief Returns the parser result code.
          */
-        [[nodiscard]] ParserResultCode resultCode() const;
+        [[nodiscard]] ParserResultCode result_code() const;
 
         /**
          * @brief If the parser stopped early because it encountered an option
          *  of type, this function returns that option.
          */
-        [[nodiscard]] OptionView stopOption() const;
+        [[nodiscard]] OptionView stop_option() const;
 
         /**
          * @brief Returns the command line arguments that were ignored by the
@@ -143,13 +143,13 @@ namespace Argos
          * This function will always return an empty vector unless at least
          * one of the following is true:
          *
-         * - ArgumentParser::ignoreUndefinedArguments is true.
-         * - ArgumentParser::ignoreUndefinedOptions is true.
-         * - ArgumentParser::autoExit is false and there are options with type
+         * - ArgumentParser::ignore_undefined_arguments is true.
+         * - ArgumentParser::ignore_undefined_options is true.
+         * - ArgumentParser::auto_exit is false and there are options with type
          *   set to OptionType::STOP.
          */
         [[nodiscard]]
-        const std::vector<std::string>& unprocessedArguments() const;
+        const std::vector<std::string>& unprocessed_arguments() const;
 
         /**
          * @brief Removes parsed arguments and options from @a argv and
@@ -157,22 +157,22 @@ namespace Argos
          *
          * The first value in @a argv is assumed to be the program name and
          * is ignored, the remainder should be identical to the command line
-         * given to ArgumentParser::parse or ArgumentParser::makeIterator.
+         * given to ArgumentParser::parse or ArgumentParser::make_iterator.
          *
          * @note No memory is freed, the function only rearranges the pointers
          *  @a in argv.
          */
-        void filterParsedArguments(int& argc, char**& argv);
+        void filter_parsed_arguments(int& argc, char**& argv);
 
         /**
          * @brief Print @a msg along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
         void error(const std::string& msg);
     private:
-        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
 
     /**

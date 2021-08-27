@@ -13,29 +13,29 @@
 #include "ParsedArgumentsImpl.hpp"
 #include "StringUtilities.hpp"
 
-namespace Argos
+namespace argos
 {
     namespace
     {
         template <typename T>
-        T getInteger(const ArgumentValue& value, T defaultValue, int base)
+        T get_integer(const ArgumentValue& value, T default_value, int base)
         {
             auto s = value.value();
             if (!s)
-                return defaultValue;
-            auto n = parseInteger<T>(std::string(*s), base);
+                return default_value;
+            auto n = parse_integer<T>(std::string(*s), base);
             if (!n)
                 value.error();
             return *n;
         }
 
         template <typename T>
-        T getFloatingPoint(const ArgumentValue& value, T defaultValue)
+        T get_floating_point(const ArgumentValue& value, T default_value)
         {
             auto s = value.value();
             if (!s)
-                return defaultValue;
-            auto n = parseFloatingPoint<T>(std::string(*s));
+                return default_value;
+            auto n = parse_floating_point<T>(std::string(*s));
             if (!n)
                 value.error();
             return *n;
@@ -43,18 +43,18 @@ namespace Argos
     }
 
     ArgumentValue::ArgumentValue()
-        : m_ValueId(),
-          m_ArgumentId()
+        : m_value_id(),
+          m_argument_id()
     {}
 
     ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
-                                 ValueId valueId,
-                                 ArgumentId argumentId)
-        : m_Value(value),
-          m_Args(std::move(args)),
-          m_ValueId(valueId),
-          m_ArgumentId(argumentId)
+                                 ValueId value_id,
+                                 ArgumentId argument_id)
+        : m_value(value),
+          m_args(std::move(args)),
+          m_value_id(value_id),
+          m_argument_id(argument_id)
     {}
 
     ArgumentValue::ArgumentValue(const ArgumentValue&) = default;
@@ -71,110 +71,110 @@ namespace Argos
 
     ArgumentValue::operator bool() const
     {
-        return m_Value.has_value();
+        return m_value.has_value();
     }
 
     std::unique_ptr<IArgumentView>
     ArgumentValue::argument() const
     {
-        if (!m_Args)
+        if (!m_args)
             ARGOS_THROW("ArgumentValue has not been initialized.");
-        return m_Args->getArgumentView(m_ArgumentId);
+        return m_args->get_argument_view(m_argument_id);
     }
 
     std::optional<std::string_view> ArgumentValue::value() const
     {
-        return m_Value;
+        return m_value;
     }
 
-    bool ArgumentValue::asBool(bool defaultValue) const
+    bool ArgumentValue::as_bool(bool default_value) const
     {
-        if (!m_Value)
-            return defaultValue;
-        return !m_Value->empty() && m_Value != "0" && m_Value != "false";
+        if (!m_value)
+            return default_value;
+        return !m_value->empty() && m_value != "0" && m_value != "false";
     }
 
-    int ArgumentValue::asInt(int defaultValue, int base) const
+    int ArgumentValue::as_int(int default_value, int base) const
     {
-        return getInteger<int>(*this, defaultValue, base);
+        return get_integer<int>(*this, default_value, base);
     }
 
-    unsigned ArgumentValue::asUInt(unsigned defaultValue, int base) const
+    unsigned ArgumentValue::as_uint(unsigned default_value, int base) const
     {
-        return getInteger<unsigned>(*this, defaultValue, base);
+        return get_integer<unsigned>(*this, default_value, base);
     }
 
-    long ArgumentValue::asLong(long defaultValue, int base) const
+    long ArgumentValue::as_long(long default_value, int base) const
     {
-        return getInteger<long>(*this, defaultValue, base);
+        return get_integer<long>(*this, default_value, base);
     }
 
-    long long ArgumentValue::asLLong(long long defaultValue, int base) const
+    long long ArgumentValue::as_llong(long long default_value, int base) const
     {
-        return getInteger<long long>(*this, defaultValue, base);
+        return get_integer<long long>(*this, default_value, base);
     }
 
     unsigned long
-    ArgumentValue::asULong(unsigned long defaultValue, int base) const
+    ArgumentValue::as_ulong(unsigned long default_value, int base) const
     {
-        return getInteger<unsigned long>(*this, defaultValue, base);
+        return get_integer<unsigned long>(*this, default_value, base);
     }
 
     unsigned long long
-    ArgumentValue::asULLong(unsigned long long defaultValue, int base) const
+    ArgumentValue::as_ullong(unsigned long long default_value, int base) const
     {
-        return getInteger<unsigned long long>(*this, defaultValue, base);
+        return get_integer<unsigned long long>(*this, default_value, base);
     }
 
-    float ArgumentValue::asFloat(float defaultValue) const
+    float ArgumentValue::as_float(float default_value) const
     {
-        return getFloatingPoint<float>(*this, defaultValue);
+        return get_floating_point<float>(*this, default_value);
     }
 
-    double ArgumentValue::asDouble(double defaultValue) const
+    double ArgumentValue::as_double(double default_value) const
     {
-        return getFloatingPoint<double>(*this, defaultValue);
+        return get_floating_point<double>(*this, default_value);
     }
 
-    std::string ArgumentValue::asString(const std::string& defaultValue) const
+    std::string ArgumentValue::as_string(const std::string& default_value) const
     {
-        return m_Value ? std::string(*m_Value) : defaultValue;
+        return m_value ? std::string(*m_value) : default_value;
     }
 
     ArgumentValues
     ArgumentValue::split(char separator,
-                         size_t minParts, size_t maxParts) const
+                         size_t min_parts, size_t max_parts) const
     {
-        if (!m_Args)
+        if (!m_args)
             ARGOS_THROW("ArgumentValue has not been initialized.");
-        if (!m_Value)
-            return ArgumentValues({}, m_Args, m_ValueId);
-        auto parts = splitString(*m_Value, separator, maxParts - 1);
-        if (parts.size() < minParts)
+        if (!m_value)
+            return ArgumentValues({}, m_args, m_value_id);
+        auto parts = split_string(*m_value, separator, max_parts - 1);
+        if (parts.size() < min_parts)
         {
-            error("Invalid value: \"" + std::string(*m_Value)
-                  + "\". Must have at least " + std::to_string(minParts)
+            error("Invalid value: \"" + std::string(*m_value)
+                  + "\". Must have at least " + std::to_string(min_parts)
                   + " values separated by \"" + separator + "\".");
-            return ArgumentValues({}, m_Args, m_ValueId);
+            return ArgumentValues({}, m_args, m_value_id);
         }
         std::vector<std::pair<std::string_view, ArgumentId>> values;
         values.reserve(parts.size());
         for (auto& part : parts)
-            values.emplace_back(part, m_ArgumentId);
-        return {move(values), m_Args, m_ValueId};
+            values.emplace_back(part, m_argument_id);
+        return {move(values), m_args, m_value_id};
     }
 
     void ArgumentValue::error(const std::string& message) const
     {
-        if (!m_Args)
+        if (!m_args)
             ARGOS_THROW("ArgumentValue has not been initialized.");
-        m_Args->error(message, m_ArgumentId);
+        m_args->error(message, m_argument_id);
     }
 
     void ArgumentValue::error() const
     {
-        if (!m_Value)
+        if (!m_value)
             ARGOS_THROW("ArgumentValue has no value.");
-        error("Invalid value: " + std::string(*m_Value) + ".");
+        error("Invalid value: " + std::string(*m_value) + ".");
     }
 }

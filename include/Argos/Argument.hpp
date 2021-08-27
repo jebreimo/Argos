@@ -16,7 +16,7 @@
  * @brief Defines the Argument class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ArgumentData;
 
@@ -180,12 +180,12 @@ namespace Argos
         /**
          * @brief Set the number of times this argument must appear on the
          *      command line.
-         * @param minCount Can be any value.
-         * @param maxCount Must be greater than or equal to @a minCount.
+         * @param min_count Can be any value.
+         * @param max_count Must be greater than or equal to @a min_count.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& count(unsigned minCount, unsigned maxCount);
+        Argument& count(unsigned min_count, unsigned max_count);
 
         /**
          * @private
@@ -197,8 +197,8 @@ namespace Argos
          */
         std::unique_ptr<ArgumentData> release();
     private:
-        void checkArgument() const;
+        void check_argument() const;
 
-        std::unique_ptr<ArgumentData> m_Argument;
+        std::unique_ptr<ArgumentData> m_argument;
     };
 }

@@ -12,39 +12,39 @@
 #include <string>
 #include <type_traits>
 
-namespace Argos
+namespace argos
 {
     template <typename T>
-    std::optional<T> parseInteger(const std::string& str, int base);
+    std::optional<T> parse_integer(const std::string& str, int base);
 
     template <>
-    std::optional<int> parseInteger<int>(const std::string& str, int base);
+    std::optional<int> parse_integer<int>(const std::string& str, int base);
 
     template <>
     std::optional<unsigned>
-    parseInteger<unsigned>(const std::string& str, int base);
+    parse_integer<unsigned>(const std::string& str, int base);
 
     template <>
-    std::optional<long> parseInteger<long>(const std::string& str, int base);
+    std::optional<long> parse_integer<long>(const std::string& str, int base);
 
     template <>
     std::optional<long long>
-    parseInteger<long long>(const std::string& str, int base);
+    parse_integer<long long>(const std::string& str, int base);
 
     template <>
     std::optional<unsigned long>
-    parseInteger<unsigned long>(const std::string& str, int base);
+    parse_integer<unsigned long>(const std::string& str, int base);
 
     template <>
     std::optional<unsigned long long>
-    parseInteger<unsigned long long>(const std::string& str, int base);
+    parse_integer<unsigned long long>(const std::string& str, int base);
 
     template <typename T>
-    std::optional<T> parseFloatingPoint(const std::string& str);
+    std::optional<T> parse_floating_point(const std::string& str);
 
     template <>
-    std::optional<float> parseFloatingPoint<float>(const std::string& str);
+    std::optional<float> parse_floating_point<float>(const std::string& str);
 
     template <>
-    std::optional<double> parseFloatingPoint<double>(const std::string& str);
+    std::optional<double> parse_floating_point<double>(const std::string& str);
 }

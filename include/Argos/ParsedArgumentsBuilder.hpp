@@ -14,7 +14,7 @@
  * @brief Defines the ParsedArgumentsBuilder class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
 
@@ -106,7 +106,7 @@ namespace Argos
          * After it's been cleared, the argument or value will be treated as
          * if it hasn't been given any value at all, i.e. the default value
          * will be returned when its value is retrieved with
-         * ArgumentValue::asString et al.
+         * ArgumentValue::as_string et al.
          *
          * @param name The name (flag, alias etc.) of an argument or option.
          * @throw ArgosException if the name doesn't match any of names,
@@ -121,7 +121,7 @@ namespace Argos
          * After it's been cleared, the argument or value will be treated as
          * if it hasn't been given any value at all, i.e. the default value
          * will be returned when its value is retrieved with
-         * ArgumentValue::asString et al.
+         * ArgumentValue::as_string et al.
          */
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
@@ -167,18 +167,18 @@ namespace Argos
         /**
          * @brief Print @a msg along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
-        [[noreturn]] void error(const std::string& errorMessage);
+        [[noreturn]] void error(const std::string& msg);
 
         /**
          * @brief Print @a msg prefixed by the argument's name or option's
          *  flags along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& errorMessage, const IArgumentView& arg);
+        void error(const std::string& msg, const IArgumentView& arg);
 
         /**
          * @brief Returns the stream that was assigned to the
@@ -193,8 +193,8 @@ namespace Argos
          * @brief Returns the program name that was assigned to the
          *  ArgumentParser.
          */
-        [[nodiscard]] const std::string& programName() const;
+        [[nodiscard]] const std::string& program_name() const;
     private:
-        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
 }

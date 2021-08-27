@@ -10,9 +10,9 @@
 #include <algorithm>
 #include <string>
 
-namespace Argos
+namespace argos
 {
-    bool areEqualCharsCI(char a, char b)
+    bool are_equal_chars_ci(char a, char b)
     {
         if (a == b)
             return true;
@@ -22,43 +22,45 @@ namespace Argos
         return 'A' <= (ua & 0xDFu) && (ua & 0xDFu) <= 'Z';
     }
 
-    bool areEqualCI(std::string_view str1, std::string_view str2)
+    bool are_equal_ci(std::string_view str1, std::string_view str2)
     {
         if (str1.size() != str2.size())
             return false;
-        return std::equal(str2.begin(), str2.end(), str1.begin(), areEqualCharsCI);
+        return std::equal(str2.begin(), str2.end(), str1.begin(), are_equal_chars_ci);
     }
 
-    bool areEqual(std::string_view str1, std::string_view str2,
-                  bool caseInsensitive)
+    bool are_equal(std::string_view str1, std::string_view str2,
+                   bool case_insensitive)
     {
-        if (caseInsensitive)
-            return areEqualCI(str1, str2);
+        if (case_insensitive)
+            return are_equal_ci(str1, str2);
         return str1 == str2;
     }
 
-    bool startsWith(std::string_view str, std::string_view prefix)
+    bool starts_with(std::string_view str, std::string_view prefix)
     {
         if (str.size() < prefix.size())
             return false;
         return std::equal(prefix.begin(), prefix.end(), str.begin());
     }
 
-    bool startsWithCI(std::string_view str, std::string_view prefix)
+    bool starts_with_ci(std::string_view str, std::string_view prefix)
     {
         if (str.size() < prefix.size())
             return false;
-        return std::equal(prefix.begin(), prefix.end(), str.begin(), areEqualCharsCI);
+        return std::equal(prefix.begin(), prefix.end(), str.begin(),
+                          are_equal_chars_ci);
     }
 
-    bool startsWith(std::string_view str, std::string_view prefix, bool caseInsensitive)
+    bool starts_with(std::string_view str, std::string_view prefix,
+                     bool case_insensitive)
     {
-        if (caseInsensitive)
-            return startsWithCI(str, prefix);
-        return startsWith(str, prefix);
+        if (case_insensitive)
+            return starts_with_ci(str, prefix);
+        return starts_with(str, prefix);
     }
 
-    int compareCI(int c1, int c2)
+    int compare_ci(int c1, int c2)
     {
         if (c1 == c2)
             return 0;
@@ -69,40 +71,41 @@ namespace Argos
         return ic1 - ic2;
     }
 
-    bool isLessCI(std::string_view str1, std::string_view str2)
+    bool is_less_ci(std::string_view str1, std::string_view str2)
     {
         auto size = std::min(str1.size(), str2.size());
         for (size_t i = 0; i < size; ++i)
         {
-            if (auto cmp = compareCI(str1[i], str2[i]); cmp != 0)
+            if (auto cmp = compare_ci(str1[i], str2[i]); cmp != 0)
                 return cmp < 0;
         }
         return str1.size() < str2.size();
     }
 
-    bool isLess(std::string_view str1, std::string_view str2, bool caseInsensitive)
+    bool is_less(std::string_view str1, std::string_view str2,
+                 bool case_insensitive)
     {
-        if (caseInsensitive)
-            return isLessCI(str1, str2);
+        if (case_insensitive)
+            return is_less_ci(str1, str2);
         return str1 < str2;
     }
 
     std::vector<std::string_view>
-    splitString(std::string_view s, char delimiter, size_t maxSplit)
+    split_string(std::string_view s, char delimiter, size_t max_split)
     {
-        if (maxSplit == 0)
+        if (max_split == 0)
             return {s};
 
         std::vector<std::string_view> result;
         size_t pos = 0;
         while (true)
         {
-            auto nextPos = s.find(delimiter, pos);
-            result.push_back(s.substr(pos, nextPos - pos));
-            if (nextPos == std::string_view::npos)
+            auto next_pos = s.find(delimiter, pos);
+            result.push_back(s.substr(pos, next_pos - pos));
+            if (next_pos == std::string_view::npos)
                 break;
-            pos = nextPos + 1;
-            if (result.size() == maxSplit)
+            pos = next_pos + 1;
+            if (result.size() == max_split)
             {
                 result.push_back(s.substr(pos));
                 break;
@@ -111,13 +114,13 @@ namespace Argos
         return result;
     }
 
-    std::string_view getBaseName(std::string_view str)
+    std::string_view get_base_name(std::string_view str)
     {
         auto pos = str.find_last_of("/\\");
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
 
-    constexpr size_t getCodePointLength(char c) noexcept
+    constexpr size_t get_code_point_length(char c) noexcept
     {
         auto u = unsigned(static_cast<uint8_t>(c));
         if (u < 0x80)
@@ -135,23 +138,23 @@ namespace Argos
         return 0;
     }
 
-    size_t countCodePoints(std::string_view str)
+    size_t count_code_points(std::string_view str)
     {
         size_t count = 0;
-        size_t charLen = 0;
+        size_t char_len = 0;
         for (auto c : str)
         {
-            if (charLen == 0)
+            if (char_len == 0)
             {
-                charLen = getCodePointLength(c);
-                if (charLen == 0)
+                char_len = get_code_point_length(c);
+                if (char_len == 0)
                     return str.size();
                 ++count;
-                --charLen;
+                --char_len;
             }
             else if ((unsigned(static_cast<uint8_t>(c)) & 0xC0u) == 0x80u)
             {
-                --charLen;
+                --char_len;
             }
             else
             {
@@ -161,33 +164,33 @@ namespace Argos
         return count;
     }
 
-    size_t findNthCodePoint(std::string_view str, size_t n)
+    size_t find_nth_code_point(std::string_view str, size_t n)
     {
         if (n >= str.size())
             return std::string_view::npos;
         size_t count = 0;
-        size_t charLen = 0;
+        size_t char_len = 0;
         for (size_t i = 0; i < str.size(); ++i)
         {
-            if (charLen == 0)
+            if (char_len == 0)
             {
                 if (count == n)
                     return i;
-                charLen = getCodePointLength(str[i]);
-                if (charLen == 0)
+                char_len = get_code_point_length(str[i]);
+                if (char_len == 0)
                     return n;
                 ++count;
-                --charLen;
+                --char_len;
             }
             else if ((static_cast<uint8_t>(str[i]) & 0xC0u) == 0x80u)
             {
-                --charLen;
+                --char_len;
             }
             else
             {
                 return n;
             }
         }
-        return charLen ? n : std::string_view::npos;
+        return char_len ? n : std::string_view::npos;
     }
 }

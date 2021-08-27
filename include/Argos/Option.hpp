@@ -17,7 +17,7 @@
  * @brief Defines the Option class.
  */
 
-namespace Argos
+namespace argos
 {
     struct OptionData;
 
@@ -176,7 +176,7 @@ namespace Argos
         /**
          * @brief Set the flag of a single-flag option.
          * @param f a flag with one or two leading dashes or a slash depending
-         *  on the option style (ArgumentParser::optionStyle).
+         *  on the option style (ArgumentParser::option_style).
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -185,7 +185,7 @@ namespace Argos
         /**
          * @brief Set the flag of a multi-flag option.
          * @param f flags with one or two leading dashes or a slash depending
-         *  on the option style (ArgumentParser::optionStyle).
+         *  on the option style (ArgumentParser::option_style).
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -213,12 +213,12 @@ namespace Argos
          *
          * @note This is not the recommended way to specify a default value,
          *  prefer instead to use the defaultValue argument to ArgumentValue's
-         *  asString() et al. ParsedArguments can not distinguish between
-         *  values assigned through initialValue() and actual command line
+         *  as_string() et al. ParsedArguments can not distinguish between
+         *  values assigned through initial_value() and actual command line
          *  arguments. APPEND-options will not overwrite the initial value,
          *  but add its values after it.
          *
-         *  The initialValue can be useful if for instance one wants to use
+         *  The initial_value can be useful if for instance one wants to use
          *  ArgumentValue's split function on a default value read from a
          *  file or an environment variable, or want to prepend
          *  a value to a list built by options of operation "APPEND".
@@ -226,7 +226,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
-        Option& initialValue(const std::string& value);
+        Option& initial_value(const std::string& value);
 
         /**
          * @brief Sets the value that this option will assign to the
@@ -317,8 +317,8 @@ namespace Argos
          */
         std::unique_ptr<OptionData> release();
     private:
-        void checkOption() const;
+        void check_option() const;
 
-        std::unique_ptr<OptionData> m_Option;
+        std::unique_ptr<OptionData> m_option;
     };
 }

@@ -13,8 +13,8 @@
 TEST_CASE("Basic test of TextFormatter")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit.");
 }
@@ -22,13 +22,13 @@ TEST_CASE("Basic test of TextFormatter")
 TEST_CASE("Test TextFormatter with indentation")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
-    formatter.pushIndentation(17);
-    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
-    formatter.popIndentation();
-    formatter.writeWords(" ");
-    formatter.writeWords("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.push_indentation(17);
+    formatter.write_words("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    formatter.pop_indentation();
+    formatter.write_words(" ");
+    formatter.write_words("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == R"*(Lorem ipsum dolor sit amet, consectetur
 adipiscing elit. Lorem ipsum dolor sit
@@ -41,8 +41,8 @@ adipiscing elit.)*");
 TEST_CASE("Text with newlines")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words("Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == "Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit.");
 }
@@ -50,10 +50,10 @@ TEST_CASE("Text with newlines")
 TEST_CASE("Indentation change")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords("ABCDEFGHIJ");
-    formatter.pushIndentation(20);
-    formatter.writeWords("ABCDEFGHIJ");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words("ABCDEFGHIJ");
+    formatter.push_indentation(20);
+    formatter.write_words("ABCDEFGHIJ");
     formatter.flush();
     REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
 }
@@ -61,10 +61,10 @@ TEST_CASE("Indentation change")
 TEST_CASE("Indentation change with preformatted text")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeLines("ABCDEFGHIJ");
-    formatter.pushIndentation(20);
-    formatter.writeLines("ABCDEFGHIJ");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_lines("ABCDEFGHIJ");
+    formatter.push_indentation(20);
+    formatter.write_lines("ABCDEFGHIJ");
     formatter.flush();
     REQUIRE(ss.str() == "ABCDEFGHIJ          ABCDEFGHIJ");
 }
@@ -72,8 +72,8 @@ TEST_CASE("Indentation change with preformatted text")
 TEST_CASE("Keep whitespace at the start of a line.")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords(" Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words(" Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == " Lorem ipsum dolor\n  sit amet, consectetur\n   adipiscing elit.");
 }
@@ -81,17 +81,17 @@ TEST_CASE("Keep whitespace at the start of a line.")
 TEST_CASE("Preformatted text across several lines")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 30);
-    formatter.pushIndentation(5);
-    formatter.writeLines("[abc efg]");
-    formatter.writeWords(" ");
-    formatter.writeLines("[abc efg]");
-    formatter.writeWords(" ");
-    formatter.writeLines("[abc efg]");
-    formatter.writeWords(" ");
-    formatter.writeLines("[abc efg]");
-    formatter.writeWords(" ");
-    formatter.writeLines("[abc efg]");
+    argos::TextFormatter formatter(&ss, 30);
+    formatter.push_indentation(5);
+    formatter.write_lines("[abc efg]");
+    formatter.write_words(" ");
+    formatter.write_lines("[abc efg]");
+    formatter.write_words(" ");
+    formatter.write_lines("[abc efg]");
+    formatter.write_words(" ");
+    formatter.write_lines("[abc efg]");
+    formatter.write_words(" ");
+    formatter.write_lines("[abc efg]");
     formatter.flush();
     REQUIRE(ss.str() == "     [abc efg] [abc efg]\n     [abc efg] [abc efg]\n     [abc efg]");
 }
@@ -99,8 +99,8 @@ TEST_CASE("Preformatted text across several lines")
 TEST_CASE("TextFormatter with multi-byte characters")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 40);
-    formatter.writeWords(u8"Lorem ipsum dålår sit åmet, consøctetur adipiscing elit.");
+    argos::TextFormatter formatter(&ss, 40);
+    formatter.write_words(u8"Lorem ipsum dålår sit åmet, consøctetur adipiscing elit.");
     formatter.flush();
     REQUIRE(ss.str() == u8"Lorem ipsum dålår sit åmet, consøctetur\nadipiscing elit.");
 }
@@ -108,8 +108,8 @@ TEST_CASE("TextFormatter with multi-byte characters")
 TEST_CASE("TextFormatter splitting word, no rule")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 10);
-    formatter.writeWords(u8"Brønnøysundsregisteret");
+    argos::TextFormatter formatter(&ss, 10);
+    formatter.write_words(u8"Brønnøysundsregisteret");
     formatter.flush();
     REQUIRE(ss.str() == u8"Brønnøysu-\nndsregist-\neret");
 }
@@ -117,9 +117,9 @@ TEST_CASE("TextFormatter splitting word, no rule")
 TEST_CASE("TextFormatter splitting word with rule")
 {
     std::stringstream ss;
-    Argos::TextFormatter formatter(&ss, 12);
-    formatter.wordSplitter().addWord("Brønn øy sunds registeret");
-    formatter.writeWords(u8"Til Brønnøysundsregisteret");
+    argos::TextFormatter formatter(&ss, 12);
+    formatter.word_splitter().add_word("Brønn øy sunds registeret");
+    formatter.write_words(u8"Til Brønnøysundsregisteret");
     formatter.flush();
     REQUIRE(ss.str() == u8"Til Brønnøy-\nsunds-\nregisteret");
 }

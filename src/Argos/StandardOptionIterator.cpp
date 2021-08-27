@@ -8,103 +8,103 @@
 #include "StandardOptionIterator.hpp"
 #include "ArgosThrow.hpp"
 
-namespace Argos
+namespace argos
 {
     StandardOptionIterator::StandardOptionIterator()
-        : m_ArgsIt(m_Args.end()),
-          m_Pos(0)
+        : m_args_it(m_args.end()),
+          m_pos(0)
     {}
 
     StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
-        : m_Args(move(args)),
-          m_ArgsIt(m_Args.begin()),
-          m_Pos(0)
+        : m_args(move(args)),
+          m_args_it(m_args.begin()),
+          m_pos(0)
     {}
 
     StandardOptionIterator::StandardOptionIterator(const StandardOptionIterator& rhs)
-        : m_Args(rhs.m_Args),
-          m_ArgsIt(m_Args.begin() + std::distance(rhs.m_Args.begin(), rhs.m_ArgsIt)),
-          m_Pos(rhs.m_Pos)
+        : m_args(rhs.m_args),
+          m_args_it(m_args.begin() + std::distance(rhs.m_args.begin(), rhs.m_args_it)),
+          m_pos(rhs.m_pos)
     {}
 
     std::optional<std::string> StandardOptionIterator::next()
     {
-        if (m_Pos == std::string_view::npos)
+        if (m_pos == std::string_view::npos)
         {
-            m_Pos = 0;
-            ++m_ArgsIt;
+            m_pos = 0;
+            ++m_args_it;
         }
-        else if (m_Pos != 0)
+        else if (m_pos != 0)
         {
-            if (m_Pos < m_ArgsIt->size() && (*m_ArgsIt)[1] != '-')
+            if (m_pos < m_args_it->size() && (*m_args_it)[1] != '-')
             {
-                auto c = (*m_ArgsIt)[m_Pos++];
-                if (m_Pos == m_ArgsIt->size())
-                    m_Pos = std::string_view::npos;
+                auto c = (*m_args_it)[m_pos++];
+                if (m_pos == m_args_it->size())
+                    m_pos = std::string_view::npos;
                 return std::string{'-', c};
             }
-            ++m_ArgsIt;
-            m_Pos = 0;
+            ++m_args_it;
+            m_pos = 0;
         }
 
-        if (m_ArgsIt == m_Args.end())
+        if (m_args_it == m_args.end())
             return {};
 
-        if (m_ArgsIt->size() <= 2 || (*m_ArgsIt)[0] != '-')
+        if (m_args_it->size() <= 2 || (*m_args_it)[0] != '-')
         {
-            m_Pos = std::string_view::npos;
-            return std::string(*m_ArgsIt);
+            m_pos = std::string_view::npos;
+            return std::string(*m_args_it);
         }
 
-        if ((*m_ArgsIt)[1] != '-')
+        if ((*m_args_it)[1] != '-')
         {
-            m_Pos = 2;
-            return std::string(m_ArgsIt->substr(0, 2));
+            m_pos = 2;
+            return std::string(m_args_it->substr(0, 2));
         }
 
-        auto eq = m_ArgsIt->find('=');
+        auto eq = m_args_it->find('=');
         if (eq == std::string_view::npos)
         {
-            m_Pos = std::string_view::npos;
-            return std::string(*m_ArgsIt);
+            m_pos = std::string_view::npos;
+            return std::string(*m_args_it);
         }
 
-        m_Pos = eq + 1;
-        return std::string(m_ArgsIt->substr(0, m_Pos));
+        m_pos = eq + 1;
+        return std::string(m_args_it->substr(0, m_pos));
     }
 
-    std::optional<std::string> StandardOptionIterator::nextValue()
+    std::optional<std::string> StandardOptionIterator::next_value()
     {
-        if (m_ArgsIt == m_Args.end())
+        if (m_args_it == m_args.end())
             return {};
 
-        if (m_Pos != std::string_view::npos)
+        if (m_pos != std::string_view::npos)
         {
-            auto result = m_ArgsIt->substr(m_Pos);
-            m_Pos = std::string_view::npos;
+            auto result = m_args_it->substr(m_pos);
+            m_pos = std::string_view::npos;
             return std::string(result);
         }
 
-        if (++m_ArgsIt == m_Args.end())
+        if (++m_args_it == m_args.end())
         {
-            m_Pos = 0;
+            m_pos = 0;
             return {};
         }
 
-        return std::string(*m_ArgsIt);
+        return std::string(*m_args_it);
     }
 
     std::string_view StandardOptionIterator::current() const
     {
-        if (m_ArgsIt == m_Args.end())
+        if (m_args_it == m_args.end())
             ARGOS_THROW("There is no current argument.");
-        return *m_ArgsIt;
+        return *m_args_it;
     }
 
-    std::vector<std::string_view> StandardOptionIterator::remainingArguments() const
+    std::vector<std::string_view> StandardOptionIterator::remaining_arguments() const
     {
-        auto it = m_Pos == 0 ? m_ArgsIt : std::next(m_ArgsIt);
-        return std::vector<std::string_view>(it, m_Args.end());
+        auto it = m_pos == 0 ? m_args_it : std::next(m_args_it);
+        return std::vector<std::string_view>(it, m_args.end());
     }
 
     IOptionIterator* StandardOptionIterator::clone() const

@@ -12,11 +12,11 @@
 
 TEST_CASE("Test filter argc/argv")
 {
-    using namespace Argos;
+    using namespace argos;
     auto parser = ArgumentParser("test")
-        .autoExit(false)
-        .ignoreUndefinedOptions(true)
-        .ignoreUndefinedArguments(true)
+        .auto_exit(false)
+        .ignore_undefined_options(true)
+        .ignore_undefined_arguments(true)
         .add(Argument("FILE"))
         .add(Option{"-f"})
         .add(Option{"--g"})
@@ -27,7 +27,7 @@ TEST_CASE("Test filter argc/argv")
         int c = argv.size();
         char** v = argv.data();
         auto args = parser.parse(c, v);
-        args.filterParsedArguments(c, v);
+        args.filter_parsed_arguments(c, v);
         REQUIRE(c == 1);
         REQUIRE(std::string(v[0]) == "test");
     }
@@ -37,7 +37,7 @@ TEST_CASE("Test filter argc/argv")
         int c = argv.size();
         char** v = argv.data();
         auto args = parser.parse(c, v);
-        args.filterParsedArguments(c, v);
+        args.filter_parsed_arguments(c, v);
         REQUIRE(c == 4);
         REQUIRE(std::string(v[0]) == "test");
         REQUIRE(std::string(v[1]) == "-p");

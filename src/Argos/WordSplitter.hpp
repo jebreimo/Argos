@@ -12,26 +12,26 @@
 #include <string_view>
 #include <vector>
 
-namespace Argos
+namespace argos
 {
     class WordSplitter
     {
     public:
-        void addWord(std::string wordRule);
+        void add_word(std::string word_rule);
 
         std::tuple<std::string_view, char, std::string_view>
-        split(std::string_view word, size_t startIndex, size_t maxLength,
-              bool mustSplit) const;
+        split(std::string_view word, size_t start_index, size_t max_length,
+              bool must_split) const;
     private:
         std::tuple<std::string_view, char, std::string_view>
-        defaultRule(std::string_view word, size_t maxLength) const;
+        default_rule(std::string_view word, size_t max_length) const;
 
         struct Split
         {
             unsigned index;
             char separator;
         };
-        std::map<std::string_view, std::vector<Split>> m_Splits;
-        std::list<std::string> m_Strings;
+        std::map<std::string_view, std::vector<Split>> m_splits;
+        std::list<std::string> m_strings;
     };
 }

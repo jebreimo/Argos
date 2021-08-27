@@ -15,11 +15,11 @@
     #include <Windows.h>
 #endif
 
-namespace Argos
+namespace argos
 {
 #if defined(__APPLE__) || defined(unix) || defined(__unix) || defined(__unix__)
 
-    unsigned getConsoleWidth()
+    unsigned get_console_width()
     {
         winsize ws = {};
         if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) <= -1)
@@ -29,33 +29,33 @@ namespace Argos
 
 #elif defined(WIN32)
 
-    unsigned getConsoleWidth()
+    unsigned get_console_width()
     {
-        HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (hCon == INVALID_HANDLE_VALUE)
+        HANDLE h_con = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (h_con == INVALID_HANDLE_VALUE)
             return 0;
 
-        CONSOLE_SCREEN_BUFFER_INFO conInfo;
-        if (!GetConsoleScreenBufferInfo(hCon, &conInfo))
+        CONSOLE_SCREEN_BUFFER_INFO con_info;
+        if (!GetConsoleScreenBufferInfo(h_con, &con_info))
             return 0;
 
-        return unsigned(conInfo.srWindow.Right - conInfo.srWindow.Left);
+        return unsigned(con_info.srWindow.Right - con_info.srWindow.Left);
     }
 
 #else
 
-    unsigned getConsoleWidth()
+    unsigned get_console_width()
     {
         return 0;
     }
 
 #endif
 
-    unsigned getConsoleWidth(unsigned minWidth, unsigned int defaultWidth)
+    unsigned get_console_width(unsigned min_width, unsigned int default_width)
     {
-        auto width = getConsoleWidth();
+        auto width = get_console_width();
         if (width == 0)
-            return defaultWidth;
-        return width < minWidth ? minWidth : width;
+            return default_width;
+        return width < min_width ? min_width : width;
     }
 }

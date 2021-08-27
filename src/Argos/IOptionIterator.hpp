@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-namespace Argos
+namespace argos
 {
     class IOptionIterator
     {
@@ -20,11 +20,11 @@ namespace Argos
 
         virtual std::optional<std::string> next() = 0;
 
-        virtual std::optional<std::string> nextValue() = 0;
+        virtual std::optional<std::string> next_value() = 0;
 
         virtual std::string_view current() const = 0;
 
-        virtual std::vector<std::string_view> remainingArguments() const = 0;
+        virtual std::vector<std::string_view> remaining_arguments() const = 0;
 
         virtual IOptionIterator* clone() const = 0;
     };

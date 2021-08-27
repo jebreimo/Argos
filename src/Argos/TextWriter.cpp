@@ -11,105 +11,105 @@
 #include <algorithm>
 #include <iostream>
 
-namespace Argos
+namespace argos
 {
-    TextWriter::TextWriter(unsigned lineWidth)
-        : m_Stream(&std::cout),
-          m_LineWidth(lineWidth)
+    TextWriter::TextWriter(unsigned line_width)
+        : m_stream(&std::cout),
+          m_line_width(line_width)
     {}
 
     std::ostream* TextWriter::stream() const
     {
-        return m_Stream;
+        return m_stream;
     }
 
-    void TextWriter::setStream(std::ostream* stream)
+    void TextWriter::set_stream(std::ostream* stream)
     {
-        m_Stream = stream;
+        m_stream = stream;
     }
 
     unsigned TextWriter::indentation() const
     {
-        return m_Indent;
+        return m_indent;
     }
 
-    bool TextWriter::setIndentation(unsigned indent)
+    bool TextWriter::set_indentation(unsigned indent)
     {
-        if (m_Indent >= m_LineWidth)
+        if (m_indent >= m_line_width)
             return false;
-        m_Indent = indent;
+        m_indent = indent;
         return true;
     }
 
     bool TextWriter::write(std::string_view str, bool force)
     {
-        auto width = currentWidth();
-        auto remaining = std::max(width, m_LineWidth) - width;
-        auto strWidth = static_cast<unsigned>(countCodePoints(str));
-        if (!force && strWidth > remaining)
+        auto width = current_width();
+        auto remaining = std::max(width, m_line_width) - width;
+        auto str_width = static_cast<unsigned>(count_code_points(str));
+        if (!force && str_width > remaining)
             return false;
-        m_Line.append(width - m_CurrentLineWidth, ' ');
-        m_Spaces = 0;
-        m_Line.append(str);
-        m_CurrentLineWidth += width - m_CurrentLineWidth + strWidth;
+        m_line.append(width - m_current_line_width, ' ');
+        m_spaces = 0;
+        m_line.append(str);
+        m_current_line_width += width - m_current_line_width + str_width;
         return true;
     }
 
     void TextWriter::newline()
     {
-        m_Line.push_back('\n');
-        m_CurrentLineWidth = 0;
+        m_line.push_back('\n');
+        m_current_line_width = 0;
         flush();
     }
 
     void TextWriter::flush()
     {
-        m_Stream->write(m_Line.data(), m_Line.size());
-        m_Line.clear();
+        m_stream->write(m_line.data(), m_line.size());
+        m_line.clear();
     }
 
     void TextWriter::tab()
     {
-        m_Spaces += m_TabSize - (currentWidth() % m_TabSize);
+        m_spaces += m_tab_size - (current_width() % m_tab_size);
     }
 
     unsigned TextWriter::spaces() const
     {
-        return m_Spaces;
+        return m_spaces;
     }
 
-    void TextWriter::setSpaces(unsigned n)
+    void TextWriter::set_spaces(unsigned n)
     {
-        m_Spaces = n;
+        m_spaces = n;
     }
 
-    unsigned TextWriter::currentWidth() const
+    unsigned TextWriter::current_width() const
     {
-        return std::max(m_CurrentLineWidth, m_Indent) + m_Spaces;
+        return std::max(m_current_line_width, m_indent) + m_spaces;
     }
 
-    unsigned TextWriter::remainingWidth() const
+    unsigned TextWriter::remaining_width() const
     {
-        return m_LineWidth - std::min(currentWidth(), m_LineWidth);
+        return m_line_width - std::min(current_width(), m_line_width);
     }
 
-    bool TextWriter::isCurrentLineEmpty() const
+    bool TextWriter::is_current_line_empty() const
     {
-        return m_Line.empty();
+        return m_line.empty();
     }
 
-    unsigned TextWriter::lineWidth() const
+    unsigned TextWriter::line_width() const
     {
-        return m_LineWidth;
+        return m_line_width;
     }
 
-    void TextWriter::setLineWidth(unsigned width)
+    void TextWriter::set_line_width(unsigned width)
     {
-        m_LineWidth = width;
+        m_line_width = width;
     }
 
     std::string_view TextWriter::currentLine() const
     {
-        return m_Line;
+        return m_line;
     }
 }

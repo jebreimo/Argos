@@ -17,7 +17,7 @@
  * @brief Defines the ArgumentParser class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ParserData;
 
@@ -35,15 +35,15 @@ namespace Argos
         /**
          * @brief Creates a new argument parser.
          *
-         * @param programName The name of the program that will be displayed
+         * @param program_name The name of the program that will be displayed
          *      in the help text and error messages.
-         * @param extractFileName Set this to true if @a programName is a
+         * @param extract_file_name Set this to true if @a program_name is a
          *      path that may contain directories, but the help text should
          *      only use the file name part. This is particularly useful if
-         *      @a argv[0] is used as the programName.
+         *      @a argv[0] is used as the program_name.
          */
-        explicit ArgumentParser(std::string_view programName,
-                                bool extractFileName = true);
+        explicit ArgumentParser(std::string_view program_name,
+                                bool extract_file_name = true);
 
         /**
          * @brief Moves the innards of the old object to the new one.
@@ -156,13 +156,13 @@ namespace Argos
          *      in argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator(). All method calls on an
+         *      the non-const version of make_iterator(). All method calls on an
          *      invalid ArgumentParser will throw an exception.
          *
          * @throw ArgosException if there are two or more options that use
          *      the same flag.
          */
-        [[nodiscard]] ArgumentIterator makeIterator(int argc, char* argv[]);
+        [[nodiscard]] ArgumentIterator make_iterator(int argc, char* argv[]);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -172,7 +172,7 @@ namespace Argos
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(int argc, char* argv[]) const;
+        ArgumentIterator make_iterator(int argc, char* argv[]) const;
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -182,14 +182,14 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator(). All method calls on an
+         *      the non-const version of make_iterator(). All method calls on an
          *      invalid ArgumentParser will throw an exception.
          *
          * @throw ArgosException if there are two or more options that use
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(std::vector<std::string_view> args);
+        ArgumentIterator make_iterator(std::vector<std::string_view> args);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -202,12 +202,12 @@ namespace Argos
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(std::vector<std::string_view> args) const;
+        ArgumentIterator make_iterator(std::vector<std::string_view> args) const;
 
         /**
          * @brief Returns true if the ArgumentParser allows abbreviated options.
          */
-        [[nodiscard]] bool allowAbbreviatedOptions() const;
+        [[nodiscard]] bool allow_abbreviated_options() const;
 
         /**
          * @brief Enable or disable abbreviated options.
@@ -220,14 +220,14 @@ namespace Argos
          * sufficient to write "--b" on the command line to enable the latter,
          * and "--fo" and "--fi" for the first two.
          */
-        ArgumentParser& allowAbbreviatedOptions(bool value);
+        ArgumentParser& allow_abbreviated_options(bool value);
 
         /**
          * @brief Returns true if the program automatically exits if the
          *      command line has invalid options or arguments, or the help
          *      option is given.
          */
-        [[nodiscard]] bool autoExit() const;
+        [[nodiscard]] bool auto_exit() const;
 
         /**
          * @brief Enable or disable automatic exit when the command line has
@@ -235,12 +235,12 @@ namespace Argos
          *
          * Automatic exit is on by default.
          */
-        ArgumentParser& autoExit(bool value);
+        ArgumentParser& auto_exit(bool value);
 
         /**
          * @brief Returns true if option flags are case insensitive.
          */
-        [[nodiscard]] bool caseInsensitive() const;
+        [[nodiscard]] bool case_insensitive() const;
 
         /**
          * @brief Enable or disable case insensitive option flags.
@@ -248,13 +248,13 @@ namespace Argos
          * @note Case-insensitivity will only work for ASCII-letters (i.e.
          *      a-z and A-Z).
          */
-        ArgumentParser& caseInsensitive(bool value);
+        ArgumentParser& case_insensitive(bool value);
 
         /**
          * @brief Returns whether or not a help option will be auto-generated
          *      if none has been added explicitly.
          */
-        [[nodiscard]] bool generateHelpOption() const;
+        [[nodiscard]] bool generate_help_option() const;
 
         /**
          * @brief Turn auto-generation of help option on or off.
@@ -267,12 +267,12 @@ namespace Argos
          *
          * By default this is on.
          */
-        ArgumentParser& generateHelpOption(bool value);
+        ArgumentParser& generate_help_option(bool value);
 
         /**
          * @brief Returns the current option style.
          */
-        [[nodiscard]] OptionStyle optionStyle() const;
+        [[nodiscard]] OptionStyle option_style() const;
 
         /**
          * @brief Set the option style.
@@ -280,13 +280,13 @@ namespace Argos
          * @note The option style can not be changed once any options have been
          *      added.
          */
-        ArgumentParser& optionStyle(OptionStyle value);
+        ArgumentParser& option_style(OptionStyle value);
 
         /**
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.
          */
-        [[nodiscard]] bool ignoreUndefinedArguments() const;
+        [[nodiscard]] bool ignore_undefined_arguments() const;
 
         /**
          * @brief Enable or disable treating undefined arguments on the command
@@ -295,13 +295,13 @@ namespace Argos
          * Ignoring undefined arguments can be useful when more than one
          * function are interpreting the command line.
          */
-        ArgumentParser& ignoreUndefinedArguments(bool value);
+        ArgumentParser& ignore_undefined_arguments(bool value);
 
         /**
          * @brief Returns true if undefined options on the command line
          *      will not be treated as errors.
          */
-        [[nodiscard]] bool ignoreUndefinedOptions() const;
+        [[nodiscard]] bool ignore_undefined_options() const;
 
         /**
          * @brief Enable or disable treating undefined options on the command
@@ -310,7 +310,7 @@ namespace Argos
          * Ignoring undefined options can be useful when more than one function
          * are interpreting the command line.
          */
-        ArgumentParser& ignoreUndefinedOptions(bool value);
+        ArgumentParser& ignore_undefined_options(bool value);
 
         /**
          * @brief Returns the callback function that will be called for every
@@ -318,13 +318,13 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        [[nodiscard]] const ArgumentCallback& argumentCallback() const;
+        [[nodiscard]] const ArgumentCallback& argument_callback() const;
 
         /**
          * @brief Set the callback function that will be called for every
          *      argument.
          */
-        ArgumentParser& argumentCallback(ArgumentCallback callback);
+        ArgumentParser& argument_callback(ArgumentCallback callback);
 
         /**
          * @brief Returns the callback function that will be called for every
@@ -332,13 +332,13 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        [[nodiscard]] const OptionCallback& optionCallback() const;
+        [[nodiscard]] const OptionCallback& option_callback() const;
 
         /**
          * @brief Set the callback function that will be called for every
          *      option.
          */
-        ArgumentParser& optionCallback(OptionCallback callback);
+        ArgumentParser& option_callback(OptionCallback callback);
 
         /**
          * @brief Returns the stream that the help text and error messages are
@@ -360,14 +360,14 @@ namespace Argos
         /**
          * @brief Return the program name.
          */
-        [[nodiscard]] const std::string& programName() const;
+        [[nodiscard]] const std::string& program_name() const;
 
         /**
          * @brief Set the program name.
          *
          * @note The program name can also be set by the constructor.
          */
-        ArgumentParser& programName(const std::string& name);
+        ArgumentParser& program_name(const std::string& name);
 
         /**
          * @brief Set the help text that will appear between the usage section
@@ -393,7 +393,7 @@ namespace Argos
          * The line width defaults to the width of the console or terminal
          * window.
          */
-        ArgumentParser& lineWidth(unsigned lineWidth);
+        ArgumentParser& line_width(unsigned line_width);
 
         /**
          * @brief Write the help text.
@@ -401,7 +401,7 @@ namespace Argos
          * @note The help text is displayed automatically when a help option
          *      is used.
          */
-        void writeHelpText() const;
+        void write_help_text() const;
 
         /**
          * @brief Inform Argos how a long word is to be split over multiple
@@ -416,7 +416,7 @@ namespace Argos
          * it can split the word "comprehensive" as either "compre-" "hensive"
          * or "comprehen-" "sive" (or even "compre-" "hen-" "sive").
          */
-        ArgumentParser& addWordSplittingRule(std::string str);
+        ArgumentParser& add_word_splitting_rule(std::string str);
 
         /**
          * @brief Makes it possible to construct an ArgumentParser with chained
@@ -424,10 +424,10 @@ namespace Argos
          */
         ArgumentParser&& move();
     private:
-        void checkData() const;
+        void check_data() const;
 
-        [[nodiscard]] ArgumentId nextArgumentId() const;
+        [[nodiscard]] ArgumentId next_argument_id() const;
 
-        std::unique_ptr<ParserData> m_Data;
+        std::unique_ptr<ParserData> m_data;
     };
 }

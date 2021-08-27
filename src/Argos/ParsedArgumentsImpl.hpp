@@ -10,7 +10,7 @@
 #include "Argos/IArgumentView.hpp"
 #include "ParserData.hpp"
 
-namespace Argos
+namespace argos
 {
     class ArgumentIteratorImpl;
 
@@ -19,57 +19,57 @@ namespace Argos
     public:
         explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
-        bool has(ValueId valueId) const;
+        bool has(ValueId value_id) const;
 
-        const std::vector<std::string>& unprocessedArguments() const;
+        const std::vector<std::string>& unprocessed_arguments() const;
 
-        void addUnprocessedArgument(const std::string& arg);
+        void add_unprocessed_argument(const std::string& arg);
 
-        std::string_view assignValue(ValueId valueId,
-                                     const std::string& value,
-                                     ArgumentId argumentId);
+        std::string_view assign_value(ValueId value_id,
+                                      const std::string& value,
+                                      ArgumentId argument_id);
 
-        std::string_view appendValue(ValueId valueId,
-                                     const std::string& value,
-                                     ArgumentId argumentId);
+        std::string_view append_value(ValueId value_id,
+                                      const std::string& value,
+                                      ArgumentId argument_id);
 
-        void clearValue(ValueId valueId);
+        void clear_value(ValueId value_id);
 
-        ValueId getValueId(std::string_view valueName) const;
+        ValueId get_value_id(std::string_view value_name) const;
 
         std::optional<std::pair<std::string_view, ArgumentId>>
-        getValue(ValueId valueId) const;
+        get_value(ValueId value_id) const;
 
         std::vector<std::pair<std::string_view, ArgumentId>>
-        getValues(ValueId valueId) const;
+        get_values(ValueId value_id) const;
 
         std::vector<std::unique_ptr<IArgumentView>>
-        getArgumentViews(ValueId valueId) const;
+        get_argument_views(ValueId value_id) const;
 
         std::unique_ptr<IArgumentView>
-        getArgumentView(ArgumentId argumentId) const;
+        get_argument_view(ArgumentId argument_id) const;
 
-        const std::shared_ptr<ParserData>& parserData() const;
+        const std::shared_ptr<ParserData>& parser_data() const;
 
-        ParserResultCode resultCode() const;
+        ParserResultCode result_code() const;
 
-        void setResultCode(ParserResultCode resultCode);
+        void set_result_code(ParserResultCode result_code);
 
-        const OptionData* stopOption() const;
+        const OptionData* stop_option() const;
 
-        void setBreakingOption(const OptionData* option);
+        void set_breaking_option(const OptionData* option);
 
         [[noreturn]]
         void error(const std::string& message);
 
         [[noreturn]]
-        void error(const std::string& message, ArgumentId argumentId);
+        void error(const std::string& message, ArgumentId argument_id);
     private:
-        std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_Values;
-        std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_Ids;
-        std::vector<std::string> m_UnprocessedArguments;
-        std::shared_ptr<ParserData> m_Data;
-        ParserResultCode m_ResultCode = ParserResultCode::NONE;
-        const OptionData* m_StopOption = nullptr;
+        std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_values;
+        std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_ids;
+        std::vector<std::string> m_unprocessed_arguments;
+        std::shared_ptr<ParserData> m_data;
+        ParserResultCode m_result_code = ParserResultCode::NONE;
+        const OptionData* m_stop_option = nullptr;
     };
 }

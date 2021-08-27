@@ -12,11 +12,11 @@
 
 TEST_CASE("Basic TextWriter")
 {
-    Argos::TextWriter writer(20);
+    argos::TextWriter writer(20);
     std::stringstream ss;
-    writer.setStream(&ss);
+    writer.set_stream(&ss);
     writer.write("Word", false);
-    writer.setSpaces(1);
+    writer.set_spaces(1);
     writer.write("word", false);
     writer.write("word", false);
     writer.flush();

@@ -12,7 +12,7 @@
  * @brief Defines the enum types used throughout Argos.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief The different option styles supported by Argos.
@@ -106,10 +106,10 @@ namespace Argos
          * @brief Argos will display the help text and not process any
          *      subsequent arguments or options.
          *
-         * If ArgumentParser::autoExit is true the program will exit after
+         * If ArgumentParser::auto_exit is true the program will exit after
          * displaying the help text, if it's not, all remaining arguments and
          * options on the command line are available in ParsedArgument's
-         * unprocessedArguments.
+         * unprocessed_arguments.
          */
         HELP,
         /**
@@ -122,18 +122,18 @@ namespace Argos
          * displays its version and ignores all other arguments.
          *
          * All remaining arguments and options on the command line are
-         * available in ParsedArgument's unprocessedArguments.
+         * available in ParsedArgument's unprocessed_arguments.
          */
         STOP,
         /**
          * @brief Similar to STOP, but program will exit if
-         *  ArgumentParser::autoExit is true.
+         *  ArgumentParser::auto_exit is true.
          *
          * Any callbacks assigned to the option or argument parser will be
          * executed first, then the program exits. Use this option type for
          * "--version" options etc.
          *
-         * Identical to STOP if ArgumentParser::autoExit is false.
+         * Identical to STOP if ArgumentParser::auto_exit is false.
          */
         EXIT,
         /**
@@ -144,7 +144,7 @@ namespace Argos
          * treated as errors when this option type is used.
          *
          * All remaining arguments and options on the command line are
-         * available in ParsedArgument's unprocessedArguments. The flag for
+         * available in ParsedArgument's unprocessed_arguments. The flag for
          * this option type is typically '--'.
          */
         LAST_ARGUMENT,
@@ -174,12 +174,12 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or EXIT if autoExit is false).
+         *      of type STOP (or EXIT if auto_exit is false).
          */
         STOP,
         /**
          * @brief The argument parser encountered an incorrect option or
-         *      argument (and autoExit is false).
+         *      argument (and auto_exit is false).
          */
         ERROR
     };

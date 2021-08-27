@@ -11,9 +11,9 @@
 
 int main(int argc, char* argv[])
 {
-    using namespace Argos;
+    using namespace argos;
     auto args = ArgumentParser("ArgosTestApp")
-            .allowAbbreviatedOptions(true)
+            .allow_abbreviated_options(true)
             .add(Argument("file").count(1, UINT_MAX)
                 .help("A file of some kind."))
             .add(Option({"-r", "--resolution"}).argument("HOR,VER")

@@ -17,7 +17,7 @@
  * @brief Defines the ArgumentValue class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
     class ArgumentValues;
@@ -41,8 +41,8 @@ namespace Argos
          */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
-                      ValueId valueId,
-                      ArgumentId argumentId);
+                      ValueId value_id,
+                      ArgumentId argument_id);
 
         /**
          * @private
@@ -92,178 +92,178 @@ namespace Argos
         [[nodiscard]] std::optional<std::string_view> value() const;
 
         /**
-         * @brief Returns defaultValue if the value was not given on the
+         * @brief Returns default_value if the value was not given on the
          *      command line, otherwise it returns true unless the given value
          *      is "0" or "false".
          */
-        [[nodiscard]] bool asBool(bool defaultValue = false) const;
+        [[nodiscard]] bool as_bool(bool default_value = false) const;
 
         /**
          * @brief Converts the value from the command line to int and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to int, an error message
-         * is displayed and the program either exits (autoExit is true) or
-         * the function throws an exception (autoExit is false). The actual
+         * is displayed and the program either exits (auto_exit is true) or
+         * the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtol and @a base is passed unmodified
          * to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to int.
          */
-        [[nodiscard]] int asInt(int defaultValue = 0, int base = 10) const;
+        [[nodiscard]] int as_int(int default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned int
          *      and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned int, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoul and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned int.
          */
         [[nodiscard]]
-        unsigned asUInt(unsigned defaultValue = 0, int base = 10) const;
+        unsigned as_uint(unsigned default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtol and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to long.
          */
-        [[nodiscard]] long asLong(long defaultValue = 0, int base = 10) const;
+        [[nodiscard]] long as_long(long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to long long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to long long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoll and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to long long.
          */
         [[nodiscard]]
-        long long asLLong(long long defaultValue = 0, int base = 10) const;
+        long long as_llong(long long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoul and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned long.
          */
         [[nodiscard]] unsigned long
-        asULong(unsigned long defaultValue = 0, int base = 10) const;
+        as_ulong(unsigned long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned long
          *      long and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned long long,
-         * an error message is displayed and the program either exits (autoExit
-         * is true) or the function throws an exception (autoExit is false).
+         * an error message is displayed and the program either exits (auto_exit
+         * is true) or the function throws an exception (auto_exit is false).
          * The actual conversion is performed by @a strtoul and @a base is
          * passed unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned long.
          */
         [[nodiscard]] unsigned long long
-        asULLong(unsigned long long defaultValue = 0, int base = 10) const;
+        as_ullong(unsigned long long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to float and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to float, an error message
-         * is displayed and the program either exits (autoExit is true) or the
-         * function throws an exception (autoExit is false).
+         * is displayed and the program either exits (auto_exit is true) or the
+         * function throws an exception (auto_exit is false).
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to float.
          */
-        [[nodiscard]] float asFloat(float defaultValue = 0) const;
+        [[nodiscard]] float as_float(float default_value = 0) const;
 
         /**
          * @brief Converts the value from the command line to double and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to double, an error message
-         * is displayed and the program either exits (autoExit is true) or the
-         * function throws an exception (autoExit is false).
+         * is displayed and the program either exits (auto_exit is true) or the
+         * function throws an exception (auto_exit is false).
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to double.
          */
-        [[nodiscard]] double asDouble(double defaultValue = 0) const;
+        [[nodiscard]] double as_double(double default_value = 0) const;
 
         /**
          * @brief Returns the value from the command line as a string.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          */
         [[nodiscard]] std::string
-        asString(const std::string& defaultValue = {}) const;
+        as_string(const std::string& default_value = {}) const;
 
         /**
          * @brief Splits the string from the command line on @a separator and
          *      returns the resulting parts.
          *
          * An error message is displayed if the result has less than
-         * @a minParts parts (i.e. number of separators is less than
-         * minParts - 1). The result will never consist of more than
-         * @a maxParts parts, even if there are more occurrences of
+         * @a min_parts parts (i.e. number of separators is less than
+         * min_parts - 1). The result will never consist of more than
+         * @a max_parts parts, even if there are more occurrences of
          * @a separator in the value, it just means that the final part will
          * contain one or more separators. The only exception is if
-         * @a maxParts is zero (the default), which means there is no upper
+         * @a max_parts is zero (the default), which means there is no upper
          * limit to the number of parts.
          *
-         * @throw ArgosException if @a autoExit is false and the result
-         *      has less than @a minParts parts.
+         * @throw ArgosException if @a auto_exit is false and the result
+         *      has less than @a min_parts parts.
          */
         [[nodiscard]] ArgumentValues
-        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+        split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
          * Display @a message as if it was an error produced within Argos
          * itself, including a reference to the argument or option this value
-         * comes from and the usage section from the help text. If autoExit is
+         * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message.
          */
         void error(const std::string& message) const;
@@ -274,9 +274,9 @@ namespace Argos
          */
         void error() const;
     private:
-        std::optional<std::string_view> m_Value;
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId;
-        ArgumentId m_ArgumentId;
+        std::optional<std::string_view> m_value;
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id;
+        ArgumentId m_argument_id;
     };
 }

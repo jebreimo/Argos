@@ -14,7 +14,7 @@
 #include "TextWriter.hpp"
 #include "WordSplitter.hpp"
 
-namespace Argos
+namespace argos
 {
     class TextFormatter
     {
@@ -23,40 +23,40 @@ namespace Argos
 
         explicit TextFormatter(std::ostream* stream);
 
-        TextFormatter(std::ostream* stream, unsigned lineWidth);
+        TextFormatter(std::ostream* stream, unsigned line_width);
 
-        WordSplitter& wordSplitter();
+        WordSplitter& word_splitter();
 
         std::ostream* stream() const;
 
-        void setStream(std::ostream* stream);
+        void set_stream(std::ostream* stream);
 
-        unsigned lineWidth() const;
+        unsigned line_width() const;
 
-        void setLineWidth(unsigned lineWidth);
+        void set_line_width(unsigned line_width);
 
-        unsigned currentLineWidth() const;
+        unsigned current_line_width() const;
 
-        bool isCurrentLineEmpty() const;
+        bool is_current_line_empty() const;
 
         static constexpr unsigned CURRENT_COLUMN = UINT_MAX;
 
-        void pushIndentation(unsigned indent);
+        void push_indentation(unsigned indent);
 
-        void popIndentation();
+        void pop_indentation();
 
-        void writeWords(std::string_view text);
+        void write_words(std::string_view text);
 
-        void writeLines(std::string_view text);
+        void write_lines(std::string_view text);
 
         void newline();
 
         void flush();
     private:
-        void appendWord(std::string_view word);
+        void append_word(std::string_view word);
 
-        TextWriter m_Writer;
-        std::vector<unsigned> m_Indents;
-        WordSplitter m_WordSplitter;
+        TextWriter m_writer;
+        std::vector<unsigned> m_indents;
+        WordSplitter m_word_splitter;
     };
 }

@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.104.1";
+constexpr char ARGOS_VERSION[] = "0.105.0";
 
 /**
  * @brief Incremented if a new version is significantly incompatible
@@ -27,13 +27,13 @@ constexpr char ARGOS_VERSION[] = "0.104.1";
  * @brief Incremented when Argos's interface is modified without introducing
  *      incompatibilities with previous versions.
  */
-#define ARGOS_VERSION_MINOR 104
+#define ARGOS_VERSION_MINOR 105
 
 /**
  * @brief Incremented when Argos's internals are modified without modifying
  *      its interface.
  */
-#define ARGOS_VERSION_PATCH 1
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -54,7 +54,7 @@ constexpr char ARGOS_VERSION[] = "0.104.1";
 /**
  * @brief The namespace for all Argos classes and functions.
  */
-namespace Argos
+namespace argos
 {
     /**
      * @brief The exception class used throughout Argos.
@@ -91,7 +91,7 @@ namespace Argos
  * @brief Defines the enum types used throughout Argos.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief The different option styles supported by Argos.
@@ -185,10 +185,10 @@ namespace Argos
          * @brief Argos will display the help text and not process any
          *      subsequent arguments or options.
          *
-         * If ArgumentParser::autoExit is true the program will exit after
+         * If ArgumentParser::auto_exit is true the program will exit after
          * displaying the help text, if it's not, all remaining arguments and
          * options on the command line are available in ParsedArgument's
-         * unprocessedArguments.
+         * unprocessed_arguments.
          */
         HELP,
         /**
@@ -201,18 +201,18 @@ namespace Argos
          * displays its version and ignores all other arguments.
          *
          * All remaining arguments and options on the command line are
-         * available in ParsedArgument's unprocessedArguments.
+         * available in ParsedArgument's unprocessed_arguments.
          */
         STOP,
         /**
          * @brief Similar to STOP, but program will exit if
-         *  ArgumentParser::autoExit is true.
+         *  ArgumentParser::auto_exit is true.
          *
          * Any callbacks assigned to the option or argument parser will be
          * executed first, then the program exits. Use this option type for
          * "--version" options etc.
          *
-         * Identical to STOP if ArgumentParser::autoExit is false.
+         * Identical to STOP if ArgumentParser::auto_exit is false.
          */
         EXIT,
         /**
@@ -223,7 +223,7 @@ namespace Argos
          * treated as errors when this option type is used.
          *
          * All remaining arguments and options on the command line are
-         * available in ParsedArgument's unprocessedArguments. The flag for
+         * available in ParsedArgument's unprocessed_arguments. The flag for
          * this option type is typically '--'.
          */
         LAST_ARGUMENT,
@@ -253,12 +253,12 @@ namespace Argos
         SUCCESS,
         /**
          * @brief The argument parser encountered an option
-         *      of type STOP (or EXIT if autoExit is false).
+         *      of type STOP (or EXIT if auto_exit is false).
          */
         STOP,
         /**
          * @brief The argument parser encountered an incorrect option or
-         *      argument (and autoExit is false).
+         *      argument (and auto_exit is false).
          */
         ERROR
     };
@@ -373,7 +373,7 @@ namespace Argos
  * @brief Defines the IArgumentView interface class.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief Interface class with the functions ArgumentView and OptionView
@@ -423,15 +423,15 @@ namespace Argos
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
-        virtual ValueId valueId() const = 0;
+        virtual ValueId value_id() const = 0;
 
         /**
-         * @brief Returns the argument's or option's argumentId().
+         * @brief Returns the argument's or option's argument_id().
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        virtual ArgumentId argumentId() const = 0;
+        virtual ArgumentId argument_id() const = 0;
     };
 }
 
@@ -448,7 +448,7 @@ namespace Argos
  * @brief Defines the ArgumentView class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ArgumentData;
 
@@ -505,15 +505,15 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        [[nodiscard]] ValueId valueId() const final;
+        [[nodiscard]] ValueId value_id() const final;
 
         /**
-         * @brief Returns the argument's argumentId().
+         * @brief Returns the argument's argument id.
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        [[nodiscard]] ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argument_id() const final;
 
         /**
          * @brief Returns the argument's name.
@@ -533,7 +533,7 @@ namespace Argos
          */
         [[nodiscard]] std::pair<unsigned, unsigned> count() const;
     private:
-        const ArgumentData* m_Argument;
+        const ArgumentData* m_argument;
     };
 }
 
@@ -551,7 +551,7 @@ namespace Argos
  * @brief Defines the OptionView class.
  */
 
-namespace Argos
+namespace argos
 {
     struct OptionData;
 
@@ -608,15 +608,15 @@ namespace Argos
          *      a value of 0, all other options and arguments have a value
          *      greater than 0.
          */
-        [[nodiscard]] ValueId valueId() const final;
+        [[nodiscard]] ValueId value_id() const final;
 
         /**
-         * @brief Returns the option's argumentId().
+         * @brief Returns the option's argument id.
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        [[nodiscard]] ArgumentId argumentId() const final;
+        [[nodiscard]] ArgumentId argument_id() const final;
 
         /**
          * @brief Returns the option's operation.
@@ -636,7 +636,7 @@ namespace Argos
         /**
          * @brief Returns the option's initial value.
          */
-        [[nodiscard]] const std::string& initialValue() const;
+        [[nodiscard]] const std::string& initial_value() const;
 
         /**
          * @brief Returns the option's constant.
@@ -656,7 +656,7 @@ namespace Argos
          */
         [[nodiscard]] bool optional() const;
     private:
-        const OptionData* m_Option;
+        const OptionData* m_option;
     };
 }
 
@@ -675,7 +675,7 @@ namespace Argos
  * @brief Defines the ArgumentValue class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
     class ArgumentValues;
@@ -699,8 +699,8 @@ namespace Argos
          */
         ArgumentValue(std::optional<std::string_view> value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
-                      ValueId valueId,
-                      ArgumentId argumentId);
+                      ValueId value_id,
+                      ArgumentId argument_id);
 
         /**
          * @private
@@ -750,178 +750,178 @@ namespace Argos
         [[nodiscard]] std::optional<std::string_view> value() const;
 
         /**
-         * @brief Returns defaultValue if the value was not given on the
+         * @brief Returns default_value if the value was not given on the
          *      command line, otherwise it returns true unless the given value
          *      is "0" or "false".
          */
-        [[nodiscard]] bool asBool(bool defaultValue = false) const;
+        [[nodiscard]] bool as_bool(bool default_value = false) const;
 
         /**
          * @brief Converts the value from the command line to int and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to int, an error message
-         * is displayed and the program either exits (autoExit is true) or
-         * the function throws an exception (autoExit is false). The actual
+         * is displayed and the program either exits (auto_exit is true) or
+         * the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtol and @a base is passed unmodified
          * to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to int.
          */
-        [[nodiscard]] int asInt(int defaultValue = 0, int base = 10) const;
+        [[nodiscard]] int as_int(int default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned int
          *      and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned int, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoul and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned int.
          */
         [[nodiscard]]
-        unsigned asUInt(unsigned defaultValue = 0, int base = 10) const;
+        unsigned as_uint(unsigned default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtol and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to long.
          */
-        [[nodiscard]] long asLong(long defaultValue = 0, int base = 10) const;
+        [[nodiscard]] long as_long(long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to long long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to long long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoll and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to long long.
          */
         [[nodiscard]]
-        long long asLLong(long long defaultValue = 0, int base = 10) const;
+        long long as_llong(long long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned long and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned long, an error
-         * message is displayed and the program either exits (autoExit is true)
-         * or the function throws an exception (autoExit is false). The actual
+         * message is displayed and the program either exits (auto_exit is true)
+         * or the function throws an exception (auto_exit is false). The actual
          * conversion is performed by @a strtoul and @a base is passed
          * unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned long.
          */
         [[nodiscard]] unsigned long
-        asULong(unsigned long defaultValue = 0, int base = 10) const;
+        as_ulong(unsigned long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to unsigned long
          *      long and returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to unsigned long long,
-         * an error message is displayed and the program either exits (autoExit
-         * is true) or the function throws an exception (autoExit is false).
+         * an error message is displayed and the program either exits (auto_exit
+         * is true) or the function throws an exception (auto_exit is false).
          * The actual conversion is performed by @a strtoul and @a base is
          * passed unmodified to that function.
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to unsigned long.
          */
         [[nodiscard]] unsigned long long
-        asULLong(unsigned long long defaultValue = 0, int base = 10) const;
+        as_ullong(unsigned long long default_value = 0, int base = 10) const;
 
         /**
          * @brief Converts the value from the command line to float and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to float, an error message
-         * is displayed and the program either exits (autoExit is true) or the
-         * function throws an exception (autoExit is false).
+         * is displayed and the program either exits (auto_exit is true) or the
+         * function throws an exception (auto_exit is false).
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to float.
          */
-        [[nodiscard]] float asFloat(float defaultValue = 0) const;
+        [[nodiscard]] float as_float(float default_value = 0) const;
 
         /**
          * @brief Converts the value from the command line to double and
          *      returns it.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          *
          * If the given value can not be converted to double, an error message
-         * is displayed and the program either exits (autoExit is true) or the
-         * function throws an exception (autoExit is false).
+         * is displayed and the program either exits (auto_exit is true) or the
+         * function throws an exception (auto_exit is false).
          *
-         * @throw ArgosException if @a autoExit is false and the given value
+         * @throw ArgosException if @a auto_exit is false and the given value
          *      can not be converted to double.
          */
-        [[nodiscard]] double asDouble(double defaultValue = 0) const;
+        [[nodiscard]] double as_double(double default_value = 0) const;
 
         /**
          * @brief Returns the value from the command line as a string.
          *
-         * Returns defaultValue if the value was not given on the command line.
+         * Returns default_value if the value was not given on the command line.
          */
         [[nodiscard]] std::string
-        asString(const std::string& defaultValue = {}) const;
+        as_string(const std::string& default_value = {}) const;
 
         /**
          * @brief Splits the string from the command line on @a separator and
          *      returns the resulting parts.
          *
          * An error message is displayed if the result has less than
-         * @a minParts parts (i.e. number of separators is less than
-         * minParts - 1). The result will never consist of more than
-         * @a maxParts parts, even if there are more occurrences of
+         * @a min_parts parts (i.e. number of separators is less than
+         * min_parts - 1). The result will never consist of more than
+         * @a max_parts parts, even if there are more occurrences of
          * @a separator in the value, it just means that the final part will
          * contain one or more separators. The only exception is if
-         * @a maxParts is zero (the default), which means there is no upper
+         * @a max_parts is zero (the default), which means there is no upper
          * limit to the number of parts.
          *
-         * @throw ArgosException if @a autoExit is false and the result
-         *      has less than @a minParts parts.
+         * @throw ArgosException if @a auto_exit is false and the result
+         *      has less than @a min_parts parts.
          */
         [[nodiscard]] ArgumentValues
-        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+        split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
          * Display @a message as if it was an error produced within Argos
          * itself, including a reference to the argument or option this value
-         * comes from and the usage section from the help text. If autoExit is
+         * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message.
          */
         void error(const std::string& message) const;
@@ -932,10 +932,10 @@ namespace Argos
          */
         void error() const;
     private:
-        std::optional<std::string_view> m_Value;
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId;
-        ArgumentId m_ArgumentId;
+        std::optional<std::string_view> m_value;
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id;
+        ArgumentId m_argument_id;
     };
 }
 
@@ -955,7 +955,7 @@ namespace Argos
  * for loops over the values in instances of ArgumentValues.
  */
 
-namespace Argos
+namespace argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
@@ -989,9 +989,9 @@ namespace Argos
          * @private
          * Only called from ArgumentValues
          */
-        ArgumentValueIterator(const It& internalIterator,
+        ArgumentValueIterator(const It& internal_iterator,
                               std::shared_ptr<ParsedArgumentsImpl> args,
-                              ValueId valueId);
+                              ValueId value_id);
 
         /**
          * @brief Prefix increment operator.
@@ -1013,11 +1013,11 @@ namespace Argos
         /**
          * @private
          */
-        It internalIterator() const;
+        It internal_iterator() const;
     private:
-        It m_Iterator = {};
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId = {};
+        It m_iterator = {};
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id = {};
     };
 
     /**
@@ -1046,7 +1046,7 @@ namespace Argos
  * @brief Defines the ArgumentValues class.
  */
 
-namespace Argos
+namespace argos
 {
     class ArgumentValue;
     class ParsedArgumentsImpl;
@@ -1065,7 +1065,7 @@ namespace Argos
          */
         ArgumentValues(std::vector<std::pair<std::string_view, ArgumentId>> values,
                        std::shared_ptr<ParsedArgumentsImpl> args,
-                       ValueId valueId);
+                       ValueId value_id);
 
         /**
          * @private
@@ -1107,7 +1107,7 @@ namespace Argos
         /**
          * Display @a message as if it was an error produced within Argos
          * itself, including a reference to the argument or option this value
-         * comes from and the usage section from the help text. If autoExit is
+         * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message, an
          * exception is thrown if it's not.
          */
@@ -1132,15 +1132,15 @@ namespace Argos
         /**
          * @brief Returns a vector with all the raw string_view values.
          */
-        std::vector<std::string_view> rawValues() const;
+        std::vector<std::string_view> raw_values() const;
 
         /**
          * @brief Returns the value with the given index.
          *
          * If @a index is to great, an error message is written to stderr, the
-         * program also automatically exits if autoExit is true.
+         * program also automatically exits if auto_exit is true.
          *
-         * @throw ArgosException if @a index is too great and autoExit
+         * @throw ArgosException if @a index is too great and auto_exit
          *  is false.
          */
         ArgumentValue value(size_t index) const;
@@ -1151,16 +1151,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<int>
-        asInts(const std::vector<int>& defaultValue = {},
-               int base = 10) const;
+        as_ints(const std::vector<int>& default_value = {},
+                int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1168,16 +1168,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<unsigned>
-        asUInts(const std::vector<unsigned>& defaultValue = {},
-               int base = 10) const;
+        as_uints(const std::vector<unsigned>& default_value = {},
+                 int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1185,16 +1185,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<long>
-        asLongs(const std::vector<long>& defaultValue = {},
-                int base = 10) const;
+        as_longs(const std::vector<long>& default_value = {},
+                 int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1202,16 +1202,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<unsigned long>
-        asULongs(const std::vector<unsigned long>& defaultValue = {},
-                 int base = 10) const;
+        as_ulongs(const std::vector<unsigned long>& default_value = {},
+                  int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1219,16 +1219,16 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @param base See the documentation for std::strtoint for details.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<long long>
-        asLLongs(const std::vector<long long>& defaultValue = {},
-                 int base = 10) const;
+        as_llongs(const std::vector<long long>& default_value = {},
+                  int base = 10) const;
 
         /**
         * @brief Returns a vector where every argument value has been
@@ -1236,16 +1236,16 @@ namespace Argos
         *
         * If any of the argument values can't be converted, an error
         * message is written to stderr, the program also automatically exits
-        * if autoExit is true.
+        * if auto_exit is true.
         *
-        * @param defaultValue This vector is returned if there are no values.
+        * @param default_value This vector is returned if there are no values.
         * @param base See the documentation for std::strtoint for details.
         * @throw ArgosException if the conversion fails for any value and
-        *  autoExit is false.
+        *  auto_exit is false.
         */
         std::vector<unsigned long long>
-        asULLongs(const std::vector<unsigned long long>& defaultValue = {},
-                  int base = 10) const;
+        as_ullongs(const std::vector<unsigned long long>& default_value = {},
+                   int base = 10) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1253,14 +1253,14 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<float>
-        asFloats(const std::vector<float>& defaultValue = {}) const;
+        as_floats(const std::vector<float>& default_value = {}) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -1268,38 +1268,39 @@ namespace Argos
          *
          * If any of the argument values can't be converted, an error
          * message is written to stderr, the program also automatically exits
-         * if autoExit is true.
+         * if auto_exit is true.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<double>
-        asDoubles(const std::vector<double>& defaultValue = {}) const;
+        as_doubles(const std::vector<double>& default_value = {}) const;
 
         /**
          * @brief Returns a vector with the argument values.
          *
-         * @param defaultValue This vector is returned if there are no values.
+         * @param default_value This vector is returned if there are no values.
          * @throw ArgosException if the conversion fails for any value and
-         *  autoExit is false.
+         *  auto_exit is false.
          */
         std::vector<std::string>
-        asStrings(const std::vector<std::string>& defaultValue = {}) const;
+        as_strings(const std::vector<std::string>& default_value = {}) const;
 
         /**
          * @brief Splits each value on @a separator and returns the parts in
          *  a single list.
          * @param separator The separator.
-         * @param minParts The minimum number of parts each value must
+         * @param min_parts The minimum number of parts each value must
          *  consist of.
-         * @param maxParts The maximum number of parts any value can
+         * @param max_parts The maximum number of parts any value can
          *  consist of. The final part will retain all excessive separators.
          * @throw ArgosException if any value consists of less than
-         *  @a minParts parts.
+         *  @a min_parts parts.
          */
         ArgumentValues
-        split(char separator, size_t minParts = 0, size_t maxParts = 0) const;
+        split(char separator, size_t min_parts = 0,
+              size_t max_parts = 0) const;
 
         /**
          * @brief Returns an iterator pointing to the first value.
@@ -1311,9 +1312,9 @@ namespace Argos
          */
         ArgumentValueIterator end() const;
     private:
-        std::vector<std::pair<std::string_view, ArgumentId>> m_Values;
-        std::shared_ptr<ParsedArgumentsImpl> m_Args;
-        ValueId m_ValueId;
+        std::vector<std::pair<std::string_view, ArgumentId>> m_values;
+        std::shared_ptr<ParsedArgumentsImpl> m_args;
+        ValueId m_value_id;
     };
 }
 
@@ -1330,7 +1331,7 @@ namespace Argos
  * @brief Defines the ParsedArgumentsBuilder class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
 
@@ -1422,7 +1423,7 @@ namespace Argos
          * After it's been cleared, the argument or value will be treated as
          * if it hasn't been given any value at all, i.e. the default value
          * will be returned when its value is retrieved with
-         * ArgumentValue::asString et al.
+         * ArgumentValue::as_string et al.
          *
          * @param name The name (flag, alias etc.) of an argument or option.
          * @throw ArgosException if the name doesn't match any of names,
@@ -1437,7 +1438,7 @@ namespace Argos
          * After it's been cleared, the argument or value will be treated as
          * if it hasn't been given any value at all, i.e. the default value
          * will be returned when its value is retrieved with
-         * ArgumentValue::asString et al.
+         * ArgumentValue::as_string et al.
          */
         ParsedArgumentsBuilder& clear(const IArgumentView& arg);
 
@@ -1483,18 +1484,18 @@ namespace Argos
         /**
          * @brief Print @a msg along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
-        [[noreturn]] void error(const std::string& errorMessage);
+        [[noreturn]] void error(const std::string& msg);
 
         /**
          * @brief Print @a msg prefixed by the argument's name or option's
          *  flags along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& errorMessage, const IArgumentView& arg);
+        void error(const std::string& msg, const IArgumentView& arg);
 
         /**
          * @brief Returns the stream that was assigned to the
@@ -1509,9 +1510,9 @@ namespace Argos
          * @brief Returns the program name that was assigned to the
          *  ArgumentParser.
          */
-        [[nodiscard]] const std::string& programName() const;
+        [[nodiscard]] const std::string& program_name() const;
     private:
-        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
 }
 
@@ -1529,7 +1530,7 @@ namespace Argos
  * @brief Defines ArgumentCallback and OptionCallback.
  */
 
-namespace Argos
+namespace argos
 {
     /**
      * @brief A callback that is called each time given arguments appear
@@ -1580,7 +1581,7 @@ namespace Argos
  * @brief Defines the Argument class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ArgumentData;
 
@@ -1744,12 +1745,12 @@ namespace Argos
         /**
          * @brief Set the number of times this argument must appear on the
          *      command line.
-         * @param minCount Can be any value.
-         * @param maxCount Must be greater than or equal to @a minCount.
+         * @param min_count Can be any value.
+         * @param max_count Must be greater than or equal to @a min_count.
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& count(unsigned minCount, unsigned maxCount);
+        Argument& count(unsigned min_count, unsigned max_count);
 
         /**
          * @private
@@ -1761,9 +1762,9 @@ namespace Argos
          */
         std::unique_ptr<ArgumentData> release();
     private:
-        void checkArgument() const;
+        void check_argument() const;
 
-        std::unique_ptr<ArgumentData> m_Argument;
+        std::unique_ptr<ArgumentData> m_argument;
     };
 }
 
@@ -1781,7 +1782,7 @@ namespace Argos
  * @brief Defines the ParsedArguments class.
  */
 
-namespace Argos
+namespace argos
 {
     class ParsedArgumentsImpl;
 
@@ -1790,7 +1791,7 @@ namespace Argos
      *      and option values.
      *
      * Instances of this class is returned by ArgumentParser::parse and
-     * ArgumentIterator::parsedArguments.
+     * ArgumentIterator::parsed_arguments.
      */
     class ParsedArguments
     {
@@ -1868,7 +1869,6 @@ namespace Argos
          */
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
-        [[nodiscard]]
         /**
          * @brief Returns all argument definitions that were registered with
          *  ArgumentParser.
@@ -1876,7 +1876,8 @@ namespace Argos
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
          */
-        std::vector<std::unique_ptr<ArgumentView>> allArguments() const;
+        [[nodiscard]]
+        std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
 
         /**
          * @brief Returns all option definitions that were registered with
@@ -1886,18 +1887,18 @@ namespace Argos
          * defined options along with their given values.
          */
         [[nodiscard]]
-        std::vector<std::unique_ptr<OptionView>> allOptions() const;
+        std::vector<std::unique_ptr<OptionView>> all_options() const;
 
         /**
          * @brief Returns the parser result code.
          */
-        [[nodiscard]] ParserResultCode resultCode() const;
+        [[nodiscard]] ParserResultCode result_code() const;
 
         /**
          * @brief If the parser stopped early because it encountered an option
          *  of type, this function returns that option.
          */
-        [[nodiscard]] OptionView stopOption() const;
+        [[nodiscard]] OptionView stop_option() const;
 
         /**
          * @brief Returns the command line arguments that were ignored by the
@@ -1906,13 +1907,13 @@ namespace Argos
          * This function will always return an empty vector unless at least
          * one of the following is true:
          *
-         * - ArgumentParser::ignoreUndefinedArguments is true.
-         * - ArgumentParser::ignoreUndefinedOptions is true.
-         * - ArgumentParser::autoExit is false and there are options with type
+         * - ArgumentParser::ignore_undefined_arguments is true.
+         * - ArgumentParser::ignore_undefined_options is true.
+         * - ArgumentParser::auto_exit is false and there are options with type
          *   set to OptionType::STOP.
          */
         [[nodiscard]]
-        const std::vector<std::string>& unprocessedArguments() const;
+        const std::vector<std::string>& unprocessed_arguments() const;
 
         /**
          * @brief Removes parsed arguments and options from @a argv and
@@ -1920,22 +1921,22 @@ namespace Argos
          *
          * The first value in @a argv is assumed to be the program name and
          * is ignored, the remainder should be identical to the command line
-         * given to ArgumentParser::parse or ArgumentParser::makeIterator.
+         * given to ArgumentParser::parse or ArgumentParser::make_iterator.
          *
          * @note No memory is freed, the function only rearranges the pointers
          *  @a in argv.
          */
-        void filterParsedArguments(int& argc, char**& argv);
+        void filter_parsed_arguments(int& argc, char**& argv);
 
         /**
          * @brief Print @a msg along with a brief help text and exit.
          *
-         * @throw ArgosException if ArgumentParser::autoExit is false.
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
         void error(const std::string& msg);
     private:
-        std::shared_ptr<ParsedArgumentsImpl> m_Impl;
+        std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
 
     /**
@@ -1959,7 +1960,7 @@ namespace Argos
  * @file
  * @brief Defines the ArgumentIterator class.
  */
-namespace Argos
+namespace argos
 {
     class ArgumentIteratorImpl;
     struct ParserData;
@@ -1972,12 +1973,13 @@ namespace Argos
     {
     public:
         /**
+         * @private
          * @brief Constructs a new instance of ArgumentIterator.
          *
-         * Client code must use ArgumentParser::makeIterator().
+         * Client code must use ArgumentParser::make_iterator().
          */
         ArgumentIterator(std::vector<std::string_view> args,
-                         std::shared_ptr<ParserData> parserData);
+                         std::shared_ptr<ParserData> parser_data);
 
         /**
          * @private
@@ -2012,8 +2014,8 @@ namespace Argos
          * ParsedArguments has been updated when the function returns.
          *
          * @param arg The definition (ArgumentView or OptionView) of the
-         *      processed argument or option. If ignoreUndefinedArguments
-         *      or ignoreUndefinedOptions is true, this pointer can be empty.
+         *      processed argument or option. If ignore_undefined_arguments
+         *      or ignore_undefined_options is true, this pointer can be empty.
          * @param value If @a arg is an argument then this is the argument's
          *      value. If @a arg is an option that take an argument then this
          *      is the option's value. If @a arg is empty (i.e. this is an
@@ -2036,13 +2038,13 @@ namespace Argos
          * the returned object.
          */
         [[nodiscard]]
-        ParsedArguments parsedArguments() const;
+        ParsedArguments parsed_arguments() const;
     private:
         ArgumentIteratorImpl& impl();
 
         const ArgumentIteratorImpl& impl() const;
 
-        std::unique_ptr<ArgumentIteratorImpl> m_Impl;
+        std::unique_ptr<ArgumentIteratorImpl> m_impl;
     };
 }
 
@@ -2060,7 +2062,7 @@ namespace Argos
  * @brief Defines the Option class.
  */
 
-namespace Argos
+namespace argos
 {
     struct OptionData;
 
@@ -2219,7 +2221,7 @@ namespace Argos
         /**
          * @brief Set the flag of a single-flag option.
          * @param f a flag with one or two leading dashes or a slash depending
-         *  on the option style (ArgumentParser::optionStyle).
+         *  on the option style (ArgumentParser::option_style).
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -2228,7 +2230,7 @@ namespace Argos
         /**
          * @brief Set the flag of a multi-flag option.
          * @param f flags with one or two leading dashes or a slash depending
-         *  on the option style (ArgumentParser::optionStyle).
+         *  on the option style (ArgumentParser::option_style).
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
@@ -2256,12 +2258,12 @@ namespace Argos
          *
          * @note This is not the recommended way to specify a default value,
          *  prefer instead to use the defaultValue argument to ArgumentValue's
-         *  asString() et al. ParsedArguments can not distinguish between
-         *  values assigned through initialValue() and actual command line
+         *  as_string() et al. ParsedArguments can not distinguish between
+         *  values assigned through initial_value() and actual command line
          *  arguments. APPEND-options will not overwrite the initial value,
          *  but add its values after it.
          *
-         *  The initialValue can be useful if for instance one wants to use
+         *  The initial_value can be useful if for instance one wants to use
          *  ArgumentValue's split function on a default value read from a
          *  file or an environment variable, or want to prepend
          *  a value to a list built by options of operation "APPEND".
@@ -2269,7 +2271,7 @@ namespace Argos
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
-        Option& initialValue(const std::string& value);
+        Option& initial_value(const std::string& value);
 
         /**
          * @brief Sets the value that this option will assign to the
@@ -2360,9 +2362,9 @@ namespace Argos
          */
         std::unique_ptr<OptionData> release();
     private:
-        void checkOption() const;
+        void check_option() const;
 
-        std::unique_ptr<OptionData> m_Option;
+        std::unique_ptr<OptionData> m_option;
     };
 }
 
@@ -2380,7 +2382,7 @@ namespace Argos
  * @brief Defines the ArgumentParser class.
  */
 
-namespace Argos
+namespace argos
 {
     struct ParserData;
 
@@ -2398,15 +2400,15 @@ namespace Argos
         /**
          * @brief Creates a new argument parser.
          *
-         * @param programName The name of the program that will be displayed
+         * @param program_name The name of the program that will be displayed
          *      in the help text and error messages.
-         * @param extractFileName Set this to true if @a programName is a
+         * @param extract_file_name Set this to true if @a program_name is a
          *      path that may contain directories, but the help text should
          *      only use the file name part. This is particularly useful if
-         *      @a argv[0] is used as the programName.
+         *      @a argv[0] is used as the program_name.
          */
-        explicit ArgumentParser(std::string_view programName,
-                                bool extractFileName = true);
+        explicit ArgumentParser(std::string_view program_name,
+                                bool extract_file_name = true);
 
         /**
          * @brief Moves the innards of the old object to the new one.
@@ -2519,13 +2521,13 @@ namespace Argos
          *      in argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator(). All method calls on an
+         *      the non-const version of make_iterator(). All method calls on an
          *      invalid ArgumentParser will throw an exception.
          *
          * @throw ArgosException if there are two or more options that use
          *      the same flag.
          */
-        [[nodiscard]] ArgumentIterator makeIterator(int argc, char* argv[]);
+        [[nodiscard]] ArgumentIterator make_iterator(int argc, char* argv[]);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -2535,7 +2537,7 @@ namespace Argos
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(int argc, char* argv[]) const;
+        ArgumentIterator make_iterator(int argc, char* argv[]) const;
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -2545,14 +2547,14 @@ namespace Argos
          *      first value, unlike when parse is called with argc and argv.
          *
          * @note The ArgumentParser instance is no longer valid after calling
-         *      the non-const version of makeIterator(). All method calls on an
+         *      the non-const version of make_iterator(). All method calls on an
          *      invalid ArgumentParser will throw an exception.
          *
          * @throw ArgosException if there are two or more options that use
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(std::vector<std::string_view> args);
+        ArgumentIterator make_iterator(std::vector<std::string_view> args);
 
         /**
          * @brief Creates an ArgumentIterator to iterate over the arguments
@@ -2565,12 +2567,12 @@ namespace Argos
          *      the same flag.
          */
         [[nodiscard]]
-        ArgumentIterator makeIterator(std::vector<std::string_view> args) const;
+        ArgumentIterator make_iterator(std::vector<std::string_view> args) const;
 
         /**
          * @brief Returns true if the ArgumentParser allows abbreviated options.
          */
-        [[nodiscard]] bool allowAbbreviatedOptions() const;
+        [[nodiscard]] bool allow_abbreviated_options() const;
 
         /**
          * @brief Enable or disable abbreviated options.
@@ -2583,14 +2585,14 @@ namespace Argos
          * sufficient to write "--b" on the command line to enable the latter,
          * and "--fo" and "--fi" for the first two.
          */
-        ArgumentParser& allowAbbreviatedOptions(bool value);
+        ArgumentParser& allow_abbreviated_options(bool value);
 
         /**
          * @brief Returns true if the program automatically exits if the
          *      command line has invalid options or arguments, or the help
          *      option is given.
          */
-        [[nodiscard]] bool autoExit() const;
+        [[nodiscard]] bool auto_exit() const;
 
         /**
          * @brief Enable or disable automatic exit when the command line has
@@ -2598,12 +2600,12 @@ namespace Argos
          *
          * Automatic exit is on by default.
          */
-        ArgumentParser& autoExit(bool value);
+        ArgumentParser& auto_exit(bool value);
 
         /**
          * @brief Returns true if option flags are case insensitive.
          */
-        [[nodiscard]] bool caseInsensitive() const;
+        [[nodiscard]] bool case_insensitive() const;
 
         /**
          * @brief Enable or disable case insensitive option flags.
@@ -2611,13 +2613,13 @@ namespace Argos
          * @note Case-insensitivity will only work for ASCII-letters (i.e.
          *      a-z and A-Z).
          */
-        ArgumentParser& caseInsensitive(bool value);
+        ArgumentParser& case_insensitive(bool value);
 
         /**
          * @brief Returns whether or not a help option will be auto-generated
          *      if none has been added explicitly.
          */
-        [[nodiscard]] bool generateHelpOption() const;
+        [[nodiscard]] bool generate_help_option() const;
 
         /**
          * @brief Turn auto-generation of help option on or off.
@@ -2630,12 +2632,12 @@ namespace Argos
          *
          * By default this is on.
          */
-        ArgumentParser& generateHelpOption(bool value);
+        ArgumentParser& generate_help_option(bool value);
 
         /**
          * @brief Returns the current option style.
          */
-        [[nodiscard]] OptionStyle optionStyle() const;
+        [[nodiscard]] OptionStyle option_style() const;
 
         /**
          * @brief Set the option style.
@@ -2643,13 +2645,13 @@ namespace Argos
          * @note The option style can not be changed once any options have been
          *      added.
          */
-        ArgumentParser& optionStyle(OptionStyle value);
+        ArgumentParser& option_style(OptionStyle value);
 
         /**
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.
          */
-        [[nodiscard]] bool ignoreUndefinedArguments() const;
+        [[nodiscard]] bool ignore_undefined_arguments() const;
 
         /**
          * @brief Enable or disable treating undefined arguments on the command
@@ -2658,13 +2660,13 @@ namespace Argos
          * Ignoring undefined arguments can be useful when more than one
          * function are interpreting the command line.
          */
-        ArgumentParser& ignoreUndefinedArguments(bool value);
+        ArgumentParser& ignore_undefined_arguments(bool value);
 
         /**
          * @brief Returns true if undefined options on the command line
          *      will not be treated as errors.
          */
-        [[nodiscard]] bool ignoreUndefinedOptions() const;
+        [[nodiscard]] bool ignore_undefined_options() const;
 
         /**
          * @brief Enable or disable treating undefined options on the command
@@ -2673,7 +2675,7 @@ namespace Argos
          * Ignoring undefined options can be useful when more than one function
          * are interpreting the command line.
          */
-        ArgumentParser& ignoreUndefinedOptions(bool value);
+        ArgumentParser& ignore_undefined_options(bool value);
 
         /**
          * @brief Returns the callback function that will be called for every
@@ -2681,13 +2683,13 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        [[nodiscard]] const ArgumentCallback& argumentCallback() const;
+        [[nodiscard]] const ArgumentCallback& argument_callback() const;
 
         /**
          * @brief Set the callback function that will be called for every
          *      argument.
          */
-        ArgumentParser& argumentCallback(ArgumentCallback callback);
+        ArgumentParser& argument_callback(ArgumentCallback callback);
 
         /**
          * @brief Returns the callback function that will be called for every
@@ -2695,13 +2697,13 @@ namespace Argos
          *
          * By default this is an empty function object.
          */
-        [[nodiscard]] const OptionCallback& optionCallback() const;
+        [[nodiscard]] const OptionCallback& option_callback() const;
 
         /**
          * @brief Set the callback function that will be called for every
          *      option.
          */
-        ArgumentParser& optionCallback(OptionCallback callback);
+        ArgumentParser& option_callback(OptionCallback callback);
 
         /**
          * @brief Returns the stream that the help text and error messages are
@@ -2723,14 +2725,14 @@ namespace Argos
         /**
          * @brief Return the program name.
          */
-        [[nodiscard]] const std::string& programName() const;
+        [[nodiscard]] const std::string& program_name() const;
 
         /**
          * @brief Set the program name.
          *
          * @note The program name can also be set by the constructor.
          */
-        ArgumentParser& programName(const std::string& name);
+        ArgumentParser& program_name(const std::string& name);
 
         /**
          * @brief Set the help text that will appear between the usage section
@@ -2756,7 +2758,7 @@ namespace Argos
          * The line width defaults to the width of the console or terminal
          * window.
          */
-        ArgumentParser& lineWidth(unsigned lineWidth);
+        ArgumentParser& line_width(unsigned line_width);
 
         /**
          * @brief Write the help text.
@@ -2764,7 +2766,7 @@ namespace Argos
          * @note The help text is displayed automatically when a help option
          *      is used.
          */
-        void writeHelpText() const;
+        void write_help_text() const;
 
         /**
          * @brief Inform Argos how a long word is to be split over multiple
@@ -2779,7 +2781,7 @@ namespace Argos
          * it can split the word "comprehensive" as either "compre-" "hensive"
          * or "comprehen-" "sive" (or even "compre-" "hen-" "sive").
          */
-        ArgumentParser& addWordSplittingRule(std::string str);
+        ArgumentParser& add_word_splitting_rule(std::string str);
 
         /**
          * @brief Makes it possible to construct an ArgumentParser with chained
@@ -2787,11 +2789,11 @@ namespace Argos
          */
         ArgumentParser&& move();
     private:
-        void checkData() const;
+        void check_data() const;
 
-        [[nodiscard]] ArgumentId nextArgumentId() const;
+        [[nodiscard]] ArgumentId next_argument_id() const;
 
-        std::unique_ptr<ParserData> m_Data;
+        std::unique_ptr<ParserData> m_data;
     };
 }
 

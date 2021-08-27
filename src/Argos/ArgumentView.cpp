@@ -10,10 +10,10 @@
 #include "ArgosThrow.hpp"
 #include "ArgumentData.hpp"
 
-namespace Argos
+namespace argos
 {
     ArgumentView::ArgumentView(const ArgumentData* data)
-            : m_Argument(data)
+            : m_argument(data)
     {
         if (!data)
             ARGOS_THROW("data can not be null");
@@ -21,51 +21,51 @@ namespace Argos
 
     const std::string& ArgumentView::help() const
     {
-        return m_Argument->help;
+        return m_argument->help;
     }
 
     const std::string& ArgumentView::section() const
     {
-        return m_Argument->section;
+        return m_argument->section;
     }
 
     const std::string& ArgumentView::value() const
     {
-        return m_Argument->value;
+        return m_argument->value;
     }
 
     Visibility ArgumentView::visibility() const
     {
-        return m_Argument->visibility;
+        return m_argument->visibility;
     }
 
     int ArgumentView::id() const
     {
-        return m_Argument->id;
+        return m_argument->id;
     }
 
     const std::string& ArgumentView::name() const
     {
-        return m_Argument->name;
+        return m_argument->name;
     }
 
     bool ArgumentView::optional() const
     {
-        return m_Argument->minCount == 0;
+        return m_argument->min_count == 0;
     }
 
     std::pair<unsigned, unsigned> ArgumentView::count() const
     {
-        return {m_Argument->minCount, m_Argument->maxCount};
+        return {m_argument->min_count, m_argument->max_count};
     }
 
-    ValueId ArgumentView::valueId() const
+    ValueId ArgumentView::value_id() const
     {
-        return m_Argument->valueId;
+        return m_argument->value_id;
     }
 
-    ArgumentId ArgumentView::argumentId() const
+    ArgumentId ArgumentView::argument_id() const
     {
-        return m_Argument->argumentId;
+        return m_argument->argument_id;
     }
 }

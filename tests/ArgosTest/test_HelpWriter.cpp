@@ -12,7 +12,7 @@
 
 TEST_CASE("Separate lines for STOP options")
 {
-    using namespace Argos;
+    using namespace argos;
     std::stringstream ss;
     auto parser = ArgumentParser("prog")
         .add(Option({"--help"}).type(OptionType::HELP).visibility(Visibility::USAGE))
@@ -22,7 +22,7 @@ TEST_CASE("Separate lines for STOP options")
         .add(Argument("arg").visibility(Visibility::USAGE))
         .stream(&ss)
         .move();
-    parser.writeHelpText();
+    parser.write_help_text();
     REQUIRE(ss.str() == R"-(USAGE
   prog --help
   prog --version
@@ -33,17 +33,17 @@ TEST_CASE("Separate lines for STOP options")
 
 TEST_CASE("No empty line after undocumented arguments and options.")
 {
-    using namespace Argos;
+    using namespace argos;
     std::stringstream ss;
     auto parser = ArgumentParser("prog")
         .add(Option({"--option1"}).help(
             "A text that is too long to fit on a single line. This makes the help text appear on the next line."))
         .add(Option({"--option2"}))
         .add(Argument("arg"))
-        .generateHelpOption(false)
+        .generate_help_option(false)
         .stream(&ss)
         .move();
-    parser.writeHelpText();
+    parser.write_help_text();
     REQUIRE(ss.str() == R"-(USAGE
   prog [--option1] [--option2] <arg>
 

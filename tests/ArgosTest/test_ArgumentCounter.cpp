@@ -11,32 +11,32 @@
 
 TEST_CASE("Test non-deterministic counter.")
 {
-    std::vector<std::unique_ptr<Argos::ArgumentData>> args;
-    args.push_back(Argos::Argument("1").count(0, 1).release());
-    args.push_back(Argos::Argument("2").count(2).release());
+    std::vector<std::unique_ptr<argos::ArgumentData>> args;
+    args.push_back(argos::Argument("1").count(0, 1).release());
+    args.push_back(argos::Argument("2").count(2).release());
 
-    REQUIRE(Argos::ArgumentCounter::requiresArgumentCount(args));
+    REQUIRE(argos::ArgumentCounter::requires_argument_count(args));
 
     SECTION("Unknown number of arguments")
     {
-        Argos::ArgumentCounter counter(args);
-        REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == args[0].get());
-        REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == args[1].get());
-        REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == args[1].get());
-        REQUIRE(counter.isComplete());
-        REQUIRE(counter.nextArgument() == nullptr);
+        argos::ArgumentCounter counter(args);
+        REQUIRE(!counter.is_complete());
+        REQUIRE(counter.next_argument() == args[0].get());
+        REQUIRE(!counter.is_complete());
+        REQUIRE(counter.next_argument() == args[1].get());
+        REQUIRE(!counter.is_complete());
+        REQUIRE(counter.next_argument() == args[1].get());
+        REQUIRE(counter.is_complete());
+        REQUIRE(counter.next_argument() == nullptr);
     }
     SECTION("Known number of arguments")
     {
-        Argos::ArgumentCounter counter(args, 2);
-        REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == args[1].get());
-        REQUIRE(!counter.isComplete());
-        REQUIRE(counter.nextArgument() == args[1].get());
-        REQUIRE(counter.isComplete());
-        REQUIRE(counter.nextArgument() == nullptr);
+        argos::ArgumentCounter counter(args, 2);
+        REQUIRE(!counter.is_complete());
+        REQUIRE(counter.next_argument() == args[1].get());
+        REQUIRE(!counter.is_complete());
+        REQUIRE(counter.next_argument() == args[1].get());
+        REQUIRE(counter.is_complete());
+        REQUIRE(counter.next_argument() == nullptr);
     }
 }

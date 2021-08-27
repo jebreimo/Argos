@@ -10,7 +10,7 @@
 #include <vector>
 #include "ArgumentData.hpp"
 
-namespace Argos
+namespace argos
 {
     class ArgumentCounter
     {
@@ -22,24 +22,24 @@ namespace Argos
 
         ArgumentCounter(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t argumentCount);
+                size_t argument_count);
 
-        const ArgumentData* nextArgument();
+        const ArgumentData* next_argument();
 
         size_t count() const;
 
-        bool isComplete() const;
+        bool is_complete() const;
 
-        static std::pair<size_t, size_t> getMinMaxCount(
+        static std::pair<size_t, size_t> get_min_max_count(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments);
 
-        static bool requiresArgumentCount(
+        static bool requires_argument_count(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments);
     private:
         using Counter = std::pair<size_t, const ArgumentData*>;
-        std::vector<Counter> m_Counters;
-        size_t m_Index = 0;
-        size_t m_FirstOptional = 0;
-        size_t m_Counter = 0;
+        std::vector<Counter> m_counters;
+        size_t m_index = 0;
+        size_t m_first_optional = 0;
+        size_t m_counter = 0;
     };
 }

@@ -10,7 +10,7 @@
 #include "Argos/Callbacks.hpp"
 #include "Argos/Enums.hpp"
 
-namespace Argos
+namespace argos
 {
     struct ArgumentData
     {
@@ -19,11 +19,11 @@ namespace Argos
         std::string section;
         std::string value;
         ArgumentCallback callback;
-        unsigned minCount = 1;
-        unsigned maxCount = 1;
+        unsigned min_count = 1;
+        unsigned max_count = 1;
         Visibility visibility = Visibility::NORMAL;
         int id = 0;
-        ValueId valueId = {};
-        ArgumentId argumentId = {};
+        ValueId value_id = {};
+        ArgumentId argument_id = {};
     };
 }

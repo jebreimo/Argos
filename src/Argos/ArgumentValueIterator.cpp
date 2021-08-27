@@ -9,50 +9,50 @@
 
 #include "Argos/ArgumentValue.hpp"
 
-namespace Argos
+namespace argos
 {
     ArgumentValueIterator::ArgumentValueIterator() = default;
 
     ArgumentValueIterator::ArgumentValueIterator(
-        const ArgumentValueIterator::It& internalIterator,
+        const ArgumentValueIterator::It& internal_iterator,
         std::shared_ptr<ParsedArgumentsImpl> args,
-        ValueId valueId)
-    : m_Iterator(internalIterator),
-      m_Args(std::move(args)),
-      m_ValueId(valueId)
+        ValueId value_id)
+    : m_iterator(internal_iterator),
+      m_args(std::move(args)),
+      m_value_id(value_id)
     {}
 
     ArgumentValueIterator& ArgumentValueIterator::operator++()
     {
-        ++m_Iterator;
+        ++m_iterator;
         return *this;
     }
 
     ArgumentValueIterator ArgumentValueIterator::operator++(int)
     {
         auto it = *this;
-        ++m_Iterator;
+        ++m_iterator;
         return it;
     }
 
     ArgumentValue ArgumentValueIterator::operator*() const
     {
-        return ArgumentValue(m_Iterator->first, m_Args,
-                             m_ValueId, m_Iterator->second);
+        return ArgumentValue(m_iterator->first, m_args,
+                             m_value_id, m_iterator->second);
     }
 
-    ArgumentValueIterator::It ArgumentValueIterator::internalIterator() const
+    ArgumentValueIterator::It ArgumentValueIterator::internal_iterator() const
     {
-        return m_Iterator;
+        return m_iterator;
     }
 
     bool operator==(const ArgumentValueIterator& a, const ArgumentValueIterator& b)
     {
-        return a.internalIterator() == b.internalIterator();
+        return a.internal_iterator() == b.internal_iterator();
     }
 
     bool operator!=(const ArgumentValueIterator& a, const ArgumentValueIterator& b)
     {
-        return a.internalIterator() != b.internalIterator();
+        return a.internal_iterator() != b.internal_iterator();
     }
 }
