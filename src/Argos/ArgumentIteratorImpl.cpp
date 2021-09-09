@@ -455,7 +455,7 @@ namespace argos
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();
-        m_parsed_args->set_result_code(ParserResultCode::ERROR);
+        m_parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
 }

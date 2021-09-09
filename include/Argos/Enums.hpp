@@ -164,7 +164,7 @@ namespace argos
     enum class ParserResultCode
     {
         /**
-         * @brief The initial status value. Means that all the arguments haven't
+         * @brief The initial value. Means that the arguments haven't
          *      been processed yet.
          */
         NONE,
@@ -180,8 +180,11 @@ namespace argos
         /**
          * @brief The argument parser encountered an incorrect option or
          *      argument (and auto_exit is false).
+         *
+         * This value was originally called ERROR, but that name clashes
+         * with a macro in Windows.h.
          */
-        ERROR
+        FAILURE
     };
 
     /**
