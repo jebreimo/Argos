@@ -14,7 +14,7 @@ add_executable(ArgosTestApp
     ArgosTestAppMain.cpp
     )
 
-set(SINGLE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../single_src)
+set(SINGLE_SRC_DIR ../../../single_src)
 
 if (EXISTS ${SINGLE_SRC_DIR}/Argos/Argos.hpp)
     target_sources(ArgosTestApp
