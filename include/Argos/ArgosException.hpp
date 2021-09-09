@@ -26,18 +26,6 @@ namespace argos
     class ArgosException : public std::runtime_error
     {
     public:
-        /**
-         * @brief Passes @a message on to the base class.
-         */
-        explicit ArgosException(const std::string& message) noexcept
-            : std::runtime_error(message)
-        {}
-
-        /**
-         * @brief Passes @a message on to the base class.
-         */
-        explicit ArgosException(const char* message) noexcept
-            : std::runtime_error(message)
-        {}
+        using std::runtime_error::runtime_error;
     };
 }
