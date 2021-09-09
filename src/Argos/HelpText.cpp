@@ -46,14 +46,27 @@ namespace argos
                    || type == OptionType::EXIT;
         }
 
-        std::string get_brief_option_name(const OptionData& opt)
+        std::string get_brief_option_name(const OptionData& opt,
+                                          bool prefer_long_flag)
         {
             std::string opt_txt;
             bool braces = opt.optional
                           && !is_stop_option(opt.type);
             if (braces)
                 opt_txt.push_back('[');
-            const auto& flag = opt.flags.front();
+
+            std::string_view flag;
+            if (prefer_long_flag)
+            {
+                auto it = std::find_if(opt.flags.begin(),  opt.flags.end(),
+                                       [](auto& s){return s.size() > 2;});
+                if (it != opt.flags.end())
+                    flag = *it;
+            }
+
+            if (flag.empty())
+                flag = opt.flags.front();
+
             opt_txt += flag;
             if (!opt.argument.empty())
             {
@@ -145,7 +158,7 @@ namespace argos
                 data.text_formatter.write_words(data.help_settings.program_name);
                 data.text_formatter.write_words(" ");
                 data.text_formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-                data.text_formatter.write_lines(get_brief_option_name(*opt));
+                data.text_formatter.write_lines(get_brief_option_name(*opt, true));
                 data.text_formatter.write_words(" ");
                 data.text_formatter.pop_indentation();
                 data.text_formatter.newline();
@@ -179,7 +192,7 @@ namespace argos
             // Check if both the longest name and the longest help text
             // can fit on the same line.
             auto name_width = name_widths.back() + 3;
-            if (name_width > 24 || name_width + text_widths.back() > line_width)
+            if (name_width > 32 || name_width + text_widths.back() > line_width)
                 return 0;
             return name_width;
         }
@@ -279,7 +292,7 @@ namespace argos
                     continue;
                 }
 
-                formatter.write_lines(get_brief_option_name(*opt));
+                formatter.write_lines(get_brief_option_name(*opt, false));
                 formatter.write_words(" ");
             }
             for (auto& arg : data.arguments)
