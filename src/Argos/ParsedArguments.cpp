@@ -8,6 +8,7 @@
 #include "Argos/ParsedArguments.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include "ArgosThrow.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
@@ -167,6 +168,11 @@ namespace argos
                 stream << " \"" << value.as_string() << "\"";
             stream << "\n";
         }
+    }
+
+    void print(const ParsedArguments& args)
+    {
+        print(args, std::cout);
     }
 
     void print(const ParsedArguments& args, std::ostream& stream)

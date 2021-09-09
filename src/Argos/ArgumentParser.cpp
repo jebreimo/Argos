@@ -191,7 +191,7 @@ namespace argos
                 return;
 
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .help("Show help text.")
+                .help("Display the help text.")
                 .constant("1").release();
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
@@ -226,7 +226,7 @@ namespace argos
                         ? data.help_settings.output_stream
                         : &std::cout;
             auto opt = Option().flag(flag).type(OptionType::STOP)
-                .help("Show program version.")
+                .help("Display the program version.")
                 .constant("1")
                 .callback([v = data.help_settings.version, stream]
                               (auto, auto, auto pa)

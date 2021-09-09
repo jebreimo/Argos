@@ -62,19 +62,7 @@ namespace argos
     class ArgosException : public std::runtime_error
     {
     public:
-        /**
-         * @brief Passes @a message on to the base class.
-         */
-        explicit ArgosException(const std::string& message) noexcept
-            : std::runtime_error(message)
-        {}
-
-        /**
-         * @brief Passes @a message on to the base class.
-         */
-        explicit ArgosException(const char* message) noexcept
-            : std::runtime_error(message)
-        {}
+        using std::runtime_error::runtime_error;
     };
 }
 
@@ -243,7 +231,7 @@ namespace argos
     enum class ParserResultCode
     {
         /**
-         * @brief The initial status value. Means that all the arguments haven't
+         * @brief The initial value. Means that the arguments haven't
          *      been processed yet.
          */
         NONE,
@@ -259,8 +247,11 @@ namespace argos
         /**
          * @brief The argument parser encountered an incorrect option or
          *      argument (and auto_exit is false).
+         *
+         * This value was originally called ERROR, but that name clashes
+         * with a macro in Windows.h.
          */
-        ERROR
+        FAILURE
     };
 
     /**
@@ -1938,6 +1929,14 @@ namespace argos
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
+
+    /**
+     * @brief Write a list of all arguments and options along with their
+     *  values to stdout.
+     *
+     * This function is intended for testing and debugging.
+     */
+    void print(const ParsedArguments& args);
 
     /**
      * @brief Write a list of all arguments and options along with their

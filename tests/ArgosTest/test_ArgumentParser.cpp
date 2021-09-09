@@ -182,7 +182,7 @@ TEST_CASE("Test incorrect slash option")
         .add(Option({"/bill"}))
         .add(Argument("file"))
         .parse(argv.size(), argv.data());
-    REQUIRE(args.result_code() == ParserResultCode::ERROR);
+    REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("Can't change option style after options have been added.")
@@ -265,7 +265,7 @@ TEST_CASE("LAST_ARGUMENT option")
         .add(Argument("arg"))
         .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
         .parse(argv.size(), argv.data());
-    REQUIRE(args.result_code() == ParserResultCode::ERROR);
+    REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("LAST_OPTION option")
@@ -412,7 +412,7 @@ TEST_CASE("Abbreviated options")
     {
         Argv argv{"test", "/peN"};
         auto args = parser.parse(argv.size(), argv.data());
-        REQUIRE(args.result_code() == ParserResultCode::ERROR);
+        REQUIRE(args.result_code() == ParserResultCode::FAILURE);
         REQUIRE(!args.value("/penny").as_bool());
         REQUIRE(!args.value("/pentagram").as_bool());
     }
@@ -523,7 +523,7 @@ TEST_CASE("Mandatory option")
         .add(Option({"--f"}).argument("N").optional(false))
         .add(Argument("arg"))
         .parse({"abcd"});
-    REQUIRE(args.result_code() == ParserResultCode::ERROR);
+    REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("Unknown options and arguments.")
@@ -571,7 +571,7 @@ TEST_CASE("Unknown option, invalid argument.")
     REQUIRE(arg);
     REQUIRE(value == "arg");
     REQUIRE(!it.next(arg, value));
-    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::ERROR);
+    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("Unknown argument, invalid option.")
@@ -594,7 +594,7 @@ TEST_CASE("Unknown argument, invalid option.")
     REQUIRE(!arg);
     REQUIRE(value == "man");
     REQUIRE(!it.next(arg, value));
-    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::ERROR);
+    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("Unknown argument, invalid short option.")
@@ -617,7 +617,7 @@ TEST_CASE("Unknown argument, invalid short option.")
     REQUIRE(!arg);
     REQUIRE(value == "-pq");
     REQUIRE(!it.next(arg, value));
-    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::ERROR);
+    REQUIRE(it.parsed_arguments().result_code() == ParserResultCode::FAILURE);
 }
 
 TEST_CASE("Default help")

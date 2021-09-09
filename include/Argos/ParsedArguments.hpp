@@ -177,6 +177,14 @@ namespace argos
 
     /**
      * @brief Write a list of all arguments and options along with their
+     *  values to stdout.
+     *
+     * This function is intended for testing and debugging.
+     */
+    void print(const ParsedArguments& args);
+
+    /**
+     * @brief Write a list of all arguments and options along with their
      *  values to @a stream.
      *
      * This function is intended for testing and debugging.
