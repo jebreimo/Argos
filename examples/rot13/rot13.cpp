@@ -23,7 +23,7 @@ void rotate_and_print(const std::string& word, int n)
 
 int main(int argc, char* argv[])
 {
-    using argos::ArgumentParser, argos::Argument, argos::Option;
+    using namespace argos;
     const argos::ParsedArguments args = ArgumentParser("example2")
         .about("Obfuscates (or reveals) text with the rot-13 algorithm.")
         .add(Argument("WORD").count(1, INT_MAX).help("One or more words."))
@@ -31,6 +31,9 @@ int main(int argc, char* argv[])
             .help("Display additional information."))
         .add(Option{"-n", "--number"}.argument("NUM")
             .help("Set the number letters are rotated by. Default is 13."))
+        .add(Option{"--"}.type(OptionType::LAST_OPTION)
+             .help("Marks the end of the options. Allows words to"
+                   " start with dashes ('-')."))
         .parse(argc, argv);
 
     const std::vector<std::string> words = args.values("WORD").as_strings();

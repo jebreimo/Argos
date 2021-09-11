@@ -1,7 +1,14 @@
 whereis
 =======
 
-This program demonstrates some of Argos' capabilities.
+This program demonstrates some of Argos' capabilities, including:
+
+- `--verbose` and `--quiet` options that toggle the same value
+- the automatic version option
+- use of list options and splitting strings on a separator
+- variable number of arguments
+- use of `Option::initial_value`
+- use of option type LAST_OPTION to allow arguments starting with dashes
 
 To build it with CMake on Unix-like operating systems (e.g Mac or Linux), cd
 into folder where whereis is located and run the following commands:

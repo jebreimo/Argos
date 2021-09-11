@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include <cmath>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
         .add(Option{"-c", "--column"}
             .callback([&](auto, auto, auto){++col; return true;})
             .help("Skip one column forward."))
-        .add(Option{"--borders"}.help("Print borders between cels."))
+        .add(Option{"--borders"}.help("Print borders between cells."))
         .parse(argc, argv);
 
     if (cells.empty())
@@ -50,6 +51,7 @@ int main(int argc, char* argv[])
 
     auto borders = args.value("--borders").as_bool();
 
+    // Calculate column widths.
     std::vector<size_t> col_widths;
     for (auto cell : cells)
     {
@@ -57,13 +59,21 @@ int main(int argc, char* argv[])
             col_widths.resize(cell.col + 1);
         col_widths[cell.col] = std::max(col_widths[cell.col], cell.text.size());
     }
-
-    auto& stream = std::cout;
     auto table_width = std::accumulate(col_widths.begin(), col_widths.end(), 0)
                        + col_widths.size() - 1;
+
+    // Initialize output stream.
+    std::ofstream file;
+    if (auto output = args.value("--output"))
+        file.open(output.as_string());
+    std::ostream& stream = file ? file : std::cout;
+
+    // Print the table.
     auto it = cells.begin();
     for (unsigned i = 0; i <= cells.back().row; ++i)
     {
+        // If borders are enabled, print a line of dashes and pluses
+        // between the rows of text.
         if (borders && i != 0)
         {
             stream << std::setfill('-');
@@ -74,13 +84,16 @@ int main(int argc, char* argv[])
                 stream << std::setw(col_widths[j]) << "";
             }
             stream << std::setfill(' ') << '\n';
-            //stream << std::setfill('-') << std::setw(table_width) << ""
-            //          << '\n' << std::setfill(' ');
         }
+
+        // Print the row of text.
         for (unsigned j = 0; j < col_widths.size(); ++j)
         {
+            // Print a separator between cells.
             if (j != 0)
                 stream << (borders ? '|' : ' ');
+
+            // spaces is the width of the column minus the width of the text
             size_t spaces = col_widths[j];
             if (it != cells.end() && it->row == i && it->col == j)
             {
@@ -92,5 +105,6 @@ int main(int argc, char* argv[])
         }
         stream << '\n';
     }
+
     return 0;
 }
