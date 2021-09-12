@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 0.105.0)
+project(Argos VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 

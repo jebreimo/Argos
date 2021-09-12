@@ -15,23 +15,23 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "0.105.0";
+constexpr char ARGOS_VERSION[] = "1.0.0";
 
 /**
- * @brief Incremented if a new version is significantly incompatible
- *      with the previous version.
+ * @brief Incremented when a new version contains significant changes. It
+ *  might be necessary to update code that has been compiled with previous
+ *  the version of Argos.
  */
-#define ARGOS_VERSION_MAJOR 0
+#define ARGOS_VERSION_MAJOR 1
 
 /**
- * @brief Incremented when Argos's interface is modified without introducing
- *      incompatibilities with previous versions.
+ * @brief Incremented when Argos's interface is modified in ways that are
+ *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 105
+#define ARGOS_VERSION_MINOR 0
 
 /**
- * @brief Incremented when Argos's internals are modified without modifying
- *      its interface.
+ * @brief Incremented when the changes does not affect the interface.
  */
 #define ARGOS_VERSION_PATCH 0
 

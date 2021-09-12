@@ -7,10 +7,6 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.13)
 
-#
-# Contents are based on https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
-#
-
 find_package(Doxygen)
 
 if(Doxygen_NOT_FOUND)
@@ -18,27 +14,26 @@ if(Doxygen_NOT_FOUND)
 endif()
 
 # Find all the public headers
-get_target_property(ARGOS_PUBLIC_HEADER_DIR Argos INTERFACE_INCLUDE_DIRECTORIES)
-file(GLOB_RECURSE ARGOS_PUBLIC_HEADERS "${ARGOS_PUBLIC_HEADER_DIR}/*.hpp")
+file(GLOB_RECURSE ARGOS_DOXYGEN_INPUT "${CMAKE_SOURCE_DIR}/include/Argos/*.hpp")
+list(APPEND ARGOS_DOXYGEN_INPUT "${CMAKE_CURRENT_BINARY_DIR}/../../ArgosVersion.hpp")
+list(INSERT ARGOS_DOXYGEN_INPUT 0 "${CMAKE_SOURCE_DIR}/README.md")
+#set(DOXYGEN_INPUT_DIRS "${CMAKE_SOURCE_DIR}/include/Argos")
+#set(ARGOS_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/../../ArgosVersion.hpp")
 
-set(DOXYGEN_START_PAGE "${CMAKE_SOURCE_DIR}/README.md")
-set(DOXYGEN_INPUT_DIRS "${CMAKE_SOURCE_DIR}/include/Argos ${CMAKE_CURRENT_BINARY_DIR}/../../include/Argos")
-set(DOXYGEN_INPUT "${DOXYGEN_START_PAGE} ${DOXYGEN_INPUT_DIRS}")
-set(DOXYGEN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
+string(REPLACE ";" " " DOXYGEN_INPUT "${ARGOS_DOXYGEN_INPUT}")
+#set(DOXYGEN_INPUT "${ARGOS_DOXYGEN_INPUT}")
+set(DOXYGEN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
 # Replace variables inside @@ with the current values
 configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
-# Doxygen won't create this for us
-file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
-
 set(DOXYGEN_INDEX_FILE "${DOXYGEN_OUTPUT_DIR}/xml/index.xml")
 
 # Only regenerate Doxygen when the Doxyfile or public headers change
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
-    DEPENDS ${ARGOS_PUBLIC_HEADERS}
+    DEPENDS ${ARGOS_DOXYGEN_INPUT}
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
     MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
     COMMENT "Generating documentation with Doxygen")

@@ -18,19 +18,19 @@
 constexpr char ARGOS_VERSION[] = "@Argos_VERSION@";
 
 /**
- * @brief Incremented if a new version is significantly incompatible
- *      with the previous version.
+ * @brief Incremented when a new version contains significant changes. It
+ *  might be necessary to update code that has been compiled with previous
+ *  the version of Argos.
  */
 #define ARGOS_VERSION_MAJOR @Argos_VERSION_MAJOR@
 
 /**
- * @brief Incremented when Argos's interface is modified without introducing
- *      incompatibilities with previous versions.
+ * @brief Incremented when Argos's interface is modified in ways that are
+ *  compatible with existing client code.
  */
 #define ARGOS_VERSION_MINOR @Argos_VERSION_MINOR@
 
 /**
- * @brief Incremented when Argos's internals are modified without modifying
- *      its interface.
+ * @brief Incremented when the changes does not affect the interface.
  */
 #define ARGOS_VERSION_PATCH @Argos_VERSION_PATCH@
