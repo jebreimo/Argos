@@ -32,16 +32,15 @@ int main(int argc, char* argv[])
                       {
                           cells.push_back({std::string(text), row, col});
                           ++col;
-                          return true;
                       })
             .help("Text of the next table cell."))
         .add(Option{"-o", "--output"}.argument("FILE")
             .help("File name for output. stdout is used by default."))
         .add(Option{"-r", "--row"}
-            .callback([&](auto, auto, auto){++row; col = 0; return true;})
+            .callback([&](auto, auto, auto){++row; col = 0;})
             .help("Next file will be placed at the beginning of a new row."))
         .add(Option{"-c", "--column"}
-            .callback([&](auto, auto, auto){++col; return true;})
+            .callback([&](auto, auto, auto){++col;})
             .help("Skip one column forward."))
         .add(Option{"--borders"}.help("Print borders between cells."))
         .parse(argc, argv);
@@ -59,7 +58,7 @@ int main(int argc, char* argv[])
             col_widths.resize(cell.col + 1);
         col_widths[cell.col] = std::max(col_widths[cell.col], cell.text.size());
     }
-    auto table_width = std::accumulate(col_widths.begin(), col_widths.end(), 0)
+    auto table_width = std::accumulate(col_widths.begin(), col_widths.end(), 0ULL)
                        + col_widths.size() - 1;
 
     // Initialize output stream.

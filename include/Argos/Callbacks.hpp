@@ -31,7 +31,7 @@ namespace argos
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */
-    using ArgumentCallback = std::function<bool(ArgumentView,
+    using ArgumentCallback = std::function<void(ArgumentView,
                                                 std::string_view,
                                                 ParsedArgumentsBuilder)>;
 
@@ -49,7 +49,7 @@ namespace argos
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */
-    using OptionCallback = std::function<bool(OptionView,
+    using OptionCallback = std::function<void(OptionView,
                                               std::string_view,
                                               ParsedArgumentsBuilder)>;
 }

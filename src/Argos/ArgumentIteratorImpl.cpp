@@ -252,22 +252,18 @@ namespace argos
             break;
         }
 
-        if (opt.callback
-            && !opt.callback(OptionView(&opt), arg,
-                             ParsedArgumentsBuilder(m_parsed_args)))
+        if (opt.callback)
         {
-            error();
-            return {OptionResult::ERROR, {}};
+            opt.callback(OptionView(&opt), arg,
+                         ParsedArgumentsBuilder(m_parsed_args));
+        }
+        if (m_data->parser_settings.option_callback)
+        {
+            m_data->parser_settings.option_callback(
+                OptionView(&opt), arg,
+                ParsedArgumentsBuilder(m_parsed_args));
         }
 
-        if (m_data->parser_settings.option_callback
-            && !m_data->parser_settings.option_callback(
-                    OptionView(&opt), arg,
-                    ParsedArgumentsBuilder(m_parsed_args)))
-        {
-            error();
-            return {OptionResult::ERROR, {}};
-        }
         switch (opt.type)
         {
         case OptionType::NORMAL:
@@ -344,20 +340,16 @@ namespace argos
         {
             auto s = m_parsed_args->append_value(argument->value_id, name,
                                                  argument->argument_id);
-            if (argument->callback
-                && !argument->callback(ArgumentView(argument), s,
-                                       ParsedArgumentsBuilder(m_parsed_args)))
+            if (argument->callback)
             {
-                error();
-                return {IteratorResultCode::ERROR, nullptr, {}};
+                argument->callback(ArgumentView(argument), s,
+                                   ParsedArgumentsBuilder(m_parsed_args));
             }
-            if (m_data->parser_settings.argument_callback
-                && !m_data->parser_settings.argument_callback(
-                        ArgumentView(argument), s,
-                        ParsedArgumentsBuilder(m_parsed_args)))
+            if (m_data->parser_settings.argument_callback)
             {
-                error();
-                return {IteratorResultCode::ERROR, nullptr, {}};
+                m_data->parser_settings.argument_callback(
+                    ArgumentView(argument), s,
+                    ParsedArgumentsBuilder(m_parsed_args));
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }

@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.0.0";
+constexpr char ARGOS_VERSION[] = "1.1.0";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -28,7 +28,7 @@ constexpr char ARGOS_VERSION[] = "1.0.0";
  * @brief Incremented when Argos's interface is modified in ways that are
  *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 0
+#define ARGOS_VERSION_MINOR 1
 
 /**
  * @brief Incremented when the changes does not affect the interface.
@@ -1536,7 +1536,7 @@ namespace argos
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */
-    using ArgumentCallback = std::function<bool(ArgumentView,
+    using ArgumentCallback = std::function<void(ArgumentView,
                                                 std::string_view,
                                                 ParsedArgumentsBuilder)>;
 
@@ -1554,7 +1554,7 @@ namespace argos
      * - ParsedArgumentsBuilder: this object can be used to read or modify
      *   the values of arguments and options.
      */
-    using OptionCallback = std::function<bool(OptionView,
+    using OptionCallback = std::function<void(OptionView,
                                               std::string_view,
                                               ParsedArgumentsBuilder)>;
 }
