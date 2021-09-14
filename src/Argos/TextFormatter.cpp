@@ -40,7 +40,7 @@ namespace argos
             case '\t':
                 return {'\t', text.substr(0, 1), text.substr(1)};
             case '\r':
-                if (text.size() > 1 || text[1] == '\n')
+                if (text.size() > 1 && text[1] == '\n')
                     return {'\n', text.substr(0, 2), text.substr(2)};
                 [[fallthrough]];
             case '\n':
