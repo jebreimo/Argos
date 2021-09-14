@@ -44,14 +44,15 @@ int main(int argc, char* argv[])
                   " include the leading '.'. This option can be used"
                   " multiple times, multiple extensions can be set at once"
                   " by separating them with '" PATH_SEPARATOR "'."))
+        .add(Option{"--"}.type(OptionType::LAST_OPTION)
+             .help("Marks the end of the options. Makes it possible to look"
+                   " for file names starting with dashes ('-')."))
+        .section("OTHER OPTIONS")
         .add(Option{"-q", "--quiet"}.alias("--verbose")
             .constant(false)
             .help("Do not show additional information (negates --verbose)."))
         .add(Option{"-v", "--verbose"}
             .help("Show additional information."))
-        .add(Option{"--"}.type(OptionType::LAST_OPTION)
-             .help("Marks the end of the options. Makes it possible to look"
-                   " for file names starting with dashes ('-')."))
         .parse(argc, argv);
 
     auto file_names = args.values("FILE").as_strings();

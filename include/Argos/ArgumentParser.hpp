@@ -376,16 +376,30 @@ namespace argos
         ArgumentParser& about(std::string text);
 
         /**
-         * @brief Set the given part of the help text.
-         */
-        ArgumentParser& text(TextId textId, std::string text);
-
-        /**
          * @brief Sets the program version and enables the --version option.
          * @param version The version is typically 2-4 numbers separated
          *  by periods, e.g. 1.0.3.
          */
         ArgumentParser& version(const std::string& version);
+
+        /**
+         * @brief Sets a section (or heading) that is automatically assigned
+         *   to arguments and options when they are added.
+         *
+         * This value is only applied to arguments and options that have not
+         * been assigned a section with Argument::section or Option::section.
+         * If this value is an empty string, the values from
+         * TextId::ARGUMENTS_TITLE and TextId::OPTIONS_TITLE are used.
+         *
+         * @param name All arguments and options with the same section name
+         *  will be listed under the same heading.
+         */
+        ArgumentParser& section(const std::string& name);
+
+        /**
+         * @brief Set the given part of the help text.
+         */
+        ArgumentParser& text(TextId textId, std::string text);
 
         /**
          * @brief Sets the line width for help text and error messages.

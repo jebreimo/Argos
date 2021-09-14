@@ -189,6 +189,9 @@ namespace argos
 
     /**
      * @brief Tells which part of the help text (or error text) is assigned.
+     *
+     * TextId identifies which part of the help text is being assigned in
+     * calls to ArgumentParser::text.
      */
     enum class TextId
     {

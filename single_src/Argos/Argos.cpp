@@ -617,6 +617,8 @@ namespace argos
         HelpSettings help_settings;
 
         TextFormatter text_formatter;
+
+        std::string current_section;
     };
 }
 
@@ -1641,6 +1643,7 @@ namespace argos
                 .constant("1").release();
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
+            opt->section = data.current_section;
             data.options.push_back(move(opt));
         }
 
@@ -1683,6 +1686,7 @@ namespace argos
                 .release();
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
+            opt->section = data.current_section;
             data.options.push_back(move(opt));
         }
 
@@ -1739,6 +1743,8 @@ namespace argos
         if (ad->name.empty())
             ARGOS_THROW("Argument must have a name.");
         ad->argument_id = next_argument_id();
+        if (ad->section.empty())
+            ad->section = m_data->current_section;
         m_data->arguments.emplace_back(std::move(ad));
         return *this;
     }
@@ -1799,6 +1805,8 @@ namespace argos
             break;
         }
         od->argument_id = next_argument_id();
+        if (od->section.empty())
+            od->section = m_data->current_section;
         m_data->options.push_back(std::move(od));
         return *this;
     }
@@ -2023,6 +2031,13 @@ namespace argos
     {
         check_data();
         m_data->help_settings.version = version;
+        return *this;
+    }
+
+    ArgumentParser &ArgumentParser::section(const std::string &name)
+    {
+        check_data();
+        m_data->current_section = name;
         return *this;
     }
 

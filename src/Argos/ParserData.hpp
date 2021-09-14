@@ -55,5 +55,7 @@ namespace argos
         HelpSettings help_settings;
 
         TextFormatter text_formatter;
+
+        std::string current_section;
     };
 }
