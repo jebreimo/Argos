@@ -55,8 +55,22 @@ namespace argos
     private:
         void append_word(std::string_view word);
 
+        void begin_alignment();
+
+        void update_alignment(const std::string_view& token);
+
+        void end_alignment();
+
         TextWriter m_writer;
         std::vector<unsigned> m_indents;
         WordSplitter m_word_splitter;
+        enum class State
+        {
+            NO_ALIGNMENT,
+            ALIGNMENT,
+            UNALIGNED_MARKER,
+            ALIGNED_MARKER
+        };
+        State m_state = State::NO_ALIGNMENT;
     };
 }

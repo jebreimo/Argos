@@ -123,3 +123,41 @@ TEST_CASE("TextFormatter splitting word with rule")
     formatter.flush();
     REQUIRE(ss.str() == u8"Til Brønnøy-\nsunds-\nregisteret");
 }
+
+TEST_CASE("Text alignment")
+{
+    std::stringstream ss;
+    argos::TextFormatter formatter(&ss, 12);
+    formatter.write_words("    Abcd efg hij klm");
+    formatter.flush();
+    REQUIRE(ss.str() == "    Abcd efg\n    hij klm");
+}
+
+TEST_CASE("List item alignment")
+{
+    std::stringstream ss;
+    argos::TextFormatter formatter(&ss, 17);
+    formatter.write_words(R"-(My list:
+- Abcdef ghijk lmn
+    * Abcdef ghij
+    * Abcdef ghijk lmn
+- Abcdef ghijk lmn
+1. Abcdef ghijk lmn
+    1. Abcdef ghijk lmn
+Abcdef ghijk lmn opqrst)-");
+    formatter.flush();
+    REQUIRE(ss.str() == R"-(My list:
+- Abcdef ghijk
+  lmn
+    * Abcdef ghij
+    * Abcdef
+      ghijk lmn
+- Abcdef ghijk
+  lmn
+1. Abcdef ghijk
+   lmn
+    1. Abcdef
+       ghijk lmn
+Abcdef ghijk lmn
+opqrst)-");
+}

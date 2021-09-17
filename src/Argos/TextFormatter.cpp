@@ -33,7 +33,7 @@ namespace argos
         next_token(std::string_view text)
         {
             if (text.empty())
-                return {'0', text, {}};
+                return {'\0', text, {}};
 
             switch (text[0])
             {
@@ -56,6 +56,20 @@ namespace argos
                 else
                     return {'A', text, {}};
             }
+        }
+
+        bool is_list_marker(const std::string_view& str)
+        {
+            if (str.size() == 1)
+                return  str[0] == '-' || str[0] == '*';
+
+            if (str.size() > 1 && str.back() == '.')
+            {
+                return std::all_of(str.begin(), str.end() - 1,
+                                   [](auto c) {return std::isdigit(c);});
+            }
+
+            return false;
         }
     }
 
@@ -119,19 +133,26 @@ namespace argos
             {
             case '\t':
                 m_writer.tab();
+                begin_alignment();
                 break;
             case '\n':
+                end_alignment();
                 m_writer.newline();
                 break;
             case ' ':
                 m_writer.set_spaces(static_cast<unsigned>(token.size()));
+                begin_alignment();
+                break;
+            case 'A':
+                update_alignment(token);
+                append_word(token);
                 break;
             default:
-                append_word(token);
                 break;
             }
             text = remainder;
         }
+        end_alignment();
     }
 
     void TextFormatter::write_lines(std::string_view text)
@@ -161,13 +182,35 @@ namespace argos
         m_writer.flush();
     }
 
+    unsigned TextFormatter::line_width() const
+    {
+        return m_writer.line_width();
+    }
+
+    void TextFormatter::set_line_width(unsigned line_width)
+    {
+        if (line_width <= 2)
+            ARGOS_THROW("Line width must be greater than 2.");
+        m_writer.set_line_width(line_width);
+    }
+
+    unsigned int TextFormatter::current_line_width() const
+    {
+        return m_writer.current_width();
+    }
+
+    bool TextFormatter::is_current_line_empty() const
+    {
+        return m_writer.is_current_line_empty();
+    }
+
     void TextFormatter::append_word(std::string_view word)
     {
         auto remainder = word;
         while (!m_writer.write(remainder))
         {
             auto width = m_writer.remaining_width();
-            auto [w, s, r] = m_word_splitter.split(
+            auto[w, s, r] = m_word_splitter.split(
                 word,
                 word.size() - remainder.size(),
                 width,
@@ -200,25 +243,38 @@ namespace argos
         }
     }
 
-    unsigned TextFormatter::line_width() const
+    void TextFormatter::begin_alignment()
     {
-        return m_writer.line_width();
+        if (m_writer.is_current_line_empty()
+            || m_state == State::UNALIGNED_MARKER)
+        {
+            push_indentation(CURRENT_COLUMN);
+            m_state = State::ALIGNMENT;
+        }
+        else if (m_state == State::ALIGNED_MARKER)
+        {
+            pop_indentation();
+            push_indentation(CURRENT_COLUMN);
+            m_state = State::ALIGNMENT;
+        }
     }
 
-    void TextFormatter::set_line_width(unsigned line_width)
+    void TextFormatter::update_alignment(const std::string_view& token)
     {
-        if (line_width <= 2)
-            ARGOS_THROW("Line width must be greater than 2.");
-        m_writer.set_line_width(line_width);
+        if (m_writer.is_current_line_empty() && is_list_marker(token))
+        {
+            m_state = m_state == State::ALIGNMENT
+                      ? State::ALIGNED_MARKER
+                      : State::UNALIGNED_MARKER;
+        }
     }
 
-    unsigned int TextFormatter::current_line_width() const
+    void TextFormatter::end_alignment()
     {
-        return m_writer.current_width();
-    }
-
-    bool TextFormatter::is_current_line_empty() const
-    {
-        return m_writer.is_current_line_empty();
+        if (m_state == State::ALIGNMENT || m_state == State::ALIGNED_MARKER)
+        {
+            pop_indentation();
+            m_state = State::NO_ALIGNMENT;
+        }
     }
 }
