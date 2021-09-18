@@ -736,3 +736,13 @@ TEST_CASE("Version option")
     REQUIRE(args.result_code() == ParserResultCode::STOP);
     REQUIRE(ss.str() == "test 1.2.3\n");
 }
+
+TEST_CASE("Check that '-' is treated as an argument")
+{
+    using namespace argos;
+    Argv argv{"test", "-"};
+    auto args = ArgumentParser("test")
+        .add(Argument("FOO"))
+        .parse(argv.size(), argv.data());
+    REQUIRE(args.value("FOO").as_string() == "-");
+}
