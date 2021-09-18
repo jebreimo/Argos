@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
         .version(VERSION)
         .add(Argument("FILE").count(1, UINT_MAX)
             .help("The file or files to locate."))
+        .section("MAIN OPTIONS")
         .add(Option{"-p", "--paths"}
             .argument("<PATH>[" PATH_SEPARATOR "<PATH>]...")
             .initial_value(path_env ? path_env : std::string())
