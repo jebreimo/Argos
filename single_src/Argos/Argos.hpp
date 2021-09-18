@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.1";
+constexpr char ARGOS_VERSION[] = "1.1.2";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.1.1";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 1
+#define ARGOS_VERSION_PATCH 2
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -2765,6 +2765,11 @@ namespace argos
 
         /**
          * @brief Set the given part of the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
          */
         ArgumentParser& text(TextId textId, std::string text);
 

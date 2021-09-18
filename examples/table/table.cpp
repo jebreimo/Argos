@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     using namespace argos;
     auto args = ArgumentParser(argv[0])
         .about("Prints the arguments as cells in a table. The program also"
-               " demonstrates how option and argument callbacks can be used.")
+               " demonstrates one way to use option and argument callbacks.")
         .add(Argument("TEXT").count(1, UINT16_MAX)
             .callback([&](auto, auto text, auto)
                       {

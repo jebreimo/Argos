@@ -9,6 +9,7 @@ This program demonstrates some of Argos' capabilities, including:
 - variable number of arguments
 - use of `Option::initial_value`
 - use of option type LAST_OPTION to allow arguments starting with dashes
+- use of ArgumentParser::section to set section headings for the options 
 
 To build it with CMake on Unix-like operating systems (e.g Mac or Linux), cd
 into folder where whereis is located and run the following commands:
@@ -26,7 +27,7 @@ variable.
 
 Running the program will yield results similar to this this:
 
-~~~shell
+~~~s
 $ ./whereis python
 /usr/local/bin/python
 /usr/bin/python
@@ -34,22 +35,22 @@ $ ./whereis python
 
 and giving the help option (either `-h` or `--help`):
 
-~~~shell
+~~~
 $ ./whereis -h
 USAGE
-  whereis -h
+  whereis --help
   whereis --version
-  whereis [-p <PATH>[:<PATH>]...] [-e <EXT>[:<EXT>]...] [-q] [-v] [--]
+  whereis [-p <PATH>[:<PATH>]...] [-e <EXT>[:<EXT>]...] [--] [-q] [-v]
           <FILE> [<FILE>]...
 
-Searches the directories in the PATH environment variable for the given file
-(or files).
+Searches the directories in the PATH environment variable for the given
+file (or files).
 
 ARGUMENTS
   <FILE> [<FILE>]...
         The file or files to locate.
 
-OPTIONS
+MAIN OPTIONS
   -p <PATH>[:<PATH>]..., --paths <PATH>[:<PATH>]...
         Search the given path or paths rather than the ones in the PATH
         environment variable. Use : as separator between the different
@@ -58,15 +59,17 @@ OPTIONS
         File name extensions to test while looking for FILE. Must include
         the leading '.'. This option can be used multiple times, multiple
         extensions can be set at once by separating them with ':'.
+  --
+        Marks the end of the options. Makes it possible to look for file
+        names starting with dashes ('-').
+
+OTHER OPTIONS
   -q, --quiet
         Do not show additional information (negates --verbose).
   -v, --verbose
         Show additional information.
-  --
-        Marks the end of the options. Makes it possible to look for file
-        names starting with dashes ('-').
   -h, --help
-        Show help text.
+        Display the help text.
   --version
-        Show program version.
+        Display the program version.
 ~~~

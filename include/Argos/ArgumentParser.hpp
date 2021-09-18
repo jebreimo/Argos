@@ -398,6 +398,11 @@ namespace argos
 
         /**
          * @brief Set the given part of the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
          */
         ArgumentParser& text(TextId textId, std::string text);
 

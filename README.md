@@ -2,37 +2,39 @@ The Argos Command Line Parser
 =============================
 
 Argos is a C++ library providing classes for declaring and parsing a program's command line
-interface. It is intended to be easy to use, yet support advanced command line interfaces.
+interface, as well as displaying a useful help text and helpful error messages. It is intended to be
+easy to use, yet support advanced command line interfaces.
 
-Its features includes:
+Its features include:
 
 - Automatic formatting of help texts, including word wrapping, based on the terminal's width.
 - A flexible parser that supports arguments of many different types, including `int`, `long`
   , `long long`
   and corresponding unsigned types, `float` and `double`.
-- Obviates most of the command line-related error handling.
+- Takes care of most of the command line-related error handling automatically.
 - Three different option styles:
     - Gnu/Linux standard options: short, `-o`, and long flags, `--option`, where multiple short
       options can be concatenated after a single dash.
     - Windows options: flags starting with a slash `/OPTION`, case sensitivity can be turned on and
       off.
     - Dash options: arbitrary flags preceded by a single dash.
-- It is easy to link two or more options, for instance `--quiet` and `--verbose` options.
-- Callbacks invoked for specific arguments and options.
+- More powerful features like linking two or more options, e.g. `--quiet` and `--verbose`, are
+  trivial
+  with [aliases](https://barsken.no/apidoc/argos/classargos_1_1_option.html#aaca269866e4b341f215726511c2992c6)
+  and [callbacks](https://barsken.no/apidoc/argos/classargos_1_1_option.html#a030255e044955d037aba30bc88b2da3f)
+  .
 - Tested on Linux, macOS and Windows.
 
-# Source code and licence
+# Documentation, source code and licence
+
+The documentation for Argos can be found
+at [barsken.no/apidoc/argos](https://barsken.no/apidoc/argos).
 
 Argos is made available under
 the [2-clause BSD licence](https://raw.githubusercontent.com/jebreimo/Argos/master/LICENSE).
 
 The source code can be cloned or forked on
 GitHub: [github.com/jebreimo/Argos](https://github.com/jebreimo/Argos).
-
-# Documentation
-
-The documentation for Argos can be found
-at [barsken.no/apidoc/argos](https://barsken.no/apidoc/argos).
 
 # Requirements
 
@@ -170,7 +172,7 @@ in [examples/whereis](https://github.com/jebreimo/Argos/tree/master/examples/whe
 USAGE
   whereis --help
   whereis --version
-  whereis [-p <PATH>[:<PATH>]...] [-e <EXT>[:<EXT>]...] [-q] [-v] [--]
+  whereis [-p <PATH>[:<PATH>]...] [-e <EXT>[:<EXT>]...] [--] [-q] [-v]
           <FILE> [<FILE>]...
 
 Searches the directories in the PATH environment variable for the given
@@ -180,23 +182,24 @@ ARGUMENTS
   <FILE> [<FILE>]...
         The file or files to locate.
 
-OPTIONS
+MAIN OPTIONS
   -p <PATH>[:<PATH>]..., --paths <PATH>[:<PATH>]...
         Search the given path or paths rather than the ones in the PATH
         environment variable. Use : as separator between the different
         paths.
   -e <EXT>[:<EXT>]..., --extensions <EXT>[:<EXT>]...
-        File name extensions to test while looking for FILE. Must
-        include the leading '.'. This option can be used multiple times,
-        multiple extensions can be set at once by separating them with
-        ':'.
+        File name extensions to test while looking for FILE. Must include
+        the leading '.'. This option can be used multiple times, multiple
+        extensions can be set at once by separating them with ':'.
+  --
+        Marks the end of the options. Makes it possible to look for file
+        names starting with dashes ('-').
+
+OTHER OPTIONS
   -q, --quiet
         Do not show additional information (negates --verbose).
   -v, --verbose
         Show additional information.
-  --
-        Marks the end of the options. Makes it possible to look for file
-        names starting with dashes ('-').
   -h, --help
         Display the help text.
   --version
