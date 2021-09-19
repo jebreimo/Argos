@@ -611,6 +611,7 @@ namespace argos
         bool ignore_undefined_arguments = false;
         bool case_insensitive = false;
         bool generate_help_option = true;
+        int normal_exit_code = 0;
         int error_exit_code = ARGOS_EX_USAGE;
     };
 
@@ -1319,7 +1320,7 @@ namespace argos
             {
             case OptionResult::EXIT:
                 if (m_data->parser_settings.auto_exit)
-                    exit(0);
+                    exit(m_data->parser_settings.normal_exit_code);
                 copy_remaining_arguments_to_parser_result();
                 return {IteratorResultCode::OPTION, option, opt_res.second};
             case OptionResult::ERROR:
@@ -2075,6 +2076,14 @@ namespace argos
     {
         check_data();
         m_data->text_formatter.word_splitter().add_word(std::move(str));
+        return *this;
+    }
+
+    ArgumentParser& ArgumentParser::set_exit_codes(int error, int normal_exit)
+    {
+        check_data();
+        m_data->parser_settings.error_exit_code = error;
+        m_data->parser_settings.normal_exit_code = normal_exit;
         return *this;
     }
 

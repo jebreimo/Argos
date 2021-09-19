@@ -35,6 +35,7 @@ namespace argos
         bool ignore_undefined_arguments = false;
         bool case_insensitive = false;
         bool generate_help_option = true;
+        int normal_exit_code = 0;
         int error_exit_code = ARGOS_EX_USAGE;
     };
 

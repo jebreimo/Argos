@@ -615,6 +615,14 @@ namespace argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::set_exit_codes(int error, int normal_exit)
+    {
+        check_data();
+        m_data->parser_settings.error_exit_code = error;
+        m_data->parser_settings.normal_exit_code = normal_exit;
+        return *this;
+    }
+
     ArgumentParser&& ArgumentParser::move()
     {
         return std::move(*this);

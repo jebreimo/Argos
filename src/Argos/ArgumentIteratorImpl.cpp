@@ -303,7 +303,7 @@ namespace argos
             {
             case OptionResult::EXIT:
                 if (m_data->parser_settings.auto_exit)
-                    exit(0);
+                    exit(m_data->parser_settings.normal_exit_code);
                 copy_remaining_arguments_to_parser_result();
                 return {IteratorResultCode::OPTION, option, opt_res.second};
             case OptionResult::ERROR:

@@ -438,6 +438,23 @@ namespace argos
         ArgumentParser& add_word_splitting_rule(std::string str);
 
         /**
+         * @brief Set the codes Argos will use when it calls exit.
+         *
+         * These values are the values that the program returns to the shell
+         * or other program that started it.
+         *
+         * @note The values assigned here are only used if auto_exit is true.
+         *
+         * @param error the program's return value if there are incorrect
+         *  arguments or options. The default value is EX_USAGE on platforms
+         *  that provide that constant, 64 on those that don't.
+         * @param normal_exit the program's return value when the help option
+         *  or an option with type OptionType::EXIT is encountered. The
+         *  default value is 0.
+         */
+        ArgumentParser& set_exit_codes(int error, int normal_exit);
+
+        /**
          * @brief Makes it possible to construct an ArgumentParser with chained
          *      method calls and assign it to a variable.
          */
