@@ -5,8 +5,8 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <algorithm>
 #include <iostream>
-#include <array>
 #include "ArgosThrow.hpp"
 #include "ConsoleWidth.hpp"
 #include "TextFormatter.hpp"
