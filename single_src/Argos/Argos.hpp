@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.3";
+constexpr char ARGOS_VERSION[] = "1.1.260";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.1.3";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 3
+#define ARGOS_VERSION_PATCH 260
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -2081,7 +2081,7 @@ namespace argos
         /**
          * @brief Creates a new option without any flags.
          *
-         * And option created this way must be assigned at least one flag with
+         * An option created this way must be assigned at least one flag with
          * Option::flag or Option::flags before it can be added to the
          * ArgumentParser.
          */

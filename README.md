@@ -7,13 +7,11 @@ easy to use, yet support advanced command line interfaces.
 
 Its features include:
 
-- Automatic formatting of help texts, including word wrapping, based on the terminal's width.
-- A flexible parser that supports arguments of many different types, including `int`, `long`
-  , `long long`
-  and corresponding unsigned types, `float` and `double`.
+- Automatic formatting of help texts, including word wrapping based on the terminal's width.
+- A flexible parser that supports arguments of many different types like for instance `int`, `unsigned long long`, `float` and `double`.
 - Takes care of most of the command line-related error handling automatically.
 - Three different option styles:
-    - Gnu/Linux standard options: short, `-o`, and long flags, `--option`, where multiple short
+    - a combination of short, `-o`, and long flags, `--option`, where multiple short
       options can be concatenated after a single dash.
     - Windows options: flags starting with a slash `/OPTION`, case sensitivity can be turned on and
       off.
@@ -84,41 +82,29 @@ Hello planet!
 ~/Argos/examples/tutorial/build $ ./hello -n 2                                                          
 Hello world!
 Hello world!
+~/Argos/examples/tutorial/build $ ./hello -h
+USAGE
+  hello --help
+  hello [-n <NUM>] [<NAME>]
+
+Displays a greeting to someone or something.
+
+ARGUMENTS
+  [<NAME>]                 The person or thing to greet.
+
+OPTIONS
+  -n <NUM>, --number <NUM> The number of times to repeat the greeting.
+  -h, --help               Display the help text.
 ~~~
 
-The ArgumentParser class, as well as the Argument and Option classes, supports method chaining for
-convenience. Without chaining, the parser construction above would look like this:
-
-~~~c++
-int main(int argc, char* argv[])
-{
-    argos::ArgumentParser parser("hello");
-    parser.about("Displays a greeting to someone or something.");
-
-    argos::Argument argument("Name");
-    argument.optional(true);
-    argument.help("The person or thing to greet.");
-    parser.add(argument);
-
-    argos::Option option{"-n", "--number"};
-    option.argument("NUM");
-    option.help("The number of times to repeat the greeting.");
-    parser.add(option);
-    
-    const argos::ParsedArguments args = parser.parse(argc, argv);
-    ...
-~~~
-
-The interface of Argos has two central classes: ArgumentParser and ParsedArguments. ArgumentParser
-is where the arguments and options are defined, as well as various configuration settings are set (
-e.g. ArgumentParser::option_style to change to Windows-style options, or ArgumentParser::
-allow_abbreviated_options to allow using less than the complete flag of options, as long as the
-option is uniquely identified). ParsedArguments is the result of ArgumentParser::parse, and is where
+The interface of Argos is centred upon two classes: `ArgumentParser` and `ParsedArguments`. `ArgumentParser`
+is where the arguments and options are defined, as well as where various configuration settings are set (e.g. `ArgumentParser::option_style()` to for instance change to Windows-style options, or `ArgumentParser::allow_abbreviated_options()` to allow using less than the complete flag of options, as long as the
+option is uniquely identified). `ParsedArguments` is the result of `ArgumentParser::parse()`, and is where
 the values of the arguments and options can be retrieved.
 
-Arguments and options are defined by adding instances of Argument and Option to the ArgumentParse.
-Argument's constructor takes the name that will appear in the help text as its argument, Option's
-constructor take a list of flags. Both classes have several properties that define their behaviour,
+Arguments and options are defined by adding instances of `Argument` and `Option` to the `ArgumentParser`.
+`Argument`'s constructor takes the name that will appear in the help text as its argument, `Option`'s
+constructor takes a list of flags. Both classes have several properties that define their behaviour,
 important ones include `help` which sets the help text and `argument` which sets the name of an
 option's argument.
 
@@ -143,26 +129,9 @@ args.value("NAME").as_string("world")
 
 returns the value of the argument `NAME` as a `std::string`, or "world" if it wasn't given.
 
-Running the program with one of the two auto-generated help options, `-h` and `--help`, displays a
-help message:
+Running the program with one of the two auto-generated help options, `-h` and `--help`, displays the help text.
 
-~~~
-~/Argos/examples/tutorial/build $ ./hello -h
-USAGE
-  hello --help
-  hello [-n <NUM>] [<NAME>]
-
-Displays a greeting to someone or something.
-
-ARGUMENTS
-  [<NAME>]                 The person or thing to greet.
-
-OPTIONS
-  -n <NUM>, --number <NUM> The number of times to repeat the greeting.
-  -h, --help               Display the help text.
-~~~
-
-The help text looks a little bit sparse when there are so few arguments and options, but the empty
+The help text looks a little bit sparse when there are so few arguments and options as in the above example, but the empty
 lines will start to make more sense when there are a more significant number of options and
 arguments, here is for instance the help message for the `whereis` example (
 in [examples/whereis](https://github.com/jebreimo/Argos/tree/master/examples/whereis)):
@@ -245,7 +214,7 @@ be turned off with
 There are several more examples on how to use Argos in
 the [examples folder](https://github.com/jebreimo/Argos/tree/master/examples).
 
-# Building
+# Building Argos
 
 Building the program, or any program using Argos, can be done in multiple ways. My preferred way in
 CMake-based projects is to use the FetchContent module to automatically download Argos from its
@@ -272,10 +241,20 @@ target_link_libraries(hello
     )
 ~~~
 
-Alternatively one can clone the git repository and build and install it with CMake, then
-use `find_package(Argos)` and the same `target_link_libraries`as in the example above.
+Alternatively one can clone the git repository and build and install it with CMake, for instance:
 
-If one doesn't care about keeping a link to the Argos git repository, but just copy the Argos files
+~~~
+git clone https://github.com/jebreimo/Argos.git
+md Argos/build
+cd Argos/build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make install
+~~~
+
+With CMake one can then
+use `find_package(Argos)` and the same `target_link_libraries` as in the example above.
+
+If one doesn't care about keeping a link to the Argos git repository, but just want to copy the Argos files
 into the current project along with all the other files, there is a special two-file version of
 Argos in the `single_source` directory, consisting of just `Argos.hpp` and `Argos.cpp`. They are the
 concatenations of the files in the `include` and `src` respectively.

@@ -34,7 +34,7 @@ namespace argos
         /**
          * @brief Creates a new option without any flags.
          *
-         * And option created this way must be assigned at least one flag with
+         * An option created this way must be assigned at least one flag with
          * Option::flag or Option::flags before it can be added to the
          * ArgumentParser.
          */
