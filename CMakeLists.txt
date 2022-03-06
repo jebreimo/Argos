@@ -6,7 +6,20 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
-project(Argos VERSION 1.1.3)
+
+find_package(Git QUIET)
+if (Git_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ARGOS_GIT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else ()
+    set(ARGOS_GIT_VERSION 0)
+endif ()
+
+project(Argos VERSION 1.1.${ARGOS_GIT_VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -24,6 +37,9 @@ option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
 
 # Install option
 option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
+
+# Install option
+option(ARGOS_BUILD_EXAMPLES "Build the examples" OFF)
 
 include(GNUInstallDirs)
 
@@ -116,7 +132,7 @@ if(ARGOS_BUILD_TEST)
     include(CodeCoverage)
     TargetEnableCodeCoverage(Argos "${ARGOS_CODE_COVERAGE}")
 
-    enable_testing(ARGOS_ENABLE_CODE_COVERAGE)
+    enable_testing()
 
     add_subdirectory(tests/ArgosTest)
 endif()
@@ -139,6 +155,10 @@ endif()
 export(TARGETS Argos
     NAMESPACE Argos::
     FILE ArgosConfig.cmake)
+
+if (ARGOS_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 if(ARGOS_INSTALL)
     install(TARGETS Argos
@@ -181,3 +201,12 @@ if(ARGOS_INSTALL)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
         )
 endif()
+
+if (ARGOS_MASTER_PROJECT AND DEFINED ENV{LOCAL_SOURCE_PACKAGE_DIR})
+    set(LOCAL_SOURCE_PACKAGE_DIR $ENV{LOCAL_SOURCE_PACKAGE_DIR})
+    set(TARBALL_NAME ${LOCAL_SOURCE_PACKAGE_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz)
+    add_custom_target(${PROJECT_NAME}_BUILD_SRC_TARBALL
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND git archive -v --format=tar.gz --prefix=${PROJECT_NAME}/ HEAD > ${TARBALL_NAME}
+        )
+endif ()
