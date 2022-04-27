@@ -4685,6 +4685,7 @@ namespace argos
             case '\n':
                 end_alignment();
                 m_writer.newline();
+                m_writer.set_spaces(0);
                 break;
             case ' ':
                 m_writer.set_spaces(static_cast<unsigned>(token.size()));

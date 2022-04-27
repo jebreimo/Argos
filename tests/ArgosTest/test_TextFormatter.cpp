@@ -161,3 +161,12 @@ Abcdef ghijk lmn opqrst)-");
 Abcdef ghijk lmn
 opqrst)-");
 }
+
+TEST_CASE("spaces before newline")
+{
+    std::stringstream ss;
+    argos::TextFormatter formatter(&ss, 12);
+    formatter.write_words("abcd \nefgh");
+    formatter.flush();
+    REQUIRE(ss.str() == "abcd\nefgh");
+}

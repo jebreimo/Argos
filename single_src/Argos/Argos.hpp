@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.260";
+constexpr char ARGOS_VERSION[] = "1.1.262";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
