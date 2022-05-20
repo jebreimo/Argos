@@ -38,8 +38,11 @@ option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
 # Install option
 option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
 
-# Install option
+# Build examples
 option(ARGOS_BUILD_EXAMPLES "Build the examples" OFF)
+
+# Updated amalgamated source and header files
+option(ARGOS_UPDATE_SINGLE_SRC "Update the amalgamated source and header files" OFF)
 
 include(GNUInstallDirs)
 
@@ -137,18 +140,31 @@ if(ARGOS_BUILD_TEST)
     add_subdirectory(tests/ArgosTest)
 endif()
 
-if(UPDATE_SINGLE_SRC)
+if(ARGOS_UPDATE_SINGLE_SRC)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.sh.in
-        make_argos_cpp.sh)
-    add_custom_target(UpdateSingleSrc ALL
-        BYPRODUCTS
-            single_src/Argos/Argos.hpp
-            single_src/Argos/Argos.cpp
-        COMMAND
-            sh "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.sh"
-    )
+    if(WIN32)
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.cmd.in
+            make_argos_cpp.cmd)
+        add_custom_target(UpdateSingleSrc ALL
+            BYPRODUCTS
+                single_src/Argos/Argos.hpp
+                single_src/Argos/Argos.cpp
+            COMMAND
+                cmd /C "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.cmd"
+            )
+    else()
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.sh.in
+            make_argos_cpp.sh)
+        add_custom_target(UpdateSingleSrc ALL
+            BYPRODUCTS
+                single_src/Argos/Argos.hpp
+                single_src/Argos/Argos.cpp
+            COMMAND
+                sh "${CMAKE_CURRENT_BINARY_DIR}/make_argos_cpp.sh"
+        )
+    endif()
     add_dependencies(UpdateSingleSrc Argos)
 endif()
 

@@ -25,7 +25,7 @@ def get_all_files_names(dir_name):
             relpath = os.path.relpath(path, dir_name)
             abspath = os.path.realpath(path)
             if relpath not in result:
-                result[relpath] = abspath
+                result[relpath.replace("\\", "/")] = abspath
     return result
 
 
@@ -178,7 +178,7 @@ def make_argument_parser():
     ap.add_argument("-i", "--include", metavar="DIR", action="append",
                     help="Add DIR to the list of include and source dirs.")
     ap.add_argument("-f", "--filter", metavar="FILE", action="append",
-                    help="Filter out FILE or files in FILE if FILE is a directory.")
+                    help="Filter out FILE, or files in FILE if FILE is a directory.")
     return ap
 
 
@@ -228,11 +228,14 @@ def main():
     else:
         text = "".join(lines)
     if args.output:
-        if os.path.exists(args.output) and open(args.output).read() == text:
-            return 0
+        try:
+            if os.path.exists(args.output) and open(args.output, encoding="utf-8").read() == text:
+                return 0
+        except Exception:
+            pass
         if not os.path.exists(os.path.dirname(args.output)):
             os.makedirs(os.path.dirname(args.output))
-        open(args.output, "w").write(text)
+        open(args.output, "w", encoding="utf-8").write(text)
         print(f"Updated {args.output}")
     else:
         sys.stdout.write(text)
