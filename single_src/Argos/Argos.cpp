@@ -2303,7 +2303,6 @@ namespace argos
             error("Invalid value: \"" + std::string(*m_value)
                   + "\". Must have at least " + std::to_string(min_parts)
                   + " values separated by \"" + separator + "\".");
-            return ArgumentValues({}, m_args, m_value_id);
         }
         std::vector<std::pair<std::string_view, ArgumentId>> values;
         values.reserve(parts.size());
