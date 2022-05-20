@@ -7,19 +7,7 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Git QUIET)
-if (Git_FOUND)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE ARGOS_GIT_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-else ()
-    set(ARGOS_GIT_VERSION 0)
-endif ()
-
-project(Argos VERSION 1.1.${ARGOS_GIT_VERSION})
+project(Argos VERSION 1.1.267)
 
 set(CMAKE_CXX_STANDARD 17)
 
