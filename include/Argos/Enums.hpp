@@ -21,8 +21,8 @@ namespace argos
     {
         /**
          * @brief Options starts with either one dash (`-`) followed by
-         *  exactly one character (short option) or two dashes (`--`) followed by
-         *  one or more characters (long option).
+         *  exactly one character (short option) or two dashes (`--`) followed
+         *  by one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
          * equivalent as long as neither of them take an argument.

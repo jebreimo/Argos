@@ -270,8 +270,7 @@ namespace argos
          *  @a min_parts parts.
          */
         ArgumentValues
-        split(char separator, size_t min_parts = 0,
-              size_t max_parts = 0) const;
+        split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
          * @brief Returns an iterator pointing to the first value.

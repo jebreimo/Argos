@@ -266,13 +266,12 @@ namespace argos
          * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message.
          */
-        void error(const std::string& message) const;
+        [[noreturn]] void error(const std::string& message) const;
 
         /**
-         * Calls error(message) with a message that says the given value
-         * is invalid.
+         * Calls error(message) with a message that says this value is invalid.
          */
-        void error() const;
+        [[noreturn]] void error() const;
     private:
         std::optional<std::string_view> m_value;
         std::shared_ptr<ParsedArgumentsImpl> m_args;
