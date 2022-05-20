@@ -1,3 +1,5 @@
+@ECHO OFF
+
 "${Python3_EXECUTABLE}"^
   "${CMAKE_CURRENT_SOURCE_DIR}/tools/mergecpp.py"^
   "${CMAKE_CURRENT_BINARY_DIR}/ArgosVersion.hpp"^
