@@ -30,6 +30,6 @@
 
 /.idea
 /bin
-/build
+build/
 /cmake-build-*
 .DS_Store
