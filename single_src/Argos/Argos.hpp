@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.262";
+constexpr char ARGOS_VERSION[] = "1.1.266";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.1.262";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 260
+#define ARGOS_VERSION_PATCH 265
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -88,8 +88,8 @@ namespace argos
     {
         /**
          * @brief Options starts with either one dash (`-`) followed by
-         *  exactly one character (short option) or two dashes (`--`) followed by
-         *  one or more characters (long option).
+         *  exactly one character (short option) or two dashes (`--`) followed
+         *  by one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
          * equivalent as long as neither of them take an argument.
@@ -918,13 +918,12 @@ namespace argos
          * comes from and the usage section from the help text. If auto_exit is
          * true the program will exit after displaying the message.
          */
-        void error(const std::string& message) const;
+        [[noreturn]] void error(const std::string& message) const;
 
         /**
-         * Calls error(message) with a message that says the given value
-         * is invalid.
+         * Calls error(message) with a message that says this value is invalid.
          */
-        void error() const;
+        [[noreturn]] void error() const;
     private:
         std::optional<std::string_view> m_value;
         std::shared_ptr<ParsedArgumentsImpl> m_args;
@@ -1293,8 +1292,7 @@ namespace argos
          *  @a min_parts parts.
          */
         ArgumentValues
-        split(char separator, size_t min_parts = 0,
-              size_t max_parts = 0) const;
+        split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
          * @brief Returns an iterator pointing to the first value.
