@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.267";
+constexpr char ARGOS_VERSION[] = "1.1.268";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.1.267";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 267
+#define ARGOS_VERSION_PATCH 268
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1092,6 +1092,19 @@ namespace argos
         explicit operator bool() const;
 
         /**
+         * @brief Returns the value with the given index.
+         *
+         * Calling this operator is identical to calling value(index).
+         *
+         * If @a index is to great, an error message is written to stderr, the
+         * program also automatically exits if auto_exit is true.
+         *
+         * @throw ArgosException if @a index is too great and auto_exit
+         *  is false.
+         */
+        ArgumentValue operator[](size_t index) const;
+
+        /**
          * @brief Returns instances of IArgumentView that identifies the
          *  command line arguments that produced these values.
          */
@@ -1758,6 +1771,11 @@ namespace argos
 
         std::unique_ptr<ArgumentData> m_argument;
     };
+
+    /**
+     * @brief A convenient short alias for Argument.
+     */
+    using Arg = Argument;
 }
 
 //****************************************************************************
@@ -2366,6 +2384,11 @@ namespace argos
 
         std::unique_ptr<OptionData> m_option;
     };
+
+    /**
+     * @brief A convenient short alias for Option.
+     */
+    using Opt = Option;
 }
 
 //****************************************************************************
