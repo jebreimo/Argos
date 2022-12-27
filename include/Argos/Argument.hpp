@@ -201,4 +201,9 @@ namespace argos
 
         std::unique_ptr<ArgumentData> m_argument;
     };
+
+    /**
+     * @brief A convenient short alias for Argument.
+     */
+    using Arg = Argument;
 }

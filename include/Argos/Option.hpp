@@ -321,4 +321,9 @@ namespace argos
 
         std::unique_ptr<OptionData> m_option;
     };
+
+    /**
+     * @brief A convenient short alias for Option.
+     */
+    using Opt = Option;
 }
