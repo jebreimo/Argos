@@ -70,6 +70,19 @@ namespace argos
         explicit operator bool() const;
 
         /**
+         * @brief Returns the value with the given index.
+         *
+         * Calling this operator is identical to calling value(index).
+         *
+         * If @a index is to great, an error message is written to stderr, the
+         * program also automatically exits if auto_exit is true.
+         *
+         * @throw ArgosException if @a index is too great and auto_exit
+         *  is false.
+         */
+        ArgumentValue operator[](size_t index) const;
+
+        /**
          * @brief Returns instances of IArgumentView that identifies the
          *  command line arguments that produced these values.
          */

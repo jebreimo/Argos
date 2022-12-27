@@ -102,6 +102,11 @@ namespace argos
         return !m_values.empty();
     }
 
+    ArgumentValue ArgumentValues::operator[](size_t index) const
+    {
+        return value(index);
+    }
+
     std::vector<std::unique_ptr<IArgumentView>>
     ArgumentValues::arguments() const
     {
