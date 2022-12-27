@@ -10,12 +10,11 @@ cmake_minimum_required(VERSION 3.14)
 include(FetchContent)
 FetchContent_Declare(catch
     GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
-    GIT_TAG "v2.13.10"
+    GIT_TAG "v3.2.1"
     )
 FetchContent_MakeAvailable(catch)
 
 add_executable(ArgosTest
-    ArgosTestMain.cpp
     Argv.hpp
     test_ArgumentCounter.cpp
     test_ArgumentParser.cpp
@@ -33,7 +32,7 @@ add_executable(ArgosTest
 target_link_libraries(ArgosTest
     PRIVATE
         Argos::Argos
-        Catch2::Catch2
+        Catch2::Catch2WithMain
     )
 
 target_compile_options(ArgosTest

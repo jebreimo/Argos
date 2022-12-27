@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include "Argos/StandardOptionIterator.hpp"
 
 std::vector<std::string_view> make_args(
