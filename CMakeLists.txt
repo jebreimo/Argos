@@ -7,7 +7,7 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-project(Argos VERSION 1.1.267)
+project(Argos VERSION 1.1.268)
 
 set(CMAKE_CXX_STANDARD 17)
 
