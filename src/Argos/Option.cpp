@@ -154,7 +154,7 @@ namespace argos
     Option& Option::callback(OptionCallback callback)
     {
         check_option();
-        m_option->callback = move(callback);
+        m_option->callback = std::move(callback);
         return *this;
     }
 

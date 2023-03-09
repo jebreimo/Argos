@@ -15,7 +15,7 @@ namespace argos
     {}
 
     OptionIterator::OptionIterator(std::vector<std::string_view> args, char prefix)
-        : m_args(move(args)),
+        : m_args(std::move(args)),
           m_args_it(m_args.begin()),
           m_prefix(prefix)
     {}

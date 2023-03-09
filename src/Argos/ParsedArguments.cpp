@@ -17,18 +17,18 @@ namespace argos
     ParsedArguments::ParsedArguments() = default;
 
     ParsedArguments::ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_impl(move(impl))
+        : m_impl(std::move(impl))
     {}
 
     ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(move(rhs.m_impl))
+        : m_impl(std::move(rhs.m_impl))
     {}
 
     ParsedArguments::~ParsedArguments() = default;
 
     ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
     {
-        m_impl = move(rhs.m_impl);
+        m_impl = std::move(rhs.m_impl);
         return *this;
     }
 

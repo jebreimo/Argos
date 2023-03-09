@@ -35,7 +35,7 @@ namespace argos
     }
 
     ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
-        : m_data(move(data))
+        : m_data(std::move(data))
     {
         assert(m_data);
         for (auto& a : m_data->arguments)

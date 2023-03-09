@@ -117,23 +117,23 @@ namespace argos
             switch (style)
             {
             case OptionStyle::SLASH:
-                return std::make_unique<OptionIterator>(move(args), '/');
+                return std::make_unique<OptionIterator>(std::move(args), '/');
             case OptionStyle::DASH:
-                return std::make_unique<OptionIterator>(move(args), '-');
+                return std::make_unique<OptionIterator>(std::move(args), '-');
             default:
-                return std::make_unique<StandardOptionIterator>(move(args));
+                return std::make_unique<StandardOptionIterator>(std::move(args));
             }
         }
     }
 
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
-        : m_data(move(data)),
+        : m_data(std::move(data)),
           m_options(make_option_index(m_data->options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
-                                          move(args)))
+                                          std::move(args)))
     {
         for (const auto& option : m_data->options)
         {
@@ -156,7 +156,7 @@ namespace argos
     ArgumentIteratorImpl::parse(std::vector<std::string_view> args,
                                 const std::shared_ptr<ParserData>& data)
     {
-        ArgumentIteratorImpl iterator(move(args), data);
+        ArgumentIteratorImpl iterator(std::move(args), data);
         while (true)
         {
             auto code = std::get<0>(iterator.next());

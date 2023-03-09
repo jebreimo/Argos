@@ -14,12 +14,12 @@ namespace argos
 {
     ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args,
                                        std::shared_ptr<ParserData> parser_data)
-        : m_impl(std::make_unique<ArgumentIteratorImpl>(move(args),
-                                                        move(parser_data)))
+        : m_impl(std::make_unique<ArgumentIteratorImpl>(std::move(args),
+                                                        std::move(parser_data)))
     {}
 
     ArgumentIterator::ArgumentIterator(ArgumentIterator&& rhs) noexcept
-        : m_impl(move(rhs.m_impl))
+        : m_impl(std::move(rhs.m_impl))
     {}
 
     ArgumentIterator::~ArgumentIterator() = default;
@@ -27,7 +27,7 @@ namespace argos
     ArgumentIterator&
     ArgumentIterator::operator=(ArgumentIterator&& rhs) noexcept
     {
-        m_impl = move(rhs.m_impl);
+        m_impl = std::move(rhs.m_impl);
         return *this;
     }
 

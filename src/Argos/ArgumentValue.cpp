@@ -160,7 +160,7 @@ namespace argos
         values.reserve(parts.size());
         for (auto& part : parts)
             values.emplace_back(part, m_argument_id);
-        return {move(values), m_args, m_value_id};
+        return {std::move(values), m_args, m_value_id};
     }
 
     void ArgumentValue::error(const std::string& message) const

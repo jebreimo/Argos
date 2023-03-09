@@ -14,7 +14,7 @@ namespace argos
 {
     ParsedArgumentsBuilder::ParsedArgumentsBuilder(
             std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_impl(move(impl))
+        : m_impl(std::move(impl))
     {}
 
     ParsedArgumentsBuilder&
@@ -88,14 +88,14 @@ namespace argos
     {
         auto id = m_impl->get_value_id(name);
         auto values = m_impl->get_values(id);
-        return {move(values), m_impl, id};
+        return {std::move(values), m_impl, id};
     }
 
     ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg) const
     {
         auto values = m_impl->get_values(arg.value_id());
-        return {move(values), m_impl, arg.value_id()};
+        return {std::move(values), m_impl, arg.value_id()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name) const

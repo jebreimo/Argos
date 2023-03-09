@@ -37,8 +37,8 @@ namespace argos
         splits.push_back({unsigned(word_rule.size() - offset), '\0'});
         word_rule.erase(remove(word_rule.begin(), word_rule.end(), ' '),
                         word_rule.end());
-        m_strings.push_back(move(word_rule));
-        m_splits.insert({std::string_view(m_strings.back()), move(splits)});
+        m_strings.push_back(std::move(word_rule));
+        m_splits.insert({std::string_view(m_strings.back()), std::move(splits)});
     }
 
     std::tuple<std::string_view, char, std::string_view>

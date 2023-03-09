@@ -16,7 +16,7 @@ namespace argos
     {}
 
     StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
-        : m_args(move(args)),
+        : m_args(std::move(args)),
           m_args_it(m_args.begin()),
           m_pos(0)
     {}

@@ -196,7 +196,7 @@ namespace argos
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
             opt->section = data.current_section;
-            data.options.push_back(move(opt));
+            data.options.push_back(std::move(opt));
         }
 
         void add_version_option(ParserData& data)
@@ -239,7 +239,7 @@ namespace argos
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
             opt->section = data.current_section;
-            data.options.push_back(move(opt));
+            data.options.push_back(std::move(opt));
         }
 
         ParsedArguments parse_impl(std::vector<std::string_view> args,

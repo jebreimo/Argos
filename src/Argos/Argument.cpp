@@ -76,7 +76,7 @@ namespace argos
     Argument& Argument::callback(ArgumentCallback callback)
     {
         check_argument();
-        m_argument->callback = move(callback);
+        m_argument->callback = std::move(callback);
         return *this;
     }
 

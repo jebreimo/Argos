@@ -80,8 +80,8 @@ namespace argos
             std::vector<std::pair<std::string_view, ArgumentId>> values,
             std::shared_ptr<ParsedArgumentsImpl> args,
             ValueId value_id)
-        : m_values(move(values)),
-          m_args(move(args)),
+        : m_values(std::move(values)),
+          m_args(std::move(args)),
           m_value_id(value_id)
     {}
 
@@ -237,7 +237,7 @@ namespace argos
             for (auto& part : parts)
                 values.emplace_back(part, value.second);
         }
-        return {move(values), m_args, m_value_id};
+        return {std::move(values), m_args, m_value_id};
     }
 
     ArgumentValueIterator ArgumentValues::begin() const
