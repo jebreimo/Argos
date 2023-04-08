@@ -117,7 +117,7 @@ namespace argos
     Argument& Argument::callback(ArgumentCallback callback)
     {
         check_argument();
-        m_argument->callback = move(callback);
+        m_argument->callback = std::move(callback);
         return *this;
     }
 
@@ -861,12 +861,12 @@ namespace argos
 {
     ArgumentIterator::ArgumentIterator(std::vector<std::string_view> args,
                                        std::shared_ptr<ParserData> parser_data)
-        : m_impl(std::make_unique<ArgumentIteratorImpl>(move(args),
-                                                        move(parser_data)))
+        : m_impl(std::make_unique<ArgumentIteratorImpl>(std::move(args),
+                                                        std::move(parser_data)))
     {}
 
     ArgumentIterator::ArgumentIterator(ArgumentIterator&& rhs) noexcept
-        : m_impl(move(rhs.m_impl))
+        : m_impl(std::move(rhs.m_impl))
     {}
 
     ArgumentIterator::~ArgumentIterator() = default;
@@ -874,7 +874,7 @@ namespace argos
     ArgumentIterator&
     ArgumentIterator::operator=(ArgumentIterator&& rhs) noexcept
     {
-        m_impl = move(rhs.m_impl);
+        m_impl = std::move(rhs.m_impl);
         return *this;
     }
 
@@ -1134,23 +1134,23 @@ namespace argos
             switch (style)
             {
             case OptionStyle::SLASH:
-                return std::make_unique<OptionIterator>(move(args), '/');
+                return std::make_unique<OptionIterator>(std::move(args), '/');
             case OptionStyle::DASH:
-                return std::make_unique<OptionIterator>(move(args), '-');
+                return std::make_unique<OptionIterator>(std::move(args), '-');
             default:
-                return std::make_unique<StandardOptionIterator>(move(args));
+                return std::make_unique<StandardOptionIterator>(std::move(args));
             }
         }
     }
 
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
-        : m_data(move(data)),
+        : m_data(std::move(data)),
           m_options(make_option_index(m_data->options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
-                                          move(args)))
+                                          std::move(args)))
     {
         for (const auto& option : m_data->options)
         {
@@ -1173,7 +1173,7 @@ namespace argos
     ArgumentIteratorImpl::parse(std::vector<std::string_view> args,
                                 const std::shared_ptr<ParserData>& data)
     {
-        ArgumentIteratorImpl iterator(move(args), data);
+        ArgumentIteratorImpl iterator(std::move(args), data);
         while (true)
         {
             auto code = std::get<0>(iterator.next());
@@ -1660,7 +1660,7 @@ namespace argos
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
             opt->section = data.current_section;
-            data.options.push_back(move(opt));
+            data.options.push_back(std::move(opt));
         }
 
         void add_version_option(ParserData& data)
@@ -1703,7 +1703,7 @@ namespace argos
             opt->argument_id = ArgumentId(data.options.size()
                                           + data.arguments.size() + 1);
             opt->section = data.current_section;
-            data.options.push_back(move(opt));
+            data.options.push_back(std::move(opt));
         }
 
         ParsedArguments parse_impl(std::vector<std::string_view> args,
@@ -2308,7 +2308,7 @@ namespace argos
         values.reserve(parts.size());
         for (auto& part : parts)
             values.emplace_back(part, m_argument_id);
-        return {move(values), m_args, m_value_id};
+        return {std::move(values), m_args, m_value_id};
     }
 
     void ArgumentValue::error(const std::string& message) const
@@ -2458,8 +2458,8 @@ namespace argos
             std::vector<std::pair<std::string_view, ArgumentId>> values,
             std::shared_ptr<ParsedArgumentsImpl> args,
             ValueId value_id)
-        : m_values(move(values)),
-          m_args(move(args)),
+        : m_values(std::move(values)),
+          m_args(std::move(args)),
           m_value_id(value_id)
     {}
 
@@ -2615,7 +2615,7 @@ namespace argos
             for (auto& part : parts)
                 values.emplace_back(part, value.second);
         }
-        return {move(values), m_args, m_value_id};
+        return {std::move(values), m_args, m_value_id};
     }
 
     ArgumentValueIterator ArgumentValues::begin() const
@@ -3312,7 +3312,7 @@ namespace argos
     Option& Option::callback(OptionCallback callback)
     {
         check_option();
-        m_option->callback = move(callback);
+        m_option->callback = std::move(callback);
         return *this;
     }
 
@@ -3365,7 +3365,7 @@ namespace argos
     {}
 
     OptionIterator::OptionIterator(std::vector<std::string_view> args, char prefix)
-        : m_args(move(args)),
+        : m_args(std::move(args)),
           m_args_it(m_args.begin()),
           m_prefix(prefix)
     {}
@@ -3706,18 +3706,18 @@ namespace argos
     ParsedArguments::ParsedArguments() = default;
 
     ParsedArguments::ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_impl(move(impl))
+        : m_impl(std::move(impl))
     {}
 
     ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(move(rhs.m_impl))
+        : m_impl(std::move(rhs.m_impl))
     {}
 
     ParsedArguments::~ParsedArguments() = default;
 
     ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
     {
-        m_impl = move(rhs.m_impl);
+        m_impl = std::move(rhs.m_impl);
         return *this;
     }
 
@@ -3910,7 +3910,7 @@ namespace argos
 {
     ParsedArgumentsBuilder::ParsedArgumentsBuilder(
             std::shared_ptr<ParsedArgumentsImpl> impl)
-        : m_impl(move(impl))
+        : m_impl(std::move(impl))
     {}
 
     ParsedArgumentsBuilder&
@@ -3984,14 +3984,14 @@ namespace argos
     {
         auto id = m_impl->get_value_id(name);
         auto values = m_impl->get_values(id);
-        return {move(values), m_impl, id};
+        return {std::move(values), m_impl, id};
     }
 
     ArgumentValues
     ParsedArgumentsBuilder::values(const IArgumentView& arg) const
     {
         auto values = m_impl->get_values(arg.value_id());
-        return {move(values), m_impl, arg.value_id()};
+        return {std::move(values), m_impl, arg.value_id()};
     }
 
     bool ParsedArgumentsBuilder::has(const std::string& name) const
@@ -4056,7 +4056,7 @@ namespace argos
     }
 
     ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
-        : m_data(move(data))
+        : m_data(std::move(data))
     {
         assert(m_data);
         for (auto& a : m_data->arguments)
@@ -4264,7 +4264,7 @@ namespace argos
     {}
 
     StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
-        : m_args(move(args)),
+        : m_args(std::move(args)),
           m_args_it(m_args.begin()),
           m_pos(0)
     {}
@@ -4976,8 +4976,8 @@ namespace argos
         splits.push_back({unsigned(word_rule.size() - offset), '\0'});
         word_rule.erase(remove(word_rule.begin(), word_rule.end(), ' '),
                         word_rule.end());
-        m_strings.push_back(move(word_rule));
-        m_splits.insert({std::string_view(m_strings.back()), move(splits)});
+        m_strings.push_back(std::move(word_rule));
+        m_splits.insert({std::string_view(m_strings.back()), std::move(splits)});
     }
 
     std::tuple<std::string_view, char, std::string_view>
