@@ -8,6 +8,7 @@
 #include "Argos/ArgumentParser.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include "ArgosThrow.hpp"
 #include "ArgumentIteratorImpl.hpp"
@@ -259,7 +260,7 @@ namespace argos
             add_missing_help_option(*data);
             add_version_option(*data);
             set_alue_ids(*data);
-            return ArgumentIterator(std::move(args), data);
+            return {std::move(args), data};
         }
 
         const char DEFAULT_NAME[] = "UNINITIALIZED";
