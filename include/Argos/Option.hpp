@@ -297,7 +297,15 @@ namespace argos
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
-        Option& optional(bool optional);
+        Option& optional(bool optional = true);
+
+        /**
+         * @brief Set whether this option is mandatory or optional.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Option& mandatory(bool mandatory = true);
 
         /**
          * @private

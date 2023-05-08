@@ -520,7 +520,7 @@ TEST_CASE("Mandatory option")
     auto args = ArgumentParser("test")
         .auto_exit(false)
         .stream(&ss)
-        .add(Option({"--f"}).argument("N").optional(false))
+        .add(Option({"--f"}).argument("N").mandatory())
         .add(Argument("arg"))
         .parse({"abcd"});
     REQUIRE(args.result_code() == ParserResultCode::FAILURE);

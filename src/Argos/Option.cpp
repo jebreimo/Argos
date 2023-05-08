@@ -172,6 +172,11 @@ namespace argos
         return *this;
     }
 
+    Option& Option::mandatory(bool mandatory)
+    {
+        return optional(!mandatory);
+    }
+
     const OptionData& Option::data() const
     {
         check_option();

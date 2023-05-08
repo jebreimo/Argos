@@ -111,6 +111,11 @@ namespace argos
         return *this;
     }
 
+    Argument& Argument::mandatory(bool mandatory)
+    {
+        return optional(!mandatory);
+    }
+
     Argument& Argument::count(unsigned n)
     {
         if (n <= 0)
