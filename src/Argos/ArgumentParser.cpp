@@ -261,10 +261,12 @@ namespace argos
             set_alue_ids(*data);
             return ArgumentIterator(std::move(args), data);
         }
+
+        const char DEFAULT_NAME[] = "UNINITIALIZED";
     }
 
     ArgumentParser::ArgumentParser()
-            : ArgumentParser("UNINITIALIZED")
+            : ArgumentParser(DEFAULT_NAME)
     {}
 
     ArgumentParser::ArgumentParser(std::string_view program_name,
@@ -366,14 +368,21 @@ namespace argos
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (argc <= 0)
-            ARGOS_THROW("argc and argv must at least contain the command name.");
+            return parse(std::vector<std::string_view>());
+
+        if (m_data->help_settings.program_name == DEFAULT_NAME
+            && std::strlen(argv[0]) != 0)
+        {
+            m_data->help_settings.program_name = get_base_name(argv[0]);
+        }
+
         return parse(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 
     ParsedArguments ArgumentParser::parse(int argc, char** argv) const
     {
         if (argc <= 0)
-            ARGOS_THROW("argc and argv must at least contain the command name.");
+            return parse(std::vector<std::string_view>());
         return parse(std::vector<std::string_view>(argv + 1, argv + argc));
     }
 

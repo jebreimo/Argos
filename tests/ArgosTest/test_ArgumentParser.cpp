@@ -746,3 +746,17 @@ TEST_CASE("Check that '-' is treated as an argument")
         .parse(argv.size(), argv.data());
     REQUIRE(args.value("FOO").as_string() == "-");
 }
+
+TEST_CASE("Check that program name is taken from argv[0]")
+{
+    using namespace argos;
+    std::stringstream ss;
+    Argv argv{"test", "-h"};
+    auto args = ArgumentParser()
+        .auto_exit(false)
+        .stream(&ss)
+        .parse(argv.size(), argv.data());
+    auto help_text = ss.str();
+    REQUIRE(help_text.substr(8, 4) == "test");
+    REQUIRE(help_text.substr(22, 4) == "test");
+}
