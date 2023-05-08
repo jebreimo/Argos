@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.270";
+constexpr char ARGOS_VERSION[] = "1.1.271";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.1.270";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 270
+#define ARGOS_VERSION_PATCH 271
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -1736,7 +1736,23 @@ namespace argos
          * @return Reference to itself. This makes it possible to chain
          *      method calls.
          */
-        Argument& optional(bool optional);
+        Argument& optional(bool optional = true);
+
+        /**
+         * @brief Make this argument mandatory (or optional).
+         *
+         * All arguments are mandatory by default.
+         *
+         * This function is a convenience function that affects the argument's
+         * minimum count.
+         * @param mandatory
+         *      @arg false The argument's minimum count is set to 1
+         *          if it currently is 0.
+         *      @arg false The argument's minimum count is set to 0.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
+        Argument& mandatory(bool mandatory = true);
 
         /**
          * @brief Set the number of times this argument must appear on the
@@ -2360,7 +2376,15 @@ namespace argos
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
-        Option& optional(bool optional);
+        Option& optional(bool optional = true);
+
+        /**
+         * @brief Set whether this option is mandatory or optional.
+         *
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Option& mandatory(bool mandatory = true);
 
         /**
          * @private
