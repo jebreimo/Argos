@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.1.271";
+constexpr char ARGOS_VERSION[] = "1.2.0";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -28,12 +28,12 @@ constexpr char ARGOS_VERSION[] = "1.1.271";
  * @brief Incremented when Argos's interface is modified in ways that are
  *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 1
+#define ARGOS_VERSION_MINOR 2
 
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 271
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -381,7 +381,7 @@ namespace argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        virtual const std::string& help() const = 0;
+        virtual std::string help() const = 0;
 
         /**
          * @brief Returns the argument's or option's section name.
@@ -463,7 +463,7 @@ namespace argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        [[nodiscard]] const std::string& help() const final;
+        [[nodiscard]] std::string help() const final;
 
         /**
          * @brief Returns the argument's section name.
@@ -566,7 +566,7 @@ namespace argos
         /**
          * @brief Returns the option's or option's help text.
          */
-        [[nodiscard]] const std::string& help() const final;
+        [[nodiscard]] std::string help() const final;
 
         /**
          * @brief Returns the option's section name.
@@ -1571,6 +1571,11 @@ namespace argos
     using OptionCallback = std::function<void(OptionView,
                                               std::string_view,
                                               ParsedArgumentsBuilder)>;
+
+    /**
+     * @brief A callback that is meant to return a part of the help text.
+     */
+    using TextCallback = std::function<std::string()>;
 }
 
 //****************************************************************************
@@ -1649,6 +1654,17 @@ namespace argos
          *      method calls.
          */
         Argument& help(const std::string& text);
+
+        /**
+         * @brief Set a callback that produces the argument's help text.
+         * @param callback The string returned by callback will be
+         *  automatically divided into multiple lines if it doesn't fit
+         *  inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Argument& help(TextCallback callback);
 
         /**
          * @brief Specifies under which heading the argument will appear
@@ -2152,12 +2168,23 @@ namespace argos
         /**
          * @brief Set the option's help text.
          * @param text The text will be automatically divided into multiple
-         *  lines if it doesn't fit fit inside the terminal window.
-         *  Text formatting using newlines, spaces and tabs is possible.
+         *  lines if it doesn't fit inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
         Option& help(const std::string& text);
+
+        /**
+         * @brief Set a callback that produces the option's help text.
+         * @param callback The string returned by callback will be
+         *  automatically divided into multiple lines if it doesn't fit
+         *  inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Option& help(TextCallback callback);
 
         /**
          * @brief Specifies under which heading the option will appear
@@ -2817,6 +2844,17 @@ namespace argos
          * TextId::FINAL_TEXT.
          */
         ArgumentParser& text(TextId textId, std::string text);
+
+        /**
+         * @brief Set a function that will produce the given part of
+         *  the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
+        ArgumentParser& text(TextId textId, std::function<std::string()> callback);
 
         /**
          * @brief Sets the line width for help text and error messages.

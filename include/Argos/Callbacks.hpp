@@ -52,4 +52,9 @@ namespace argos
     using OptionCallback = std::function<void(OptionView,
                                               std::string_view,
                                               ParsedArgumentsBuilder)>;
+
+    /**
+     * @brief A callback that is meant to return a part of the help text.
+     */
+    using TextCallback = std::function<std::string()>;
 }

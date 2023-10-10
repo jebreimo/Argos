@@ -9,13 +9,14 @@
 #include <string>
 #include "Argos/Callbacks.hpp"
 #include "Argos/Enums.hpp"
+#include "TextSource.hpp"
 
 namespace argos
 {
     struct ArgumentData
     {
         std::string name;
-        std::string help;
+        TextSource help;
         std::string section;
         std::string value;
         ArgumentCallback callback;

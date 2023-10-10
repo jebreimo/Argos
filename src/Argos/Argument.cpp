@@ -59,6 +59,13 @@ namespace argos
         return *this;
     }
 
+    Argument& Argument::help(TextCallback callback)
+    {
+        check_argument();
+        m_argument->help = callback;
+        return *this;
+    }
+
     Argument& Argument::section(const std::string& name)
     {
         check_argument();

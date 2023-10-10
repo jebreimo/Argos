@@ -73,12 +73,23 @@ namespace argos
         /**
          * @brief Set the option's help text.
          * @param text The text will be automatically divided into multiple
-         *  lines if it doesn't fit fit inside the terminal window.
-         *  Text formatting using newlines, spaces and tabs is possible.
+         *  lines if it doesn't fit inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
          * @return Reference to itself. This makes it possible to chain
          *  method calls.
          */
         Option& help(const std::string& text);
+
+        /**
+         * @brief Set a callback that produces the option's help text.
+         * @param callback The string returned by callback will be
+         *  automatically divided into multiple lines if it doesn't fit
+         *  inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Option& help(TextCallback callback);
 
         /**
          * @brief Specifies under which heading the option will appear

@@ -589,6 +589,14 @@ namespace argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::text(TextId textId,
+                                         std::function<std::string()> callback)
+    {
+        check_data();
+        m_data->help_settings.texts[textId] = std::move(callback);
+        return *this;
+    }
+
     ArgumentParser& ArgumentParser::version(const std::string& version)
     {
         check_data();

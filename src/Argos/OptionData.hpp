@@ -10,13 +10,14 @@
 #include <vector>
 #include "Argos/Callbacks.hpp"
 #include "Argos/Enums.hpp"
+#include "TextSource.hpp"
 
 namespace argos
 {
     struct OptionData
     {
         std::vector<std::string> flags;
-        std::string help;
+        TextSource help;
         std::string section;
         std::string alias;
         std::string argument;

@@ -7,7 +7,7 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-project(Argos VERSION 1.1.271)
+project(Argos VERSION 1.2.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -104,7 +104,8 @@ add_library(Argos
     src/Argos/TextWriter.hpp
     src/Argos/WordSplitter.cpp
     src/Argos/WordSplitter.hpp
-    )
+    src/Argos/TextSource.hpp
+)
 
 target_include_directories(Argos
     PUBLIC
@@ -205,12 +206,3 @@ if(ARGOS_INSTALL)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Argos
         )
 endif()
-
-if (ARGOS_MASTER_PROJECT AND DEFINED ENV{LOCAL_SOURCE_PACKAGE_DIR})
-    set(LOCAL_SOURCE_PACKAGE_DIR $ENV{LOCAL_SOURCE_PACKAGE_DIR})
-    set(TARBALL_NAME ${LOCAL_SOURCE_PACKAGE_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz)
-    add_custom_target(${PROJECT_NAME}_BUILD_SRC_TARBALL
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND git archive -v --format=tar.gz --prefix=${PROJECT_NAME}/ HEAD > ${TARBALL_NAME}
-        )
-endif ()

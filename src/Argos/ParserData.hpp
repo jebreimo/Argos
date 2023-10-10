@@ -43,7 +43,7 @@ namespace argos
     {
         std::string program_name;
         std::string version;
-        std::map<TextId, std::string> texts;
+        std::map<TextId, TextSource> texts;
         std::ostream* output_stream = nullptr;
     };
 

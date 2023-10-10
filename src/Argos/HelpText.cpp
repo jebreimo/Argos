@@ -120,7 +120,10 @@ namespace argos
         {
             auto it = data.help_settings.texts.find(text_id);
             if (it != data.help_settings.texts.end())
-                return it->second;
+            {
+                return get_text(it->second);
+
+            }
             return {};
         }
 
@@ -165,7 +168,7 @@ namespace argos
             }
         }
 
-        using HelpText = std::pair<std::string, std::string_view>;
+        using HelpText = std::pair<std::string, std::string>;
         using HelpTextVector = std::vector<HelpText>;
         using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
 
@@ -201,7 +204,7 @@ namespace argos
         {
             std::vector<SectionHelpTexts> sections;
 
-            auto add_help_text = [&](std::string_view s, std::string a, std::string_view b)
+            auto add_help_text = [&](std::string_view s, std::string a, std::string b)
             {
                 auto it = find_if(sections.begin(), sections.end(),
                                   [&](const auto& v)
@@ -211,7 +214,7 @@ namespace argos
                     sections.push_back({s, {}});
                     it = std::prev(sections.end());
                 }
-                it->second.emplace_back(std::move(a), b);
+                it->second.emplace_back(std::move(a), std::move(b));
             };
 
             auto arg_title = get_custom_text(data, TextId::ARGUMENTS_TITLE);
@@ -222,7 +225,7 @@ namespace argos
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *arg_title : a->section;
-                add_help_text(section, get_argument_name(*a), a->help);
+                add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
             auto opt_title = get_custom_text(data, TextId::OPTIONS_TITLE);
             if (!opt_title)
@@ -232,7 +235,7 @@ namespace argos
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = o->section.empty() ? *opt_title : o->section;
-                add_help_text(section, get_long_option_name(*o), o->help);
+                add_help_text(section, get_long_option_name(*o), get_text(o->help));
             }
 
             if (sections.empty())

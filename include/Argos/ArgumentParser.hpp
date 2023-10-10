@@ -407,6 +407,17 @@ namespace argos
         ArgumentParser& text(TextId textId, std::string text);
 
         /**
+         * @brief Set a function that will produce the given part of
+         *  the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
+        ArgumentParser& text(TextId textId, std::function<std::string()> callback);
+
+        /**
          * @brief Sets the line width for help text and error messages.
          *
          * The line width defaults to the width of the console or terminal

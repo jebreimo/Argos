@@ -71,6 +71,32 @@ TEST_CASE("Section order in help text")
     REQUIRE(ss.str() == "Z\n  <file>\n  -s\n\nA\n  <device>\n  -h\n");
 }
 
+TEST_CASE("Test text callback")
+{
+    struct MakeText
+    {
+        std::string operator()()
+        {
+            return "Something.";
+        }
+    };
+    using namespace argos;
+    Argv argv{"test", "-h"};
+    std::stringstream ss;
+    auto args = argos::ArgumentParser("test")
+        .auto_exit(false)
+        .add(Argument("file"))
+        .add(Option({"-h"}).type(OptionType::HELP))
+        .add(Argument("device").section("A"))
+        .stream(&ss)
+        .text(TextId::USAGE_TITLE, "")
+        .text(TextId::USAGE, "")
+        .text(TextId::FINAL_TEXT, MakeText())
+        .parse(argv.size(), argv.data());
+    REQUIRE(ss.str() == "ARGUMENTS\n  <file>\n\nA\n  <device>\n\nOPTIONS\n  -h\n\nSomething.\n");
+
+}
+
 TEST_CASE("Two argument")
 {
     using namespace argos;

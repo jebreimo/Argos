@@ -81,6 +81,17 @@ namespace argos
         Argument& help(const std::string& text);
 
         /**
+         * @brief Set a callback that produces the argument's help text.
+         * @param callback The string returned by callback will be
+         *  automatically divided into multiple lines if it doesn't fit
+         *  inside the terminal window.
+         *  Text formatting with newlines, spaces and tabs is possible.
+         * @return Reference to itself. This makes it possible to chain
+         *  method calls.
+         */
+        Argument& help(TextCallback callback);
+
+        /**
          * @brief Specifies under which heading the argument will appear
          *      in the help text.
          *

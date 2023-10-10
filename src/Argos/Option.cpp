@@ -59,6 +59,13 @@ namespace argos
         return *this;
     }
 
+    Option& Option::help(TextCallback callback)
+    {
+        check_option();
+        m_option->help = callback;
+        return *this;
+    }
+
     Option& Option::section(const std::string& name)
     {
         check_option();

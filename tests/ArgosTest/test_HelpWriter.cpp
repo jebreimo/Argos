@@ -57,3 +57,25 @@ OPTIONS
   --option2
 )-");
 }
+
+TEST_CASE("Callbacks for arguments and options.")
+{
+    using namespace argos;
+    std::stringstream ss;
+    auto parser = ArgumentParser("prog")
+        .add(Opt({"--opt"}).help([](){return "Option";}))
+        .add(Arg("arg").help([](){return "Argument";}))
+        .generate_help_option(false)
+        .stream(&ss)
+        .move();
+    parser.write_help_text();
+    REQUIRE(ss.str() == R"-(USAGE
+  prog [--opt] <arg>
+
+ARGUMENTS
+  <arg> Argument
+
+OPTIONS
+  --opt Option
+)-");
+}
