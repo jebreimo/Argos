@@ -95,7 +95,7 @@ namespace argos
     private:
         ArgumentIteratorImpl& impl();
 
-        const ArgumentIteratorImpl& impl() const;
+        [[nodiscard]] const ArgumentIteratorImpl& impl() const;
 
         std::unique_ptr<ArgumentIteratorImpl> m_impl;
     };

@@ -27,17 +27,17 @@ namespace argos
 
         WordSplitter& word_splitter();
 
-        std::ostream* stream() const;
+        [[nodiscard]] std::ostream* stream() const;
 
         void set_stream(std::ostream* stream);
 
-        unsigned line_width() const;
+        [[nodiscard]] unsigned line_width() const;
 
         void set_line_width(unsigned line_width);
 
-        unsigned current_line_width() const;
+        [[nodiscard]] unsigned current_line_width() const;
 
-        bool is_current_line_empty() const;
+        [[nodiscard]] bool is_current_line_empty() const;
 
         static constexpr unsigned CURRENT_COLUMN = UINT_MAX;
 

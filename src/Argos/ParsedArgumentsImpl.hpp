@@ -19,9 +19,9 @@ namespace argos
     public:
         explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
 
-        bool has(ValueId value_id) const;
+        [[nodiscard]] bool has(ValueId value_id) const;
 
-        const std::vector<std::string>& unprocessed_arguments() const;
+        [[nodiscard]] const std::vector<std::string>& unprocessed_arguments() const;
 
         void add_unprocessed_argument(const std::string& arg);
 
@@ -35,27 +35,27 @@ namespace argos
 
         void clear_value(ValueId value_id);
 
-        ValueId get_value_id(std::string_view value_name) const;
+        [[nodiscard]] ValueId get_value_id(std::string_view value_name) const;
 
-        std::optional<std::pair<std::string_view, ArgumentId>>
+        [[nodiscard]] std::optional<std::pair<std::string_view, ArgumentId>>
         get_value(ValueId value_id) const;
 
-        std::vector<std::pair<std::string_view, ArgumentId>>
+        [[nodiscard]] std::vector<std::pair<std::string_view, ArgumentId>>
         get_values(ValueId value_id) const;
 
-        std::vector<std::unique_ptr<IArgumentView>>
+        [[nodiscard]] std::vector<std::unique_ptr<IArgumentView>>
         get_argument_views(ValueId value_id) const;
 
-        std::unique_ptr<IArgumentView>
+        [[nodiscard]] std::unique_ptr<IArgumentView>
         get_argument_view(ArgumentId argument_id) const;
 
-        const std::shared_ptr<ParserData>& parser_data() const;
+        [[nodiscard]] const std::shared_ptr<ParserData>& parser_data() const;
 
-        ParserResultCode result_code() const;
+        [[nodiscard]] ParserResultCode result_code() const;
 
         void set_result_code(ParserResultCode result_code);
 
-        const OptionData* stop_option() const;
+        [[nodiscard]] const OptionData* stop_option() const;
 
         void set_breaking_option(const OptionData* option);
 

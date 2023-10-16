@@ -17,7 +17,7 @@ struct Argv
             argv.push_back(arg.data());
     }
 
-    int size() const
+    [[nodiscard]] int size() const
     {
         return static_cast<int>(argv.size());
     }

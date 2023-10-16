@@ -8,7 +8,6 @@
 #include "StringUtilities.hpp"
 
 #include <algorithm>
-#include <string>
 
 namespace argos
 {

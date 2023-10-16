@@ -131,6 +131,7 @@ namespace argos
     std::vector<ArgumentValue> ArgumentValues::values() const
     {
         std::vector<ArgumentValue> result;
+        result.reserve(m_values.size());
         for (const auto& v : m_values)
             result.emplace_back(v.first, m_args, m_value_id, v.second);
         return result;
@@ -139,6 +140,7 @@ namespace argos
     std::vector<std::string_view> ArgumentValues::raw_values() const
     {
         std::vector<std::string_view> result;
+        result.reserve(m_values.size());
         for (const auto& s : m_values)
             result.push_back(s.first);
         return result;

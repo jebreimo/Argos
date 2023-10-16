@@ -8,7 +8,6 @@
 #include "ArgumentIteratorImpl.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include "ArgosThrow.hpp"
 #include "HelpText.hpp"
 #include "StringUtilities.hpp"

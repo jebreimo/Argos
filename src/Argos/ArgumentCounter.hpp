@@ -26,9 +26,9 @@ namespace argos
 
         const ArgumentData* next_argument();
 
-        size_t count() const;
+        [[nodiscard]] size_t count() const;
 
-        bool is_complete() const;
+        [[nodiscard]] bool is_complete() const;
 
         static std::pair<size_t, size_t> get_min_max_count(
                 const std::vector<std::unique_ptr<ArgumentData>>& arguments);

@@ -64,7 +64,7 @@ namespace argos
 
     void TextWriter::flush()
     {
-        m_stream->write(m_line.data(), m_line.size());
+        m_stream->write(m_line.data(), std::streamsize(m_line.size()));
         m_line.clear();
     }
 

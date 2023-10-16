@@ -41,7 +41,8 @@ namespace argos
         parse(std::vector<std::string_view> args,
               const std::shared_ptr<ParserData>& data);
 
-        const std::shared_ptr<ParsedArgumentsImpl>& parsed_arguments() const;
+        [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
+        parsed_arguments() const;
     private:
         enum class OptionResult
         {
@@ -61,7 +62,7 @@ namespace argos
 
         void copy_remaining_arguments_to_parser_result();
 
-        size_t count_arguments() const;
+        [[nodiscard]] size_t count_arguments() const;
 
         bool check_argument_and_option_counts();
 

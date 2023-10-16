@@ -86,7 +86,7 @@ namespace argos
          * @brief Returns instances of IArgumentView that identifies the
          *  command line arguments that produced these values.
          */
-        std::vector<std::unique_ptr<IArgumentView>> arguments() const;
+        [[nodiscard]] std::vector<std::unique_ptr<IArgumentView>> arguments() const;
 
         /**
          * Display @a message as if it was an error produced within Argos
@@ -101,22 +101,22 @@ namespace argos
         /**
          * @brief Returns true if there are no values.
          */
-        bool empty() const;
+        [[nodiscard]] bool empty() const;
 
         /**
          * @brief Returns the number of values.
          */
-        size_t size() const;
+        [[nodiscard]] size_t size() const;
 
         /**
          * @brief Returns a vector with all the values.
          */
-        std::vector<ArgumentValue> values() const;
+        [[nodiscard]] std::vector<ArgumentValue> values() const;
 
         /**
          * @brief Returns a vector with all the raw string_view values.
          */
-        std::vector<std::string_view> raw_values() const;
+        [[nodiscard]] std::vector<std::string_view> raw_values() const;
 
         /**
          * @brief Returns the value with the given index.
@@ -127,7 +127,7 @@ namespace argos
          * @throw ArgosException if @a index is too great and auto_exit
          *  is false.
          */
-        ArgumentValue value(size_t index) const;
+        [[nodiscard]] ArgumentValue value(size_t index) const;
 
         /**
          * @brief Returns a vector where every argument value has been
@@ -142,7 +142,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<int>
+        [[nodiscard]] std::vector<int>
         as_ints(const std::vector<int>& default_value = {},
                 int base = 10) const;
 
@@ -159,7 +159,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<unsigned>
+        [[nodiscard]] std::vector<unsigned>
         as_uints(const std::vector<unsigned>& default_value = {},
                  int base = 10) const;
 
@@ -176,7 +176,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<long>
+        [[nodiscard]] std::vector<long>
         as_longs(const std::vector<long>& default_value = {},
                  int base = 10) const;
 
@@ -193,7 +193,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<unsigned long>
+        [[nodiscard]] std::vector<unsigned long>
         as_ulongs(const std::vector<unsigned long>& default_value = {},
                   int base = 10) const;
 
@@ -210,7 +210,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<long long>
+        [[nodiscard]] std::vector<long long>
         as_llongs(const std::vector<long long>& default_value = {},
                   int base = 10) const;
 
@@ -227,7 +227,7 @@ namespace argos
         * @throw ArgosException if the conversion fails for any value and
         *  auto_exit is false.
         */
-        std::vector<unsigned long long>
+        [[nodiscard]] std::vector<unsigned long long>
         as_ullongs(const std::vector<unsigned long long>& default_value = {},
                    int base = 10) const;
 
@@ -243,7 +243,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<float>
+        [[nodiscard]] std::vector<float>
         as_floats(const std::vector<float>& default_value = {}) const;
 
         /**
@@ -258,7 +258,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<double>
+        [[nodiscard]] std::vector<double>
         as_doubles(const std::vector<double>& default_value = {}) const;
 
         /**
@@ -268,7 +268,7 @@ namespace argos
          * @throw ArgosException if the conversion fails for any value and
          *  auto_exit is false.
          */
-        std::vector<std::string>
+        [[nodiscard]] std::vector<std::string>
         as_strings(const std::vector<std::string>& default_value = {}) const;
 
         /**
@@ -282,18 +282,18 @@ namespace argos
          * @throw ArgosException if any value consists of less than
          *  @a min_parts parts.
          */
-        ArgumentValues
+        [[nodiscard]] ArgumentValues
         split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
          * @brief Returns an iterator pointing to the first value.
          */
-        ArgumentValueIterator begin() const;
+        [[nodiscard]] ArgumentValueIterator begin() const;
 
         /**
          * @brief Returns an iterator pointing to the end of the last value.
          */
-        ArgumentValueIterator end() const;
+        [[nodiscard]] ArgumentValueIterator end() const;
     private:
         std::vector<std::pair<std::string_view, ArgumentId>> m_values;
         std::shared_ptr<ParsedArgumentsImpl> m_args;

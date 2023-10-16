@@ -22,10 +22,11 @@ namespace argos
 
         virtual std::optional<std::string> next_value() = 0;
 
-        virtual std::string_view current() const = 0;
+        [[nodiscard]] virtual std::string_view current() const = 0;
 
-        virtual std::vector<std::string_view> remaining_arguments() const = 0;
+        [[nodiscard]] virtual std::vector<std::string_view>
+        remaining_arguments() const = 0;
 
-        virtual IOptionIterator* clone() const = 0;
+        [[nodiscard]] virtual IOptionIterator* clone() const = 0;
     };
 }

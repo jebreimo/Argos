@@ -19,12 +19,12 @@ namespace argos
     public:
         void add_word(std::string word_rule);
 
-        std::tuple<std::string_view, char, std::string_view>
+        [[nodiscard]] std::tuple<std::string_view, char, std::string_view>
         split(std::string_view word, size_t start_index, size_t max_length,
               bool must_split) const;
     private:
-        std::tuple<std::string_view, char, std::string_view>
-        default_rule(std::string_view word, size_t max_length) const;
+        static std::tuple<std::string_view, char, std::string_view>
+        default_rule(std::string_view word, size_t max_length) ;
 
         struct Split
         {

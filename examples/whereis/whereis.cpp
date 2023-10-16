@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     for (const auto& dir : dirs)
     {
         std::filesystem::path dir_path(dir);
-        for (auto file_name : file_names)
+        for (const auto& file_name : file_names)
         {
             bool found = false;
             for (const auto& extension : extensions)

@@ -29,28 +29,28 @@ namespace argos
         /**
          * @brief Returns the argument's or option's help text.
          */
-        virtual std::string help() const = 0;
+        [[nodiscard]] virtual std::string help() const = 0;
 
         /**
          * @brief Returns the argument's or option's section name.
          */
-        virtual const std::string& section() const = 0;
+        [[nodiscard]] virtual const std::string& section() const = 0;
 
         /**
          * @brief Returns the argument's or option's value name.
          */
-        virtual const std::string& value() const = 0;
+        [[nodiscard]] virtual const std::string& value() const = 0;
 
         /**
          * @brief Returns the argument's or option's visibility in
          *      the help text and error messages.
          */
-        virtual Visibility visibility() const = 0;
+        [[nodiscard]] virtual Visibility visibility() const = 0;
 
         /**
          * @brief Returns the argument's or option's custom id.
          */
-        virtual int id() const = 0;
+        [[nodiscard]] virtual int id() const = 0;
 
         /**
          * @brief Returns the numeric id of the value the argument or option
@@ -65,7 +65,7 @@ namespace argos
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
-        virtual ValueId value_id() const = 0;
+        [[nodiscard]] virtual ValueId value_id() const = 0;
 
         /**
          * @brief Returns the argument's or option's argument_id().
@@ -73,6 +73,6 @@ namespace argos
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
          */
-        virtual ArgumentId argument_id() const = 0;
+        [[nodiscard]] virtual ArgumentId argument_id() const = 0;
     };
 }

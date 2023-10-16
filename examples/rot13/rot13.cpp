@@ -14,9 +14,9 @@ void rotate_and_print(const std::string& word, int n)
     for (auto c: word)
     {
         if ('A' <= c && c <= 'Z')
-            c = 'A' + ((c - 'A') + n) % 26;
+            c = char('A' + ((c - 'A') + n) % 26);
         else if ('a' <= c && c <= 'z')
-            c = 'a' + ((c - 'a') + n) % 26;
+            c = char('a' + ((c - 'a') + n) % 26);
         std::cout << c;
     }
 }

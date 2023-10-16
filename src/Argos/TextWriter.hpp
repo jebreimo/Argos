@@ -17,11 +17,11 @@ namespace argos
     public:
         explicit TextWriter(unsigned line_width = 80);
 
-        std::ostream* stream() const;
+        [[nodiscard]] std::ostream* stream() const;
 
         void set_stream(std::ostream* stream);
 
-        unsigned indentation() const;
+        [[nodiscard]] unsigned indentation() const;
 
         bool set_indentation(unsigned indent);
 
@@ -33,21 +33,21 @@ namespace argos
 
         void tab();
 
-        unsigned spaces() const;
+        [[nodiscard]] unsigned spaces() const;
 
         void set_spaces(unsigned n);
 
-        unsigned current_width() const;
+        [[nodiscard]] unsigned current_width() const;
 
-        unsigned remaining_width() const;
+        [[nodiscard]] unsigned remaining_width() const;
 
-        bool is_current_line_empty() const;
+        [[nodiscard]] bool is_current_line_empty() const;
 
-        unsigned line_width() const;
+        [[nodiscard]] unsigned line_width() const;
 
         void set_line_width(unsigned width);
 
-        std::string_view currentLine() const;
+        [[nodiscard]] std::string_view currentLine() const;
     private:
         std::ostream* m_stream;
         std::string m_line;

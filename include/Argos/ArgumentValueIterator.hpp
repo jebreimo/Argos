@@ -64,7 +64,7 @@ namespace argos
         /**
          * @brief Postfix increment operator.
          */
-        ArgumentValueIterator operator++(int);
+        ArgumentValueIterator operator++(int) &;
 
         /**
          * @brief Returns the current value.
@@ -76,7 +76,7 @@ namespace argos
         /**
          * @private
          */
-        It internal_iterator() const;
+        [[nodiscard]] It internal_iterator() const;
     private:
         It m_iterator = {};
         std::shared_ptr<ParsedArgumentsImpl> m_args;

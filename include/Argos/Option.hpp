@@ -43,7 +43,7 @@ namespace argos
         /**
          * @brief Creates a new option with the given flags.
          */
-        explicit Option(std::initializer_list<std::string> flags);
+        Option(std::initializer_list<std::string> flags);
 
         /**
          * @private

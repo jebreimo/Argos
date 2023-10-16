@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
                  .help("Clears the list of values."))
         .parse(argc, argv);
 
-    for (auto str : args.values("--include").as_strings())
+    for (const auto& str : args.values("--include").as_strings())
         std::cout << str << "\n";
 
     return 0;

@@ -52,14 +52,12 @@ int main(int argc, char* argv[])
 
     // Calculate column widths.
     std::vector<size_t> col_widths;
-    for (auto cell : cells)
+    for (const auto& cell : cells)
     {
         if (cell.col >= col_widths.size())
             col_widths.resize(cell.col + 1);
         col_widths[cell.col] = std::max(col_widths[cell.col], cell.text.size());
     }
-    auto table_width = std::accumulate(col_widths.begin(), col_widths.end(), 0ULL)
-                       + col_widths.size() - 1;
 
     // Initialize output stream.
     std::ofstream file;
@@ -80,7 +78,7 @@ int main(int argc, char* argv[])
             {
                 if (j != 0)
                     stream << '+';
-                stream << std::setw(col_widths[j]) << "";
+                stream << std::setw(std::streamsize(col_widths[j])) << "";
             }
             stream << std::setfill(' ') << '\n';
         }
@@ -100,7 +98,7 @@ int main(int argc, char* argv[])
                 spaces -= it->text.size();
                 ++it;
             }
-            stream << std::setw(spaces) << "";
+            stream << std::setw(std::streamsize(spaces)) << "";
         }
         stream << '\n';
     }

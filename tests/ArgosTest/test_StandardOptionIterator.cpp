@@ -12,6 +12,7 @@ std::vector<std::string_view> make_args(
         const std::vector<std::string>& strings)
 {
     std::vector<std::string_view> result;
+    result.reserve(strings.size());
     for (auto& s : strings)
         result.emplace_back(s);
     return result;

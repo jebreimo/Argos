@@ -70,7 +70,7 @@ namespace argos
     }
 
     std::tuple<std::string_view, char, std::string_view>
-    WordSplitter::default_rule(std::string_view word, size_t max_length) const
+    WordSplitter::default_rule(std::string_view word, size_t max_length)
     {
         if (max_length <= 2)
             return {{}, '\0', word};

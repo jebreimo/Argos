@@ -148,7 +148,7 @@ namespace argos
         if (!m_args)
             ARGOS_THROW("ArgumentValue has not been initialized.");
         if (!m_value)
-            return ArgumentValues({}, m_args, m_value_id);
+            return {{}, m_args, m_value_id};
         auto parts = split_string(*m_value, separator, max_parts - 1);
         if (parts.size() < min_parts)
         {

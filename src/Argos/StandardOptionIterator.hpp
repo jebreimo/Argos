@@ -23,11 +23,11 @@ namespace argos
 
         std::optional<std::string> next_value() final;
 
-        std::string_view current() const final;
+        [[nodiscard]] std::string_view current() const final;
 
-        std::vector<std::string_view> remaining_arguments() const final;
+        [[nodiscard]] std::vector<std::string_view> remaining_arguments() const final;
 
-        IOptionIterator* clone() const final;
+        [[nodiscard]] IOptionIterator* clone() const final;
     private:
         std::vector<std::string_view> m_args;
         std::vector<std::string_view>::const_iterator m_args_it;

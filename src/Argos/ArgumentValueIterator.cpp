@@ -28,7 +28,7 @@ namespace argos
         return *this;
     }
 
-    ArgumentValueIterator ArgumentValueIterator::operator++(int)
+    ArgumentValueIterator ArgumentValueIterator::operator++(int) &
     {
         auto it = *this;
         ++m_iterator;
@@ -37,8 +37,8 @@ namespace argos
 
     ArgumentValue ArgumentValueIterator::operator*() const
     {
-        return ArgumentValue(m_iterator->first, m_args,
-                             m_value_id, m_iterator->second);
+        return {m_iterator->first, m_args,
+                m_value_id, m_iterator->second};
     }
 
     ArgumentValueIterator::It ArgumentValueIterator::internal_iterator() const
