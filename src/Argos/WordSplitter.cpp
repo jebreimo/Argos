@@ -8,6 +8,7 @@
 #include "WordSplitter.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include "ArgosThrow.hpp"
 #include "StringUtilities.hpp"
 
