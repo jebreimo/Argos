@@ -8,6 +8,7 @@
 #include "StringUtilities.hpp"
 
 #include <algorithm>
+#include <cstdint>
 
 namespace argos
 {
