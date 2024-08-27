@@ -21,7 +21,7 @@ namespace argos
     /**
      * @brief Provides read-only access to an argument definition.
      */
-    class ArgumentView : public IArgumentView
+    class ArgumentView final : public IArgumentView
     {
     public:
         /**

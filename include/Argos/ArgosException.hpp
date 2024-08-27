@@ -8,7 +8,6 @@
 #pragma once
 
 #include <stdexcept>
-#include <string>
 
 /**
  * @file
@@ -23,7 +22,7 @@ namespace argos
     /**
      * @brief The exception class used throughout Argos.
      */
-    class ArgosException : public std::runtime_error
+    class ArgosException final : public std::runtime_error
     {
     public:
         using std::runtime_error::runtime_error;

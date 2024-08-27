@@ -132,8 +132,8 @@ namespace argos
     {
         std::vector<ArgumentValue> result;
         result.reserve(m_values.size());
-        for (const auto& v : m_values)
-            result.emplace_back(v.first, m_args, m_value_id, v.second);
+        for (const auto& [value, arg_id] : m_values)
+            result.emplace_back(value, m_args, m_value_id, arg_id);
         return result;
     }
 
@@ -141,8 +141,8 @@ namespace argos
     {
         std::vector<std::string_view> result;
         result.reserve(m_values.size());
-        for (const auto& s : m_values)
-            result.push_back(s.first);
+        for (const auto& [value, _] : m_values)
+            result.push_back(value);
         return result;
     }
 
@@ -151,8 +151,8 @@ namespace argos
         if (m_values.empty())
             return {{}, m_args, m_value_id, {}};
 
-        const auto& v = m_values.at(index);
-        return {v.first, m_args, m_value_id, v.second};
+        const auto& [value, arg_id] = m_values.at(index);
+        return {value, m_args, m_value_id, arg_id};
     }
 
     std::vector<int>
@@ -217,8 +217,8 @@ namespace argos
 
         std::vector<std::string> result;
         result.reserve(m_values.size());
-        for (const auto& v : m_values)
-            result.emplace_back(v.first);
+        for (const auto& [value, _] : m_values)
+            result.emplace_back(value);
         return result;
     }
 
@@ -227,28 +227,28 @@ namespace argos
                           size_t min_parts, size_t max_parts) const
     {
         std::vector<std::pair<std::string_view, ArgumentId>> values;
-        for (auto value : m_values)
+        for (auto [value, arg_id] : m_values)
         {
-            auto parts = split_string(value.first, separator, max_parts - 1);
+            auto parts = split_string(value, separator, max_parts - 1);
             if (parts.size() < min_parts)
             {
-                error("Invalid value: \"" + std::string(value.first)
+                error("Invalid value: \"" + std::string(value)
                       + "\". Must be at least " + std::to_string(min_parts)
                       + " values separated by \"" + separator + "\".");
             }
             for (auto& part : parts)
-                values.emplace_back(part, value.second);
+                values.emplace_back(part, arg_id);
         }
         return {std::move(values), m_args, m_value_id};
     }
 
     ArgumentValueIterator ArgumentValues::begin() const
     {
-        return ArgumentValueIterator(m_values.begin(), m_args, m_value_id);
+        return {m_values.begin(), m_args, m_value_id};
     }
 
     ArgumentValueIterator ArgumentValues::end() const
     {
-        return ArgumentValueIterator(m_values.end(), m_args, m_value_id);
+        return {m_values.end(), m_args, m_value_id};
     }
 }

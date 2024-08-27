@@ -207,7 +207,7 @@ namespace argos
         m_stop_option = option;
     }
 
-    void ParsedArgumentsImpl::error(const std::string& message)
+    void ParsedArgumentsImpl::error(const std::string& message) const
     {
         write_error_message(*m_data, message);
         if (m_data->parser_settings.auto_exit)

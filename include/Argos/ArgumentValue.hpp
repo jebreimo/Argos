@@ -9,7 +9,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 #include "IArgumentView.hpp"
 
 /**
@@ -39,7 +38,7 @@ namespace argos
         /**
          * @private
          */
-        ArgumentValue(std::optional<std::string_view> value,
+        ArgumentValue(const std::optional<std::string_view>& value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId value_id,
                       ArgumentId argument_id);

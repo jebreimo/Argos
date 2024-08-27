@@ -23,7 +23,7 @@ namespace argos
         bool check_flag_with_equal(const std::string& flag,
                                    const OptionData& od)
         {
-            auto eq_pos = flag.find('=');
+            const auto eq_pos = flag.find('=');
             if (eq_pos == std::string::npos)
                 return true;
             if (eq_pos != flag.size() - 1)
@@ -84,7 +84,7 @@ namespace argos
 
                 std::optional<ValueId> find_value_id(std::string_view name)
                 {
-                    auto it = explicit_ids.find(name);
+                    const auto it = explicit_ids.find(name);
                     if (it == explicit_ids.end())
                         return {};
                     return it->second;
@@ -92,7 +92,7 @@ namespace argos
 
                 ValueId make_value_id(std::string_view name)
                 {
-                    if (auto id = find_value_id(name))
+                    if (const auto id = find_value_id(name))
                         return *id;
                     n = ValueId(n + 1);
                     explicit_ids.emplace(name, n);
@@ -103,7 +103,7 @@ namespace argos
                 {
                     for (const auto& name : names)
                     {
-                        if (auto id = find_value_id(name))
+                        if (const auto id = find_value_id(name))
                             return *id;
                     }
                     n = ValueId(n + 1);
@@ -263,7 +263,7 @@ namespace argos
             return {std::move(args), data};
         }
 
-        const char DEFAULT_NAME[] = "UNINITIALIZED";
+        constexpr char DEFAULT_NAME[] = "UNINITIALIZED";
     }
 
     ArgumentParser::ArgumentParser()
@@ -621,7 +621,7 @@ namespace argos
     void ArgumentParser::write_help_text() const
     {
         check_data();
-        auto data = make_copy(*m_data);
+        const auto data = make_copy(*m_data);
         add_missing_help_option(*data);
         argos::write_help_text(*data);
     }
@@ -654,7 +654,7 @@ namespace argos
 
     ArgumentId ArgumentParser::next_argument_id() const
     {
-        auto& d = *m_data;
+        const auto& d = *m_data;
         return ArgumentId(d.options.size() + d.arguments.size() + 1);
     }
 }

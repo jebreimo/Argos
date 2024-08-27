@@ -7,7 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include "ArgumentValue.hpp"
 #include "ArgumentValues.hpp"
 #include "ArgumentView.hpp"
@@ -162,7 +162,7 @@ namespace argos
          * @note No memory is freed, the function only rearranges the pointers
          *  @a in argv.
          */
-        void filter_parsed_arguments(int& argc, char**& argv);
+        void filter_parsed_arguments(int& argc, char**& argv) const;
 
         /**
          * @brief Print @a msg along with a brief help text and exit.
@@ -170,7 +170,7 @@ namespace argos
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& msg);
+        void error(const std::string& msg) const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
@@ -189,5 +189,5 @@ namespace argos
      *
      * This function is intended for testing and debugging.
      */
-    void print(const ParsedArguments& args, std::ostream& stream);
+    void print(const ParsedArguments& parsed_args, std::ostream& stream);
 }

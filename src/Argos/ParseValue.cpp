@@ -63,7 +63,7 @@ namespace argos
     template <>
     std::optional<int> parse_integer<int>(const std::string& str, int base)
     {
-        auto n = parse_integer_impl<long>(str, base);
+        const auto n = parse_integer_impl<long>(str, base);
         if (!n)
             return {};
 

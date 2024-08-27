@@ -20,8 +20,8 @@ namespace argos
         using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
 
         OptionTable make_option_index(
-                const std::vector<std::unique_ptr<OptionData>>& options,
-                bool case_insensitive)
+            const std::vector<std::unique_ptr<OptionData>>& options,
+            bool case_insensitive)
         {
             OptionTable index;
             for (auto& option : options)
@@ -35,11 +35,12 @@ namespace argos
                 return is_less(a.first, b.first, case_insensitive);
             });
 
-            auto it = adjacent_find(index.begin(), index.end(),
-                                    [&](const auto& a, const auto& b)
-            {
-                return are_equal(a.first, b.first, case_insensitive);
-            });
+            const auto it = adjacent_find(
+                index.begin(), index.end(),
+                [&](const auto& a, const auto& b)
+                {
+                    return are_equal(a.first, b.first, case_insensitive);
+                });
 
             if (it == index.end())
                 return index;
@@ -49,11 +50,9 @@ namespace argos
                 ARGOS_THROW("Multiple definitions of flag "
                             + std::string(it->first));
             }
-            else
-            {
-                ARGOS_THROW("Conflicting flags: " + std::string(it->first)
-                            + " and " + std::string(next(it)->first));
-            }
+
+            ARGOS_THROW("Conflicting flags: " + std::string(it->first)
+                        + " and " + std::string(next(it)->first));
         }
 
         const OptionData* find_option_impl(const OptionTable& options,
@@ -61,11 +60,13 @@ namespace argos
                                            bool allow_abbreviations,
                                            bool case_insensitive)
         {
-            auto it = std::lower_bound(
+            const auto it = std::lower_bound(
                 options.begin(), options.end(),
                 OptionTable::value_type(arg, nullptr),
                 [&](auto& a, auto& b)
-                {return is_less(a.first, b.first, case_insensitive);});
+                {
+                    return is_less(a.first, b.first, case_insensitive);
+                });
             if (it == options.end())
                 return nullptr;
             if (it->first == arg)
@@ -76,7 +77,7 @@ namespace argos
                 return nullptr;
             if (!starts_with(it->first, arg, case_insensitive))
                 return nullptr;
-            auto nxt = next(it);
+            const auto nxt = next(it);
             if (nxt != options.end()
                 && starts_with(nxt->first, arg, case_insensitive))
                 return nullptr;
@@ -158,7 +159,7 @@ namespace argos
         ArgumentIteratorImpl iterator(std::move(args), data);
         while (true)
         {
-            auto code = std::get<0>(iterator.next());
+            const auto code = std::get<0>(iterator.next());
             if (code == IteratorResultCode::ERROR
                 || code == IteratorResultCode::DONE)
             {
@@ -175,9 +176,9 @@ namespace argos
         if (m_state == State::DONE)
             return {IteratorResultCode::DONE, nullptr, {}};
 
-        auto arg = m_state == State::ARGUMENTS_AND_OPTIONS
-                   ? m_iterator->next()
-                   : m_iterator->next_value();
+        const auto arg = m_state == State::ARGUMENTS_AND_OPTIONS
+                             ? m_iterator->next()
+                             : m_iterator->next_value();
         if (!arg)
         {
             if (check_argument_and_option_counts())
@@ -216,7 +217,7 @@ namespace argos
                 m_parsed_args->assign_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator->next_value())
             {
                 arg = m_parsed_args->assign_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -233,7 +234,7 @@ namespace argos
                 m_parsed_args->append_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator->next_value())
             {
                 arg = m_parsed_args->append_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -297,14 +298,14 @@ namespace argos
             m_data->parser_settings.case_insensitive);
         if (option)
         {
-            auto opt_res = process_option(*option, flag);
-            switch (opt_res.first)
+            auto [res, arg] = process_option(*option, flag);
+            switch (res)
             {
             case OptionResult::EXIT:
                 if (m_data->parser_settings.auto_exit)
                     exit(m_data->parser_settings.normal_exit_code);
                 copy_remaining_arguments_to_parser_result();
-                return {IteratorResultCode::OPTION, option, opt_res.second};
+                return {IteratorResultCode::OPTION, option, arg};
             case OptionResult::ERROR:
                 return {IteratorResultCode::ERROR, option, {}};
             case OptionResult::LAST_ARGUMENT:
@@ -315,7 +316,7 @@ namespace argos
                 copy_remaining_arguments_to_parser_result();
                 [[fallthrough]];
             default:
-                return {IteratorResultCode::OPTION, option, opt_res.second};
+                return {IteratorResultCode::OPTION, option, arg};
             }
         }
         if (!m_data->parser_settings.ignore_undefined_options
@@ -364,6 +365,7 @@ namespace argos
         return {IteratorResultCode::UNKNOWN, nullptr, m_iterator->current()};
     }
 
+    // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
         for (auto str : m_iterator->remaining_arguments())
@@ -373,13 +375,15 @@ namespace argos
     size_t ArgumentIteratorImpl::count_arguments() const
     {
         size_t result = 0;
-        std::unique_ptr<IOptionIterator> it(m_iterator->clone());
+        const std::unique_ptr<IOptionIterator> it(m_iterator->clone());
         bool arguments_only = false;
         for (auto arg = it->next(); arg && !arguments_only; arg = it->next())
         {
-            auto option = find_option(m_options, *arg,
-                                      m_data->parser_settings.allow_abbreviated_options,
-                                      m_data->parser_settings.case_insensitive);
+            const auto option = find_option(
+                m_options, *arg,
+                m_data->parser_settings.allow_abbreviated_options,
+                m_data->parser_settings.case_insensitive
+                );
             if (option)
             {
                 if (!option->argument.empty())
@@ -410,7 +414,7 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (auto& o : m_data->options)
+        for (const auto& o : m_data->options)
         {
             if (!o->optional && !m_parsed_args->has(o->value_id))
             {
@@ -429,11 +433,11 @@ namespace argos
         }
         else
         {
-            auto ns = ArgumentCounter::get_min_max_count(m_data->arguments);
-            error((ns.first == ns.second
-                   ? "Too few arguments. Expected "
-                   : "Too few arguments. Expected at least ")
-                  + std::to_string(ns.first) + ", received "
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->arguments);
+            error((lo == hi
+                       ? "Too few arguments. Expected "
+                       : "Too few arguments. Expected at least ")
+                  + std::to_string(lo) + ", received "
                   + std::to_string(m_argument_counter.count()) + ".");
             return false;
         }

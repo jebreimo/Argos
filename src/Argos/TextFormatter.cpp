@@ -18,7 +18,7 @@ namespace argos
         std::pair<std::string_view, std::string_view>
         next_line(std::string_view text)
         {
-            auto pos = text.find_first_of("\n\r");
+            const auto pos = text.find_first_of("\n\r");
             if (pos == std::string_view::npos)
                 return {text, {}};
             if (text[pos] == '\n'
@@ -46,12 +46,12 @@ namespace argos
             case '\n':
                 return {'\n', text.substr(0, 1), text.substr(1)};
             case ' ':
-                if (auto n = text.find_first_not_of(' '); n != std::string_view::npos)
+                if (const auto n = text.find_first_not_of(' '); n != std::string_view::npos)
                     return {' ', text.substr(0, n), text.substr(n)};
                 else
                     return {' ', text, {}};
             default:
-                if (auto n = text.find_first_of("\t\r\n "); n != std::string_view::npos)
+                if (const auto n = text.find_first_of("\t\r\n "); n != std::string_view::npos)
                     return {'A', text.substr(0, n), text.substr(n)};
                 else
                     return {'A', text, {}};
@@ -210,7 +210,7 @@ namespace argos
         auto remainder = word;
         while (!m_writer.write(remainder))
         {
-            auto width = m_writer.remaining_width();
+            const auto width = m_writer.remaining_width();
             auto[w, s, r] = m_word_splitter.split(
                 word,
                 word.size() - remainder.size(),

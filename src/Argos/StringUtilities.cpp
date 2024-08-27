@@ -16,7 +16,8 @@ namespace argos
     {
         if (a == b)
             return true;
-        auto ua = uint8_t(a), ub = uint8_t(b);
+        const auto ua = uint8_t(a);
+        const auto ub = uint8_t(b);
         if ((ua ^ ub) != 32)
             return false;
         return 'A' <= (ua & 0xDFu) && (ua & 0xDFu) <= 'Z';
@@ -64,19 +65,19 @@ namespace argos
     {
         if (c1 == c2)
             return 0;
-        auto ic1 = int(uint8_t(c1) & 0xDFu);
+        const auto ic1 = int(uint8_t(c1) & 0xDFu);
         if (ic1 < 'A' || 'Z' < ic1)
             return c1 - c2;
-        auto ic2 = int(uint8_t(c2) & 0xDFu);
+        const auto ic2 = int(uint8_t(c2) & 0xDFu);
         return ic1 - ic2;
     }
 
     bool is_less_ci(std::string_view str1, std::string_view str2)
     {
-        auto size = std::min(str1.size(), str2.size());
+        const auto size = std::min(str1.size(), str2.size());
         for (size_t i = 0; i < size; ++i)
         {
-            if (auto cmp = compare_ci(str1[i], str2[i]); cmp != 0)
+            if (const auto cmp = compare_ci(str1[i], str2[i]); cmp != 0)
                 return cmp < 0;
         }
         return str1.size() < str2.size();
@@ -100,7 +101,7 @@ namespace argos
         size_t pos = 0;
         while (true)
         {
-            auto next_pos = s.find(delimiter, pos);
+            const auto next_pos = s.find(delimiter, pos);
             result.push_back(s.substr(pos, next_pos - pos));
             if (next_pos == std::string_view::npos)
                 break;
@@ -116,13 +117,13 @@ namespace argos
 
     std::string_view get_base_name(std::string_view str)
     {
-        auto pos = str.find_last_of("/\\");
+        const auto pos = str.find_last_of("/\\");
         return pos == std::string_view::npos ? str : str.substr(pos + 1);
     }
 
     constexpr size_t get_code_point_length(char c) noexcept
     {
-        auto u = unsigned(static_cast<uint8_t>(c));
+        const auto u = unsigned(static_cast<uint8_t>(c));
         if (u < 0x80)
             return 1;
         if (u > 0xF7)
@@ -142,7 +143,7 @@ namespace argos
     {
         size_t count = 0;
         size_t char_len = 0;
-        for (auto c : str)
+        for (const auto c : str)
         {
             if (char_len == 0)
             {

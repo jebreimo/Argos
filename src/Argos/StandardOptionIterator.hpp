@@ -10,7 +10,7 @@
 
 namespace argos
 {
-    class StandardOptionIterator : public IOptionIterator
+    class StandardOptionIterator final : public IOptionIterator
     {
     public:
         StandardOptionIterator();

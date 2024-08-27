@@ -5,7 +5,6 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <optional>
 #include "ArgumentCounter.hpp"
 
 namespace argos
@@ -50,13 +49,13 @@ namespace argos
             const std::vector<std::unique_ptr<ArgumentData>>& arguments,
             size_t n)
         {
-            auto minmax = ArgumentCounter::get_min_max_count(arguments);
-            if (n < minmax.first)
+            const auto [lo, hi] = ArgumentCounter::get_min_max_count(arguments);
+            if (n < lo)
                 n = 0;
-            else if (n > minmax.second)
-                n = minmax.second - minmax.first;
+            else if (n > hi)
+                n = hi - lo;
             else
-                n -= minmax.first;
+                n -= lo;
 
             std::vector<std::pair<size_t, const ArgumentData*>> result;
             for (auto& arg : arguments)

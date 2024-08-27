@@ -60,7 +60,7 @@ namespace argos
         void set_breaking_option(const OptionData* option);
 
         [[noreturn]]
-        void error(const std::string& message);
+        void error(const std::string& message) const;
 
         [[noreturn]]
         void error(const std::string& message, ArgumentId argument_id);

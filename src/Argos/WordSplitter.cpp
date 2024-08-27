@@ -31,7 +31,7 @@ namespace argos
         {
             if (pos == 0 || word_rule[pos - 1] == ' ')
                 ARGOS_THROW("Invalid split rule: '" + word_rule + "'");
-            auto sep = word_rule[pos - 1] == '-' ? '\0' : '-';
+            const auto sep = word_rule[pos - 1] == '-' ? '\0' : '-';
             splits.push_back({unsigned(pos - offset), sep});
             ++offset;
         }
@@ -46,12 +46,12 @@ namespace argos
     WordSplitter::split(std::string_view word, size_t start_index,
                         size_t max_length, bool must_split) const
     {
-        auto it = m_splits.find(word);
-        if (it != m_splits.end())
+        const auto it = m_splits.find(word);
+        if (it == m_splits.end())
         {
             Split prev = {unsigned(start_index), '\0'};
             size_t length = 0;
-            for (auto split : it->second)
+            for (const auto split : it->second)
             {
                 if (split.index < start_index + 1)
                     continue;
@@ -78,7 +78,7 @@ namespace argos
         auto max_pos = find_nth_code_point(word, max_length);
         if (max_pos == std::string_view::npos)
             return {word, '\0', {}};
-        auto ignore_utf8 = max_pos == max_length;
+        const auto ignore_utf8 = max_pos == max_length;
         --max_pos;
         if (!ignore_utf8)
         {
@@ -86,7 +86,7 @@ namespace argos
                 --max_pos;
         }
 
-        auto min_pos = (max_length + 2) / 3;
+        const auto min_pos = (max_length + 2) / 3;
         auto index = max_pos;
         for (auto count = max_length - 1; count-- > min_pos;)
         {

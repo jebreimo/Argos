@@ -169,7 +169,7 @@ namespace argos
          *
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
-        [[noreturn]] void error(const std::string& msg);
+        [[noreturn]] void error(const std::string& msg) const;
 
         /**
          * @brief Print @a msg prefixed by the argument's name or option's
@@ -178,7 +178,7 @@ namespace argos
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& msg, const IArgumentView& arg);
+        void error(const std::string& msg, const IArgumentView& arg) const;
 
         /**
          * @brief Returns the stream that was assigned to the

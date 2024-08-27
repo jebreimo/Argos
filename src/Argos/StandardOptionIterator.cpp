@@ -11,14 +11,12 @@
 namespace argos
 {
     StandardOptionIterator::StandardOptionIterator()
-        : m_args_it(m_args.end()),
-          m_pos(0)
+        : m_args_it(m_args.end())
     {}
 
     StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
         : m_args(std::move(args)),
-          m_args_it(m_args.begin()),
-          m_pos(0)
+          m_args_it(m_args.begin())
     {}
 
     StandardOptionIterator::StandardOptionIterator(const StandardOptionIterator& rhs)
@@ -38,7 +36,7 @@ namespace argos
         {
             if (m_pos < m_args_it->size() && (*m_args_it)[1] != '-')
             {
-                auto c = (*m_args_it)[m_pos++];
+                const auto c = (*m_args_it)[m_pos++];
                 if (m_pos == m_args_it->size())
                     m_pos = std::string_view::npos;
                 return std::string{'-', c};
@@ -62,7 +60,7 @@ namespace argos
             return std::string(m_args_it->substr(0, 2));
         }
 
-        auto eq = m_args_it->find('=');
+        const auto eq = m_args_it->find('=');
         if (eq == std::string_view::npos)
         {
             m_pos = std::string_view::npos;
@@ -80,7 +78,7 @@ namespace argos
 
         if (m_pos != std::string_view::npos)
         {
-            auto result = m_args_it->substr(m_pos);
+            const auto result = m_args_it->substr(m_pos);
             m_pos = std::string_view::npos;
             return std::string(result);
         }
@@ -103,8 +101,8 @@ namespace argos
 
     std::vector<std::string_view> StandardOptionIterator::remaining_arguments() const
     {
-        auto it = m_pos == 0 ? m_args_it : std::next(m_args_it);
-        return std::vector<std::string_view>(it, m_args.end());
+        const auto it = m_pos == 0 ? m_args_it : std::next(m_args_it);
+        return {it, m_args.end()};
     }
 
     IOptionIterator* StandardOptionIterator::clone() const

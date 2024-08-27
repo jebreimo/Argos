@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.2.1";
+constexpr char ARGOS_VERSION[] = "1.2.3";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -33,7 +33,7 @@ constexpr char ARGOS_VERSION[] = "1.2.1";
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 1
+#define ARGOS_VERSION_PATCH 3
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -44,7 +44,6 @@ constexpr char ARGOS_VERSION[] = "1.2.1";
 //****************************************************************************
 
 #include <stdexcept>
-#include <string>
 
 /**
  * @file
@@ -59,7 +58,7 @@ namespace argos
     /**
      * @brief The exception class used throughout Argos.
      */
-    class ArgosException : public std::runtime_error
+    class ArgosException final : public std::runtime_error
     {
     public:
         using std::runtime_error::runtime_error;
@@ -362,6 +361,8 @@ namespace argos
 // License text is included with the source distribution.
 //****************************************************************************
 
+#include <string>
+
 /**
  * @file
  * @brief Defines the IArgumentView interface class.
@@ -449,7 +450,7 @@ namespace argos
     /**
      * @brief Provides read-only access to an argument definition.
      */
-    class ArgumentView : public IArgumentView
+    class ArgumentView final : public IArgumentView
     {
     public:
         /**
@@ -552,7 +553,7 @@ namespace argos
     /**
      * @brief Provides read-only access to an option definition.
      */
-    class OptionView : public IArgumentView
+    class OptionView final : public IArgumentView
     {
     public:
         /**
@@ -691,7 +692,7 @@ namespace argos
         /**
          * @private
          */
-        ArgumentValue(std::optional<std::string_view> value,
+        ArgumentValue(const std::optional<std::string_view>& value,
                       std::shared_ptr<ParsedArgumentsImpl> args,
                       ValueId value_id,
                       ArgumentId argument_id);
@@ -966,7 +967,7 @@ namespace argos
         /**
          * @private
          */
-        using It = typename std::vector<
+        using It = std::vector<
             std::pair<std::string_view, ArgumentId>
             >::const_iterator;
 
@@ -1491,7 +1492,7 @@ namespace argos
          *
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
-        [[noreturn]] void error(const std::string& msg);
+        [[noreturn]] void error(const std::string& msg) const;
 
         /**
          * @brief Print @a msg prefixed by the argument's name or option's
@@ -1500,7 +1501,7 @@ namespace argos
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& msg, const IArgumentView& arg);
+        void error(const std::string& msg, const IArgumentView& arg) const;
 
         /**
          * @brief Returns the stream that was assigned to the
@@ -1817,7 +1818,7 @@ namespace argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <ostream>
+#include <iosfwd>
 
 /**
  * @file
@@ -1968,7 +1969,7 @@ namespace argos
          * @note No memory is freed, the function only rearranges the pointers
          *  @a in argv.
          */
-        void filter_parsed_arguments(int& argc, char**& argv);
+        void filter_parsed_arguments(int& argc, char**& argv) const;
 
         /**
          * @brief Print @a msg along with a brief help text and exit.
@@ -1976,7 +1977,7 @@ namespace argos
          * @throw ArgosException if ArgumentParser::auto_exit is false.
          */
         [[noreturn]]
-        void error(const std::string& msg);
+        void error(const std::string& msg) const;
     private:
         std::shared_ptr<ParsedArgumentsImpl> m_impl;
     };
@@ -1995,7 +1996,7 @@ namespace argos
      *
      * This function is intended for testing and debugging.
      */
-    void print(const ParsedArguments& args, std::ostream& stream);
+    void print(const ParsedArguments& parsed_args, std::ostream& stream);
 }
 
 //****************************************************************************
@@ -2449,7 +2450,6 @@ namespace argos
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <iosfwd>
 
 /**
  * @file

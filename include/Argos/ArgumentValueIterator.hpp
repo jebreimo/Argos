@@ -36,7 +36,7 @@ namespace argos
         /**
          * @private
          */
-        using It = typename std::vector<
+        using It = std::vector<
             std::pair<std::string_view, ArgumentId>
             >::const_iterator;
 

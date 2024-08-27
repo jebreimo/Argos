@@ -17,12 +17,12 @@ namespace argos
     {
         struct Visitor
         {
-            std::string operator()(const std::string& s)
+            std::string operator()(const std::string& s) const
             {
                 return s;
             }
 
-            std::string operator()(const std::function<std::string()>& f)
+            std::string operator()(const std::function<std::string()>& f) const
             {
                 return f();
             }

@@ -66,8 +66,7 @@ namespace argos
     ArgumentValue ParsedArgumentsBuilder::value(const std::string& name) const
     {
         auto id = m_impl->get_value_id(name);
-        auto value = m_impl->get_value(id);
-        if (value)
+        if (auto value = m_impl->get_value(id))
             return {value->first, m_impl, id, value->second};
         else
             return {{}, m_impl, id, {}};
@@ -76,8 +75,7 @@ namespace argos
     ArgumentValue
     ParsedArgumentsBuilder::value(const IArgumentView& arg) const
     {
-        auto value = m_impl->get_value(arg.value_id());
-        if (value)
+        if (auto value = m_impl->get_value(arg.value_id()))
             return {value->first, m_impl, arg.value_id(), arg.argument_id()};
         else
             return {{}, m_impl, arg.value_id(), arg.argument_id()};
@@ -108,20 +106,20 @@ namespace argos
         return m_impl->has(arg.value_id());
     }
 
-    void ParsedArgumentsBuilder::error(const std::string& msg)
+    void ParsedArgumentsBuilder::error(const std::string& msg) const
     {
          m_impl->error(msg);
     }
 
     void ParsedArgumentsBuilder::error(const std::string& msg,
-                                       const IArgumentView& arg)
+                                       const IArgumentView& arg) const
     {
         m_impl->error(msg, arg.argument_id());
     }
 
     std::ostream& ParsedArgumentsBuilder::stream() const
     {
-        auto custom_stream = m_impl->parser_data()->help_settings.output_stream;
+        const auto custom_stream = m_impl->parser_data()->help_settings.output_stream;
         return custom_stream ? *custom_stream : std::cout;
     }
 

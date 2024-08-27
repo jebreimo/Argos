@@ -20,7 +20,7 @@ namespace argos
         template <typename T>
         T get_integer(const ArgumentValue& value, T default_value, int base)
         {
-            auto s = value.value();
+            const auto s = value.value();
             if (!s)
                 return default_value;
             auto n = parse_integer<T>(std::string(*s), base);
@@ -32,7 +32,7 @@ namespace argos
         template <typename T>
         T get_floating_point(const ArgumentValue& value, T default_value)
         {
-            auto s = value.value();
+            const auto s = value.value();
             if (!s)
                 return default_value;
             auto n = parse_floating_point<T>(std::string(*s));
@@ -47,7 +47,7 @@ namespace argos
           m_argument_id()
     {}
 
-    ArgumentValue::ArgumentValue(std::optional<std::string_view> value,
+    ArgumentValue::ArgumentValue(const std::optional<std::string_view>& value,
                                  std::shared_ptr<ParsedArgumentsImpl> args,
                                  ValueId value_id,
                                  ArgumentId argument_id)

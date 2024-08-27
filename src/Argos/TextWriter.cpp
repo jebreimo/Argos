@@ -43,9 +43,9 @@ namespace argos
 
     bool TextWriter::write(std::string_view str, bool force)
     {
-        auto width = current_width();
-        auto remaining = std::max(width, m_line_width) - width;
-        auto str_width = static_cast<unsigned>(count_code_points(str));
+        const auto width = current_width();
+        const auto remaining = std::max(width, m_line_width) - width;
+        const auto str_width = static_cast<unsigned>(count_code_points(str));
         if (!force && str_width > remaining)
             return false;
         m_line.append(width - m_current_line_width, ' ');

@@ -44,7 +44,7 @@ namespace argos
             return std::string(*m_args_it);
         }
 
-        auto eq = m_args_it->find('=');
+        const auto eq = m_args_it->find('=');
         if (eq == std::string_view::npos)
         {
             m_pos = std::string_view::npos;
@@ -62,7 +62,7 @@ namespace argos
 
         if (m_pos != std::string_view::npos)
         {
-            auto result = m_args_it->substr(m_pos);
+            const auto result = m_args_it->substr(m_pos);
             m_pos = std::string_view::npos;
             return std::string(result);
         }
@@ -87,7 +87,7 @@ namespace argos
     std::vector<std::string_view> OptionIterator::remaining_arguments() const
     {
         auto it = m_pos == 0 ? m_args_it : std::next(m_args_it);
-        return std::vector<std::string_view>(it, m_args.end());
+        return {it, m_args.end()};
     }
 
     OptionIterator* OptionIterator::clone() const

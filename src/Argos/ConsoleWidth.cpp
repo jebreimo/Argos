@@ -31,7 +31,7 @@ namespace argos
 
     unsigned get_console_width()
     {
-        HANDLE h_con = GetStdHandle(STD_OUTPUT_HANDLE);
+        const HANDLE h_con = GetStdHandle(STD_OUTPUT_HANDLE);
         if (h_con == INVALID_HANDLE_VALUE)
             return 0;
 
@@ -53,7 +53,7 @@ namespace argos
 
     unsigned get_console_width(unsigned min_width, unsigned int default_width)
     {
-        auto width = get_console_width();
+        const auto width = get_console_width();
         if (width == 0)
             return default_width;
         return width < min_width ? min_width : width;

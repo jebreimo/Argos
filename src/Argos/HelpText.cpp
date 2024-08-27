@@ -50,16 +50,16 @@ namespace argos
                                           bool prefer_long_flag)
         {
             std::string opt_txt;
-            bool braces = opt.optional
-                          && !is_stop_option(opt.type);
+            const bool braces = opt.optional
+                                && !is_stop_option(opt.type);
             if (braces)
                 opt_txt.push_back('[');
 
             std::string_view flag;
             if (prefer_long_flag)
             {
-                auto it = std::find_if(opt.flags.begin(),  opt.flags.end(),
-                                       [](auto& s){return s.size() > 2;});
+                const auto it = std::find_if(opt.flags.begin(),  opt.flags.end(),
+                                             [](auto& s){return s.size() > 2;});
                 if (it != opt.flags.end())
                     flag = *it;
             }
@@ -118,7 +118,7 @@ namespace argos
         std::optional<std::string>
         get_custom_text(ParserData& data, TextId text_id)
         {
-            auto it = data.help_settings.texts.find(text_id);
+            const auto it = data.help_settings.texts.find(text_id);
             if (it != data.help_settings.texts.end())
             {
                 return get_text(it->second);
@@ -180,9 +180,9 @@ namespace argos
             // and option flags.
             std::vector<unsigned> name_widths;
             std::vector<unsigned> text_widths;
-            for (const auto& entry : sections)
+            for (const auto& [_, help_texts] : sections)
             {
-                for (const auto& [name, txt] : entry.second)
+                for (const auto& [name, txt] : help_texts)
                 {
                     name_widths.push_back(static_cast<unsigned>(name.size()));
                     text_widths.push_back(static_cast<unsigned>(txt.size()));
@@ -191,10 +191,10 @@ namespace argos
 
             std::sort(name_widths.begin(), name_widths.end());
             std::sort(text_widths.begin(), text_widths.end());
-            auto line_width = data.text_formatter.line_width();
+            const auto line_width = data.text_formatter.line_width();
             // Check if both the longest name and the longest help text
             // can fit on the same line.
-            auto name_width = name_widths.back() + 3;
+            const auto name_width = name_widths.back() + 3;
             if (name_width > 32 || name_width + text_widths.back() > line_width)
                 return 0;
             return name_width;
@@ -240,7 +240,7 @@ namespace argos
 
             if (sections.empty())
                 return;
-            unsigned int name_width = get_help_text_label_width(data, sections);
+            const unsigned name_width = get_help_text_label_width(data, sections);
 
             auto& formatter = data.text_formatter;
             for (auto&[section, txts] : sections)
@@ -312,11 +312,11 @@ namespace argos
 
         bool write_usage(ParserData& data, bool prepend_newline = false)
         {
-            if (auto t = get_custom_text(data, TextId::USAGE); t && t->empty())
+            if (const auto t = get_custom_text(data, TextId::USAGE); t && t->empty())
                 return false;
 
-            auto text1 = write_custom_text(data, TextId::USAGE_TITLE,
-                                           prepend_newline);
+            const auto text1 = write_custom_text(data, TextId::USAGE_TITLE,
+                                                 prepend_newline);
             if (!text1)
             {
                 if (prepend_newline)
@@ -329,15 +329,15 @@ namespace argos
             {
                 prepend_newline = prepend_newline && is_empty(text1);
             }
-            auto text2 = write_custom_text(data, TextId::USAGE,
-                                           prepend_newline);
+            const auto text2 = write_custom_text(data, TextId::USAGE,
+                                                 prepend_newline);
             if (text2)
                 return !is_empty(text1) || !is_empty(text2);
             write_brief_usage(data, prepend_newline);
             return true;
         }
 
-        std::string get_name(ParserData& data, ArgumentId argument_id)
+        std::string get_name(const ParserData& data, ArgumentId argument_id)
         {
             for (const auto& a : data.arguments)
             {
@@ -385,7 +385,7 @@ namespace argos
     void write_error_message(ParserData& data, const std::string& msg,
                              ArgumentId argument_id)
     {
-        if (auto name = get_name(data, argument_id); !name.empty())
+        if (const auto name = get_name(data, argument_id); !name.empty())
             write_error_message(data, name + ": " + msg);
         else
             write_error_message(data, msg);

@@ -45,8 +45,7 @@ namespace argos
     ArgumentValue ParsedArguments::value(const std::string& name) const
     {
         auto id = m_impl->get_value_id(name);
-        auto value = m_impl->get_value(id);
-        if (value)
+        if (auto value = m_impl->get_value(id))
             return {value->first, m_impl, id, value->second};
         else
             return {{}, m_impl, id, {}};
@@ -54,8 +53,7 @@ namespace argos
 
     ArgumentValue ParsedArguments::value(const IArgumentView& arg) const
     {
-        auto value = m_impl->get_value(arg.value_id());
-        if (value)
+        if (auto value = m_impl->get_value(arg.value_id()))
             return {value->first, m_impl, arg.value_id(), arg.argument_id()};
         else
             return {{}, m_impl, arg.value_id(), arg.argument_id()};
@@ -111,7 +109,7 @@ namespace argos
         return m_impl->unprocessed_arguments();
     }
 
-    void ParsedArguments::filter_parsed_arguments(int& argc, char**& argv)
+    void ParsedArguments::filter_parsed_arguments(int& argc, char**& argv) const
     {
         if (argc <= 1)
             return;
@@ -133,7 +131,7 @@ namespace argos
         argc = out;
     }
 
-    void ParsedArguments::error(const std::string& msg)
+    void ParsedArguments::error(const std::string& msg) const
     {
         m_impl->error(msg);
     }
@@ -175,14 +173,14 @@ namespace argos
         print(args, std::cout);
     }
 
-    void print(const ParsedArguments& args, std::ostream& stream)
+    void print(const ParsedArguments& parsed_args, std::ostream& stream)
     {
         std::vector<const IArgumentView*> argViews;
-        auto a = args.all_arguments();
-        std::transform(a.begin(), a.end(), back_inserter(argViews),
+        auto args = parsed_args.all_arguments();
+        std::transform(args.begin(), args.end(), back_inserter(argViews),
                        [](auto& av) {return av.get();});
-        auto o = args.all_options();
-        std::transform(o.begin(), o.end(), back_inserter(argViews),
+        auto opts = parsed_args.all_options();
+        std::transform(opts.begin(), opts.end(), back_inserter(argViews),
                        [](auto& ov) {return ov.get();});
 
         stable_sort(argViews.begin(), argViews.end(),
@@ -198,12 +196,12 @@ namespace argos
         }
 
         for (const auto&[arg, label] : labels)
-            print_argument(stream, label, args.values(*arg));
+            print_argument(stream, label, parsed_args.values(*arg));
 
-        if (!args.unprocessed_arguments().empty())
+        if (!parsed_args.unprocessed_arguments().empty())
         {
             stream << "Unprocessed arguments:";
-            for (auto& arg : args.unprocessed_arguments())
+            for (auto& arg : parsed_args.unprocessed_arguments())
                 stream << " \"" << arg << "\"";
         }
     }

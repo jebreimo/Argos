@@ -15,7 +15,7 @@
 namespace argos
 {
     template <typename T>
-    std::optional<T> parse_integer(const std::string& str, int base);
+    std::optional<T> parse_integer(const std::string& str, int base) = delete;
 
     template <>
     std::optional<int> parse_integer<int>(const std::string& str, int base);

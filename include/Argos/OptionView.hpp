@@ -21,7 +21,7 @@ namespace argos
     /**
      * @brief Provides read-only access to an option definition.
      */
-    class OptionView : public IArgumentView
+    class OptionView final : public IArgumentView
     {
     public:
         /**
