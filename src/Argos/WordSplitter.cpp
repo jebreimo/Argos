@@ -47,7 +47,7 @@ namespace argos
                         size_t max_length, bool must_split) const
     {
         const auto it = m_splits.find(word);
-        if (it == m_splits.end())
+        if (it != m_splits.end())
         {
             Split prev = {unsigned(start_index), '\0'};
             size_t length = 0;
