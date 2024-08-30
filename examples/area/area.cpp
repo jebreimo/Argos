@@ -30,10 +30,10 @@ double calculate_area(Point a, Point b, Point c, Point d)
 
 int main(int argc, char* argv[])
 {
-    using argos::ArgumentParser, argos::Argument, argos::Option;
+    using argos::ArgumentParser, argos::Arg;
     auto args = ArgumentParser("example2")
         .about("Computes the area of a triangle or quadrilateral.")
-        .add(Argument("X,Y")
+        .add(Arg("X,Y")
             .count(3, 4)
             .help("The coordinates of the corners in a triangle"
                   " or quadrilateral."))

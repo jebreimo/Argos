@@ -26,12 +26,12 @@ int main(int argc, char* argv[])
     using namespace argos;
     const argos::ParsedArguments args = ArgumentParser("example2")
         .about("Obfuscates (or reveals) text with the rot-13 algorithm.")
-        .add(Argument("WORD").count(1, INT_MAX).help("One or more words."))
-        .add(Option{"-v", "--verbose"}
+        .add(Arg("WORD").count(1, INT_MAX).help("One or more words."))
+        .add(Opt{"-v", "--verbose"}
             .help("Display additional information."))
-        .add(Option{"-n", "--number"}.argument("NUM")
+        .add(Opt{"-n", "--number"}.argument("NUM")
             .help("Set the number letters are rotated by. Default is 13."))
-        .add(Option{"--"}.type(OptionType::LAST_OPTION)
+        .add(Opt{"--"}.type(OptionType::LAST_OPTION)
              .help("Marks the end of the options. Allows words to"
                    " start with dashes ('-')."))
         .parse(argc, argv);

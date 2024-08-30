@@ -14,10 +14,10 @@ int main(int argc, char* argv[])
     auto args = ArgumentParser(argv[0])
         .about("A small example that demonstrates different ways to work"
                " with options that build lists of values.")
-        .add(Option{"-s", "--add-single"}.argument("VALUE")
+        .add(Opt{"-s", "--add-single"}.argument("VALUE")
             .operation(OptionOperation::APPEND)
             .help("Add a single value to a list."))
-        .add(Option{"-m", "--add-multi"}.argument("VALUE[:VALUE]...")
+        .add(Opt{"-m", "--add-multi"}.argument("VALUE[:VALUE]...")
             .operation(OptionOperation::APPEND)
             .help("Add one or more values to a list. Use colon, ':', as"
                   " separator when supplying more than one value."))

@@ -12,9 +12,9 @@ int main(int argc, char* argv[])
 {
     const argos::ParsedArguments args = argos::ArgumentParser(argv[0])
         .about("Displays a greeting to someone or something.")
-        .add(argos::Argument("NAME").optional(true)
+        .add(argos::Arg("NAME").optional(true)
             .help("The person or thing to greet."))
-        .add(argos::Option{"-n", "--number"}.argument("NUM")
+        .add(argos::Opt{"-n", "--number"}.argument("NUM")
             .help("The number of times to repeat the greeting."))
         .parse(argc, argv);
 

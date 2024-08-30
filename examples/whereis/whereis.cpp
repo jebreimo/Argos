@@ -29,30 +29,30 @@ int main(int argc, char* argv[])
         .about("Searches the directories in the PATH environment variable"
                " for the given file (or files).")
         .version(VERSION)
-        .add(Argument("FILE").count(1, UINT_MAX)
+        .add(Arg("FILE").count(1, UINT_MAX)
             .help("The file or files to locate."))
         .section("MAIN OPTIONS")
-        .add(Option{"-p", "--paths"}
+        .add(Opt{"-p", "--paths"}
             .argument("<PATH>[" PATH_SEPARATOR "<PATH>]...")
             .initial_value(path_env ? path_env : std::string())
             .help("Search the given path or paths rather than the ones in"
                   " the PATH environment variable. Use " PATH_SEPARATOR
                   " as separator between the different paths."))
-        .add(Option{"-e", "--extensions"}
+        .add(Opt{"-e", "--extensions"}
             .argument("<EXT>[" PATH_SEPARATOR "<EXT>]...")
             .operation(OptionOperation::APPEND)
             .help("File name extensions to test while looking for FILE. Must"
                   " include the leading '.'. This option can be used"
                   " multiple times, multiple extensions can be set at once"
                   " by separating them with '" PATH_SEPARATOR "'."))
-        .add(Option{"--"}.type(OptionType::LAST_OPTION)
+        .add(Opt{"--"}.type(OptionType::LAST_OPTION)
              .help("Marks the end of the options. Makes it possible to look"
                    " for file names starting with dashes ('-')."))
         .section("OTHER OPTIONS")
-        .add(Option{"-q", "--quiet"}.alias("--verbose")
+        .add(Opt{"-q", "--quiet"}.alias("--verbose")
             .constant(false)
             .help("Do not show additional information (negates --verbose)."))
-        .add(Option{"-v", "--verbose"}
+        .add(Opt{"-v", "--verbose"}
             .help("Show additional information."))
         .parse(argc, argv);
 

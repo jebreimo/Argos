@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
     using namespace argos;
     auto args = ArgumentParser(argv[0])
         .about("Demonstrates APPEND and CLEAR options.")
-        .add(Option{"-i", "--include="}.argument("VALUE")
+        .add(Opt{"-i", "--include="}.argument("VALUE")
                  .operation(OptionOperation::APPEND)
                  .alias("--include")
                  .help("Appends VALUE to the list of values."))
-        .add(Option{"--include"}
+        .add(Opt{"--include"}
                  .operation(OptionOperation::CLEAR)
                  .help("Clears the list of values."))
         .parse(argc, argv);
