@@ -243,9 +243,9 @@ target_link_libraries(hello
 
 Alternatively one can clone the git repository and build and install it with CMake, for instance:
 
-~~~
+~~~shell
 git clone https://github.com/jebreimo/Argos.git
-md Argos/build
+mkdir Argos/build
 cd Argos/build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make install
