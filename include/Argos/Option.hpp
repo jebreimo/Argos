@@ -40,6 +40,10 @@ namespace argos
          */
         Option();
 
+        explicit Option(std::string flag);
+
+        Option(std::string flag1, std::string flag2);
+
         /**
          * @brief Creates a new option with the given flags.
          */

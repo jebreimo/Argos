@@ -2136,6 +2136,10 @@ namespace argos
          */
         Option();
 
+        explicit Option(std::string flag);
+
+        Option(std::string flag1, std::string flag2);
+
         /**
          * @brief Creates a new option with the given flags.
          */
@@ -2677,12 +2681,12 @@ namespace argos
         ArgumentParser& auto_exit(bool value);
 
         /**
-         * @brief Returns true if option flags are case insensitive.
+         * @brief Returns true if option flags are case-insensitive.
          */
         [[nodiscard]] bool case_insensitive() const;
 
         /**
-         * @brief Enable or disable case insensitive option flags.
+         * @brief Enable or disable case-insensitive option flags.
          *
          * @note Case-insensitivity will only work for ASCII-letters (i.e.
          *      a-z and A-Z).
@@ -2690,7 +2694,7 @@ namespace argos
         ArgumentParser& case_insensitive(bool value);
 
         /**
-         * @brief Returns whether or not a help option will be auto-generated
+         * @brief Returns whether a help option will be auto-generated
          *      if none has been added explicitly.
          */
         [[nodiscard]] bool generate_help_option() const;
@@ -2704,7 +2708,7 @@ namespace argos
          * No help flag will be added if the ArgumentParser has a conflicting
          * flag.
          *
-         * By default this is on.
+         * By default, this is on.
          */
         ArgumentParser& generate_help_option(bool value);
 
@@ -2716,8 +2720,8 @@ namespace argos
         /**
          * @brief Set the option style.
          *
-         * @note The option style can not be changed once any options have been
-         *      added.
+         * @note The option style can no longer be changed once options
+         *      have been added.
          */
         ArgumentParser& option_style(OptionStyle value);
 
@@ -2755,7 +2759,7 @@ namespace argos
          * @brief Returns the callback function that will be called for every
          *      argument.
          *
-         * By default this is an empty function object.
+         * By default, this is an empty function object.
          */
         [[nodiscard]] const ArgumentCallback& argument_callback() const;
 
@@ -2769,7 +2773,7 @@ namespace argos
          * @brief Returns the callback function that will be called for every
          *      option.
          *
-         * By default this is an empty function object.
+         * By default, this is an empty function object.
          */
         [[nodiscard]] const OptionCallback& option_callback() const;
 
@@ -2791,7 +2795,7 @@ namespace argos
          * @brief Set the stream that the help text and error messages are
          *      written to.
          *
-         * By default std::cout is used for the help text and std::cerr for
+         * By default, std::cout is used for the help text and std::cerr for
          * error messages.
          */
         ArgumentParser& stream(std::ostream* stream);
@@ -2804,7 +2808,7 @@ namespace argos
         /**
          * @brief Set the program name.
          *
-         * @note The program name can also be set by the constructor.
+         * @note The program name can also be set with the constructor.
          */
         ArgumentParser& program_name(const std::string& name);
 

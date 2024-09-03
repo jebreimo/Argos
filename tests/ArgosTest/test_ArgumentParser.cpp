@@ -124,7 +124,7 @@ TEST_CASE("List argument")
     Argv argv{"test", "-n", "12", "--number", "20", "--number=6", "-n15"};
     auto args = argos::ArgumentParser("test")
         .auto_exit(false)
-        .add(Option{"-n", "--number"}
+        .add(Option("-n", "--number")
              .operation(OptionOperation::APPEND)
              .argument("NUM"))
         .parse(argv.size(), argv.data());

@@ -18,7 +18,7 @@ TEST_CASE("Test filter argc/argv")
         .ignore_undefined_options(true)
         .ignore_undefined_arguments(true)
         .add(Argument("FILE"))
-        .add(Option{"-f"})
+        .add(Option("-f"))
         .add(Option{"--g"})
         .move();
     SECTION("filter all")

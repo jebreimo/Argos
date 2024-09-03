@@ -16,6 +16,19 @@ namespace argos
         : m_option(std::make_unique<OptionData>())
     {}
 
+    Option::Option(std::string flag)
+        : m_option(std::make_unique<OptionData>())
+    {
+        m_option->flags.emplace_back(std::move(flag));
+    }
+
+    Option::Option(std::string flag1, std::string flag2)
+        : m_option(std::make_unique<OptionData>())
+    {
+        m_option->flags.emplace_back(std::move(flag1));
+        m_option->flags.emplace_back(std::move(flag2));
+    }
+
     Option::Option(std::initializer_list<std::string> flags)
         : m_option(std::make_unique<OptionData>())
     {
