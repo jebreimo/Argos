@@ -7,6 +7,7 @@
 //****************************************************************************
 #include "ParseArguments.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include "Argos/Option.hpp"
 #include "ArgumentIteratorImpl.hpp"
