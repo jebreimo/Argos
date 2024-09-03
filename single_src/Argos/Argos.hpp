@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.2.3";
+constexpr char ARGOS_VERSION[] = "1.4.0";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -28,12 +28,12 @@ constexpr char ARGOS_VERSION[] = "1.2.3";
  * @brief Incremented when Argos's interface is modified in ways that are
  *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 2
+#define ARGOS_VERSION_MINOR 4
 
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 3
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -2915,6 +2915,8 @@ namespace argos
         ArgumentParser&& move();
     private:
         void check_data() const;
+
+        void update_and_validate_option(OptionData& od);
 
         [[nodiscard]] ArgumentId next_argument_id() const;
 

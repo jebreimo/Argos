@@ -1820,56 +1820,9 @@ namespace argos
         check_data();
 
         auto od = option.release();
-        if (od->flags.empty())
-            ARGOS_THROW("Option must have one or more flags.");
-
-        for (auto& flag : od->flags)
-        {
-            bool ok = false;
-            switch (m_data->parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                ok = check_standard_flag(flag, *od);
-                break;
-            case OptionStyle::SLASH:
-                ok = check_flag(flag, '/', *od);
-                break;
-            case OptionStyle::DASH:
-                ok = check_flag(flag, '-', *od);
-                break;
-            default:
-                break;
-            }
-            if (!ok)
-                ARGOS_THROW("Invalid flag: '" + flag + "'.");
-        }
-
-        if (!od->argument.empty() && !od->constant.empty())
-            ARGOS_THROW("Option cannot have both argument and constant.");
-
-        switch (od->operation)
-        {
-        case OptionOperation::NONE:
-            if (!od->constant.empty())
-                ARGOS_THROW("NONE-options cannot have a constant.");
-            if (!od->alias.empty())
-                ARGOS_THROW("NONE-options cannot have an alias.");
-            break;
-        case OptionOperation::ASSIGN:
-            if (od->argument.empty() && od->constant.empty())
-                od->constant = "1";
-            break;
-        case OptionOperation::APPEND:
-            if (od->argument.empty() && od->constant.empty())
-                ARGOS_THROW("Options that appends must have either constant or argument.");
-            break;
-        case OptionOperation::CLEAR:
-            if (!od->argument.empty() ||!od->constant.empty())
-                od->constant = "1";
-            if (!od->optional)
-                ARGOS_THROW("CLEAR-options must be optional.");
-            break;
-        }
+        if (!od)
+            ARGOS_THROW("Option is empty (it has probably already been added).");
+        update_and_validate_option(*od);
         od->argument_id = next_argument_id();
         if (od->section.empty())
             od->section = m_data->current_section;
@@ -2167,6 +2120,60 @@ namespace argos
     {
         const auto& d = *m_data;
         return ArgumentId(d.options.size() + d.arguments.size() + 1);
+    }
+
+    void ArgumentParser::update_and_validate_option(OptionData& od)
+    {
+        if (od.flags.empty())
+            ARGOS_THROW("Option must have one or more flags.");
+
+        for (auto& flag: od.flags)
+        {
+            bool ok = false;
+            switch (m_data->parser_settings.option_style)
+            {
+            case OptionStyle::STANDARD:
+                ok = check_standard_flag(flag, od);
+                break;
+            case OptionStyle::SLASH:
+                ok = check_flag(flag, '/', od);
+                break;
+            case OptionStyle::DASH:
+                ok = check_flag(flag, '-', od);
+                break;
+            default:
+                break;
+            }
+            if (!ok)
+                ARGOS_THROW("Invalid flag: '" + flag + "'.");
+        }
+
+        if (!od.argument.empty() && !od.constant.empty())
+            ARGOS_THROW("Option cannot have both argument and constant.");
+
+        switch (od.operation)
+        {
+        case OptionOperation::NONE:
+            if (!od.constant.empty())
+                ARGOS_THROW("NONE-options cannot have a constant.");
+            if (!od.alias.empty())
+                ARGOS_THROW("NONE-options cannot have an alias.");
+            break;
+        case OptionOperation::ASSIGN:
+            if (od.argument.empty() && od.constant.empty())
+                od.constant = "1";
+            break;
+        case OptionOperation::APPEND:
+            if (od.argument.empty() && od.constant.empty())
+                ARGOS_THROW("Options that appends must have either constant or argument.");
+            break;
+        case OptionOperation::CLEAR:
+            if (!od.argument.empty() || !od.constant.empty())
+                od.constant = "1";
+            if (!od.optional)
+                ARGOS_THROW("CLEAR-options must be optional.");
+            break;
+        }
     }
 }
 
