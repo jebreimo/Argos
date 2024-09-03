@@ -105,6 +105,8 @@ add_library(Argos
     src/Argos/WordSplitter.cpp
     src/Argos/WordSplitter.hpp
     src/Argos/TextSource.hpp
+    src/Argos/ParseArguments.cpp
+    src/Argos/ParseArguments.hpp
 )
 
 target_include_directories(Argos
