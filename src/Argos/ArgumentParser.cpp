@@ -75,7 +75,7 @@ namespace argos
             return result;
         }
 
-        void set_alue_ids(const ParserData& data)
+        void set_value_ids(const ParserData& data)
         {
             struct InternalIdMaker
             {
@@ -248,7 +248,7 @@ namespace argos
         {
             add_missing_help_option(*data);
             add_version_option(*data);
-            set_alue_ids(*data);
+            set_value_ids(*data);
             return ParsedArguments(
                 ArgumentIteratorImpl::parse(std::move(args), data));
         }
@@ -259,7 +259,7 @@ namespace argos
         {
             add_missing_help_option(*data);
             add_version_option(*data);
-            set_alue_ids(*data);
+            set_value_ids(*data);
             return {std::move(args), data};
         }
 
