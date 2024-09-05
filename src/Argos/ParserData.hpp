@@ -12,6 +12,7 @@
 #include "Argos/Enums.hpp"
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
+#include "SubparserData.hpp"
 #include "TextFormatter.hpp"
 
 #ifndef ARGOS_EX_USAGE
@@ -51,6 +52,7 @@ namespace argos
     {
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
+        std::vector<std::unique_ptr<SubparserData>> subparsers;
 
         ParserSettings parser_settings;
         HelpSettings help_settings;

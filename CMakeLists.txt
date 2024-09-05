@@ -107,6 +107,9 @@ add_library(Argos
     src/Argos/TextSource.hpp
     src/Argos/ParseArguments.cpp
     src/Argos/ParseArguments.hpp
+    src/Argos/SubparserData.hpp
+    src/Argos/Subparser.cpp
+    src/Argos/Subparser.hpp
 )
 
 target_include_directories(Argos
