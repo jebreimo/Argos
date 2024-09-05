@@ -4809,34 +4809,34 @@ namespace argos
 {
     struct SubparserData;
 
-    class Subparser
+    class Subcommand
     {
     public:
-        Subparser(std::string name);
+        Subcommand(std::string name);
 
-        Subparser(const Subparser&);
+        Subcommand(const Subcommand&);
 
-        Subparser(Subparser&&) noexcept;
+        Subcommand(Subcommand&&) noexcept;
 
-        ~Subparser();
+        ~Subcommand();
 
-        Subparser& operator=(const Subparser&);
+        Subcommand& operator=(const Subcommand&);
 
-        Subparser& operator=(const Subparser&&);
+        Subcommand& operator=(const Subcommand&&);
 
-        Subparser& add(Argument argument);
+        Subcommand& add(Argument argument);
 
-        Subparser& add(Option option);
+        Subcommand& add(Option option);
 
-        Subparser& add(Subparser parser);
+        Subcommand& add(Subcommand parser);
 
-        Subparser& about(std::string text);
+        Subcommand& about(std::string text);
 
-        Subparser& section(const std::string& name);
+        Subcommand& section(const std::string& name);
 
-        Subparser& text(TextId textId, std::string text);
+        Subcommand& text(TextId textId, std::string text);
 
-        Subparser& text(TextId textId, std::function<std::string()> callback);
+        Subcommand& text(TextId textId, std::function<std::string()> callback);
 
         std::unique_ptr<SubparserData> release();
     private:
