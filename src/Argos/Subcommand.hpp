@@ -16,7 +16,7 @@ namespace argos
     class Subcommand
     {
     public:
-        Subcommand(std::string name);
+        explicit Subcommand(std::string name);
 
         Subcommand(const Subcommand&);
 
@@ -26,13 +26,13 @@ namespace argos
 
         Subcommand& operator=(const Subcommand&);
 
-        Subcommand& operator=(const Subcommand&&);
+        Subcommand& operator=(Subcommand&&) noexcept;
 
         Subcommand& add(Argument argument);
 
         Subcommand& add(Option option);
 
-        Subcommand& add(Subcommand parser);
+        Subcommand& add(Subcommand command);
 
         Subcommand& about(std::string text);
 
