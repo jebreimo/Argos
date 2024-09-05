@@ -67,12 +67,7 @@ namespace argos
             auto result = std::make_unique<ParserData>();
             result->parser_settings = data.parser_settings;
             result->help_settings = data.help_settings;
-            result->arguments.reserve(data.arguments.size());
-            for (const auto& a : data.arguments)
-                result->arguments.push_back(std::make_unique<ArgumentData>(*a));
-            result->options.reserve(data.options.size());
-            for (const auto& o : data.options)
-                result->options.push_back(std::make_unique<OptionData>(*o));
+            result->command = data.command;
             return result;
         }
 
@@ -80,21 +75,22 @@ namespace argos
     }
 
     ArgumentParser::ArgumentParser()
-            : ArgumentParser(DEFAULT_NAME)
+        : ArgumentParser(DEFAULT_NAME)
     {}
 
     ArgumentParser::ArgumentParser(std::string_view program_name,
                                    bool extract_file_name)
         : m_data(std::make_unique<ParserData>())
     {
-        m_data->help_settings.program_name = extract_file_name
-                                           ? get_base_name(program_name)
-                                           : program_name;
+        m_data->command.name = extract_file_name
+                                   ? get_base_name(program_name)
+                                   : program_name;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
         : m_data(std::move(rhs.m_data))
-    {}
+    {
+    }
 
     ArgumentParser::~ArgumentParser() = default;
 
@@ -112,8 +108,8 @@ namespace argos
             ARGOS_THROW("Argument must have a name.");
         ad->argument_id = next_argument_id();
         if (ad->section.empty())
-            ad->section = m_data->current_section;
-        m_data->arguments.emplace_back(std::move(ad));
+            ad->section = m_data->command.current_section;
+        m_data->command.arguments.emplace_back(std::move(ad));
         return *this;
     }
 
@@ -127,8 +123,8 @@ namespace argos
         update_and_validate_option(*od);
         od->argument_id = next_argument_id();
         if (od->section.empty())
-            od->section = m_data->current_section;
-        m_data->options.push_back(std::move(od));
+            od->section = m_data->command.current_section;
+        m_data->command.options.push_back(std::move(od));
         return *this;
     }
 
@@ -137,10 +133,10 @@ namespace argos
         if (argc <= 0)
             return parse(std::vector<std::string_view>());
 
-        if (m_data->help_settings.program_name == DEFAULT_NAME
+        if (m_data->command.name == DEFAULT_NAME
             && std::strlen(argv[0]) != 0)
         {
-            m_data->help_settings.program_name = get_base_name(argv[0]);
+            m_data->command.name = get_base_name(argv[0]);
         }
 
         return parse(std::vector<std::string_view>(argv + 1, argv + argc));
@@ -257,7 +253,7 @@ namespace argos
         check_data();
         if (value != m_data->parser_settings.option_style)
         {
-            if (!m_data->options.empty())
+            if (!m_data->command.options.empty())
                 ARGOS_THROW("Can't change option style after"
                             " options have been added.");
             m_data->parser_settings.option_style = value;
@@ -333,13 +329,13 @@ namespace argos
     const std::string& ArgumentParser::program_name() const
     {
         check_data();
-        return m_data->help_settings.program_name;
+        return m_data->command.name;
     }
 
     ArgumentParser& ArgumentParser::program_name(const std::string& name)
     {
         check_data();
-        m_data->help_settings.program_name = name;
+        m_data->command.name = name;
         return *this;
     }
 
@@ -351,7 +347,7 @@ namespace argos
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(text);
+        m_data->command.texts[textId] = std::move(text);
         return *this;
     }
 
@@ -359,7 +355,7 @@ namespace argos
                                          std::function<std::string()> callback)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(callback);
+        m_data->command.texts[textId] = std::move(callback);
         return *this;
     }
 
@@ -370,10 +366,10 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser &ArgumentParser::section(const std::string &name)
+    ArgumentParser& ArgumentParser::section(const std::string& name)
     {
         check_data();
-        m_data->current_section = name;
+        m_data->command.current_section = name;
         return *this;
     }
 
@@ -420,8 +416,8 @@ namespace argos
 
     ArgumentId ArgumentParser::next_argument_id() const
     {
-        const auto& d = *m_data;
-        return ArgumentId(d.options.size() + d.arguments.size() + 1);
+        const auto& cmd = m_data->command;
+        return ArgumentId(cmd.options.size() + cmd.arguments.size() + 1);
     }
 
     void ArgumentParser::update_and_validate_option(OptionData& od)
@@ -429,7 +425,7 @@ namespace argos
         if (od.flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
 
-        for (auto& flag: od.flags)
+        for (auto& flag : od.flags)
         {
             bool ok = false;
             switch (m_data->parser_settings.option_style)

@@ -118,8 +118,8 @@ namespace argos
         std::optional<std::string>
         get_custom_text(ParserData& data, TextId text_id)
         {
-            const auto it = data.help_settings.texts.find(text_id);
-            if (it != data.help_settings.texts.end())
+            const auto it = data.command.texts.find(text_id);
+            if (it != data.command.texts.end())
             {
                 return get_text(it->second);
 
@@ -150,7 +150,7 @@ namespace argos
 
         void write_stop_and_help_usage(ParserData& data)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : data.command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -158,7 +158,7 @@ namespace argos
                     continue;
                 }
 
-                data.text_formatter.write_words(data.help_settings.program_name);
+                data.text_formatter.write_words(data.command.name);
                 data.text_formatter.write_words(" ");
                 data.text_formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
                 data.text_formatter.write_lines(get_brief_option_name(*opt, true));
@@ -220,7 +220,7 @@ namespace argos
             auto arg_title = get_custom_text(data, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = "ARGUMENTS";
-            for (auto& a : data.arguments)
+            for (auto& a : data.command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -230,7 +230,7 @@ namespace argos
             auto opt_title = get_custom_text(data, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = "OPTIONS";
-            for (auto& o : data.options)
+            for (auto& o : data.command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -284,10 +284,10 @@ namespace argos
 
             formatter.push_indentation(2);
             write_stop_and_help_usage(data);
-            formatter.write_words(data.help_settings.program_name);
+            formatter.write_words(data.command.name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt : data.options)
+            for (auto& opt : data.command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || is_stop_option(opt->type))
@@ -298,7 +298,7 @@ namespace argos
                 formatter.write_lines(get_brief_option_name(*opt, false));
                 formatter.write_words(" ");
             }
-            for (auto& arg : data.arguments)
+            for (auto& arg : data.command.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
@@ -339,12 +339,12 @@ namespace argos
 
         std::string get_name(const ParserData& data, ArgumentId argument_id)
         {
-            for (const auto& a : data.arguments)
+            for (const auto& a : data.command.arguments)
             {
                 if (a->argument_id == argument_id)
                     return a->name;
             }
-            for (const auto& o : data.options)
+            for (const auto& o : data.command.options)
             {
                 if (o->argument_id == argument_id)
                 {
@@ -375,7 +375,7 @@ namespace argos
             data.text_formatter.set_stream(data.help_settings.output_stream);
         else
             data.text_formatter.set_stream(&std::cerr);
-        data.text_formatter.write_words(data.help_settings.program_name + ": ");
+        data.text_formatter.write_words(data.command.name + ": ");
         data.text_formatter.write_words(msg);
         data.text_formatter.newline();
         if (!write_custom_text(data, TextId::ERROR_USAGE))

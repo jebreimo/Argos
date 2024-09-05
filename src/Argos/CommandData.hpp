@@ -13,11 +13,23 @@
 
 namespace argos
 {
-    struct SubparserData
+    struct CommandData
     {
+        CommandData();
+
+        CommandData(const CommandData&);
+
+        CommandData(CommandData&&) noexcept;
+
+        ~CommandData();
+
+        CommandData& operator=(const CommandData&);
+
+        CommandData& operator=(CommandData&&) noexcept;
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
-        std::vector<std::unique_ptr<SubparserData>> sub_parsers;
+        std::vector<std::unique_ptr<CommandData>> subcommands;
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;

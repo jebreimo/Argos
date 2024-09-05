@@ -125,6 +125,6 @@ namespace argos
 
     const std::string& ParsedArgumentsBuilder::program_name() const
     {
-      return m_impl->parser_data()->help_settings.program_name;
+      return m_impl->parser_data()->command.name;
     }
 }

@@ -129,13 +129,13 @@ namespace argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
-          m_options(make_option_index(m_data->options,
+          m_options(make_option_index(m_data->command.options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
                                           std::move(args)))
     {
-        for (const auto& option : m_data->options)
+        for (const auto& option : m_data->command.options)
         {
             if (!option->initial_value.empty())
             {
@@ -145,10 +145,10 @@ namespace argos
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_data->arguments))
-            m_argument_counter = ArgumentCounter(m_data->arguments);
+        if (!ArgumentCounter::requires_argument_count(m_data->command.arguments))
+            m_argument_counter = ArgumentCounter(m_data->command.arguments);
         else
-            m_argument_counter = ArgumentCounter(m_data->arguments,
+            m_argument_counter = ArgumentCounter(m_data->command.arguments,
                                                  count_arguments());
     }
 
@@ -414,7 +414,7 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (const auto& o : m_data->options)
+        for (const auto& o : m_data->command.options)
         {
             if (!o->optional && !m_parsed_args->has(o->value_id))
             {
@@ -433,7 +433,7 @@ namespace argos
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->command.arguments);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")

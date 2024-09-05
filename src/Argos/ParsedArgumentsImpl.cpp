@@ -38,13 +38,13 @@ namespace argos
         : m_data(std::move(data))
     {
         assert(m_data);
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
             if (!a->value.empty())
                 m_ids.emplace_back(a->value, a->value_id, a->argument_id);
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->operation == OptionOperation::NONE)
                 continue;
@@ -152,12 +152,12 @@ namespace argos
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             if (a->value_id == value_id)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->value_id == value_id)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
@@ -168,12 +168,12 @@ namespace argos
     std::unique_ptr<IArgumentView>
     ParsedArgumentsImpl::get_argument_view(ArgumentId argument_id) const
     {
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             if (a->argument_id == argument_id)
                 return std::make_unique<ArgumentView>(a.get());
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->argument_id == argument_id)
                 return std::make_unique<OptionView>(o.get());

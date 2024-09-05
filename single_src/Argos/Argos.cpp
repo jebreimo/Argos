@@ -471,11 +471,23 @@ namespace argos
 
 namespace argos
 {
-    struct SubparserData
+    struct CommandData
     {
+        CommandData();
+
+        CommandData(const CommandData&);
+
+        CommandData(CommandData&&) noexcept;
+
+        ~CommandData();
+
+        CommandData& operator=(const CommandData&);
+
+        CommandData& operator=(CommandData&&) noexcept;
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
-        std::vector<std::unique_ptr<SubparserData>> sub_parsers;
+        std::vector<std::unique_ptr<CommandData>> subcommands;
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
@@ -679,24 +691,16 @@ namespace argos
 
     struct HelpSettings
     {
-        std::string program_name;
         std::string version;
-        std::map<TextId, TextSource> texts;
         std::ostream* output_stream = nullptr;
     };
 
     struct ParserData
     {
-        std::vector<std::unique_ptr<ArgumentData>> arguments;
-        std::vector<std::unique_ptr<OptionData>> options;
-        std::vector<std::unique_ptr<SubparserData>> subparsers;
-
+        CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
-
         TextFormatter text_formatter;
-
-        std::string current_section;
     };
 }
 
@@ -1212,13 +1216,13 @@ namespace argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
-          m_options(make_option_index(m_data->options,
+          m_options(make_option_index(m_data->command.options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
                                           std::move(args)))
     {
-        for (const auto& option : m_data->options)
+        for (const auto& option : m_data->command.options)
         {
             if (!option->initial_value.empty())
             {
@@ -1228,10 +1232,10 @@ namespace argos
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_data->arguments))
-            m_argument_counter = ArgumentCounter(m_data->arguments);
+        if (!ArgumentCounter::requires_argument_count(m_data->command.arguments))
+            m_argument_counter = ArgumentCounter(m_data->command.arguments);
         else
-            m_argument_counter = ArgumentCounter(m_data->arguments,
+            m_argument_counter = ArgumentCounter(m_data->command.arguments,
                                                  count_arguments());
     }
 
@@ -1497,7 +1501,7 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (const auto& o : m_data->options)
+        for (const auto& o : m_data->command.options)
         {
             if (!o->optional && !m_parsed_args->has(o->value_id))
             {
@@ -1516,7 +1520,7 @@ namespace argos
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->command.arguments);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")
@@ -1619,12 +1623,7 @@ namespace argos
             auto result = std::make_unique<ParserData>();
             result->parser_settings = data.parser_settings;
             result->help_settings = data.help_settings;
-            result->arguments.reserve(data.arguments.size());
-            for (const auto& a : data.arguments)
-                result->arguments.push_back(std::make_unique<ArgumentData>(*a));
-            result->options.reserve(data.options.size());
-            for (const auto& o : data.options)
-                result->options.push_back(std::make_unique<OptionData>(*o));
+            result->command = data.command;
             return result;
         }
 
@@ -1632,21 +1631,22 @@ namespace argos
     }
 
     ArgumentParser::ArgumentParser()
-            : ArgumentParser(DEFAULT_NAME)
+        : ArgumentParser(DEFAULT_NAME)
     {}
 
     ArgumentParser::ArgumentParser(std::string_view program_name,
                                    bool extract_file_name)
         : m_data(std::make_unique<ParserData>())
     {
-        m_data->help_settings.program_name = extract_file_name
-                                           ? get_base_name(program_name)
-                                           : program_name;
+        m_data->command.name = extract_file_name
+                                   ? get_base_name(program_name)
+                                   : program_name;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
         : m_data(std::move(rhs.m_data))
-    {}
+    {
+    }
 
     ArgumentParser::~ArgumentParser() = default;
 
@@ -1664,8 +1664,8 @@ namespace argos
             ARGOS_THROW("Argument must have a name.");
         ad->argument_id = next_argument_id();
         if (ad->section.empty())
-            ad->section = m_data->current_section;
-        m_data->arguments.emplace_back(std::move(ad));
+            ad->section = m_data->command.current_section;
+        m_data->command.arguments.emplace_back(std::move(ad));
         return *this;
     }
 
@@ -1679,8 +1679,8 @@ namespace argos
         update_and_validate_option(*od);
         od->argument_id = next_argument_id();
         if (od->section.empty())
-            od->section = m_data->current_section;
-        m_data->options.push_back(std::move(od));
+            od->section = m_data->command.current_section;
+        m_data->command.options.push_back(std::move(od));
         return *this;
     }
 
@@ -1689,10 +1689,10 @@ namespace argos
         if (argc <= 0)
             return parse(std::vector<std::string_view>());
 
-        if (m_data->help_settings.program_name == DEFAULT_NAME
+        if (m_data->command.name == DEFAULT_NAME
             && std::strlen(argv[0]) != 0)
         {
-            m_data->help_settings.program_name = get_base_name(argv[0]);
+            m_data->command.name = get_base_name(argv[0]);
         }
 
         return parse(std::vector<std::string_view>(argv + 1, argv + argc));
@@ -1809,7 +1809,7 @@ namespace argos
         check_data();
         if (value != m_data->parser_settings.option_style)
         {
-            if (!m_data->options.empty())
+            if (!m_data->command.options.empty())
                 ARGOS_THROW("Can't change option style after"
                             " options have been added.");
             m_data->parser_settings.option_style = value;
@@ -1885,13 +1885,13 @@ namespace argos
     const std::string& ArgumentParser::program_name() const
     {
         check_data();
-        return m_data->help_settings.program_name;
+        return m_data->command.name;
     }
 
     ArgumentParser& ArgumentParser::program_name(const std::string& name)
     {
         check_data();
-        m_data->help_settings.program_name = name;
+        m_data->command.name = name;
         return *this;
     }
 
@@ -1903,7 +1903,7 @@ namespace argos
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(text);
+        m_data->command.texts[textId] = std::move(text);
         return *this;
     }
 
@@ -1911,7 +1911,7 @@ namespace argos
                                          std::function<std::string()> callback)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(callback);
+        m_data->command.texts[textId] = std::move(callback);
         return *this;
     }
 
@@ -1922,10 +1922,10 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser &ArgumentParser::section(const std::string &name)
+    ArgumentParser& ArgumentParser::section(const std::string& name)
     {
         check_data();
-        m_data->current_section = name;
+        m_data->command.current_section = name;
         return *this;
     }
 
@@ -1972,8 +1972,8 @@ namespace argos
 
     ArgumentId ArgumentParser::next_argument_id() const
     {
-        const auto& d = *m_data;
-        return ArgumentId(d.options.size() + d.arguments.size() + 1);
+        const auto& cmd = m_data->command;
+        return ArgumentId(cmd.options.size() + cmd.arguments.size() + 1);
     }
 
     void ArgumentParser::update_and_validate_option(OptionData& od)
@@ -1981,7 +1981,7 @@ namespace argos
         if (od.flags.empty())
             ARGOS_THROW("Option must have one or more flags.");
 
-        for (auto& flag: od.flags)
+        for (auto& flag : od.flags)
         {
             bool ok = false;
             switch (m_data->parser_settings.option_style)
@@ -2626,6 +2626,83 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-05.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    CommandData::CommandData() = default;
+
+    CommandData::CommandData(const CommandData& rhs)
+        : name(rhs.name),
+          texts(rhs.texts),
+          current_section(rhs.current_section)
+    {
+        arguments.reserve(rhs.arguments.size());
+        for (const auto& a : rhs.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+        options.reserve(rhs.options.size());
+        for (const auto& o : rhs.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+    }
+
+    CommandData::CommandData(CommandData&& rhs) noexcept
+        : name(std::move(rhs.name)),
+          texts(std::move(rhs.texts)),
+          current_section(std::move(rhs.current_section)),
+          arguments(std::move(rhs.arguments)),
+          options(std::move(rhs.options)),
+          subcommands(std::move(rhs.subcommands))
+    {}
+
+    CommandData::~CommandData() = default;
+
+    CommandData& CommandData::operator=(const CommandData& rhs)
+    {
+        if (&rhs == this)
+            return *this;
+        name = rhs.name;
+        texts = rhs.texts;
+        current_section = rhs.current_section;
+
+        arguments.clear();
+        arguments.reserve(rhs.arguments.size());
+        for (const auto& a : rhs.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+
+        options.clear();
+        options.reserve(rhs.options.size());
+        for (const auto& o : rhs.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+
+        subcommands.clear();
+        subcommands.reserve(rhs.subcommands.size());
+        for (const auto& c : rhs.subcommands)
+            subcommands.push_back(std::make_unique<CommandData>(*c));
+
+        return *this;
+    }
+
+    CommandData& CommandData::operator=(CommandData&& rhs) noexcept
+    {
+        if (&rhs == this)
+            return *this;
+
+        name = std::move(rhs.name);
+        texts = std::move(rhs.texts);
+        current_section = std::move(rhs.current_section);
+        arguments = std::move(rhs.arguments);
+        options = std::move(rhs.options);
+        subcommands = std::move(rhs.subcommands);
+        return *this;
+    }
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-10.
 //
@@ -2817,8 +2894,8 @@ namespace argos
         std::optional<std::string>
         get_custom_text(ParserData& data, TextId text_id)
         {
-            const auto it = data.help_settings.texts.find(text_id);
-            if (it != data.help_settings.texts.end())
+            const auto it = data.command.texts.find(text_id);
+            if (it != data.command.texts.end())
             {
                 return get_text(it->second);
 
@@ -2849,7 +2926,7 @@ namespace argos
 
         void write_stop_and_help_usage(ParserData& data)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : data.command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -2857,7 +2934,7 @@ namespace argos
                     continue;
                 }
 
-                data.text_formatter.write_words(data.help_settings.program_name);
+                data.text_formatter.write_words(data.command.name);
                 data.text_formatter.write_words(" ");
                 data.text_formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
                 data.text_formatter.write_lines(get_brief_option_name(*opt, true));
@@ -2919,7 +2996,7 @@ namespace argos
             auto arg_title = get_custom_text(data, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = "ARGUMENTS";
-            for (auto& a : data.arguments)
+            for (auto& a : data.command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -2929,7 +3006,7 @@ namespace argos
             auto opt_title = get_custom_text(data, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = "OPTIONS";
-            for (auto& o : data.options)
+            for (auto& o : data.command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -2983,10 +3060,10 @@ namespace argos
 
             formatter.push_indentation(2);
             write_stop_and_help_usage(data);
-            formatter.write_words(data.help_settings.program_name);
+            formatter.write_words(data.command.name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt : data.options)
+            for (auto& opt : data.command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || is_stop_option(opt->type))
@@ -2997,7 +3074,7 @@ namespace argos
                 formatter.write_lines(get_brief_option_name(*opt, false));
                 formatter.write_words(" ");
             }
-            for (auto& arg : data.arguments)
+            for (auto& arg : data.command.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
@@ -3038,12 +3115,12 @@ namespace argos
 
         std::string get_name(const ParserData& data, ArgumentId argument_id)
         {
-            for (const auto& a : data.arguments)
+            for (const auto& a : data.command.arguments)
             {
                 if (a->argument_id == argument_id)
                     return a->name;
             }
-            for (const auto& o : data.options)
+            for (const auto& o : data.command.options)
             {
                 if (o->argument_id == argument_id)
                 {
@@ -3074,7 +3151,7 @@ namespace argos
             data.text_formatter.set_stream(data.help_settings.output_stream);
         else
             data.text_formatter.set_stream(&std::cerr);
-        data.text_formatter.write_words(data.help_settings.program_name + ": ");
+        data.text_formatter.write_words(data.command.name + ": ");
         data.text_formatter.write_words(msg);
         data.text_formatter.newline();
         if (!write_custom_text(data, TextId::ERROR_USAGE))
@@ -3541,7 +3618,7 @@ namespace argos
             };
 
             InternalIdMaker id_maker;
-            for (const auto& a: data.arguments)
+            for (const auto& a: data.command.arguments)
             {
                 if (!a->value.empty())
                 {
@@ -3553,7 +3630,7 @@ namespace argos
                     a->value_id = id_maker.make_value_id(a->name);
                 }
             }
-            for (const auto& o: data.options)
+            for (const auto& o: data.command.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
@@ -3572,7 +3649,7 @@ namespace argos
 
         inline bool has_help_option(const ParserData& data)
         {
-            return std::any_of(data.options.begin(), data.options.end(),
+            return std::any_of(data.command.options.begin(), data.command.options.end(),
                                [](const auto& o)
                                {
                                    return o->type == OptionType::HELP;
@@ -3582,7 +3659,7 @@ namespace argos
         inline bool has_flag(const ParserData& data, std::string_view flag)
         {
             bool ci = data.parser_settings.case_insensitive;
-            return any_of(data.options.begin(), data.options.end(),
+            return any_of(data.command.options.begin(), data.command.options.end(),
                           [&](const auto& o)
                           {
                               return any_of(o->flags.begin(), o->flags.end(),
@@ -3626,10 +3703,10 @@ namespace argos
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
                 .help("Display the help text.")
                 .constant("1").release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
+            opt->argument_id = ArgumentId(data.command.options.size()
+                                          + data.command.arguments.size() + 1);
+            opt->section = data.command.current_section;
+            data.command.options.push_back(std::move(opt));
         }
 
         void add_version_option(ParserData& data)
@@ -3669,10 +3746,10 @@ namespace argos
                         return true;
                     })
                 .release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
+            opt->argument_id = ArgumentId(data.command.options.size()
+                                          + data.command.arguments.size() + 1);
+            opt->section = data.command.current_section;
+            data.command.options.push_back(std::move(opt));
         }
     }
 
@@ -3698,165 +3775,6 @@ namespace argos
         add_missing_options(*data);
         set_value_ids(*data);
         return {std::move(args), data};
-    }
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-13.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-#include <cstdlib>
-
-namespace argos
-{
-    namespace
-    {
-        template <typename T>
-        T str_to_int(const char* str, char** endp, int base);
-
-        template <>
-        long str_to_int<long>(const char* str, char** endp, int base)
-        {
-            return strtol(str, endp, base);
-        }
-
-        template <>
-        long long str_to_int<long long>(const char* str, char** endp, int base)
-        {
-            return strtoll(str, endp, base);
-        }
-
-        template <>
-        unsigned long
-        str_to_int<unsigned long>(const char* str, char** endp, int base)
-        {
-            return strtoul(str, endp, base);
-        }
-
-        template <>
-        unsigned long long
-        str_to_int<unsigned long long>(const char* str, char** endp, int base)
-        {
-            return strtoull(str, endp, base);
-        }
-
-        template <typename T>
-        std::optional<T> parse_integer_impl(const std::string& str, int base)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_int<T>(str.c_str(), &endp, base);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<int> parse_integer<int>(const std::string& str, int base)
-    {
-        const auto n = parse_integer_impl<long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(int) != sizeof(long))
-        {
-            if (*n < INT_MIN || INT_MAX < *n)
-                return {};
-        }
-        return static_cast<int>(*n);
-    }
-
-    template <>
-    std::optional<unsigned>
-    parse_integer<unsigned>(const std::string& str, int base)
-    {
-        auto n = parse_integer_impl<unsigned long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
-        {
-            if (UINT_MAX < *n)
-                return {};
-        }
-        return static_cast<unsigned>(*n);
-    }
-
-    template <>
-    std::optional<long> parse_integer<long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long>(str, base);
-    }
-
-    template <>
-    std::optional<long long>
-    parse_integer<long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long>
-    parse_integer<unsigned long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long long>
-    parse_integer<unsigned long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long long>(str, base);
-    }
-
-    namespace
-    {
-        template <typename T>
-        T str_to_float(const char* str, char** endp);
-
-        template <>
-        float str_to_float<float>(const char* str, char** endp)
-        {
-            return strtof(str, endp);
-        }
-
-        template <>
-        double str_to_float<double>(const char* str, char** endp)
-        {
-            return strtod(str, endp);
-        }
-
-        template <typename T>
-        std::optional<T> parse_floating_point_impl(const std::string& str)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_float<T>(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<float> parse_floating_point<float>(const std::string& str)
-    {
-        return parse_floating_point_impl<float>(str);
-    }
-
-    template <>
-    std::optional<double> parse_floating_point<double>(const std::string& str)
-    {
-        return parse_floating_point_impl<double>(str);
     }
 }
 
@@ -3932,7 +3850,7 @@ namespace argos
     ParsedArguments::all_arguments() const
     {
         std::vector<std::unique_ptr<ArgumentView>> result;
-        for (auto& a : m_impl->parser_data()->arguments)
+        for (auto& a : m_impl->parser_data()->command.arguments)
             result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         return result;
     }
@@ -3941,7 +3859,7 @@ namespace argos
     ParsedArguments::all_options() const
     {
         std::vector<std::unique_ptr<OptionView>> result;
-        for (auto& o : m_impl->parser_data()->options)
+        for (auto& o : m_impl->parser_data()->command.options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
         return result;
     }
@@ -4186,7 +4104,7 @@ namespace argos
 
     const std::string& ParsedArgumentsBuilder::program_name() const
     {
-      return m_impl->parser_data()->help_settings.program_name;
+      return m_impl->parser_data()->command.name;
     }
 }
 
@@ -4224,13 +4142,13 @@ namespace argos
         : m_data(std::move(data))
     {
         assert(m_data);
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
             if (!a->value.empty())
                 m_ids.emplace_back(a->value, a->value_id, a->argument_id);
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->operation == OptionOperation::NONE)
                 continue;
@@ -4338,12 +4256,12 @@ namespace argos
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             if (a->value_id == value_id)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->value_id == value_id)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
@@ -4354,12 +4272,12 @@ namespace argos
     std::unique_ptr<IArgumentView>
     ParsedArgumentsImpl::get_argument_view(ArgumentId argument_id) const
     {
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_data->command.arguments)
         {
             if (a->argument_id == argument_id)
                 return std::make_unique<ArgumentView>(a.get());
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_data->command.options)
         {
             if (o->argument_id == argument_id)
                 return std::make_unique<OptionView>(o.get());
@@ -4410,6 +4328,165 @@ namespace argos
             exit(m_data->parser_settings.error_exit_code);
         else
             ARGOS_THROW("Error while parsing arguments.");
+    }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-13.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+#include <cstdlib>
+
+namespace argos
+{
+    namespace
+    {
+        template <typename T>
+        T str_to_int(const char* str, char** endp, int base);
+
+        template <>
+        long str_to_int<long>(const char* str, char** endp, int base)
+        {
+            return strtol(str, endp, base);
+        }
+
+        template <>
+        long long str_to_int<long long>(const char* str, char** endp, int base)
+        {
+            return strtoll(str, endp, base);
+        }
+
+        template <>
+        unsigned long
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
+        {
+            return strtoul(str, endp, base);
+        }
+
+        template <>
+        unsigned long long
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
+        {
+            return strtoull(str, endp, base);
+        }
+
+        template <typename T>
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
+    {
+        const auto n = parse_integer_impl<long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(int) != sizeof(long))
+        {
+            if (*n < INT_MIN || INT_MAX < *n)
+                return {};
+        }
+        return static_cast<int>(*n);
+    }
+
+    template <>
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
+    {
+        auto n = parse_integer_impl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long>(str, base);
+    }
+
+    template <>
+    std::optional<long long>
+    parse_integer<long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long>
+    parse_integer<unsigned long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long long>
+    parse_integer<unsigned long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long long>(str, base);
+    }
+
+    namespace
+    {
+        template <typename T>
+        T str_to_float(const char* str, char** endp);
+
+        template <>
+        float str_to_float<float>(const char* str, char** endp)
+        {
+            return strtof(str, endp);
+        }
+
+        template <>
+        double str_to_float<double>(const char* str, char** endp)
+        {
+            return strtod(str, endp);
+        }
+
+        template <typename T>
+        std::optional<T> parse_floating_point_impl(const std::string& str)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_float<T>(str.c_str(), &endp);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<float> parse_floating_point<float>(const std::string& str)
+    {
+        return parse_floating_point_impl<float>(str);
+    }
+
+    template <>
+    std::optional<double> parse_floating_point<double>(const std::string& str)
+    {
+        return parse_floating_point_impl<double>(str);
     }
 }
 

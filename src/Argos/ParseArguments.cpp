@@ -56,7 +56,7 @@ namespace argos
             };
 
             InternalIdMaker id_maker;
-            for (const auto& a: data.arguments)
+            for (const auto& a: data.command.arguments)
             {
                 if (!a->value.empty())
                 {
@@ -68,7 +68,7 @@ namespace argos
                     a->value_id = id_maker.make_value_id(a->name);
                 }
             }
-            for (const auto& o: data.options)
+            for (const auto& o: data.command.options)
             {
                 if (o->operation == OptionOperation::NONE)
                     continue;
@@ -87,7 +87,7 @@ namespace argos
 
         inline bool has_help_option(const ParserData& data)
         {
-            return std::any_of(data.options.begin(), data.options.end(),
+            return std::any_of(data.command.options.begin(), data.command.options.end(),
                                [](const auto& o)
                                {
                                    return o->type == OptionType::HELP;
@@ -97,7 +97,7 @@ namespace argos
         inline bool has_flag(const ParserData& data, std::string_view flag)
         {
             bool ci = data.parser_settings.case_insensitive;
-            return any_of(data.options.begin(), data.options.end(),
+            return any_of(data.command.options.begin(), data.command.options.end(),
                           [&](const auto& o)
                           {
                               return any_of(o->flags.begin(), o->flags.end(),
@@ -141,10 +141,10 @@ namespace argos
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
                 .help("Display the help text.")
                 .constant("1").release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
+            opt->argument_id = ArgumentId(data.command.options.size()
+                                          + data.command.arguments.size() + 1);
+            opt->section = data.command.current_section;
+            data.command.options.push_back(std::move(opt));
         }
 
         void add_version_option(ParserData& data)
@@ -184,10 +184,10 @@ namespace argos
                         return true;
                     })
                 .release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
+            opt->argument_id = ArgumentId(data.command.options.size()
+                                          + data.command.arguments.size() + 1);
+            opt->section = data.command.current_section;
+            data.command.options.push_back(std::move(opt));
         }
     }
 
