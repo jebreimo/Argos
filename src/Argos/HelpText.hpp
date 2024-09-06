@@ -11,11 +11,14 @@
 
 namespace argos
 {
-    void write_help_text(ParserData& data);
+    void write_help_text(const ParserData& data, const CommandData& cmd);
 
-    void write_error_message(ParserData& data, const std::string& msg);
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg);
 
-    void write_error_message(ParserData& data,
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
                              const std::string& msg,
                              ArgumentId argument_id);
 }

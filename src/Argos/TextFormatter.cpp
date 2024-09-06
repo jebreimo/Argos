@@ -74,17 +74,17 @@ namespace argos
     }
 
     TextFormatter::TextFormatter()
-        : TextFormatter(&std::cout, get_console_width(32))
+        : TextFormatter(&std::cout, 0)
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream)
-        : TextFormatter(stream, get_console_width(32))
+        : TextFormatter(stream, 0)
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream, unsigned line_width)
-        : m_writer(line_width)
+        : m_writer(line_width ? line_width : get_console_width(32))
     {
-        if (line_width <= 2)
+        if (m_writer.line_width() <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
         m_writer.set_stream(stream);
         m_indents.push_back(0);

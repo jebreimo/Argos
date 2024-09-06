@@ -209,7 +209,7 @@ namespace argos
 
     void ParsedArgumentsImpl::error(const std::string& message) const
     {
-        write_error_message(*m_data, message);
+        write_error_message(*m_data, m_data->command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
@@ -219,7 +219,7 @@ namespace argos
     void ParsedArgumentsImpl::error(const std::string& message,
                                     ArgumentId argument_id)
     {
-        write_error_message(*m_data, message, argument_id);
+        write_error_message(*m_data, m_data->command, message, argument_id);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else

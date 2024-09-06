@@ -269,7 +269,7 @@ namespace argos
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            write_help_text(*m_data);
+            write_help_text(*m_data, m_data->command);
             [[fallthrough]];
         case OptionType::EXIT:
             m_state = State::DONE;
@@ -446,7 +446,7 @@ namespace argos
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            write_error_message(*m_data, message);
+            write_error_message(*m_data, m_data->command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();

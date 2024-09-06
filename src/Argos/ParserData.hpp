@@ -44,6 +44,8 @@ namespace argos
     {
         std::string version;
         std::ostream* output_stream = nullptr;
+        unsigned line_width = 0;
+        std::vector<std::string> word_split_rules;
     };
 
     struct ParserData
@@ -51,6 +53,5 @@ namespace argos
         CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
-        TextFormatter text_formatter;
     };
 }

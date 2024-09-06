@@ -376,7 +376,7 @@ namespace argos
     ArgumentParser& ArgumentParser::line_width(unsigned int line_width)
     {
         check_data();
-        m_data->text_formatter.set_line_width(line_width);
+        m_data->help_settings.line_width = line_width;
         return *this;
     }
 
@@ -385,13 +385,13 @@ namespace argos
         check_data();
         const auto data = make_copy(*m_data);
         add_missing_options(*data);
-        argos::write_help_text(*data);
+        argos::write_help_text(*data, data->command);
     }
 
     ArgumentParser& ArgumentParser::add_word_splitting_rule(std::string str)
     {
         check_data();
-        m_data->text_formatter.word_splitter().add_word(std::move(str));
+        m_data->help_settings.word_split_rules.push_back(std::move(str));
         return *this;
     }
 

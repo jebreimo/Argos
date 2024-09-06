@@ -25,12 +25,12 @@ namespace argos
     }
 
     CommandData::CommandData(CommandData&& rhs) noexcept
-        : name(std::move(rhs.name)),
-          texts(std::move(rhs.texts)),
-          current_section(std::move(rhs.current_section)),
-          arguments(std::move(rhs.arguments)),
+        : arguments(std::move(rhs.arguments)),
           options(std::move(rhs.options)),
-          subcommands(std::move(rhs.subcommands))
+          subcommands(std::move(rhs.subcommands)),
+          name(std::move(rhs.name)),
+          texts(std::move(rhs.texts)),
+          current_section(std::move(rhs.current_section))
     {}
 
     CommandData::~CommandData() = default;
