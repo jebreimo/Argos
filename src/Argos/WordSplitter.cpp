@@ -12,13 +12,43 @@
 #include "ArgosThrow.hpp"
 #include "StringUtilities.hpp"
 
-namespace argos
-{
-    namespace
+namespace argos { namespace
     {
         bool is_utf8_continuation(char c)
         {
             return (uint8_t(c) & 0xC0u) == 0x80;
+        }
+
+        std::string_view remove_punctuation(std::string_view word)
+        {
+            auto last = word.find_last_not_of(".,;:!?()[]{}<>\"'`");
+            return word.substr(0, last + 1);
+        }
+
+        char to_lower(char c)
+        {
+            return ('A' <= c && c <= 'Z') ? char(c - 'A' + 'a') : c;
+        }
+
+        void to_lower(std::string& word)
+        {
+            for (auto& c: word)
+                c = to_lower(c);
+        }
+
+        std::string to_lower(std::string_view word)
+        {
+            std::string result(word);
+            to_lower(result);
+            return result;
+        }
+
+        bool is_lower(std::string_view word)
+        {
+            return std::all_of(word.begin(), word.end(), [](char c)
+            {
+                return c < 'A' || 'Z' < c;
+            });
         }
     }
 
@@ -38,20 +68,30 @@ namespace argos
         splits.push_back({unsigned(word_rule.size() - offset), '\0'});
         word_rule.erase(remove(word_rule.begin(), word_rule.end(), ' '),
                         word_rule.end());
+        to_lower(word_rule);
         m_strings.push_back(std::move(word_rule));
         m_splits.insert({std::string_view(m_strings.back()), std::move(splits)});
+    }
+
+    void WordSplitter::add_words(std::vector<std::string> word_rules)
+    {
+        for (auto& word_rule: word_rules)
+            add_word(std::move(word_rule));
     }
 
     std::tuple<std::string_view, char, std::string_view>
     WordSplitter::split(std::string_view word, size_t start_index,
                         size_t max_length, bool must_split) const
     {
-        const auto it = m_splits.find(word);
+        auto key = remove_punctuation(word);
+        const auto it = is_lower(key)
+                            ? m_splits.find(key)
+                            : m_splits.find(to_lower(key));
         if (it != m_splits.end())
         {
             Split prev = {unsigned(start_index), '\0'};
             size_t length = 0;
-            for (const auto split : it->second)
+            for (const auto split: it->second)
             {
                 if (split.index < start_index + 1)
                     continue;
@@ -61,9 +101,11 @@ namespace argos
                 prev = split;
             }
             if (prev.index > start_index + 1)
-                return {word.substr(start_index, prev.index - start_index),
-                        prev.separator,
-                        word.substr(prev.index)};
+                return {
+                    word.substr(start_index, prev.index - start_index),
+                    prev.separator,
+                    word.substr(prev.index)
+                };
         }
         if (must_split)
             return default_rule(word.substr(start_index), max_length);
@@ -103,8 +145,10 @@ namespace argos
             if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
                 return {word.substr(0, index), '-', word.substr(index)};
         }
-        return {word.substr(0, max_pos),
-                '-',
-                word.substr(max_pos)};
+        return {
+            word.substr(0, max_pos),
+            '-',
+            word.substr(max_pos)
+        };
     }
 }

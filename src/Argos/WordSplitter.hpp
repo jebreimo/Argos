@@ -19,6 +19,8 @@ namespace argos
     public:
         void add_word(std::string word_rule);
 
+        void add_words(std::vector<std::string> word_rules);
+
         [[nodiscard]] std::tuple<std::string_view, char, std::string_view>
         split(std::string_view word, size_t start_index, size_t max_length,
               bool must_split) const;

@@ -52,6 +52,13 @@ TEST_CASE("Test default splitter")
     test_default_split("bbbbbbccccccdddddd", 6, 7, {"cccccc", '-', "dddddd"});
 }
 
+TEST_CASE("Test split double-dash option")
+{
+    // I'm adding this test case to highlight a behavior that I'm not
+    // entirely sure I want.
+    test_default_split("--help", 0, 5, {"--", '\0', "help"});
+}
+
 TEST_CASE("Test default splitter with UTF-8")
 {
     argos::WordSplitter splitter;
@@ -86,4 +93,14 @@ TEST_CASE("Test splitter with UTF-8")
     test_split(u8"Brønn øy sund", 0, 10, {u8"Brønnøy", '-', u8"sund"});
     test_split(u8"Brønn øy sund", 0, 11, {u8"Brønnøysund", '\0', {}});
     test_split(u8"Brønn øy sund", 4, 7, {u8"nnøy", '-', u8"sund"});
+}
+
+TEST_CASE("Test splitter handles case and punctuation.")
+{
+    argos::WordSplitter splitter;
+    splitter.add_word("in compre hensi bili ties");
+    auto [txt, sep, rem] = splitter.split("Incomprehensibilities.", 0, 12, false);
+    REQUIRE(txt == "Incompre");
+    REQUIRE(sep == '-');
+    REQUIRE(rem == "hensibilities.");
 }
