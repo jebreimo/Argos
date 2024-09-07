@@ -375,6 +375,7 @@ namespace argos
             formatter.set_line_width(data.help_settings.line_width);
         if (data.help_settings.output_stream)
             formatter.set_stream(data.help_settings.output_stream);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
         bool newline = !is_empty(write_custom_text(formatter, cmd, TextId::INITIAL_TEXT));
         newline = write_usage(formatter, cmd, newline) || newline;
         newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline)) || newline;
@@ -393,6 +394,7 @@ namespace argos
             formatter.set_stream(data.help_settings.output_stream);
         else
             formatter.set_stream(&std::cerr);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
         formatter.write_words(cmd.name + ": ");
         formatter.write_words(msg);
         formatter.newline();

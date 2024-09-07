@@ -35,7 +35,7 @@ namespace argos
 
     bool TextWriter::set_indentation(unsigned indent)
     {
-        if (m_indent >= m_line_width)
+        if (indent >= m_line_width)
             return false;
         m_indent = indent;
         return true;

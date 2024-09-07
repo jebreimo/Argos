@@ -34,10 +34,10 @@ TEST_CASE("Conflicting flags")
 {
     argos::ArgumentParser parser("test");
     parser.add(argos::Option({"-h", "--help"})
-       .type(argos::OptionType::HELP)
-       .help("Show help message."));
+        .type(argos::OptionType::HELP)
+        .help("Show help message."));
     parser.add(argos::Option({"-h"})
-       .help("Output height."));
+        .help("Output height."));
     Argv argv{"test", "--help"};
     REQUIRE_THROWS(parser.parse(argv.size(), argv.data()));
 }
@@ -94,7 +94,6 @@ TEST_CASE("Test text callback")
         .text(TextId::FINAL_TEXT, MakeText())
         .parse(argv.size(), argv.data());
     REQUIRE(ss.str() == "ARGUMENTS\n  <file>\n\nA\n  <device>\n\nOPTIONS\n  -h\n\nSomething.\n");
-
 }
 
 TEST_CASE("Two argument")
@@ -115,7 +114,7 @@ TEST_CASE("Option that appends must have argument or value")
     using namespace argos;
     ArgumentParser parser("test");
     REQUIRE_THROWS(parser.add(Option({"-a"})
-                         .operation(OptionOperation::APPEND)));
+        .operation(OptionOperation::APPEND)));
 }
 
 TEST_CASE("List argument")
@@ -125,8 +124,8 @@ TEST_CASE("List argument")
     auto args = argos::ArgumentParser("test")
         .auto_exit(false)
         .add(Option("-n", "--number")
-             .operation(OptionOperation::APPEND)
-             .argument("NUM"))
+            .operation(OptionOperation::APPEND)
+            .argument("NUM"))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     auto numbers = args.values("-n").as_ints();
@@ -159,19 +158,19 @@ TEST_CASE("Test dash options")
     using namespace argos;
 
     REQUIRE_NOTHROW(ArgumentParser().option_style(OptionStyle::DASH)
-                        .add(Option({"-="})));
+        .add(Option({"-="})));
     REQUIRE_THROWS(ArgumentParser().option_style(OptionStyle::DASH)
-                       .add(Option({"-a="})));
+        .add(Option({"-a="})));
     REQUIRE_NOTHROW(ArgumentParser().option_style(OptionStyle::DASH)
-                        .add(Option({"-a="}).argument("A")));
+        .add(Option({"-a="}).argument("A")));
 
     Argv argv{"test", "-number", "12", "-number", "20", "-number=6", "-number", "15"};
     auto args = argos::ArgumentParser("test")
         .auto_exit(false)
         .option_style(OptionStyle::DASH)
         .add(Option({"-number"})
-             .operation(OptionOperation::APPEND)
-             .argument("NUM"))
+            .operation(OptionOperation::APPEND)
+            .argument("NUM"))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     auto numbers = args.values("-number").as_ints();
@@ -187,8 +186,8 @@ TEST_CASE("Tet slash options")
         .auto_exit(false)
         .option_style(OptionStyle::SLASH)
         .add(Option({"/number"})
-             .operation(OptionOperation::APPEND)
-             .argument("NUM"))
+            .operation(OptionOperation::APPEND)
+            .argument("NUM"))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     auto numbers = args.values("/number").as_longs();
@@ -270,7 +269,7 @@ TEST_CASE("STOP option")
     auto args = argos::ArgumentParser("test")
         .auto_exit(false)
         .add(Argument("arg"))
-        .add(Option({"--version"}).type(OptionType::STOP))
+        .add(Option("--version").type(OptionType::STOP))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::STOP);
     auto option = args.stop_option();
@@ -289,7 +288,7 @@ TEST_CASE("LAST_ARGUMENT option")
         .auto_exit(false)
         .stream(&ss)
         .add(Argument("arg"))
-        .add(Option({"--"}).type(OptionType::LAST_ARGUMENT))
+        .add(Option("--").type(OptionType::LAST_ARGUMENT))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }
@@ -301,8 +300,8 @@ TEST_CASE("LAST_OPTION option")
     auto args = argos::ArgumentParser("test")
         .auto_exit(false)
         .add(Argument("arg"))
-        .add(Option({"--bar"}))
-        .add(Option({"--"}).type(OptionType::LAST_OPTION))
+        .add(Option("--bar"))
+        .add(Option("--").type(OptionType::LAST_OPTION))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     REQUIRE(args.value("--bar").as_bool());
@@ -348,15 +347,15 @@ TEST_CASE("CLEAR option")
     Argv argv{"test", "--bar=12", "--bud", "--bar", "34", "--ben"};
     auto it = argos::ArgumentParser("test")
         .auto_exit(false)
-        .add(Option({"--bar"}).argument("N")
-             .operation(OptionOperation::APPEND)
-             .id(1))
-        .add(Option({"--ben"})
-             .alias("--bar")
-             .operation(OptionOperation::CLEAR)
-             .id(2))
-        .add(Option({"--bud"})
-             .id(3))
+        .add(Option("--bar").argument("N")
+            .operation(OptionOperation::APPEND)
+            .id(1))
+        .add(Option("--ben")
+            .alias("--bar")
+            .operation(OptionOperation::CLEAR)
+            .id(2))
+        .add(Option("--bud")
+            .id(3))
         .make_iterator(argv.size(), argv.data());
     std::unique_ptr<IArgumentView> arg;
     std::string_view value;
@@ -382,11 +381,11 @@ TEST_CASE("Conflicting case-insensitive options")
 {
     argos::ArgumentParser argos("test");
     argos.case_insensitive(true)
-        .add(argos::Option({"-h", "--help"})
-             .type(argos::OptionType::HELP)
-             .help("Show help message."))
-        .add(argos::Option({"-H"})
-             .help("Output height."));
+        .add(argos::Option("-h", "--help")
+            .type(argos::OptionType::HELP)
+            .help("Show help message."))
+        .add(argos::Option("-H")
+            .help("Output height."));
     Argv argv{"test", "--help"};
     REQUIRE_THROWS(argos.parse(argv.size(), argv.data()));
 }
@@ -398,8 +397,8 @@ TEST_CASE("Case-insensitive options")
     auto args = ArgumentParser("test")
         .case_insensitive(true)
         .option_style(OptionStyle::SLASH)
-        .add(argos::Option({"/penny"}))
-        .add(argos::Option({"/lane"}))
+        .add(argos::Option("/penny"))
+        .add(argos::Option("/lane"))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     REQUIRE(args.value("/penny").as_bool());
@@ -416,8 +415,8 @@ TEST_CASE("Abbreviated options")
         .case_insensitive(true)
         .option_style(OptionStyle::SLASH)
         .stream(&ss)
-        .add(argos::Option({"/penny"}))
-        .add(argos::Option({"/pentagram"}));
+        .add(argos::Option("/penny"))
+        .add(argos::Option("/pentagram"));
     SECTION("Valid flag 1")
     {
         Argv argv{"test", "/PenN"};
@@ -525,14 +524,14 @@ TEST_CASE("NONE option")
 {
     using namespace argos;
     REQUIRE_THROWS(ArgumentParser("p").add(
-        Option({"-o"}).alias("f").operation(OptionOperation::NONE)));
+        Option("-o").alias("f").operation(OptionOperation::NONE)));
     REQUIRE_THROWS(ArgumentParser("p").add(
-        Option({"-o"}).alias("f").operation(OptionOperation::NONE)));
+        Option("-o").alias("f").operation(OptionOperation::NONE)));
     auto args = ArgumentParser("test")
         .auto_exit(false)
-        .add(Option({"--f"}).argument("N").operation(OptionOperation::NONE))
-        .add(Option({"--g"}).operation(OptionOperation::NONE))
-        .add(Option({"--h"}))
+        .add(Option("--f").argument("N").operation(OptionOperation::NONE))
+        .add(Option("--g").operation(OptionOperation::NONE))
+        .add(Option("--h"))
         .parse({"--f=12", "--g", "--h"});
     REQUIRE_THROWS(args.value("--f"));
     REQUIRE_THROWS(args.value("--g"));
@@ -726,11 +725,11 @@ TEST_CASE("Test options with initial_value")
     auto parser = ArgumentParser("test")
         .auto_exit(false)
         .add(Option{"-a"}
-             .initial_value("a:b")
-             .argument("A"))
+            .initial_value("a:b")
+            .argument("A"))
         .add(Option{"-b"}
-             .initial_value("o:p")
-             .argument("B")
+            .initial_value("o:p")
+            .argument("B")
             .operation(OptionOperation::APPEND))
         .move();
     SECTION("Defaults")
@@ -785,4 +784,19 @@ TEST_CASE("Check that program name is taken from argv[0]")
     auto help_text = ss.str();
     REQUIRE(help_text.substr(8, 4) == "test");
     REQUIRE(help_text.substr(22, 4) == "test");
+}
+
+TEST_CASE("Check that word-splitting rules are used")
+{
+    using namespace argos;
+    ArgumentParser parser("test");
+    parser.about("Full of weird incomprehensibilities.")
+        .add_word_splitting_rule("in compre hensi bili ties")
+        .generate_help_option(false);
+    std::stringstream ss;
+    parser.stream(&ss);
+    parser.line_width(20);
+    parser.write_help_text();
+    auto help_text = ss.str();
+    REQUIRE(help_text == "USAGE\n  test\n\nFull of weird in-\ncomprehensibilities.\n");
 }
