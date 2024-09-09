@@ -58,10 +58,10 @@ namespace argos
          *
          * This value is created internally in Argos and must not be
          * confused with the customizable value returned by id().
-         * If different options or arguments have the same value name, they
-         * will also have the same value id.
+         * If different options or arguments are aliases for each other,
+         * they will also have the same value id.
          *
-         * @return options with operation OptionOperation::NONE have
+         * @return all options with operation OptionOperation::NONE have
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */

@@ -108,8 +108,8 @@ add_library(Argos
     src/Argos/ParseArguments.cpp
     src/Argos/ParseArguments.hpp
     src/Argos/CommandData.hpp
-    src/Argos/Subcommand.cpp
-    src/Argos/Subcommand.hpp
+    src/Argos/Command.cpp
+    include/Argos/Command.hpp
     src/Argos/CommandData.cpp
 )
 

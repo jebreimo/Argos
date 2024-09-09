@@ -79,6 +79,9 @@ namespace argos
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
+        [[nodiscard]] std::optional<ParsedArguments>
+        subcommand() const;
+
         /**
          * @brief Returns the value of the argument with the given name.
          *
@@ -132,7 +135,7 @@ namespace argos
 
         /**
          * @brief If the parser stopped early because it encountered an option
-         *  of type, this function returns that option.
+         *  of type 'STOP', this function returns that option.
          */
         [[nodiscard]] OptionView stop_option() const;
 

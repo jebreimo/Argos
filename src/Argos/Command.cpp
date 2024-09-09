@@ -5,7 +5,7 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "Subcommand.hpp"
+#include "Argos/Command.hpp"
 #include "CommandData.hpp"
 
 namespace argos {

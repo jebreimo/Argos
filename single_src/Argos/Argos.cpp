@@ -2633,6 +2633,17 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-04.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos {
+} // argos
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-05.
 //
 // This file is distributed under the BSD License.
@@ -4824,64 +4835,6 @@ namespace argos
         return char_len ? n : std::string_view::npos;
     }
 }
-
-//****************************************************************************
-// Copyright © 2024 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2024-09-04.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    struct CommandData;
-
-    class Subcommand
-    {
-    public:
-        explicit Subcommand(std::string name);
-
-        Subcommand(const Subcommand&);
-
-        Subcommand(Subcommand&&) noexcept;
-
-        ~Subcommand();
-
-        Subcommand& operator=(const Subcommand&);
-
-        Subcommand& operator=(Subcommand&&) noexcept;
-
-        Subcommand& add(Argument argument);
-
-        Subcommand& add(Option option);
-
-        Subcommand& add(Subcommand command);
-
-        Subcommand& about(std::string text);
-
-        Subcommand& section(const std::string& name);
-
-        Subcommand& text(TextId textId, std::string text);
-
-        Subcommand& text(TextId textId, std::function<std::string()> callback);
-
-        std::unique_ptr<CommandData> release();
-    private:
-        std::unique_ptr<CommandData> data_;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2024 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2024-09-04.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos {
-} // argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.

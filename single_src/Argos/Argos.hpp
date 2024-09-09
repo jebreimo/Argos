@@ -411,10 +411,10 @@ namespace argos
          *
          * This value is created internally in Argos and must not be
          * confused with the customizable value returned by id().
-         * If different options or arguments have the same value name, they
-         * will also have the same value id.
+         * If different options or arguments are aliases for each other,
+         * they will also have the same value id.
          *
-         * @return options with operation OptionOperation::NONE have
+         * @return all options with operation OptionOperation::NONE have
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
@@ -427,231 +427,6 @@ namespace argos
          * each argument and option.
          */
         [[nodiscard]] virtual ArgumentId argument_id() const = 0;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-28.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-/**
- * @file
- * @brief Defines the ArgumentView class.
- */
-
-namespace argos
-{
-    struct ArgumentData;
-
-    /**
-     * @brief Provides read-only access to an argument definition.
-     */
-    class ArgumentView final : public IArgumentView
-    {
-    public:
-        /**
-         * @private
-         * @brief For internal use only.
-         *
-         * Client code can only receive objects, not construct them.
-         */
-        explicit ArgumentView(const ArgumentData* data);
-
-        /**
-         * @brief Returns the argument's or option's help text.
-         */
-        [[nodiscard]] std::string help() const final;
-
-        /**
-         * @brief Returns the argument's section name.
-         */
-        [[nodiscard]] const std::string& section() const final;
-
-        /**
-         * @brief Returns the argument's value name.
-         */
-        [[nodiscard]] const std::string& value() const final;
-
-        /**
-         * @brief Returns the argument's visibility in
-         *      the help text and error messages.
-         */
-        [[nodiscard]] Visibility visibility() const final;
-
-        /**
-         * @brief Returns the argument's custom id.
-         */
-        [[nodiscard]] int id() const final;
-
-        /**
-         * @brief Returns the numeric id of the value the argument assigns
-         *      or appends to.
-         *
-         * This value is created internally in Argos and must not be
-         * confused with the customizable value returned by id().
-         * If different options or arguments have the same value name, they
-         * will also have the same value id.
-         *
-         * @return options with operation OptionOperation::NONE have
-         *      a value of 0, all other options and arguments have a value
-         *      greater than 0.
-         */
-        [[nodiscard]] ValueId value_id() const final;
-
-        /**
-         * @brief Returns the argument's argument id.
-         *
-         * This id is assigned and used internally to uniquely identify
-         * each argument and option.
-         */
-        [[nodiscard]] ArgumentId argument_id() const final;
-
-        /**
-         * @brief Returns the argument's name.
-         */
-        [[nodiscard]] const std::string& name() const;
-
-        /**
-         * @brief Returns true if the argument is optional (i.e. its minimum
-         *  count is 0).
-         */
-        [[nodiscard]] bool optional() const;
-
-        /**
-         * @brief Returns the argument's minimum and maximum counts.
-         *
-         * Normal arguments have both set to 1.
-         */
-        [[nodiscard]] std::pair<unsigned, unsigned> count() const;
-    private:
-        const ArgumentData* m_argument;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-28.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-#include <vector>
-
-/**
- * @file
- * @brief Defines the OptionView class.
- */
-
-namespace argos
-{
-    struct OptionData;
-
-    /**
-     * @brief Provides read-only access to an option definition.
-     */
-    class OptionView final : public IArgumentView
-    {
-    public:
-        /**
-         * @private
-         * @brief For internal use only.
-         *
-         * Client code can only receive objects, not construct them.
-         */
-        explicit OptionView(const OptionData* data);
-
-        /**
-         * @brief Returns the option's or option's help text.
-         */
-        [[nodiscard]] std::string help() const final;
-
-        /**
-         * @brief Returns the option's section name.
-         */
-        [[nodiscard]] const std::string& section() const final;
-
-        /**
-         * @brief Returns the option's value name.
-         */
-        [[nodiscard]] const std::string& value() const final;
-
-        /**
-         * @brief Returns the option's visibility in
-         *      the help text and error messages.
-         */
-        [[nodiscard]] Visibility visibility() const final;
-
-        /**
-         * @brief Returns the option's custom id.
-         */
-        [[nodiscard]] int id() const final;
-
-        /**
-         * @brief Returns the numeric id of the value the argument assigns
-         *      or appends to.
-         *
-         * This value is created internally in Argos and must not be
-         * confused with the customizable value returned by id().
-         * If different options or arguments have the same value name, they
-         * will also have the same value id.
-         *
-         * @return options with operation OptionOperation::NONE have
-         *      a value of 0, all other options and arguments have a value
-         *      greater than 0.
-         */
-        [[nodiscard]] ValueId value_id() const final;
-
-        /**
-         * @brief Returns the option's argument id.
-         *
-         * This id is assigned and used internally to uniquely identify
-         * each argument and option.
-         */
-        [[nodiscard]] ArgumentId argument_id() const final;
-
-        /**
-         * @brief Returns the option's operation.
-         */
-        [[nodiscard]] OptionOperation operation() const;
-
-        /**
-         * @brief Returns the option's flags.
-         */
-        [[nodiscard]] const std::vector<std::string>& flags() const;
-
-        /**
-         * @brief Returns the option's argument.
-         */
-        [[nodiscard]] const std::string& argument() const;
-
-        /**
-         * @brief Returns the option's initial value.
-         */
-        [[nodiscard]] const std::string& initial_value() const;
-
-        /**
-         * @brief Returns the option's constant.
-         *
-         * @note The constant is stored as a string internally, even if the
-         *  option was assigned an integer or boolean value.
-         */
-        [[nodiscard]] const std::string& constant() const;
-
-        /**
-         * @brief Returns the option's type.
-         */
-        [[nodiscard]] OptionType type() const;
-
-        /**
-         * @brief Returns false if the option is mandatory.
-         */
-        [[nodiscard]] bool optional() const;
-    private:
-        const OptionData* m_option;
     };
 }
 
@@ -942,6 +717,7 @@ namespace argos
 //****************************************************************************
 #include <iterator>
 #include <string_view>
+#include <vector>
 
 /**
  * @file
@@ -1321,6 +1097,521 @@ namespace argos
         std::vector<std::pair<std::string_view, ArgumentId>> m_values;
         std::shared_ptr<ParsedArgumentsImpl> m_args;
         ValueId m_value_id;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-28.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+/**
+ * @file
+ * @brief Defines the ArgumentView class.
+ */
+
+namespace argos
+{
+    struct ArgumentData;
+
+    /**
+     * @brief Provides read-only access to an argument definition.
+     */
+    class ArgumentView final : public IArgumentView
+    {
+    public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
+        explicit ArgumentView(const ArgumentData* data);
+
+        /**
+         * @brief Returns the argument's or option's help text.
+         */
+        [[nodiscard]] std::string help() const final;
+
+        /**
+         * @brief Returns the argument's section name.
+         */
+        [[nodiscard]] const std::string& section() const final;
+
+        /**
+         * @brief Returns the argument's value name.
+         */
+        [[nodiscard]] const std::string& value() const final;
+
+        /**
+         * @brief Returns the argument's visibility in
+         *      the help text and error messages.
+         */
+        [[nodiscard]] Visibility visibility() const final;
+
+        /**
+         * @brief Returns the argument's custom id.
+         */
+        [[nodiscard]] int id() const final;
+
+        /**
+         * @brief Returns the numeric id of the value the argument assigns
+         *      or appends to.
+         *
+         * This value is created internally in Argos and must not be
+         * confused with the customizable value returned by id().
+         * If different options or arguments have the same value name, they
+         * will also have the same value id.
+         *
+         * @return options with operation OptionOperation::NONE have
+         *      a value of 0, all other options and arguments have a value
+         *      greater than 0.
+         */
+        [[nodiscard]] ValueId value_id() const final;
+
+        /**
+         * @brief Returns the argument's argument id.
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
+        [[nodiscard]] ArgumentId argument_id() const final;
+
+        /**
+         * @brief Returns the argument's name.
+         */
+        [[nodiscard]] const std::string& name() const;
+
+        /**
+         * @brief Returns true if the argument is optional (i.e. its minimum
+         *  count is 0).
+         */
+        [[nodiscard]] bool optional() const;
+
+        /**
+         * @brief Returns the argument's minimum and maximum counts.
+         *
+         * Normal arguments have both set to 1.
+         */
+        [[nodiscard]] std::pair<unsigned, unsigned> count() const;
+    private:
+        const ArgumentData* m_argument;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-28.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+/**
+ * @file
+ * @brief Defines the OptionView class.
+ */
+
+namespace argos
+{
+    struct OptionData;
+
+    /**
+     * @brief Provides read-only access to an option definition.
+     */
+    class OptionView final : public IArgumentView
+    {
+    public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
+        explicit OptionView(const OptionData* data);
+
+        /**
+         * @brief Returns the option's or option's help text.
+         */
+        [[nodiscard]] std::string help() const final;
+
+        /**
+         * @brief Returns the option's section name.
+         */
+        [[nodiscard]] const std::string& section() const final;
+
+        /**
+         * @brief Returns the option's value name.
+         */
+        [[nodiscard]] const std::string& value() const final;
+
+        /**
+         * @brief Returns the option's visibility in
+         *      the help text and error messages.
+         */
+        [[nodiscard]] Visibility visibility() const final;
+
+        /**
+         * @brief Returns the option's custom id.
+         */
+        [[nodiscard]] int id() const final;
+
+        /**
+         * @brief Returns the numeric id of the value the argument assigns
+         *      or appends to.
+         *
+         * This value is created internally in Argos and must not be
+         * confused with the customizable value returned by id().
+         * If different options or arguments have the same value name, they
+         * will also have the same value id.
+         *
+         * @return options with operation OptionOperation::NONE have
+         *      a value of 0, all other options and arguments have a value
+         *      greater than 0.
+         */
+        [[nodiscard]] ValueId value_id() const final;
+
+        /**
+         * @brief Returns the option's argument id.
+         *
+         * This id is assigned and used internally to uniquely identify
+         * each argument and option.
+         */
+        [[nodiscard]] ArgumentId argument_id() const final;
+
+        /**
+         * @brief Returns the option's operation.
+         */
+        [[nodiscard]] OptionOperation operation() const;
+
+        /**
+         * @brief Returns the option's flags.
+         */
+        [[nodiscard]] const std::vector<std::string>& flags() const;
+
+        /**
+         * @brief Returns the option's argument.
+         */
+        [[nodiscard]] const std::string& argument() const;
+
+        /**
+         * @brief Returns the option's initial value.
+         */
+        [[nodiscard]] const std::string& initial_value() const;
+
+        /**
+         * @brief Returns the option's constant.
+         *
+         * @note The constant is stored as a string internally, even if the
+         *  option was assigned an integer or boolean value.
+         */
+        [[nodiscard]] const std::string& constant() const;
+
+        /**
+         * @brief Returns the option's type.
+         */
+        [[nodiscard]] OptionType type() const;
+
+        /**
+         * @brief Returns false if the option is mandatory.
+         */
+        [[nodiscard]] bool optional() const;
+    private:
+        const OptionData* m_option;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-26.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+#include <iosfwd>
+
+/**
+ * @file
+ * @brief Defines the ParsedArguments class.
+ */
+
+namespace argos
+{
+    class ParsedArgumentsImpl;
+
+    /**
+     * @brief The result of the ArgumentParser. Gives access to all argument
+     *      and option values.
+     *
+     * Instances of this class is returned by ArgumentParser::parse and
+     * ArgumentIterator::parsed_arguments.
+     */
+    class ParsedArguments
+    {
+    public:
+        ParsedArguments();
+
+        /**
+         * @private
+         */
+        explicit ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
+
+        /**
+         * @private
+         */
+        ParsedArguments(const ParsedArguments&) = delete;
+
+        /**
+         * @private
+         */
+        ParsedArguments(ParsedArguments&&) noexcept;
+
+        /**
+         * @private
+         */
+        ~ParsedArguments();
+
+        /**
+         * @private
+         */
+        ParsedArguments& operator=(const ParsedArguments&) = delete;
+
+        /**
+         * @private
+         */
+        ParsedArguments& operator=(ParsedArguments&&) noexcept;
+
+        /**
+         * @brief Returns true if the argument or option named @a name
+         *  was given on command line.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
+        [[nodiscard]] bool has(const std::string& name) const;
+
+        /**
+         * @brief Returns true if the given argument instance was given a
+         *  value on command line.
+         */
+        [[nodiscard]] bool has(const IArgumentView& arg) const;
+
+        [[nodiscard]] std::optional<ParsedArguments>
+        subcommand() const;
+
+        /**
+         * @brief Returns the value of the argument with the given name.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
+        [[nodiscard]] ArgumentValue value(const std::string& name) const;
+
+        /**
+         * @brief Returns the value of the given argument.
+         */
+        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
+
+        /**
+         * @brief Returns the values of the argument with the given name.
+         *
+         * @throw ArgosException if @a name doesn't match the name of any
+         *  argument or option.
+         */
+        [[nodiscard]] ArgumentValues values(const std::string& name) const;
+
+        /**
+         * @brief Returns the value of the given argument.
+         */
+        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
+
+        /**
+         * @brief Returns all argument definitions that were registered with
+         *  ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined arguments along with their given values.
+         */
+        [[nodiscard]]
+        std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
+
+        /**
+         * @brief Returns all option definitions that were registered with
+         *  ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined options along with their given values.
+         */
+        [[nodiscard]]
+        std::vector<std::unique_ptr<OptionView>> all_options() const;
+
+        /**
+         * @brief Returns the parser result code.
+         */
+        [[nodiscard]] ParserResultCode result_code() const;
+
+        /**
+         * @brief If the parser stopped early because it encountered an option
+         *  of type 'STOP', this function returns that option.
+         */
+        [[nodiscard]] OptionView stop_option() const;
+
+        /**
+         * @brief Returns the command line arguments that were ignored by the
+         *  argument parser.
+         *
+         * This function will always return an empty vector unless at least
+         * one of the following is true:
+         *
+         * - ArgumentParser::ignore_undefined_arguments is true.
+         * - ArgumentParser::ignore_undefined_options is true.
+         * - ArgumentParser::auto_exit is false and there are options with type
+         *   set to OptionType::STOP.
+         */
+        [[nodiscard]]
+        const std::vector<std::string>& unprocessed_arguments() const;
+
+        /**
+         * @brief Removes parsed arguments and options from @a argv and
+         *  decrements @a argc correspondingly.
+         *
+         * The first value in @a argv is assumed to be the program name and
+         * is ignored, the remainder should be identical to the command line
+         * given to ArgumentParser::parse or ArgumentParser::make_iterator.
+         *
+         * @note No memory is freed, the function only rearranges the pointers
+         *  @a in argv.
+         */
+        void filter_parsed_arguments(int& argc, char**& argv) const;
+
+        /**
+         * @brief Print @a msg along with a brief help text and exit.
+         *
+         * @throw ArgosException if ArgumentParser::auto_exit is false.
+         */
+        [[noreturn]]
+        void error(const std::string& msg) const;
+    private:
+        std::shared_ptr<ParsedArgumentsImpl> m_impl;
+    };
+
+    /**
+     * @brief Write a list of all arguments and options along with their
+     *  values to stdout.
+     *
+     * This function is intended for testing and debugging.
+     */
+    void print(const ParsedArguments& args);
+
+    /**
+     * @brief Write a list of all arguments and options along with their
+     *  values to @a stream.
+     *
+     * This function is intended for testing and debugging.
+     */
+    void print(const ParsedArguments& parsed_args, std::ostream& stream);
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-26.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+/**
+ * @file
+ * @brief Defines the ArgumentIterator class.
+ */
+namespace argos
+{
+    class ArgumentIteratorImpl;
+    struct ParserData;
+
+    /**
+     * @brief Iterator class created by ArgumentParser that lets client code
+     *      process one argument or option at a time.
+     */
+    class ArgumentIterator
+    {
+    public:
+        /**
+         * @private
+         * @brief Constructs a new instance of ArgumentIterator.
+         *
+         * Client code must use ArgumentParser::make_iterator().
+         */
+        ArgumentIterator(std::vector<std::string_view> args,
+                         std::shared_ptr<ParserData> parser_data);
+
+        /**
+         * @private
+         */
+        ArgumentIterator(const ArgumentIterator&) = delete;
+
+        /**
+         * @brief Moves the innards of the old object to the new one.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
+        ArgumentIterator(ArgumentIterator&&) noexcept;
+
+        ~ArgumentIterator();
+
+        /**
+         * @private
+         */
+        ArgumentIterator& operator=(const ArgumentIterator&) = delete;
+
+        /**
+         * @brief Moves the innards of the object on the right hand side
+         *      to the one on the left hand side.
+         *
+         * Any attempt to use the old object will result in an exception.
+         */
+        ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
+
+        /**
+         * @brief Process the next argument or option and return the result.
+         *
+         * ParsedArguments has been updated when the function returns.
+         *
+         * @param arg The definition (ArgumentView or OptionView) of the
+         *      processed argument or option. If ignore_undefined_arguments
+         *      or ignore_undefined_options is true, this pointer can be empty.
+         * @param value If @a arg is an argument then this is the argument's
+         *      value. If @a arg is an option that take an argument then this
+         *      is the option's value. If @a arg is empty (i.e. this is an
+         *      undefined argument or option) then this is the unrecognized
+         *      argument value or option flag. Otherwise @a value is empty.
+         * @return true If an argument or option was processed successfully,
+         *      false if there were no more arguments or an error was
+         *      encountered.
+         */
+        bool next(std::unique_ptr<IArgumentView>& arg,
+                  std::string_view& value);
+
+        /**
+         * @brief Gives access to all the arguments and options processed
+         *      so far.
+         *
+         * The returned object is "live" in the sense that it is updated
+         * behind the scenes each time next() is called. It is therefore
+         * sufficient to only call this function once and keep a copy of
+         * the returned object.
+         */
+        [[nodiscard]]
+        ParsedArguments parsed_arguments() const;
+    private:
+        ArgumentIteratorImpl& impl();
+
+        [[nodiscard]] const ArgumentIteratorImpl& impl() const;
+
+        std::unique_ptr<ArgumentIteratorImpl> m_impl;
     };
 }
 
@@ -1813,294 +2104,6 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-26.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-#include <iosfwd>
-
-/**
- * @file
- * @brief Defines the ParsedArguments class.
- */
-
-namespace argos
-{
-    class ParsedArgumentsImpl;
-
-    /**
-     * @brief The result of the ArgumentParser. Gives access to all argument
-     *      and option values.
-     *
-     * Instances of this class is returned by ArgumentParser::parse and
-     * ArgumentIterator::parsed_arguments.
-     */
-    class ParsedArguments
-    {
-    public:
-        ParsedArguments();
-
-        /**
-         * @private
-         */
-        explicit ParsedArguments(std::shared_ptr<ParsedArgumentsImpl> impl);
-
-        /**
-         * @private
-         */
-        ParsedArguments(const ParsedArguments&) = delete;
-
-        /**
-         * @private
-         */
-        ParsedArguments(ParsedArguments&&) noexcept;
-
-        /**
-         * @private
-         */
-        ~ParsedArguments();
-
-        /**
-         * @private
-         */
-        ParsedArguments& operator=(const ParsedArguments&) = delete;
-
-        /**
-         * @private
-         */
-        ParsedArguments& operator=(ParsedArguments&&) noexcept;
-
-        /**
-         * @brief Returns true if the argument or option named @a name
-         *  was given on command line.
-         *
-         * @throw ArgosException if @a name doesn't match the name of any
-         *  argument or option.
-         */
-        [[nodiscard]] bool has(const std::string& name) const;
-
-        /**
-         * @brief Returns true if the given argument instance was given a
-         *  value on command line.
-         */
-        [[nodiscard]] bool has(const IArgumentView& arg) const;
-
-        /**
-         * @brief Returns the value of the argument with the given name.
-         *
-         * @throw ArgosException if @a name doesn't match the name of any
-         *  argument or option.
-         */
-        [[nodiscard]] ArgumentValue value(const std::string& name) const;
-
-        /**
-         * @brief Returns the value of the given argument.
-         */
-        [[nodiscard]] ArgumentValue value(const IArgumentView& arg) const;
-
-        /**
-         * @brief Returns the values of the argument with the given name.
-         *
-         * @throw ArgosException if @a name doesn't match the name of any
-         *  argument or option.
-         */
-        [[nodiscard]] ArgumentValues values(const std::string& name) const;
-
-        /**
-         * @brief Returns the value of the given argument.
-         */
-        [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
-
-        /**
-         * @brief Returns all argument definitions that were registered with
-         *  ArgumentParser.
-         *
-         * Intended for testing and debugging, for instance to list all
-         * defined arguments along with their given values.
-         */
-        [[nodiscard]]
-        std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
-
-        /**
-         * @brief Returns all option definitions that were registered with
-         *  ArgumentParser.
-         *
-         * Intended for testing and debugging, for instance to list all
-         * defined options along with their given values.
-         */
-        [[nodiscard]]
-        std::vector<std::unique_ptr<OptionView>> all_options() const;
-
-        /**
-         * @brief Returns the parser result code.
-         */
-        [[nodiscard]] ParserResultCode result_code() const;
-
-        /**
-         * @brief If the parser stopped early because it encountered an option
-         *  of type, this function returns that option.
-         */
-        [[nodiscard]] OptionView stop_option() const;
-
-        /**
-         * @brief Returns the command line arguments that were ignored by the
-         *  argument parser.
-         *
-         * This function will always return an empty vector unless at least
-         * one of the following is true:
-         *
-         * - ArgumentParser::ignore_undefined_arguments is true.
-         * - ArgumentParser::ignore_undefined_options is true.
-         * - ArgumentParser::auto_exit is false and there are options with type
-         *   set to OptionType::STOP.
-         */
-        [[nodiscard]]
-        const std::vector<std::string>& unprocessed_arguments() const;
-
-        /**
-         * @brief Removes parsed arguments and options from @a argv and
-         *  decrements @a argc correspondingly.
-         *
-         * The first value in @a argv is assumed to be the program name and
-         * is ignored, the remainder should be identical to the command line
-         * given to ArgumentParser::parse or ArgumentParser::make_iterator.
-         *
-         * @note No memory is freed, the function only rearranges the pointers
-         *  @a in argv.
-         */
-        void filter_parsed_arguments(int& argc, char**& argv) const;
-
-        /**
-         * @brief Print @a msg along with a brief help text and exit.
-         *
-         * @throw ArgosException if ArgumentParser::auto_exit is false.
-         */
-        [[noreturn]]
-        void error(const std::string& msg) const;
-    private:
-        std::shared_ptr<ParsedArgumentsImpl> m_impl;
-    };
-
-    /**
-     * @brief Write a list of all arguments and options along with their
-     *  values to stdout.
-     *
-     * This function is intended for testing and debugging.
-     */
-    void print(const ParsedArguments& args);
-
-    /**
-     * @brief Write a list of all arguments and options along with their
-     *  values to @a stream.
-     *
-     * This function is intended for testing and debugging.
-     */
-    void print(const ParsedArguments& parsed_args, std::ostream& stream);
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-26.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-/**
- * @file
- * @brief Defines the ArgumentIterator class.
- */
-namespace argos
-{
-    class ArgumentIteratorImpl;
-    struct ParserData;
-
-    /**
-     * @brief Iterator class created by ArgumentParser that lets client code
-     *      process one argument or option at a time.
-     */
-    class ArgumentIterator
-    {
-    public:
-        /**
-         * @private
-         * @brief Constructs a new instance of ArgumentIterator.
-         *
-         * Client code must use ArgumentParser::make_iterator().
-         */
-        ArgumentIterator(std::vector<std::string_view> args,
-                         std::shared_ptr<ParserData> parser_data);
-
-        /**
-         * @private
-         */
-        ArgumentIterator(const ArgumentIterator&) = delete;
-
-        /**
-         * @brief Moves the innards of the old object to the new one.
-         *
-         * Any attempt to use the old object will result in an exception.
-         */
-        ArgumentIterator(ArgumentIterator&&) noexcept;
-
-        ~ArgumentIterator();
-
-        /**
-         * @private
-         */
-        ArgumentIterator& operator=(const ArgumentIterator&) = delete;
-
-        /**
-         * @brief Moves the innards of the object on the right hand side
-         *      to the one on the left hand side.
-         *
-         * Any attempt to use the old object will result in an exception.
-         */
-        ArgumentIterator& operator=(ArgumentIterator&&) noexcept;
-
-        /**
-         * @brief Process the next argument or option and return the result.
-         *
-         * ParsedArguments has been updated when the function returns.
-         *
-         * @param arg The definition (ArgumentView or OptionView) of the
-         *      processed argument or option. If ignore_undefined_arguments
-         *      or ignore_undefined_options is true, this pointer can be empty.
-         * @param value If @a arg is an argument then this is the argument's
-         *      value. If @a arg is an option that take an argument then this
-         *      is the option's value. If @a arg is empty (i.e. this is an
-         *      undefined argument or option) then this is the unrecognized
-         *      argument value or option flag. Otherwise @a value is empty.
-         * @return true If an argument or option was processed successfully,
-         *      false if there were no more arguments or an error was
-         *      encountered.
-         */
-        bool next(std::unique_ptr<IArgumentView>& arg,
-                  std::string_view& value);
-
-        /**
-         * @brief Gives access to all the arguments and options processed
-         *      so far.
-         *
-         * The returned object is "live" in the sense that it is updated
-         * behind the scenes each time next() is called. It is therefore
-         * sufficient to only call this function once and keep a copy of
-         * the returned object.
-         */
-        [[nodiscard]]
-        ParsedArguments parsed_arguments() const;
-    private:
-        ArgumentIteratorImpl& impl();
-
-        [[nodiscard]] const ArgumentIteratorImpl& impl() const;
-
-        std::unique_ptr<ArgumentIteratorImpl> m_impl;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-10.
 //
 // This file is distributed under the BSD License.
@@ -2445,6 +2448,53 @@ namespace argos
      * @brief A convenient short alias for Option.
      */
     using Opt = Option;
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-04.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    struct CommandData;
+
+    class Command
+    {
+    public:
+        explicit Command(std::string name);
+
+        Command(const Command&);
+
+        Command(Command&&) noexcept;
+
+        ~Command();
+
+        Command& operator=(const Command&);
+
+        Command& operator=(Command&&) noexcept;
+
+        Command& add(Argument argument);
+
+        Command& add(Option option);
+
+        Command& add(Command command);
+
+        Command& about(std::string text);
+
+        Command& section(const std::string& name);
+
+        Command& text(TextId textId, std::string text);
+
+        Command& text(TextId textId, std::function<std::string()> callback);
+
+        std::unique_ptr<CommandData> release();
+    private:
+        std::unique_ptr<CommandData> data_;
+    };
 }
 
 //****************************************************************************

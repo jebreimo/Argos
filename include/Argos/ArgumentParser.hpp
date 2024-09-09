@@ -8,9 +8,8 @@
 #pragma once
 #include <iosfwd>
 #include <memory>
-#include "Argument.hpp"
 #include "ArgumentIterator.hpp"
-#include "Option.hpp"
+#include "Command.hpp"
 
 /**
  * @file
