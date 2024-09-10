@@ -29,13 +29,5 @@ int main(int argc, char* argv[])
                 .help("The number of times to repeat the congratulation.")))
         .parse(argc, argv);
 
-    int n = args.value("--number").as_int(1);
-    for (int i = 0; i < n; ++i)
-    {
-        std::cout << "Hello "
-                  << args.value("NAME").as_string("world")
-                  << "!\n";
-    }
-
     return 0;
 }

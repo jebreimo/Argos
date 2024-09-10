@@ -2493,6 +2493,8 @@ namespace argos
 
         std::unique_ptr<CommandData> release();
     private:
+        void check_command() const;
+
         std::unique_ptr<CommandData> data_;
     };
 }
@@ -2586,6 +2588,8 @@ namespace argos
          *        constant.
          */
         ArgumentParser& add(Option option);
+
+        ArgumentParser& add(Command command);
 
         /**
          * @brief Parses the arguments and options in argv.

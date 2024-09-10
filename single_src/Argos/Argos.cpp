@@ -225,8 +225,7 @@ namespace argos
     void Argument::check_argument() const
     {
         if (!m_argument)
-            ARGOS_THROW("Cannot use Argument instance after"
-                        " release() has been called.");
+            ARGOS_THROW("Argument has been moved.");
     }
 }
 
@@ -487,10 +486,14 @@ namespace argos
 
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
-        std::vector<std::unique_ptr<CommandData>> subcommands;
+        std::vector<std::unique_ptr<CommandData>> commands;
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
+        /**
+         * The section the command is listed in in the parent command's help.
+         */
+        std::string section;
     };
 }
 
@@ -1690,6 +1693,19 @@ namespace argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::add(Command command)
+    {
+        check_data();
+
+        auto cmd = command.release();
+        if (!cmd)
+            ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (cmd->section.empty())
+            cmd->section = m_data->command.current_section;
+        m_data->command.commands.push_back(std::move(cmd));
+        return *this;
+    }
+
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (argc <= 0)
@@ -2639,8 +2655,103 @@ namespace argos
 // License text is included with the source distribution.
 //****************************************************************************
 
-namespace argos {
-} // argos
+namespace argos
+{
+    Command::Command(std::string name)
+        : data_(std::make_unique<CommandData>())
+    {
+        data_->name = std::move(name);
+    }
+
+    Command::Command(const Command& rhs)
+        : data_(rhs.data_ ? std::make_unique<CommandData>(*rhs.data_) : nullptr)
+    {
+    }
+
+    Command::Command(Command&& rhs) noexcept
+        : data_(std::move(rhs.data_))
+    {
+    }
+
+    Command::~Command() = default;
+
+    Command& Command::operator=(const Command& rhs)
+    {
+        if (this != &rhs)
+        {
+            data_ = rhs.data_
+                        ? std::make_unique<CommandData>(*rhs.data_)
+                        : nullptr;
+        }
+        return *this;
+    }
+
+    Command& Command::operator=(Command&& rhs) noexcept
+    {
+        data_ = std::move(rhs.data_);
+        return *this;
+    }
+
+    Command& Command::add(Argument argument)
+    {
+        check_command();
+        data_->arguments.push_back(argument.release());
+        return *this;
+    }
+
+    Command& Command::add(Option option)
+    {
+        check_command();
+        data_->options.push_back(option.release());
+        return *this;
+    }
+
+    Command& Command::add(Command command)
+    {
+        check_command();
+        data_->commands.push_back(command.release());
+        return *this;
+    }
+
+    Command& Command::about(std::string text)
+    {
+        check_command();
+        data_->texts[TextId::ABOUT] = std::move(text);
+        return *this;
+    }
+
+    Command& Command::section(const std::string& name)
+    {
+        check_command();
+        data_->current_section = name;
+        return *this;
+    }
+
+    Command& Command::text(TextId textId, std::string text)
+    {
+        check_command();
+        data_->texts[textId] = std::move(text);
+        return *this;
+    }
+
+    Command& Command::text(TextId textId, std::function<std::string()> callback)
+    {
+        check_command();
+        data_->texts[textId] = std::move(callback);
+        return *this;
+    }
+
+    std::unique_ptr<CommandData> Command::release()
+    {
+        return std::move(data_);
+    }
+
+    void Command::check_command() const
+    {
+        if (!data_)
+            ARGOS_THROW("Command has been moved.");
+    }
+}
 
 //****************************************************************************
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
@@ -2670,7 +2781,7 @@ namespace argos
     CommandData::CommandData(CommandData&& rhs) noexcept
         : arguments(std::move(rhs.arguments)),
           options(std::move(rhs.options)),
-          subcommands(std::move(rhs.subcommands)),
+          commands(std::move(rhs.commands)),
           name(std::move(rhs.name)),
           texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section))
@@ -2696,10 +2807,10 @@ namespace argos
         for (const auto& o : rhs.options)
             options.push_back(std::make_unique<OptionData>(*o));
 
-        subcommands.clear();
-        subcommands.reserve(rhs.subcommands.size());
-        for (const auto& c : rhs.subcommands)
-            subcommands.push_back(std::make_unique<CommandData>(*c));
+        commands.clear();
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
 
         return *this;
     }
@@ -2714,7 +2825,7 @@ namespace argos
         current_section = std::move(rhs.current_section);
         arguments = std::move(rhs.arguments);
         options = std::move(rhs.options);
-        subcommands = std::move(rhs.subcommands);
+        commands = std::move(rhs.commands);
         return *this;
     }
 }

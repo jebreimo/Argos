@@ -93,6 +93,8 @@ namespace argos
          */
         ArgumentParser& add(Option option);
 
+        ArgumentParser& add(Command command);
+
         /**
          * @brief Parses the arguments and options in argv.
          *

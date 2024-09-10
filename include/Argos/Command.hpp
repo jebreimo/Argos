@@ -44,6 +44,8 @@ namespace argos
 
         std::unique_ptr<CommandData> release();
     private:
+        void check_command() const;
+
         std::unique_ptr<CommandData> data_;
     };
 }

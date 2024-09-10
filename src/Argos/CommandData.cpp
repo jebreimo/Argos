@@ -27,7 +27,7 @@ namespace argos
     CommandData::CommandData(CommandData&& rhs) noexcept
         : arguments(std::move(rhs.arguments)),
           options(std::move(rhs.options)),
-          subcommands(std::move(rhs.subcommands)),
+          commands(std::move(rhs.commands)),
           name(std::move(rhs.name)),
           texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section))
@@ -53,10 +53,10 @@ namespace argos
         for (const auto& o : rhs.options)
             options.push_back(std::make_unique<OptionData>(*o));
 
-        subcommands.clear();
-        subcommands.reserve(rhs.subcommands.size());
-        for (const auto& c : rhs.subcommands)
-            subcommands.push_back(std::make_unique<CommandData>(*c));
+        commands.clear();
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
 
         return *this;
     }
@@ -71,7 +71,7 @@ namespace argos
         current_section = std::move(rhs.current_section);
         arguments = std::move(rhs.arguments);
         options = std::move(rhs.options);
-        subcommands = std::move(rhs.subcommands);
+        commands = std::move(rhs.commands);
         return *this;
     }
 }

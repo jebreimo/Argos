@@ -29,9 +29,13 @@ namespace argos
 
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
-        std::vector<std::unique_ptr<CommandData>> subcommands;
+        std::vector<std::unique_ptr<CommandData>> commands;
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
+        /**
+         * The section the command is listed in in the parent command's help.
+         */
+        std::string section;
     };
 }

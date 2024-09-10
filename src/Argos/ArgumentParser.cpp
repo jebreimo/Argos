@@ -128,6 +128,19 @@ namespace argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::add(Command command)
+    {
+        check_data();
+
+        auto cmd = command.release();
+        if (!cmd)
+            ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (cmd->section.empty())
+            cmd->section = m_data->command.current_section;
+        m_data->command.commands.push_back(std::move(cmd));
+        return *this;
+    }
+
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (argc <= 0)

@@ -153,7 +153,6 @@ namespace argos
     void Argument::check_argument() const
     {
         if (!m_argument)
-            ARGOS_THROW("Cannot use Argument instance after"
-                        " release() has been called.");
+            ARGOS_THROW("Argument has been moved.");
     }
 }
