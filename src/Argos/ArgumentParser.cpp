@@ -388,7 +388,7 @@ namespace argos
     ArgumentParser& ArgumentParser::version(const std::string& version)
     {
         check_data();
-        m_data->help_settings.version = version;
+        m_data->version = version;
         return *this;
     }
 
@@ -410,7 +410,7 @@ namespace argos
     {
         check_data();
         const auto data = make_copy(*m_data);
-        add_missing_options(*data);
+        finish_initialization(*data);
         argos::write_help_text(*data, data->command);
     }
 

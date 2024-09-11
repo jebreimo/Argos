@@ -17,6 +17,4 @@ namespace argos
     ArgumentIterator
     make_argument_iterator(std::vector<std::string_view> args,
                            const std::shared_ptr<ParserData>& data);
-
-    void add_missing_options(ParserData& data);
 }

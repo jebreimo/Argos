@@ -486,11 +486,6 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
-        /**
-         * Complete the definition of this command and any subcommands.
-         */
-        void complete_definition(const ParserData& data);
-
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
@@ -503,6 +498,18 @@ namespace argos
          */
         std::string section;
     };
+
+    struct ParserSettings;
+
+    /**
+     * Finish the initialization of this command and any subcommands, and
+     * make them ready for parsing arguments.
+     */
+    void finish_initialization(CommandData& cmd, const ParserData& data);
+
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings);
 }
 
 //****************************************************************************
@@ -704,7 +711,6 @@ namespace argos
 
     struct HelpSettings
     {
-        std::string version;
         std::ostream* output_stream = nullptr;
         unsigned line_width = 0;
         std::vector<std::string> word_split_rules;
@@ -715,7 +721,10 @@ namespace argos
         CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
+        std::string version;
     };
+
+    void finish_initialization(ParserData& data);
 }
 
 //****************************************************************************
@@ -1583,8 +1592,6 @@ namespace argos
     ArgumentIterator
     make_argument_iterator(std::vector<std::string_view> args,
                            const std::shared_ptr<ParserData>& data);
-
-    void add_missing_options(ParserData& data);
 }
 
 //****************************************************************************
@@ -1969,7 +1976,7 @@ namespace argos
     ArgumentParser& ArgumentParser::version(const std::string& version)
     {
         check_data();
-        m_data->help_settings.version = version;
+        m_data->version = version;
         return *this;
     }
 
@@ -1991,7 +1998,7 @@ namespace argos
     {
         check_data();
         const auto data = make_copy(*m_data);
-        add_missing_options(*data);
+        finish_initialization(*data);
         argos::write_help_text(*data, data->command);
     }
 
@@ -2881,7 +2888,7 @@ namespace argos
             }
         }
 
-        inline bool has_help_option(const CommandData& cmd)
+        bool has_help_option(const CommandData& cmd)
         {
             for (const auto& o: cmd.options)
             {
@@ -2891,44 +2898,29 @@ namespace argos
             return false;
         }
 
-        inline bool has_flag(const CommandData& data,
-                             std::string_view flag,
-                             bool case_insensitive)
+        void add_help_option(CommandData& cmd, const ParserSettings& settings)
         {
-            for (auto& o: data.options)
-            {
-                for (auto& f: o->flags)
-                {
-                    if (are_equal(f, flag, case_insensitive))
-                        return true;
-                }
-            }
-            return false;
-        }
-
-        void add_help_option(CommandData& cmd, const ParserData& data)
-        {
-            if (!data.parser_settings.generate_help_option)
+            if (!settings.generate_help_option)
                 return;
             if (has_help_option(cmd))
                 return;
             std::vector<std::string> flags;
-            switch (data.parser_settings.option_style)
+            switch (settings.option_style)
             {
             case OptionStyle::STANDARD:
-                if (!has_flag(cmd, "-h", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "-h", settings))
                     flags.emplace_back("-h");
-                if (!has_flag(cmd, "--help", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "--help", settings))
                     flags.emplace_back("--help");
                 break;
             case OptionStyle::SLASH:
-                if (!has_flag(cmd, "/?", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "/?", settings))
                     flags.emplace_back("/?");
                 break;
             case OptionStyle::DASH:
-                if (!has_flag(cmd, "-h", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "-h", settings))
                     flags.emplace_back("-h");
-                else if (!has_flag(cmd, "-help", data.parser_settings.case_insensitive))
+                else if (!has_flag(cmd, "-help", settings))
                     flags.emplace_back("-help");
                 break;
             }
@@ -2941,17 +2933,38 @@ namespace argos
                 .constant("1").release();
             opt->argument_id = ArgumentId(cmd.options.size()
                                           + cmd.arguments.size() + 1);
-            opt->section = data.command.current_section;
+            opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
+        }
+
+        void add_missing_options(CommandData& cmd,
+                                 const ParserSettings& settings)
+        {
+            add_help_option(cmd, settings);
         }
     }
 
-    void CommandData::complete_definition(const ParserData& data)
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings)
     {
-        update_require_command(*this);
-        add_help_option(*this, data);
-        for (auto& c: commands)
-            c->complete_definition(data);
+        for (auto& o: cmd.options)
+        {
+            for (auto& f: o->flags)
+            {
+                if (are_equal(f, flag, settings.case_insensitive))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    void finish_initialization(CommandData& cmd, const ParserData& data)
+    {
+        update_require_command(cmd);
+        add_help_option(cmd, data.parser_settings);
+        for (auto& c: cmd.commands)
+            finish_initialization(*c, data);
     }
 }
 
@@ -3852,193 +3865,10 @@ namespace argos
 
 namespace argos
 {
-    namespace
-    {
-        void set_value_ids(const ParserData& data)
-        {
-            struct InternalIdMaker
-            {
-                std::map<std::string_view, ValueId> explicit_ids;
-                ValueId n = ValueId(0);
-
-                std::optional<ValueId> find_value_id(std::string_view name)
-                {
-                    const auto it = explicit_ids.find(name);
-                    if (it == explicit_ids.end())
-                        return {};
-                    return it->second;
-                }
-
-                ValueId make_value_id(std::string_view name)
-                {
-                    if (const auto id = find_value_id(name))
-                        return *id;
-                    n = ValueId(n + 1);
-                    explicit_ids.emplace(name, n);
-                    return n;
-                }
-
-                ValueId make_value_id(const std::vector<std::string>& names)
-                {
-                    for (const auto& name: names)
-                    {
-                        if (const auto id = find_value_id(name))
-                            return *id;
-                    }
-                    n = ValueId(n + 1);
-                    for (const auto& name: names)
-                        explicit_ids.emplace(name, n);
-                    return n;
-                }
-            };
-
-            InternalIdMaker id_maker;
-            for (const auto& a: data.command.arguments)
-            {
-                if (!a->value.empty())
-                {
-                    a->value_id = id_maker.make_value_id(a->value);
-                    id_maker.explicit_ids.emplace(a->name, a->value_id);
-                }
-                else
-                {
-                    a->value_id = id_maker.make_value_id(a->name);
-                }
-            }
-            for (const auto& o: data.command.options)
-            {
-                if (o->operation == OptionOperation::NONE)
-                    continue;
-                if (!o->alias.empty())
-                {
-                    o->value_id = id_maker.make_value_id(o->alias);
-                    for (auto& f: o->flags)
-                        id_maker.explicit_ids.emplace(f, o->value_id);
-                }
-                else
-                {
-                    o->value_id = id_maker.make_value_id(o->flags);
-                }
-            }
-        }
-
-        inline bool has_help_option(const ParserData& data)
-        {
-            return std::any_of(data.command.options.begin(), data.command.options.end(),
-                               [](const auto& o)
-                               {
-                                   return o->type == OptionType::HELP;
-                               });
-        }
-
-        inline bool has_flag(const ParserData& data, std::string_view flag)
-        {
-            bool ci = data.parser_settings.case_insensitive;
-            return any_of(data.command.options.begin(), data.command.options.end(),
-                          [&](const auto& o)
-                          {
-                              return any_of(o->flags.begin(), o->flags.end(),
-                                            [&](const auto& f)
-                                            {
-                                                return are_equal(f, flag, ci);
-                                            });
-                          });
-        }
-
-        void add_help_option(ParserData& data)
-        {
-            if (!data.parser_settings.generate_help_option)
-                return;
-            if (has_help_option(data))
-                return;
-            std::vector<std::string> flags;
-            switch (data.parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                if (!has_flag(data, "-h"))
-                    flags.emplace_back("-h");
-                if (!has_flag(data, "--help"))
-                    flags.emplace_back("--help");
-                break;
-            case OptionStyle::SLASH:
-                if (!has_flag(data, "/?"))
-                    flags.emplace_back("/?");
-                break;
-            case OptionStyle::DASH:
-                if (!has_flag(data, "-h"))
-                    flags.emplace_back("-h");
-                else if (!has_flag(data, "-help"))
-                    flags.emplace_back("-help");
-                break;
-            }
-
-            if (flags.empty())
-                return;
-
-            auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .help("Display the help text.")
-                .constant("1").release();
-            opt->argument_id = ArgumentId(data.command.options.size()
-                                          + data.command.arguments.size() + 1);
-            opt->section = data.command.current_section;
-            data.command.options.push_back(std::move(opt));
-        }
-
-        void add_version_option(ParserData& data)
-        {
-            if (data.help_settings.version.empty())
-                return;
-            std::string flag;
-            switch (data.parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                if (!has_flag(data, "--version"))
-                    flag = "--version";
-                break;
-            case OptionStyle::SLASH:
-                if (!has_flag(data, "/VERSION"))
-                    flag = "/VERSION";
-                break;
-            case OptionStyle::DASH:
-                if (!has_flag(data, "-version"))
-                    flag = "-version";
-                break;
-            }
-
-            if (flag.empty())
-                return;
-
-            auto stream = data.help_settings.output_stream
-                              ? data.help_settings.output_stream
-                              : &std::cout;
-            auto opt = Option().flag(flag).type(OptionType::STOP)
-                .help("Display the program version.")
-                .constant("1")
-                .callback([v = data.help_settings.version, stream]
-                (auto, auto, auto pa)
-                    {
-                        *stream << pa.program_name() << " " << v << "\n";
-                        return true;
-                    })
-                .release();
-            opt->argument_id = ArgumentId(data.command.options.size()
-                                          + data.command.arguments.size() + 1);
-            opt->section = data.command.current_section;
-            data.command.options.push_back(std::move(opt));
-        }
-    }
-
-    void add_missing_options(ParserData& data)
-    {
-        add_help_option(data);
-        add_version_option(data);
-    }
-
     ParsedArguments parse_arguments(std::vector<std::string_view> args,
                                     const std::shared_ptr<ParserData>& data)
     {
-        add_missing_options(*data);
-        set_value_ids(*data);
+        finish_initialization(*data);
         return ParsedArguments(
             ArgumentIteratorImpl::parse(std::move(args), data));
     }
@@ -4047,9 +3877,167 @@ namespace argos
     make_argument_iterator(std::vector<std::string_view> args,
                            const std::shared_ptr<ParserData>& data)
     {
-        add_missing_options(*data);
-        set_value_ids(*data);
+        finish_initialization(*data);
         return {std::move(args), data};
+    }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-13.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+#include <cstdlib>
+
+namespace argos
+{
+    namespace
+    {
+        template <typename T>
+        T str_to_int(const char* str, char** endp, int base);
+
+        template <>
+        long str_to_int<long>(const char* str, char** endp, int base)
+        {
+            return strtol(str, endp, base);
+        }
+
+        template <>
+        long long str_to_int<long long>(const char* str, char** endp, int base)
+        {
+            return strtoll(str, endp, base);
+        }
+
+        template <>
+        unsigned long
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
+        {
+            return strtoul(str, endp, base);
+        }
+
+        template <>
+        unsigned long long
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
+        {
+            return strtoull(str, endp, base);
+        }
+
+        template <typename T>
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
+    {
+        const auto n = parse_integer_impl<long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(int) != sizeof(long))
+        {
+            if (*n < INT_MIN || INT_MAX < *n)
+                return {};
+        }
+        return static_cast<int>(*n);
+    }
+
+    template <>
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
+    {
+        auto n = parse_integer_impl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long>(str, base);
+    }
+
+    template <>
+    std::optional<long long>
+    parse_integer<long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long>
+    parse_integer<unsigned long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long long>
+    parse_integer<unsigned long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long long>(str, base);
+    }
+
+    namespace
+    {
+        template <typename T>
+        T str_to_float(const char* str, char** endp);
+
+        template <>
+        float str_to_float<float>(const char* str, char** endp)
+        {
+            return strtof(str, endp);
+        }
+
+        template <>
+        double str_to_float<double>(const char* str, char** endp)
+        {
+            return strtod(str, endp);
+        }
+
+        template <typename T>
+        std::optional<T> parse_floating_point_impl(const std::string& str)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_float<T>(str.c_str(), &endp);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<float> parse_floating_point<float>(const std::string& str)
+    {
+        return parse_floating_point_impl<float>(str);
+    }
+
+    template <>
+    std::optional<double> parse_floating_point<double>(const std::string& str)
+    {
+        return parse_floating_point_impl<double>(str);
     }
 }
 
@@ -4607,161 +4595,135 @@ namespace argos
 }
 
 //****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-13.
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-11.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
-#include <cstdlib>
-
 namespace argos
 {
     namespace
     {
-        template <typename T>
-        T str_to_int(const char* str, char** endp, int base);
-
-        template <>
-        long str_to_int<long>(const char* str, char** endp, int base)
+        void set_value_ids(const ParserData& data)
         {
-            return strtol(str, endp, base);
+            struct InternalIdMaker
+            {
+                std::map<std::string_view, ValueId> explicit_ids;
+                ValueId n = ValueId(0);
+
+                std::optional<ValueId> find_value_id(std::string_view name)
+                {
+                    const auto it = explicit_ids.find(name);
+                    if (it == explicit_ids.end())
+                        return {};
+                    return it->second;
+                }
+
+                ValueId make_value_id(std::string_view name)
+                {
+                    if (const auto id = find_value_id(name))
+                        return *id;
+                    n = ValueId(n + 1);
+                    explicit_ids.emplace(name, n);
+                    return n;
+                }
+
+                ValueId make_value_id(const std::vector<std::string>& names)
+                {
+                    for (const auto& name: names)
+                    {
+                        if (const auto id = find_value_id(name))
+                            return *id;
+                    }
+                    n = ValueId(n + 1);
+                    for (const auto& name: names)
+                        explicit_ids.emplace(name, n);
+                    return n;
+                }
+            };
+
+            InternalIdMaker id_maker;
+            for (const auto& a: data.command.arguments)
+            {
+                if (!a->value.empty())
+                {
+                    a->value_id = id_maker.make_value_id(a->value);
+                    id_maker.explicit_ids.emplace(a->name, a->value_id);
+                }
+                else
+                {
+                    a->value_id = id_maker.make_value_id(a->name);
+                }
+            }
+            for (const auto& o: data.command.options)
+            {
+                if (o->operation == OptionOperation::NONE)
+                    continue;
+                if (!o->alias.empty())
+                {
+                    o->value_id = id_maker.make_value_id(o->alias);
+                    for (auto& f: o->flags)
+                        id_maker.explicit_ids.emplace(f, o->value_id);
+                }
+                else
+                {
+                    o->value_id = id_maker.make_value_id(o->flags);
+                }
+            }
         }
 
-        template <>
-        long long str_to_int<long long>(const char* str, char** endp, int base)
+        void add_version_option(ParserData& data)
         {
-            return strtoll(str, endp, base);
-        }
+            if (data.version.empty())
+                return;
+            auto& cmd = data.command;
+            std::string flag;
+            switch (data.parser_settings.option_style)
+            {
+            case OptionStyle::STANDARD:
+                if (!has_flag(cmd, "--version", data.parser_settings))
+                    flag = "--version";
+                break;
+            case OptionStyle::SLASH:
+                if (!has_flag(cmd, "/VERSION", data.parser_settings))
+                    flag = "/VERSION";
+                break;
+            case OptionStyle::DASH:
+                if (!has_flag(cmd, "-version", data.parser_settings))
+                    flag = "-version";
+                break;
+            }
 
-        template <>
-        unsigned long
-        str_to_int<unsigned long>(const char* str, char** endp, int base)
-        {
-            return strtoul(str, endp, base);
-        }
+            if (flag.empty())
+                return;
 
-        template <>
-        unsigned long long
-        str_to_int<unsigned long long>(const char* str, char** endp, int base)
-        {
-            return strtoull(str, endp, base);
-        }
-
-        template <typename T>
-        std::optional<T> parse_integer_impl(const std::string& str, int base)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_int<T>(str.c_str(), &endp, base);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<int> parse_integer<int>(const std::string& str, int base)
-    {
-        const auto n = parse_integer_impl<long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(int) != sizeof(long))
-        {
-            if (*n < INT_MIN || INT_MAX < *n)
-                return {};
-        }
-        return static_cast<int>(*n);
-    }
-
-    template <>
-    std::optional<unsigned>
-    parse_integer<unsigned>(const std::string& str, int base)
-    {
-        auto n = parse_integer_impl<unsigned long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
-        {
-            if (UINT_MAX < *n)
-                return {};
-        }
-        return static_cast<unsigned>(*n);
-    }
-
-    template <>
-    std::optional<long> parse_integer<long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long>(str, base);
-    }
-
-    template <>
-    std::optional<long long>
-    parse_integer<long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long>
-    parse_integer<unsigned long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long long>
-    parse_integer<unsigned long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long long>(str, base);
-    }
-
-    namespace
-    {
-        template <typename T>
-        T str_to_float(const char* str, char** endp);
-
-        template <>
-        float str_to_float<float>(const char* str, char** endp)
-        {
-            return strtof(str, endp);
-        }
-
-        template <>
-        double str_to_float<double>(const char* str, char** endp)
-        {
-            return strtod(str, endp);
-        }
-
-        template <typename T>
-        std::optional<T> parse_floating_point_impl(const std::string& str)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_float<T>(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
+            auto stream = data.help_settings.output_stream
+                              ? data.help_settings.output_stream
+                              : &std::cout;
+            auto opt = Option().flag(flag).type(OptionType::STOP)
+                .help("Display the program version.")
+                .constant("1")
+                .callback([v = data.version, stream]
+                (auto, auto, auto pa)
+                    {
+                        *stream << pa.program_name() << " " << v << "\n";
+                        return true;
+                    })
+                .release();
+            opt->argument_id = ArgumentId(cmd.options.size()
+                                          + cmd.arguments.size() + 1);
+            opt->section = cmd.current_section;
+            cmd.options.push_back(std::move(opt));
         }
     }
 
-    template <>
-    std::optional<float> parse_floating_point<float>(const std::string& str)
+    void finish_initialization(ParserData& data)
     {
-        return parse_floating_point_impl<float>(str);
-    }
-
-    template <>
-    std::optional<double> parse_floating_point<double>(const std::string& str)
-    {
-        return parse_floating_point_impl<double>(str);
+        add_version_option(data);
+        finish_initialization(data.command, data);
+        set_value_ids(data);
     }
 }
 

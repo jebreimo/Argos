@@ -104,7 +104,7 @@ namespace argos
             }
         }
 
-        inline bool has_help_option(const CommandData& cmd)
+        bool has_help_option(const CommandData& cmd)
         {
             for (const auto& o: cmd.options)
             {
@@ -114,44 +114,29 @@ namespace argos
             return false;
         }
 
-        inline bool has_flag(const CommandData& data,
-                             std::string_view flag,
-                             bool case_insensitive)
+        void add_help_option(CommandData& cmd, const ParserSettings& settings)
         {
-            for (auto& o: data.options)
-            {
-                for (auto& f: o->flags)
-                {
-                    if (are_equal(f, flag, case_insensitive))
-                        return true;
-                }
-            }
-            return false;
-        }
-
-        void add_help_option(CommandData& cmd, const ParserData& data)
-        {
-            if (!data.parser_settings.generate_help_option)
+            if (!settings.generate_help_option)
                 return;
             if (has_help_option(cmd))
                 return;
             std::vector<std::string> flags;
-            switch (data.parser_settings.option_style)
+            switch (settings.option_style)
             {
             case OptionStyle::STANDARD:
-                if (!has_flag(cmd, "-h", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "-h", settings))
                     flags.emplace_back("-h");
-                if (!has_flag(cmd, "--help", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "--help", settings))
                     flags.emplace_back("--help");
                 break;
             case OptionStyle::SLASH:
-                if (!has_flag(cmd, "/?", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "/?", settings))
                     flags.emplace_back("/?");
                 break;
             case OptionStyle::DASH:
-                if (!has_flag(cmd, "-h", data.parser_settings.case_insensitive))
+                if (!has_flag(cmd, "-h", settings))
                     flags.emplace_back("-h");
-                else if (!has_flag(cmd, "-help", data.parser_settings.case_insensitive))
+                else if (!has_flag(cmd, "-help", settings))
                     flags.emplace_back("-help");
                 break;
             }
@@ -164,16 +149,37 @@ namespace argos
                 .constant("1").release();
             opt->argument_id = ArgumentId(cmd.options.size()
                                           + cmd.arguments.size() + 1);
-            opt->section = data.command.current_section;
+            opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
+        }
+
+        void add_missing_options(CommandData& cmd,
+                                 const ParserSettings& settings)
+        {
+            add_help_option(cmd, settings);
         }
     }
 
-    void CommandData::complete_definition(const ParserData& data)
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings)
     {
-        update_require_command(*this);
-        add_help_option(*this, data);
-        for (auto& c: commands)
-            c->complete_definition(data);
+        for (auto& o: cmd.options)
+        {
+            for (auto& f: o->flags)
+            {
+                if (are_equal(f, flag, settings.case_insensitive))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    void finish_initialization(CommandData& cmd, const ParserData& data)
+    {
+        update_require_command(cmd);
+        add_help_option(cmd, data.parser_settings);
+        for (auto& c: cmd.commands)
+            finish_initialization(*c, data);
     }
 }

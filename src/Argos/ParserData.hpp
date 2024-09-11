@@ -42,7 +42,6 @@ namespace argos
 
     struct HelpSettings
     {
-        std::string version;
         std::ostream* output_stream = nullptr;
         unsigned line_width = 0;
         std::vector<std::string> word_split_rules;
@@ -53,5 +52,8 @@ namespace argos
         CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
+        std::string version;
     };
+
+    void finish_initialization(ParserData& data);
 }

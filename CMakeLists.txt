@@ -111,6 +111,7 @@ add_library(Argos
     src/Argos/Command.cpp
     include/Argos/Command.hpp
     src/Argos/CommandData.cpp
+    src/Argos/ParserData.cpp
 )
 
 target_include_directories(Argos

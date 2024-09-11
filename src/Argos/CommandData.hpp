@@ -29,11 +29,6 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
-        /**
-         * Complete the definition of this command and any subcommands.
-         */
-        void complete_definition(const ParserData& data);
-
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
@@ -46,4 +41,16 @@ namespace argos
          */
         std::string section;
     };
+
+    struct ParserSettings;
+
+    /**
+     * Finish the initialization of this command and any subcommands, and
+     * make them ready for parsing arguments.
+     */
+    void finish_initialization(CommandData& cmd, const ParserData& data);
+
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings);
 }
