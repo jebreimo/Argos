@@ -12,7 +12,9 @@
 #include "ArgosThrow.hpp"
 #include "StringUtilities.hpp"
 
-namespace argos { namespace
+namespace argos
+{
+    namespace
     {
         bool is_utf8_continuation(char c)
         {
@@ -23,32 +25,6 @@ namespace argos { namespace
         {
             auto last = word.find_last_not_of(".,;:!?()[]{}<>\"'`");
             return word.substr(0, last + 1);
-        }
-
-        char to_lower(char c)
-        {
-            return ('A' <= c && c <= 'Z') ? char(c - 'A' + 'a') : c;
-        }
-
-        void to_lower(std::string& word)
-        {
-            for (auto& c: word)
-                c = to_lower(c);
-        }
-
-        std::string to_lower(std::string_view word)
-        {
-            std::string result(word);
-            to_lower(result);
-            return result;
-        }
-
-        bool is_lower(std::string_view word)
-        {
-            return std::all_of(word.begin(), word.end(), [](char c)
-            {
-                return c < 'A' || 'Z' < c;
-            });
         }
     }
 

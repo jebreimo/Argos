@@ -13,6 +13,8 @@
 
 namespace argos
 {
+    class ParserData;
+
     struct CommandData
     {
         CommandData();
@@ -27,12 +29,18 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
+        /**
+         * Complete the definition of this command and any subcommands.
+         */
+        void complete_definition(const ParserData& data);
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
+        std::optional<bool> require_command;
         /**
          * The section the command is listed in in the parent command's help.
          */

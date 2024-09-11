@@ -274,6 +274,19 @@ namespace argos
         return *this;
     }
 
+    std::optional<bool> ArgumentParser::require_command() const
+    {
+        check_data();
+        return m_data->command.require_command;
+    }
+
+    ArgumentParser& ArgumentParser::require_command(bool value)
+    {
+        check_data();
+        m_data->command.require_command = value;
+        return *this;
+    }
+
     bool ArgumentParser::ignore_undefined_arguments() const
     {
         check_data();

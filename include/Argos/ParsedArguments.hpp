@@ -79,8 +79,7 @@ namespace argos
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        [[nodiscard]] std::optional<ParsedArguments>
-        subcommand() const;
+        [[nodiscard]] std::vector<ParsedArguments> commands() const;
 
         /**
          * @brief Returns the value of the argument with the given name.
@@ -148,8 +147,8 @@ namespace argos
          *
          * - ArgumentParser::ignore_undefined_arguments is true.
          * - ArgumentParser::ignore_undefined_options is true.
-         * - ArgumentParser::auto_exit is false and there are options with type
-         *   set to OptionType::STOP.
+         * - ArgumentParser::auto_exit is false and there are options with
+         *   type set to OptionType::STOP.
          */
         [[nodiscard]]
         const std::vector<std::string>& unprocessed_arguments() const;

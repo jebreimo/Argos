@@ -37,4 +37,12 @@ namespace argos
     size_t count_code_points(std::string_view str);
 
     size_t find_nth_code_point(std::string_view str, size_t n);
+
+    char to_lower(char c);
+
+    void to_lower(std::string& word);
+
+    std::string to_lower(std::string_view word);
+
+    bool is_lower(std::string_view word);
 }

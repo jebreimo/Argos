@@ -283,6 +283,10 @@ namespace argos
          */
         ArgumentParser& option_style(OptionStyle value);
 
+        [[nodiscard]] std::optional<bool> require_command() const;
+
+        ArgumentParser& require_command(bool value);
+
         /**
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.
