@@ -199,22 +199,9 @@ namespace argos
         add_version_option(data);
     }
 
-    void update_require_command(CommandData& cmd)
-    {
-        if (cmd.require_command.value_or(false)
-            && cmd.commands.empty())
-            ARGOS_THROW("require_command is true, but no commands have been added.");
-        if (!cmd.require_command)
-        {
-            cmd.require_command = !cmd.commands.empty()
-                                  && cmd.arguments.empty();
-        }
-    }
-
     ParsedArguments parse_arguments(std::vector<std::string_view> args,
                                     const std::shared_ptr<ParserData>& data)
     {
-        update_require_command(data->command);
         add_missing_options(*data);
         set_value_ids(*data);
         return ParsedArguments(
@@ -225,7 +212,6 @@ namespace argos
     make_argument_iterator(std::vector<std::string_view> args,
                            const std::shared_ptr<ParserData>& data)
     {
-        update_require_command(data->command);
         add_missing_options(*data);
         set_value_ids(*data);
         return {std::move(args), data};

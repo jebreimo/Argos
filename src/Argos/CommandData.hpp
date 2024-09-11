@@ -13,7 +13,7 @@
 
 namespace argos
 {
-    class ParserData;
+    struct ParserData;
 
     struct CommandData
     {

@@ -173,7 +173,6 @@ namespace argos
     {
         update_require_command(*this);
         add_help_option(*this, data);
-        set_value_ids(*data);
         for (auto& c: commands)
             c->complete_definition(data);
     }
