@@ -281,15 +281,22 @@ namespace argos
          */
         ABOUT,
         /**
+         * @brief The title of the list of commands (default is "COMMANDS").
+         *
+         * @note This will only be used for commands where the section
+         *      property has not been set.
+         */
+        COMMANDS_TITLE,
+        /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *
-         * @note This will only be used for arguments without the section
-         *      property.
+         * @note This will only be used for arguments where the section
+         *      property has not been set.
          */
         ARGUMENTS_TITLE,
         /**
          * @brief The title of the list of options (default is "OPTIONS").
-
+         *
          * @note This will only be used for options without the section
          *      property.
          */
@@ -2489,6 +2496,8 @@ namespace argos
         Command& text(TextId textId, std::string text);
 
         Command& text(TextId textId, std::function<std::string()> callback);
+
+        Command& visibility(Visibility visibility);
 
         std::unique_ptr<CommandData> release();
     private:

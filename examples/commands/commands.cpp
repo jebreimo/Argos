@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
     using namespace argos;
     const ParsedArguments args = ArgumentParser(argv[0])
         .about("Performs an operation of some kind.")
+        .version("1.0.0")
         .add(Command("greet")
             .about("Prints a greeting.")
             .add(Arg("NAME").optional(true)

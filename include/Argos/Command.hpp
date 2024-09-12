@@ -42,6 +42,8 @@ namespace argos
 
         Command& text(TextId textId, std::function<std::string()> callback);
 
+        Command& visibility(Visibility visibility);
+
         std::unique_ptr<CommandData> release();
     private:
         void check_command() const;

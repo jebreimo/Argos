@@ -96,6 +96,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::visibility(Visibility visibility)
+    {
+        check_command();
+        data_->visibility = visibility;
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);

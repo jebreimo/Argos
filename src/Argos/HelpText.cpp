@@ -91,7 +91,7 @@ namespace argos
         std::string get_long_option_name(const OptionData& opt)
         {
             std::string opt_txt;
-            for (const auto& flag: opt.flags)
+            for (const auto& flag : opt.flags)
             {
                 if (!opt_txt.empty())
                     opt_txt.append(", ");
@@ -152,7 +152,7 @@ namespace argos
         void write_stop_and_help_usage(TextFormatter& formatter,
                                        const CommandData& data)
         {
-            for (auto& opt: data.options)
+            for (auto& opt : data.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -182,9 +182,9 @@ namespace argos
             // and option flags.
             std::vector<unsigned> name_widths;
             std::vector<unsigned> text_widths;
-            for (const auto& [_, help_texts]: sections)
+            for (const auto& [_, help_texts] : sections)
             {
-                for (const auto& [name, txt]: help_texts)
+                for (const auto& [name, txt] : help_texts)
                 {
                     name_widths.push_back(static_cast<unsigned>(name.size()));
                     text_widths.push_back(static_cast<unsigned>(txt.size()));
@@ -223,20 +223,33 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
+            auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = "COMMANDS";
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::ABOUT).value_or(""));
+            }
+
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = "ARGUMENTS";
-            for (auto& a: command.arguments)
+            for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *arg_title : a->section;
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
+
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = "OPTIONS";
-            for (auto& o: command.options)
+            for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -248,14 +261,14 @@ namespace argos
                 return;
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
-            for (auto& [section, txts]: sections)
+            for (auto& [section, txts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text]: txts)
+                for (auto& [name, text] : txts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -281,6 +294,60 @@ namespace argos
             }
         }
 
+        void write_brief_regular_options(TextFormatter& formatter,
+                                         const CommandData& command)
+        {
+            for (auto& opt : command.options)
+            {
+                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
+                    || is_stop_option(opt->type))
+                {
+                    continue;
+                }
+
+                formatter.write_lines(get_brief_option_name(*opt, false));
+                formatter.write_words(" ");
+            }
+        }
+
+        void write_brief_arguments(TextFormatter& formatter,
+                                   const CommandData& command)
+        {
+            for (auto& arg : command.arguments)
+            {
+                if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                formatter.write_lines(get_argument_name(*arg));
+                formatter.write_words(" ");
+            }
+        }
+
+        void write_brief_commands(TextFormatter& formatter,
+                                  const CommandData& command)
+        {
+            if (command.commands.empty())
+                return;
+
+            auto brackets = !command.require_command.value_or(false);
+
+            if (brackets)
+                formatter.write_words("[");
+
+            bool first_command = true;
+            for (auto& cmd : command.commands)
+            {
+                if ((cmd->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                if (!first_command)
+                    formatter.write_words("|");
+                first_command = false;
+                formatter.write_words(cmd->name);
+            }
+
+            if (brackets)
+                formatter.write_words("]");
+        }
+
         void write_brief_usage(TextFormatter& formatter,
                                const CommandData& command,
                                bool prepend_newline)
@@ -293,24 +360,11 @@ namespace argos
             formatter.write_words(command.name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt: command.options)
-            {
-                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
-                    || is_stop_option(opt->type))
-                {
-                    continue;
-                }
 
-                formatter.write_lines(get_brief_option_name(*opt, false));
-                formatter.write_words(" ");
-            }
-            for (auto& arg: command.arguments)
-            {
-                if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
-                    continue;
-                formatter.write_lines(get_argument_name(*arg));
-                formatter.write_words(" ");
-            }
+            write_brief_regular_options(formatter, command);
+            write_brief_arguments(formatter, command);
+            write_brief_commands(formatter, command);
+
             formatter.pop_indentation();
             formatter.newline();
             formatter.pop_indentation();
@@ -349,12 +403,12 @@ namespace argos
 
         std::string get_name(const CommandData& data, ArgumentId argument_id)
         {
-            for (const auto& a: data.arguments)
+            for (const auto& a : data.arguments)
             {
                 if (a->argument_id == argument_id)
                     return a->name;
             }
-            for (const auto& o: data.options)
+            for (const auto& o : data.options)
             {
                 if (o->argument_id == argument_id)
                 {

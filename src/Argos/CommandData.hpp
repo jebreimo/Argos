@@ -35,9 +35,11 @@ namespace argos
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
+        Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
         /**
-         * The section the command is listed in in the parent command's help.
+         * The heading the command is listed under in the parent
+         * command's help.
          */
         std::string section;
     };

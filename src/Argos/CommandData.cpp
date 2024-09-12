@@ -153,12 +153,6 @@ namespace argos
             cmd.options.push_back(std::move(opt));
         }
 
-        void add_missing_options(CommandData& cmd,
-                                 const ParserSettings& settings)
-        {
-            add_help_option(cmd, settings);
-        }
-
         ValueId set_value_ids(const CommandData& cmd,
                               ValueId start_id = ValueId(0))
         {

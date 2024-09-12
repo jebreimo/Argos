@@ -492,9 +492,11 @@ namespace argos
         std::string name;
         std::map<TextId, TextSource> texts;
         std::string current_section;
+        Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
         /**
-         * The section the command is listed in in the parent command's help.
+         * The heading the command is listed under in the parent
+         * command's help.
          */
         std::string section;
     };
@@ -2777,6 +2779,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::visibility(Visibility visibility)
+    {
+        check_command();
+        data_->visibility = visibility;
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);
@@ -2935,12 +2944,6 @@ namespace argos
                                           + cmd.arguments.size() + 1);
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
-        }
-
-        void add_missing_options(CommandData& cmd,
-                                 const ParserSettings& settings)
-        {
-            add_help_option(cmd, settings);
         }
 
         ValueId set_value_ids(const CommandData& cmd,
@@ -3212,7 +3215,7 @@ namespace argos
         std::string get_long_option_name(const OptionData& opt)
         {
             std::string opt_txt;
-            for (const auto& flag: opt.flags)
+            for (const auto& flag : opt.flags)
             {
                 if (!opt_txt.empty())
                     opt_txt.append(", ");
@@ -3273,7 +3276,7 @@ namespace argos
         void write_stop_and_help_usage(TextFormatter& formatter,
                                        const CommandData& data)
         {
-            for (auto& opt: data.options)
+            for (auto& opt : data.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -3303,9 +3306,9 @@ namespace argos
             // and option flags.
             std::vector<unsigned> name_widths;
             std::vector<unsigned> text_widths;
-            for (const auto& [_, help_texts]: sections)
+            for (const auto& [_, help_texts] : sections)
             {
-                for (const auto& [name, txt]: help_texts)
+                for (const auto& [name, txt] : help_texts)
                 {
                     name_widths.push_back(static_cast<unsigned>(name.size()));
                     text_widths.push_back(static_cast<unsigned>(txt.size()));
@@ -3344,20 +3347,33 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
+            auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = "COMMANDS";
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::ABOUT).value_or(""));
+            }
+
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = "ARGUMENTS";
-            for (auto& a: command.arguments)
+            for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *arg_title : a->section;
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
+
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = "OPTIONS";
-            for (auto& o: command.options)
+            for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -3369,14 +3385,14 @@ namespace argos
                 return;
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
-            for (auto& [section, txts]: sections)
+            for (auto& [section, txts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text]: txts)
+                for (auto& [name, text] : txts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -3402,6 +3418,60 @@ namespace argos
             }
         }
 
+        void write_brief_regular_options(TextFormatter& formatter,
+                                         const CommandData& command)
+        {
+            for (auto& opt : command.options)
+            {
+                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
+                    || is_stop_option(opt->type))
+                {
+                    continue;
+                }
+
+                formatter.write_lines(get_brief_option_name(*opt, false));
+                formatter.write_words(" ");
+            }
+        }
+
+        void write_brief_arguments(TextFormatter& formatter,
+                                   const CommandData& command)
+        {
+            for (auto& arg : command.arguments)
+            {
+                if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                formatter.write_lines(get_argument_name(*arg));
+                formatter.write_words(" ");
+            }
+        }
+
+        void write_brief_commands(TextFormatter& formatter,
+                                  const CommandData& command)
+        {
+            if (command.commands.empty())
+                return;
+
+            auto brackets = !command.require_command.value_or(false);
+
+            if (brackets)
+                formatter.write_words("[");
+
+            bool first_command = true;
+            for (auto& cmd : command.commands)
+            {
+                if ((cmd->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                if (!first_command)
+                    formatter.write_words("|");
+                first_command = false;
+                formatter.write_words(cmd->name);
+            }
+
+            if (brackets)
+                formatter.write_words("]");
+        }
+
         void write_brief_usage(TextFormatter& formatter,
                                const CommandData& command,
                                bool prepend_newline)
@@ -3414,24 +3484,11 @@ namespace argos
             formatter.write_words(command.name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt: command.options)
-            {
-                if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
-                    || is_stop_option(opt->type))
-                {
-                    continue;
-                }
 
-                formatter.write_lines(get_brief_option_name(*opt, false));
-                formatter.write_words(" ");
-            }
-            for (auto& arg: command.arguments)
-            {
-                if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
-                    continue;
-                formatter.write_lines(get_argument_name(*arg));
-                formatter.write_words(" ");
-            }
+            write_brief_regular_options(formatter, command);
+            write_brief_arguments(formatter, command);
+            write_brief_commands(formatter, command);
+
             formatter.pop_indentation();
             formatter.newline();
             formatter.pop_indentation();
@@ -3470,12 +3527,12 @@ namespace argos
 
         std::string get_name(const CommandData& data, ArgumentId argument_id)
         {
-            for (const auto& a: data.arguments)
+            for (const auto& a : data.arguments)
             {
                 if (a->argument_id == argument_id)
                     return a->name;
             }
-            for (const auto& o: data.options)
+            for (const auto& o : data.options)
             {
                 if (o->argument_id == argument_id)
                 {
@@ -3931,6 +3988,165 @@ namespace argos
     ArgumentId OptionView::argument_id() const
     {
         return m_option->argument_id;
+    }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-13.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+#include <cstdlib>
+
+namespace argos
+{
+    namespace
+    {
+        template <typename T>
+        T str_to_int(const char* str, char** endp, int base);
+
+        template <>
+        long str_to_int<long>(const char* str, char** endp, int base)
+        {
+            return strtol(str, endp, base);
+        }
+
+        template <>
+        long long str_to_int<long long>(const char* str, char** endp, int base)
+        {
+            return strtoll(str, endp, base);
+        }
+
+        template <>
+        unsigned long
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
+        {
+            return strtoul(str, endp, base);
+        }
+
+        template <>
+        unsigned long long
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
+        {
+            return strtoull(str, endp, base);
+        }
+
+        template <typename T>
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
+    {
+        const auto n = parse_integer_impl<long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(int) != sizeof(long))
+        {
+            if (*n < INT_MIN || INT_MAX < *n)
+                return {};
+        }
+        return static_cast<int>(*n);
+    }
+
+    template <>
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
+    {
+        auto n = parse_integer_impl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long>(str, base);
+    }
+
+    template <>
+    std::optional<long long>
+    parse_integer<long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long>
+    parse_integer<unsigned long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long long>
+    parse_integer<unsigned long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long long>(str, base);
+    }
+
+    namespace
+    {
+        template <typename T>
+        T str_to_float(const char* str, char** endp);
+
+        template <>
+        float str_to_float<float>(const char* str, char** endp)
+        {
+            return strtof(str, endp);
+        }
+
+        template <>
+        double str_to_float<double>(const char* str, char** endp)
+        {
+            return strtod(str, endp);
+        }
+
+        template <typename T>
+        std::optional<T> parse_floating_point_impl(const std::string& str)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_float<T>(str.c_str(), &endp);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<float> parse_floating_point<float>(const std::string& str)
+    {
+        return parse_floating_point_impl<float>(str);
+    }
+
+    template <>
+    std::optional<double> parse_floating_point<double>(const std::string& str)
+    {
+        return parse_floating_point_impl<double>(str);
     }
 }
 
@@ -4548,165 +4764,6 @@ namespace argos
     {
         add_version_option(data);
         finish_initialization(data.command, data);
-    }
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-13.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-#include <cstdlib>
-
-namespace argos
-{
-    namespace
-    {
-        template <typename T>
-        T str_to_int(const char* str, char** endp, int base);
-
-        template <>
-        long str_to_int<long>(const char* str, char** endp, int base)
-        {
-            return strtol(str, endp, base);
-        }
-
-        template <>
-        long long str_to_int<long long>(const char* str, char** endp, int base)
-        {
-            return strtoll(str, endp, base);
-        }
-
-        template <>
-        unsigned long
-        str_to_int<unsigned long>(const char* str, char** endp, int base)
-        {
-            return strtoul(str, endp, base);
-        }
-
-        template <>
-        unsigned long long
-        str_to_int<unsigned long long>(const char* str, char** endp, int base)
-        {
-            return strtoull(str, endp, base);
-        }
-
-        template <typename T>
-        std::optional<T> parse_integer_impl(const std::string& str, int base)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_int<T>(str.c_str(), &endp, base);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<int> parse_integer<int>(const std::string& str, int base)
-    {
-        const auto n = parse_integer_impl<long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(int) != sizeof(long))
-        {
-            if (*n < INT_MIN || INT_MAX < *n)
-                return {};
-        }
-        return static_cast<int>(*n);
-    }
-
-    template <>
-    std::optional<unsigned>
-    parse_integer<unsigned>(const std::string& str, int base)
-    {
-        auto n = parse_integer_impl<unsigned long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
-        {
-            if (UINT_MAX < *n)
-                return {};
-        }
-        return static_cast<unsigned>(*n);
-    }
-
-    template <>
-    std::optional<long> parse_integer<long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long>(str, base);
-    }
-
-    template <>
-    std::optional<long long>
-    parse_integer<long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long>
-    parse_integer<unsigned long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long long>
-    parse_integer<unsigned long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long long>(str, base);
-    }
-
-    namespace
-    {
-        template <typename T>
-        T str_to_float(const char* str, char** endp);
-
-        template <>
-        float str_to_float<float>(const char* str, char** endp)
-        {
-            return strtof(str, endp);
-        }
-
-        template <>
-        double str_to_float<double>(const char* str, char** endp)
-        {
-            return strtod(str, endp);
-        }
-
-        template <typename T>
-        std::optional<T> parse_floating_point_impl(const std::string& str)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_float<T>(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<float> parse_floating_point<float>(const std::string& str)
-    {
-        return parse_floating_point_impl<float>(str);
-    }
-
-    template <>
-    std::optional<double> parse_floating_point<double>(const std::string& str)
-    {
-        return parse_floating_point_impl<double>(str);
     }
 }
 
