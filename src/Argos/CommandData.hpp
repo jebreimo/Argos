@@ -48,7 +48,9 @@ namespace argos
      * Finish the initialization of this command and any subcommands, and
      * make them ready for parsing arguments.
      */
-    void finish_initialization(CommandData& cmd, const ParserData& data);
+    void finish_initialization(CommandData& cmd,
+                               const ParserData& data,
+                               ValueId start_id = ValueId(0));
 
     bool has_flag(const CommandData& cmd,
                   std::string_view flag,

@@ -105,8 +105,6 @@ add_library(Argos
     src/Argos/WordSplitter.cpp
     src/Argos/WordSplitter.hpp
     src/Argos/TextSource.hpp
-    src/Argos/ParseArguments.cpp
-    src/Argos/ParseArguments.hpp
     src/Argos/CommandData.hpp
     src/Argos/Command.cpp
     include/Argos/Command.hpp

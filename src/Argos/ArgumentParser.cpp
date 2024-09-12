@@ -14,7 +14,6 @@
 #include "ArgumentIteratorImpl.hpp"
 #include "HelpText.hpp"
 #include "ParserData.hpp"
-#include "ParseArguments.hpp"
 #include "StringUtilities.hpp"
 
 namespace argos
@@ -72,6 +71,22 @@ namespace argos
         }
 
         constexpr char DEFAULT_NAME[] = "UNINITIALIZED";
+
+        ParsedArguments parse_arguments(std::vector<std::string_view> args,
+                                        const std::shared_ptr<ParserData>& data)
+        {
+            finish_initialization(*data);
+            return ParsedArguments(
+                ArgumentIteratorImpl::parse(std::move(args), data));
+        }
+
+        ArgumentIterator
+        make_argument_iterator(std::vector<std::string_view> args,
+                               const std::shared_ptr<ParserData>& data)
+        {
+            finish_initialization(*data);
+            return {std::move(args), data};
+        }
     }
 
     ArgumentParser::ArgumentParser()
