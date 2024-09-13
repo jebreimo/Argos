@@ -27,7 +27,8 @@ add_executable(ArgosTest
     test_TextFormatter.cpp
     test_TextWriter.cpp
     test_WordSplitter.cpp
-    )
+    test_Subcommands.cpp
+)
 
 target_link_libraries(ArgosTest
     PRIVATE
