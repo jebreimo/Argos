@@ -42,6 +42,11 @@ namespace argos
         return m_impl->has(arg.value_id());
     }
 
+    std::vector<ParsedArguments> ParsedArguments::commands() const
+    {
+        return {};
+    }
+
     ArgumentValue ParsedArguments::value(const std::string& name) const
     {
         auto id = m_impl->get_value_id(name);
