@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -37,4 +38,9 @@ namespace argos
     size_t count_code_points(std::string_view str);
 
     size_t find_nth_code_point(std::string_view str, size_t n);
+
+    inline void pop_front(std::span<std::string_view>& span)
+    {
+        span = span.subspan(1);
+    }
 }

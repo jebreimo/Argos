@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <vector>
+#include <span>
 
 namespace argos
 {
@@ -24,7 +24,7 @@ namespace argos
 
         [[nodiscard]] virtual std::string_view current() const = 0;
 
-        [[nodiscard]] virtual std::vector<std::string_view>
+        [[nodiscard]] virtual std::span<std::string_view>
         remaining_arguments() const = 0;
 
         [[nodiscard]] virtual IOptionIterator* clone() const = 0;

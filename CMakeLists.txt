@@ -7,9 +7,9 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-project(Argos VERSION 1.4.0)
+project(Argos VERSION 1.5.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if(NOT DEFINED ARGOS_MASTER_PROJECT)

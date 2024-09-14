@@ -9,6 +9,7 @@
 
 #include <sstream>
 #include <catch2/catch_test_macros.hpp>
+#include "U8Adapter.hpp"
 
 TEST_CASE("Basic test of TextFormatter")
 {
@@ -100,18 +101,18 @@ TEST_CASE("TextFormatter with multi-byte characters")
 {
     std::stringstream ss;
     argos::TextFormatter formatter(&ss, 40);
-    formatter.write_words(u8"Lorem ipsum dålår sit åmet, consøctetur adipiscing elit.");
+    formatter.write_words(U8("Lorem ipsum dålår sit åmet, consøctetur adipiscing elit."));
     formatter.flush();
-    REQUIRE(ss.str() == u8"Lorem ipsum dålår sit åmet, consøctetur\nadipiscing elit.");
+    REQUIRE(ss.str() == U8("Lorem ipsum dålår sit åmet, consøctetur\nadipiscing elit."));
 }
 
 TEST_CASE("TextFormatter splitting word, no rule")
 {
     std::stringstream ss;
     argos::TextFormatter formatter(&ss, 10);
-    formatter.write_words(u8"Brønnøysundsregisteret");
+    formatter.write_words(U8("Brønnøysundsregisteret"));
     formatter.flush();
-    REQUIRE(ss.str() == u8"Brønnøysu-\nndsregist-\neret");
+    REQUIRE(ss.str() == U8("Brønnøysu-\nndsregist-\neret"));
 }
 
 TEST_CASE("TextFormatter splitting word with rule")
@@ -119,9 +120,9 @@ TEST_CASE("TextFormatter splitting word with rule")
     std::stringstream ss;
     argos::TextFormatter formatter(&ss, 12);
     formatter.word_splitter().add_word("Brønn øy sunds registeret");
-    formatter.write_words(u8"Til Brønnøysundsregisteret");
+    formatter.write_words(U8("Til Brønnøysundsregisteret"));
     formatter.flush();
-    REQUIRE(ss.str() == u8"Til Brønnøy-\nsunds-\nregisteret");
+    REQUIRE(ss.str() == U8("Til Brønnøy-\nsunds-\nregisteret"));
 }
 
 TEST_CASE("Text alignment")
