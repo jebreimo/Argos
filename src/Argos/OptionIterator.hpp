@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include "IOptionIterator.hpp"
+#include <vector>
 
 namespace argos
 {
@@ -26,12 +27,12 @@ namespace argos
 
         [[nodiscard]] std::string_view current() const final;
 
-        [[nodiscard]] std::vector<std::string_view> remaining_arguments() const final;
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const final;
 
         [[nodiscard]] OptionIterator* clone() const final;
     private:
-        std::vector<std::string_view> m_args;
-        std::vector<std::string_view>::const_iterator m_args_it;
+        std::vector<std::string_view> m_all_args;
+        std::span<std::string_view> m_args;
         size_t m_pos = 0;
         char m_prefix = '-';
     };
