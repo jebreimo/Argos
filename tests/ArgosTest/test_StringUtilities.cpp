@@ -5,8 +5,9 @@
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <catch2/catch_test_macros.hpp>
 #include "Argos/StringUtilities.hpp"
+#include <catch2/catch_test_macros.hpp>
+#include "U8Adapter.hpp"
 
 TEST_CASE("Test starts_with")
 {
@@ -39,12 +40,12 @@ TEST_CASE("Test is_less_ci")
 
 TEST_CASE("Test count_code_points")
 {
-    REQUIRE(argos::count_code_points(u8"Bæ bæ bø må.") == 12);
+    REQUIRE(argos::count_code_points(U8("Bæ bæ bø må.")) == 12);
 }
 
 TEST_CASE("Test find_nth_code_point")
 {
-    REQUIRE(argos::find_nth_code_point(u8"Bæ bæ bø må.", 8) == 11);
+    REQUIRE(argos::find_nth_code_point(U8("Bæ bæ bø må."), 8) == 11);
 }
 
 TEST_CASE("Test find_nth_code_point non-UTF8")

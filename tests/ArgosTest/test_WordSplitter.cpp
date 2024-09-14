@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
+#include "U8Adapter.hpp"
 
 namespace
 {
@@ -55,10 +56,10 @@ TEST_CASE("Test default splitter")
 TEST_CASE("Test default splitter with UTF-8")
 {
     argos::WordSplitter splitter;
-    test_default_split(u8"æøå•Ωé†µüıœπ˙äöﬁª√˛¸ƒ∂ß", 0, 14,
-                       {u8"æøå•Ωé†µüıœπ˙", '-', u8"äöﬁª√˛¸ƒ∂ß"});
-    test_default_split(u8"Båidg-hølnow", 0, 8,
-                       {u8"Båidg-", '\0', u8"hølnow"});
+    test_default_split(U8("æøå•Ωé†µüıœπ˙äöﬁª√˛¸ƒ∂ß"), 0, 14,
+                       {U8("æøå•Ωé†µüıœπ˙"), '-', U8("äöﬁª√˛¸ƒ∂ß")});
+    test_default_split(U8("Båidg-hølnow"), 0, 8,
+                       {U8("Båidg-"), '\0', U8("hølnow")});
 }
 
 TEST_CASE("Test splitter")
@@ -80,10 +81,10 @@ TEST_CASE("Test splitter with hyphens")
 TEST_CASE("Test splitter with UTF-8")
 {
     argos::WordSplitter splitter;
-    test_split(u8"Brønn øy sund", 0, 6, {u8"Brønn", '-', u8"øysund"});
-    test_split(u8"Brønn øy sund", 0, 7, {u8"Brønn", '-', u8"øysund"});
-    test_split(u8"Brønn øy sund", 0, 8, {u8"Brønnøy", '-', u8"sund"});
-    test_split(u8"Brønn øy sund", 0, 10, {u8"Brønnøy", '-', u8"sund"});
-    test_split(u8"Brønn øy sund", 0, 11, {u8"Brønnøysund", '\0', {}});
-    test_split(u8"Brønn øy sund", 4, 7, {u8"nnøy", '-', u8"sund"});
+    test_split(U8("Brønn øy sund"), 0, 6, {U8("Brønn"), '-', U8("øysund")});
+    test_split(U8("Brønn øy sund"), 0, 7, {U8("Brønn"), '-', U8("øysund")});
+    test_split(U8("Brønn øy sund"), 0, 8, {U8("Brønnøy"), '-', U8("sund")});
+    test_split(U8("Brønn øy sund"), 0, 10, {U8("Brønnøy"), '-', U8("sund")});
+    test_split(U8("Brønn øy sund"), 0, 11, {U8("Brønnøysund"), '\0', {}});
+    test_split(U8("Brønn øy sund"), 4, 7, {U8("nnøy"), '-', U8("sund")});
 }
