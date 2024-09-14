@@ -28,6 +28,7 @@ add_executable(ArgosTest
     test_TextWriter.cpp
     test_WordSplitter.cpp
     test_Subcommands.cpp
+    U8Adapter.hpp
 )
 
 target_link_libraries(ArgosTest

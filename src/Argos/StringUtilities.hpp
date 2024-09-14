@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -46,4 +47,9 @@ namespace argos
     std::string to_lower(std::string_view word);
 
     bool is_lower(std::string_view word);
+
+    inline void pop_front(std::span<std::string_view>& span)
+    {
+        span = span.subspan(1);
+    }
 }
