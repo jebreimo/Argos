@@ -174,7 +174,7 @@ namespace argos
         if (m_state == State::ERROR)
             ARGOS_THROW("next() called after error.");
         if (m_state == State::DONE)
-            return {IteratorResultCode::DONE, nullptr, {}};
+            return {IteratorResultCode::DONE, {}, {}};
 
         const auto arg = m_state == State::ARGUMENTS_AND_OPTIONS
                              ? m_iterator->next()
@@ -182,9 +182,9 @@ namespace argos
         if (!arg)
         {
             if (check_argument_and_option_counts())
-                return {IteratorResultCode::DONE, nullptr, {}};
+                return {IteratorResultCode::DONE, {}, {}};
             else
-                return {IteratorResultCode::ERROR, nullptr, {}};
+                return {IteratorResultCode::ERROR, {}, {}};
         }
 
         if (m_state == State::ARGUMENTS_AND_OPTIONS
@@ -310,7 +310,7 @@ namespace argos
                 return {IteratorResultCode::ERROR, option, {}};
             case OptionResult::LAST_ARGUMENT:
                 if (!check_argument_and_option_counts())
-                    return {IteratorResultCode::ERROR, nullptr, {}};
+                    return {IteratorResultCode::ERROR, {}, {}};
                 [[fallthrough]];
             case OptionResult::STOP:
                 copy_remaining_arguments_to_parser_result();
@@ -323,13 +323,13 @@ namespace argos
             || !starts_with(m_iterator->current(), flag))
         {
             error("Unknown option: " + std::string(m_iterator->current()));
-            return {IteratorResultCode::ERROR, nullptr, {}};
+            return {IteratorResultCode::ERROR, {}, {}};
         }
         else
         {
             m_parsed_args->add_unprocessed_argument(
                 std::string(m_iterator->current()));
-            return {IteratorResultCode::UNKNOWN, nullptr, m_iterator->current()};
+            return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
         }
     }
 
@@ -360,9 +360,9 @@ namespace argos
         else
         {
             error("Too many arguments, starting with \"" + name + "\".");
-            return {IteratorResultCode::ERROR, nullptr, {}};
+            return {IteratorResultCode::ERROR, {}, {}};
         }
-        return {IteratorResultCode::UNKNOWN, nullptr, m_iterator->current()};
+        return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
     }
 
     // ReSharper disable once CppMemberFunctionMayBeConst

@@ -7,6 +7,7 @@
 //****************************************************************************
 #pragma once
 #include <string>
+#include <variant>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
 #include "StandardOptionIterator.hpp"
@@ -24,10 +25,15 @@ namespace argos
         ERROR
     };
 
+    using IteratorResultData = std::variant<
+        std::monostate,
+        const ArgumentData*,
+        const OptionData*>;
+
     using IteratorResult = std::tuple<
-            IteratorResultCode,
-            const void*,
-            std::string_view>;
+        IteratorResultCode,
+        IteratorResultData,
+        std::string_view>;
 
     class ArgumentIteratorImpl
     {
@@ -43,6 +49,7 @@ namespace argos
 
         [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
         parsed_arguments() const;
+
     private:
         enum class OptionResult
         {
@@ -73,6 +80,7 @@ namespace argos
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
         std::unique_ptr<IOptionIterator> m_iterator;
         ArgumentCounter m_argument_counter;
+
         enum class State
         {
             ARGUMENTS_AND_OPTIONS,
@@ -80,6 +88,7 @@ namespace argos
             DONE,
             ERROR
         };
+
         State m_state = State::ARGUMENTS_AND_OPTIONS;
     };
 }
