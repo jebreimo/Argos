@@ -39,12 +39,12 @@ namespace argos
         {
         case IteratorResultCode::ARGUMENT:
             arg = std::make_unique<ArgumentView>(
-                    static_cast<const ArgumentData*>(std::get<1>(res)));
+                    std::get<const ArgumentData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
         case IteratorResultCode::OPTION:
             arg = std::make_unique<OptionView>(
-                    static_cast<const OptionData*>(std::get<1>(res)));
+                    std::get<const OptionData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
         case IteratorResultCode::UNKNOWN:
