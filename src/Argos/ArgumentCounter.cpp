@@ -24,14 +24,14 @@ namespace argos
         }
 
         void make_argument_counters(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                std::vector<std::pair<size_t, const ArgumentData*>>& counters,
-                size_t& first_optional)
+            const CommandData& command,
+            std::vector<std::pair<size_t, const ArgumentData*>>& counters,
+            size_t& first_optional)
         {
-            first_optional = find_first_optional(arguments);
-            for (size_t i = 0; i < arguments.size(); ++i)
+            first_optional = find_first_optional(command.arguments);
+            for (size_t i = 0; i < command.arguments.size(); ++i)
             {
-                auto& a = arguments[i];
+                auto& a = command.arguments[i];
                 if (i + 1 == first_optional && a->min_count != a->max_count)
                 {
                     counters.emplace_back(a->min_count, a.get());
@@ -46,10 +46,10 @@ namespace argos
 
         std::vector<std::pair<size_t, const ArgumentData*>>
         make_argument_counters(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments,
+            const CommandData& command,
             size_t n)
         {
-            const auto [lo, hi] = ArgumentCounter::get_min_max_count(arguments);
+            const auto [lo, hi] = ArgumentCounter::get_min_max_count(command.arguments);
             if (n < lo)
                 n = 0;
             else if (n > hi)
@@ -58,7 +58,7 @@ namespace argos
                 n -= lo;
 
             std::vector<std::pair<size_t, const ArgumentData*>> result;
-            for (auto& arg : arguments)
+            for (auto& arg : command.arguments)
             {
                 if (n == 0 || arg->min_count == arg->max_count)
                 {
@@ -81,20 +81,20 @@ namespace argos
 
     ArgumentCounter::ArgumentCounter()
         : m_counters()
-    {}
-
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
-        make_argument_counters(arguments, m_counters, m_first_optional);
     }
 
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-        size_t argument_count)
-        : m_counters(make_argument_counters(arguments, argument_count)),
+    ArgumentCounter::ArgumentCounter(const CommandData& command)
+    {
+        make_argument_counters(command, m_counters, m_first_optional);
+    }
+
+    ArgumentCounter::ArgumentCounter(const CommandData& command,
+                                     size_t argument_count)
+        : m_counters(make_argument_counters(command, argument_count)),
           m_first_optional(m_counters.size())
-    {}
+    {
+    }
 
     const ArgumentData* ArgumentCounter::next_argument()
     {
@@ -141,7 +141,7 @@ namespace argos
     }
 
     bool ArgumentCounter::requires_argument_count(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
         bool deterministic = true;
         for (auto& arg : arguments)

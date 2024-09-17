@@ -8,7 +8,7 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "ArgumentData.hpp"
+#include "CommandData.hpp"
 
 namespace argos
 {
@@ -17,12 +17,9 @@ namespace argos
     public:
         ArgumentCounter();
 
-        explicit ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        explicit ArgumentCounter(const CommandData& command);
 
-        ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t argument_count);
+        ArgumentCounter( const CommandData& command, size_t argument_count);
 
         const ArgumentData* next_argument();
 

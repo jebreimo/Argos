@@ -11,7 +11,8 @@
 
 TEST_CASE("Test non-deterministic counter.")
 {
-    std::vector<std::unique_ptr<argos::ArgumentData>> args;
+    argos::CommandData command;
+    auto& args = command.arguments;
     args.push_back(argos::Argument("1").count(0, 1).release());
     args.push_back(argos::Argument("2").count(2).release());
 
@@ -19,7 +20,7 @@ TEST_CASE("Test non-deterministic counter.")
 
     SECTION("Unknown number of arguments")
     {
-        argos::ArgumentCounter counter(args);
+        argos::ArgumentCounter counter(command);
         REQUIRE(!counter.is_complete());
         REQUIRE(counter.next_argument() == args[0].get());
         REQUIRE(!counter.is_complete());
@@ -31,7 +32,7 @@ TEST_CASE("Test non-deterministic counter.")
     }
     SECTION("Known number of arguments")
     {
-        argos::ArgumentCounter counter(args, 2);
+        argos::ArgumentCounter counter(command, 2);
         REQUIRE(!counter.is_complete());
         REQUIRE(counter.next_argument() == args[1].get());
         REQUIRE(!counter.is_complete());

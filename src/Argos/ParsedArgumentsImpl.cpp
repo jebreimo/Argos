@@ -34,17 +34,19 @@ namespace argos
         }
     }
 
-    ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
-        : m_data(std::move(data))
+    ParsedArgumentsImpl::ParsedArgumentsImpl(const CommandData* command,
+                                             std::shared_ptr<ParserData> data)
+        : m_command(command),
+          m_data(std::move(data))
     {
         assert(m_data);
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
             if (!a->value.empty())
                 m_ids.emplace_back(a->value, a->value_id, a->argument_id);
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->operation == OptionOperation::NONE)
                 continue;
@@ -118,7 +120,7 @@ namespace argos
     {
         using std::get;
         auto it = lower_bound(m_ids.begin(), m_ids.end(), value_name,
-                              [](auto& p, auto& s) {return get<0>(p) < s;});
+                              [](auto& p, auto& s) { return get<0>(p) < s; });
         if (it == m_ids.end() || get<0>(*it) != value_name)
             ARGOS_THROW("Unknown value: " + std::string(value_name));
         return get<1>(*it);
@@ -152,12 +154,12 @@ namespace argos
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->value_id == value_id)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->value_id == value_id)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
@@ -168,12 +170,12 @@ namespace argos
     std::unique_ptr<IArgumentView>
     ParsedArgumentsImpl::get_argument_view(ArgumentId argument_id) const
     {
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->argument_id == argument_id)
                 return std::make_unique<ArgumentView>(a.get());
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->argument_id == argument_id)
                 return std::make_unique<OptionView>(o.get());
@@ -209,7 +211,7 @@ namespace argos
 
     void ParsedArgumentsImpl::error(const std::string& message) const
     {
-        write_error_message(*m_data, m_data->command, message);
+        write_error_message(*m_data, *m_command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
@@ -219,7 +221,7 @@ namespace argos
     void ParsedArgumentsImpl::error(const std::string& message,
                                     ArgumentId argument_id)
     {
-        write_error_message(*m_data, m_data->command, message, argument_id);
+        write_error_message(*m_data, *m_command, message, argument_id);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else

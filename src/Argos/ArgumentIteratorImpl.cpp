@@ -142,7 +142,7 @@ namespace argos
           m_command(&m_data->command),
           m_options(make_option_index(m_command->options,
                                       m_data->parser_settings.case_insensitive)),
-          m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
+          m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_command, m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
                                           std::move(args)))
     {
@@ -157,9 +157,9 @@ namespace argos
         }
 
         if (!ArgumentCounter::requires_argument_count(m_command->arguments))
-            m_argument_counter = ArgumentCounter(m_command->arguments);
+            m_argument_counter = ArgumentCounter(*m_command);
         else
-            m_argument_counter = ArgumentCounter(m_command->arguments,
+            m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
     }
 

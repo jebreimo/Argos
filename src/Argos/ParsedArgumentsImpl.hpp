@@ -17,7 +17,8 @@ namespace argos
     class ParsedArgumentsImpl
     {
     public:
-        explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
+        explicit ParsedArgumentsImpl(const CommandData* command,
+                                     std::shared_ptr<ParserData> data);
 
         [[nodiscard]] bool has(ValueId value_id) const;
 
@@ -64,10 +65,12 @@ namespace argos
 
         [[noreturn]]
         void error(const std::string& message, ArgumentId argument_id);
+
     private:
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_values;
         std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_ids;
         std::vector<std::string> m_unprocessed_arguments;
+        const CommandData* m_command;
         std::shared_ptr<ParserData> m_data;
         ParserResultCode m_result_code = ParserResultCode::NONE;
         const OptionData* m_stop_option = nullptr;
