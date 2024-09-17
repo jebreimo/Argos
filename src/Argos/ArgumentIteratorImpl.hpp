@@ -92,6 +92,7 @@ namespace argos
         std::vector<Something> m_somethings;
 
         std::shared_ptr<ParserData> m_data;
+        const CommandData* m_command = nullptr;
         std::vector<std::pair<std::string_view, const OptionData*>> m_options;
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
         std::unique_ptr<IOptionIterator> m_iterator;

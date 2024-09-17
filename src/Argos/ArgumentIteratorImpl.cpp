@@ -139,13 +139,14 @@ namespace argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
-          m_options(make_option_index(m_data->command.options,
+          m_command(&m_data->command),
+          m_options(make_option_index(m_command->options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
                                           std::move(args)))
     {
-        for (const auto& option : m_data->command.options)
+        for (const auto& option : m_command->options)
         {
             if (!option->initial_value.empty())
             {
@@ -155,10 +156,10 @@ namespace argos
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_data->command.arguments))
-            m_argument_counter = ArgumentCounter(m_data->command.arguments);
+        if (!ArgumentCounter::requires_argument_count(m_command->arguments))
+            m_argument_counter = ArgumentCounter(m_command->arguments);
         else
-            m_argument_counter = ArgumentCounter(m_data->command.arguments,
+            m_argument_counter = ArgumentCounter(m_command->arguments,
                                                  count_arguments());
     }
 
@@ -284,7 +285,7 @@ namespace argos
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            write_help_text(*m_data, m_data->command);
+            write_help_text(*m_data, *m_command);
             [[fallthrough]];
         case OptionType::EXIT:
             m_state = State::DONE;
@@ -435,7 +436,7 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (const auto& o : m_data->command.options)
+        for (const auto& o : m_command->options)
         {
             if (!o->optional && !m_parsed_args->has(o->value_id))
             {
@@ -454,7 +455,7 @@ namespace argos
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->command.arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_command->arguments);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")
@@ -467,7 +468,7 @@ namespace argos
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            write_error_message(*m_data, m_data->command, message);
+            write_error_message(*m_data, *m_command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();
