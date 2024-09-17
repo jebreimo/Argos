@@ -67,6 +67,8 @@ namespace argos
 
         IteratorResult process_argument(const std::string& name);
 
+        IteratorResult process_command(const std::string& name);
+
         void copy_remaining_arguments_to_parser_result();
 
         [[nodiscard]] size_t count_arguments() const;
@@ -74,6 +76,20 @@ namespace argos
         bool check_argument_and_option_counts();
 
         void error(const std::string& message = {});
+
+        struct Something
+        {
+            const CommandData* command;
+            std::vector<std::pair<std::string_view, const OptionData*>> options;
+            std::shared_ptr<ParsedArgumentsImpl> parsed_args;
+            ArgumentCounter argument_counter;
+
+            Something(const CommandData* cmd,
+                      std::span<std::string_view> args,
+                      std::shared_ptr<ParserData> data);
+        };
+
+        std::vector<Something> m_somethings;
 
         std::shared_ptr<ParserData> m_data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_options;

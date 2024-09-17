@@ -48,11 +48,11 @@ namespace argos
             if (it->first == next(it)->first)
             {
                 ARGOS_THROW("Multiple definitions of flag "
-                            + std::string(it->first));
+                    + std::string(it->first));
             }
 
             ARGOS_THROW("Conflicting flags: " + std::string(it->first)
-                        + " and " + std::string(next(it)->first));
+                + " and " + std::string(next(it)->first));
         }
 
         const OptionData* find_option_impl(const OptionTable& options,
@@ -126,6 +126,16 @@ namespace argos
         }
     }
 
+    ArgumentIteratorImpl::Something::Something(const CommandData* cmd,
+                                               std::span<std::string_view> args,
+                                               std::shared_ptr<ParserData> data)
+        : command(cmd),
+          options(make_option_index(cmd->options,
+                                    data->parser_settings.case_insensitive))
+
+    {
+    }
+
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
@@ -194,6 +204,11 @@ namespace argos
         }
         else
         {
+            if (m_argument_counter.is_complete())
+            {
+                auto result = process_command(*arg);
+                // if (result =)
+            }
             return process_argument(*arg);
         }
     }
@@ -365,6 +380,12 @@ namespace argos
         return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
     }
 
+    IteratorResult
+    ArgumentIteratorImpl::process_command(const std::string& name)
+    {
+        return {};
+    }
+
     // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
@@ -383,7 +404,7 @@ namespace argos
                 m_options, *arg,
                 m_data->parser_settings.allow_abbreviated_options,
                 m_data->parser_settings.case_insensitive
-                );
+            );
             if (option)
             {
                 if (!option->argument.empty())
