@@ -35,6 +35,9 @@ namespace argos
                                       bool allow_abbreviations,
                                       bool case_insensitive) const;
 
+        const CommandData* find_command(std::string_view name,
+                                        bool case_insensitive) const;
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;

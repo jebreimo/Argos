@@ -172,6 +172,16 @@ namespace argos
         return it->second;
     }
 
+    const CommandData* CommandData::find_command(std::string_view name,
+                                                 bool case_insensitive) const
+    {
+        for (const auto& c : commands)
+        {
+            if (are_equal(c->name, name, case_insensitive))
+                return c.get();
+        }
+    }
+
     namespace
     {
         void update_require_command(CommandData& cmd)
