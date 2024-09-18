@@ -90,6 +90,88 @@ namespace argos
         return *this;
     }
 
+    void CommandData::build_option_index(bool case_insensitive)
+    {
+        std::vector<std::pair<std::string_view, const OptionData*>> index;
+        for (auto& option : options)
+        {
+            for (auto& flag : option->flags)
+                index.emplace_back(flag, option.get());
+        }
+
+        sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
+        {
+            return is_less(a.first, b.first, case_insensitive);
+        });
+
+        const auto it = adjacent_find(
+            index.begin(), index.end(),
+            [&](const auto& a, const auto& b)
+            {
+                return are_equal(a.first, b.first, case_insensitive);
+            });
+
+        if (it == index.end())
+        {
+            option_index = std::move(index);
+            return;
+        }
+
+        if (it->first == next(it)->first)
+        {
+            ARGOS_THROW("Multiple definitions of flag "
+                + std::string(it->first));
+        }
+
+        ARGOS_THROW("Conflicting flags: " + std::string(it->first)
+            + " and " + std::string(next(it)->first));
+    }
+
+    const OptionData* CommandData::find_option(std::string_view flag,
+                                               bool allow_abbreviations,
+                                               bool case_insensitive) const
+    {
+        auto opt = find_option_impl(flag, allow_abbreviations,
+                                    case_insensitive);
+        if (opt == nullptr && flag.size() > 2 && flag.back() == '=')
+        {
+            flag = flag.substr(0, flag.size() - 1);
+            opt = find_option_impl(flag, allow_abbreviations,
+                                   case_insensitive);
+            if (opt && opt->argument.empty())
+                opt = nullptr;
+        }
+        return opt;
+    }
+
+    const OptionData* CommandData::find_option_impl(std::string_view flag,
+                                                    bool allow_abbreviations,
+                                                    bool case_insensitive) const
+    {
+        const auto it = std::lower_bound(
+            option_index.begin(), option_index.end(),
+            std::pair(flag, nullptr),
+            [&](auto& a, auto& b)
+            {
+                return is_less(a.first, b.first, case_insensitive);
+            });
+        if (it == option_index.end())
+            return nullptr;
+        if (it->first == flag)
+            return it->second;
+        if (case_insensitive && are_equal_ci(it->first, flag))
+            return it->second;
+        if (!allow_abbreviations)
+            return nullptr;
+        if (!starts_with(it->first, flag, case_insensitive))
+            return nullptr;
+        const auto nxt = next(it);
+        if (nxt != option_index.end()
+            && starts_with(nxt->first, flag, case_insensitive))
+            return nullptr;
+        return it->second;
+    }
+
     namespace
     {
         void update_require_command(CommandData& cmd)
@@ -252,6 +334,7 @@ namespace argos
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
         start_id = set_value_ids(cmd, start_id);
+        cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
             finish_initialization(*c, data, start_id);
     }

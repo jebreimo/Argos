@@ -29,6 +29,12 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
+        void build_option_index(bool case_insensitive);
+
+        const OptionData* find_option(std::string_view flag,
+                                      bool allow_abbreviations,
+                                      bool case_insensitive) const;
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
@@ -42,6 +48,13 @@ namespace argos
          * command's help.
          */
         std::string section;
+
+    private:
+        const OptionData* find_option_impl(std::string_view flag,
+                                           bool allow_abbreviations,
+                                           bool case_insensitive) const;
+
+        std::vector<std::pair<std::string_view, const OptionData*>> option_index;
     };
 
     struct ParserSettings;

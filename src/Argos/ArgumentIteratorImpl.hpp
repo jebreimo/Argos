@@ -80,7 +80,6 @@ namespace argos
         struct Something
         {
             const CommandData* command;
-            std::vector<std::pair<std::string_view, const OptionData*>> options;
             std::shared_ptr<ParsedArgumentsImpl> parsed_args;
             ArgumentCounter argument_counter;
 
@@ -93,7 +92,6 @@ namespace argos
 
         std::shared_ptr<ParserData> m_data;
         const CommandData* m_command = nullptr;
-        std::vector<std::pair<std::string_view, const OptionData*>> m_options;
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
         std::unique_ptr<IOptionIterator> m_iterator;
         ArgumentCounter m_argument_counter;

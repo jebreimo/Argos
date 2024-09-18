@@ -17,91 +17,6 @@ namespace argos
 {
     namespace
     {
-        using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
-
-        OptionTable make_option_index(
-            const std::vector<std::unique_ptr<OptionData>>& options,
-            bool case_insensitive)
-        {
-            OptionTable index;
-            for (auto& option : options)
-            {
-                for (auto& flag : option->flags)
-                    index.emplace_back(flag, option.get());
-            }
-
-            sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
-            {
-                return is_less(a.first, b.first, case_insensitive);
-            });
-
-            const auto it = adjacent_find(
-                index.begin(), index.end(),
-                [&](const auto& a, const auto& b)
-                {
-                    return are_equal(a.first, b.first, case_insensitive);
-                });
-
-            if (it == index.end())
-                return index;
-
-            if (it->first == next(it)->first)
-            {
-                ARGOS_THROW("Multiple definitions of flag "
-                    + std::string(it->first));
-            }
-
-            ARGOS_THROW("Conflicting flags: " + std::string(it->first)
-                + " and " + std::string(next(it)->first));
-        }
-
-        const OptionData* find_option_impl(const OptionTable& options,
-                                           std::string_view arg,
-                                           bool allow_abbreviations,
-                                           bool case_insensitive)
-        {
-            const auto it = std::lower_bound(
-                options.begin(), options.end(),
-                OptionTable::value_type(arg, nullptr),
-                [&](auto& a, auto& b)
-                {
-                    return is_less(a.first, b.first, case_insensitive);
-                });
-            if (it == options.end())
-                return nullptr;
-            if (it->first == arg)
-                return it->second;
-            if (case_insensitive && are_equal_ci(it->first, arg))
-                return it->second;
-            if (!allow_abbreviations)
-                return nullptr;
-            if (!starts_with(it->first, arg, case_insensitive))
-                return nullptr;
-            const auto nxt = next(it);
-            if (nxt != options.end()
-                && starts_with(nxt->first, arg, case_insensitive))
-                return nullptr;
-            return it->second;
-        }
-
-        const OptionData* find_option(const OptionTable& options,
-                                      std::string_view arg,
-                                      bool allow_abbreviations,
-                                      bool case_insensitive)
-        {
-            auto opt = find_option_impl(options, arg, allow_abbreviations,
-                                        case_insensitive);
-            if (opt == nullptr && arg.size() > 2 && arg.back() == '=')
-            {
-                arg = arg.substr(0, arg.size() - 1);
-                opt = find_option_impl(options, arg, allow_abbreviations,
-                                       case_insensitive);
-                if (opt && opt->argument.empty())
-                    opt = nullptr;
-            }
-            return opt;
-        }
-
         bool is_option(const std::string& s, OptionStyle style)
         {
             if (s.size() < 2)
@@ -140,8 +55,6 @@ namespace argos
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
           m_command(&m_data->command),
-          m_options(make_option_index(m_command->options,
-                                      m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_command, m_data)),
           m_iterator(make_option_iterator(m_data->parser_settings.option_style,
                                           std::move(args)))
@@ -308,8 +221,8 @@ namespace argos
     IteratorResult
     ArgumentIteratorImpl::process_option(const std::string& flag)
     {
-        auto option = find_option(
-            m_options, flag,
+        auto option = m_command->find_option(
+            flag,
             m_data->parser_settings.allow_abbreviated_options,
             m_data->parser_settings.case_insensitive);
         if (option)
@@ -401,8 +314,8 @@ namespace argos
         bool arguments_only = false;
         for (auto arg = it->next(); arg && !arguments_only; arg = it->next())
         {
-            const auto option = find_option(
-                m_options, *arg,
+            const auto option = m_command->find_option(
+                *arg,
                 m_data->parser_settings.allow_abbreviated_options,
                 m_data->parser_settings.case_insensitive
             );
