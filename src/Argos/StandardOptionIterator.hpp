@@ -8,6 +8,7 @@
 #pragma once
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
