@@ -242,6 +242,12 @@ namespace argos
         return {std::move(values), m_args, m_value_id};
     }
 
+    ArgumentValues
+    ArgumentValues::split_n(char separator, size_t num_parts) const
+    {
+        return split(separator, num_parts, num_parts);
+    }
+
     ArgumentValueIterator ArgumentValues::begin() const
     {
         return {m_values.begin(), m_args, m_value_id};

@@ -286,6 +286,22 @@ namespace argos
         split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
 
         /**
+         * @brief Splits each value on @a separator into exactly @a num_parts
+         *  parts and returns the result.
+         *
+         * @note This function is equivalent to calling
+         *  `split(separator, num_parts, num_parts)`.
+         *
+         * @param separator The separator.
+         * @param num_parts The number of parts each value must
+         *  consist of.
+         * @throw ArgosException if any value consists of less than
+         *  @a num_parts parts.
+         */
+        [[nodiscard]] ArgumentValues
+        split_n(char separator, size_t num_parts) const;
+
+        /**
          * @brief Returns an iterator pointing to the first value.
          */
         [[nodiscard]] ArgumentValueIterator begin() const;
