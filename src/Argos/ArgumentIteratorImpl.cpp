@@ -41,15 +41,15 @@ namespace argos
         }
     }
 
-    ArgumentIteratorImpl::Something::Something(const CommandData* cmd,
-                                               std::span<std::string_view> args,
-                                               std::shared_ptr<ParserData> data)
-        : command(cmd),
-          options(make_option_index(cmd->options,
-                                    data->parser_settings.case_insensitive))
-
-    {
-    }
+    // ArgumentIteratorImpl::Something::Something(const CommandData* cmd,
+    //                                            std::span<std::string_view> args,
+    //                                            std::shared_ptr<ParserData> data)
+    //     : command(cmd),
+    //       options(make_option_index(cmd->options,
+    //                                 data->parser_settings.case_insensitive))
+    //
+    // {
+    // }
 
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
@@ -120,11 +120,11 @@ namespace argos
         }
         else
         {
-            if (m_argument_counter.is_complete())
-            {
-                auto result = process_command(*arg);
-                // if (result =)
-            }
+            // if (m_argument_counter.is_complete())
+            // {
+            //     auto result = process_command(*arg);
+            //     // if (result =)
+            // }
             return process_argument(*arg);
         }
     }
