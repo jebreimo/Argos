@@ -81,7 +81,6 @@ add_library(Argos
     src/Argos/ConsoleWidth.hpp
     src/Argos/HelpText.cpp
     src/Argos/HelpText.hpp
-    src/Argos/IOptionIterator.hpp
     src/Argos/Option.cpp
     src/Argos/OptionData.hpp
     src/Argos/OptionIterator.cpp
@@ -107,6 +106,7 @@ add_library(Argos
     src/Argos/TextSource.hpp
     src/Argos/ParseArguments.cpp
     src/Argos/ParseArguments.hpp
+    src/Argos/OptionIteratorWrapper.hpp
 )
 
 target_include_directories(Argos

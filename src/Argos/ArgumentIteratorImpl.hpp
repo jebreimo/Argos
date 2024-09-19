@@ -12,6 +12,7 @@
 #include "ParserData.hpp"
 #include "StandardOptionIterator.hpp"
 #include "OptionData.hpp"
+#include "OptionIteratorWrapper.hpp"
 #include "ParsedArgumentsImpl.hpp"
 
 namespace argos
@@ -78,7 +79,8 @@ namespace argos
         std::shared_ptr<ParserData> m_data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_options;
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        std::unique_ptr<IOptionIterator> m_iterator;
+        // std::unique_ptr<IOptionIterator> m_iterator;
+        OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 
         enum class State

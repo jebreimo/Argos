@@ -110,18 +110,18 @@ namespace argos
             return s[0] == (style == OptionStyle::SLASH ? '/' : '-');
         }
 
-        std::unique_ptr<IOptionIterator>
+        std::variant<OptionIterator, StandardOptionIterator>
         make_option_iterator(OptionStyle style,
                              std::vector<std::string_view> args)
         {
             switch (style)
             {
             case OptionStyle::SLASH:
-                return std::make_unique<OptionIterator>(std::move(args), '/');
+                return OptionIterator(std::move(args), '/');
             case OptionStyle::DASH:
-                return std::make_unique<OptionIterator>(std::move(args), '-');
+                return OptionIterator(std::move(args), '-');
             default:
-                return std::make_unique<StandardOptionIterator>(std::move(args));
+                return StandardOptionIterator(std::move(args));
             }
         }
     }
@@ -132,8 +132,8 @@ namespace argos
           m_options(make_option_index(m_data->options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
-          m_iterator(make_option_iterator(m_data->parser_settings.option_style,
-                                          std::move(args)))
+          m_iterator{make_option_iterator(m_data->parser_settings.option_style,
+                                          std::move(args))}
     {
         for (const auto& option : m_data->options)
         {
@@ -177,8 +177,8 @@ namespace argos
             return {IteratorResultCode::DONE, {}, {}};
 
         const auto arg = m_state == State::ARGUMENTS_AND_OPTIONS
-                             ? m_iterator->next()
-                             : m_iterator->next_value();
+                             ? m_iterator.next()
+                             : m_iterator.next_value();
         if (!arg)
         {
             if (check_argument_and_option_counts())
@@ -217,7 +217,7 @@ namespace argos
                 m_parsed_args->assign_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (const auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator.next_value())
             {
                 arg = m_parsed_args->assign_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -234,7 +234,7 @@ namespace argos
                 m_parsed_args->append_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (const auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator.next_value())
             {
                 arg = m_parsed_args->append_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -320,16 +320,16 @@ namespace argos
             }
         }
         if (!m_data->parser_settings.ignore_undefined_options
-            || !starts_with(m_iterator->current(), flag))
+            || !starts_with(m_iterator.current(), flag))
         {
-            error("Unknown option: " + std::string(m_iterator->current()));
+            error("Unknown option: " + std::string(m_iterator.current()));
             return {IteratorResultCode::ERROR, {}, {}};
         }
         else
         {
             m_parsed_args->add_unprocessed_argument(
-                std::string(m_iterator->current()));
-            return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
+                std::string(m_iterator.current()));
+            return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
     }
 
@@ -362,22 +362,22 @@ namespace argos
             error("Too many arguments, starting with \"" + name + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
-        return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
+        return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
     }
 
     // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
-        for (auto str : m_iterator->remaining_arguments())
+        for (auto str : m_iterator.remaining_arguments())
             m_parsed_args->add_unprocessed_argument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::count_arguments() const
     {
         size_t result = 0;
-        const std::unique_ptr<IOptionIterator> it(m_iterator->clone());
+        auto it = m_iterator;
         bool arguments_only = false;
-        for (auto arg = it->next(); arg && !arguments_only; arg = it->next())
+        for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
         {
             const auto option = find_option(
                 m_options, *arg,
@@ -387,7 +387,7 @@ namespace argos
             if (option)
             {
                 if (!option->argument.empty())
-                    it->next_value();
+                    it.next_value();
                 switch (option->type)
                 {
                 case OptionType::HELP:
@@ -407,7 +407,7 @@ namespace argos
             }
         }
 
-        for (auto arg = it->next(); arg; arg = it->next())
+        for (auto arg = it.next(); arg; arg = it.next())
             ++result;
         return result;
     }
