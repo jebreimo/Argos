@@ -163,6 +163,12 @@ namespace argos
         return {std::move(values), m_args, m_value_id};
     }
 
+    ArgumentValues
+    ArgumentValue::split_n(char separator, size_t num_parts) const
+    {
+        return split(separator, num_parts, num_parts);
+    }
+
     void ArgumentValue::error(const std::string& message) const
     {
         if (!m_args)
