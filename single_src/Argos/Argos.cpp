@@ -733,7 +733,7 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-18.
+// Created by Jan Erik Breimo on 2020-01-09.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
@@ -743,35 +743,7 @@ namespace argos
 
 namespace argos
 {
-    class IOptionIterator
-    {
-    public:
-        virtual ~IOptionIterator() = default;
-
-        virtual std::optional<std::string> next() = 0;
-
-        virtual std::optional<std::string> next_value() = 0;
-
-        [[nodiscard]] virtual std::string_view current() const = 0;
-
-        [[nodiscard]] virtual std::span<std::string_view>
-        remaining_arguments() const = 0;
-
-        [[nodiscard]] virtual IOptionIterator* clone() const = 0;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-09.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    class StandardOptionIterator final : public IOptionIterator
+    class StandardOptionIterator
     {
     public:
         StandardOptionIterator();
@@ -780,19 +752,100 @@ namespace argos
 
         StandardOptionIterator(const StandardOptionIterator& rhs);
 
-        std::optional<std::string> next() final;
+        std::optional<std::string> next();
 
-        std::optional<std::string> next_value() final;
+        std::optional<std::string> next_value();
 
-        [[nodiscard]] std::string_view current() const final;
+        [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const final;
-
-        [[nodiscard]] IOptionIterator* clone() const final;
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
     private:
         std::vector<std::string_view> m_all_args;
         std::span<std::string_view> m_args;
         size_t m_pos = 0;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-18.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    class OptionIterator
+    {
+    public:
+        OptionIterator();
+
+        explicit OptionIterator(std::vector<std::string_view> args,
+                                char prefix);
+
+        OptionIterator(const OptionIterator& rhs);
+
+        std::optional<std::string> next();
+
+        std::optional<std::string> next_value();
+
+        [[nodiscard]] std::string_view current() const;
+
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+    private:
+        std::vector<std::string_view> m_all_args;
+        std::span<std::string_view> m_args;
+        size_t m_pos = 0;
+        char m_prefix = '-';
+    };
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-19.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    struct OptionIteratorWrapper
+    {
+        std::optional<std::string> next()
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                return std::get<OptionIterator>(iterator).next();
+            else
+                return std::get<StandardOptionIterator>(iterator).next();
+        }
+
+        std::optional<std::string> next_value()
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                return std::get<OptionIterator>(iterator).next_value();
+            else
+                return std::get<StandardOptionIterator>(iterator).next_value();
+        }
+
+        [[nodiscard]] std::string_view current() const
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                return std::get<OptionIterator>(iterator).current();
+            else
+                return std::get<StandardOptionIterator>(iterator).current();
+        }
+
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                return std::get<OptionIterator>(iterator).remaining_arguments();
+            else
+                return std::get<StandardOptionIterator>(iterator).remaining_arguments();
+        }
+
+        std::variant<OptionIterator, StandardOptionIterator> iterator;
     };
 }
 
@@ -940,7 +993,8 @@ namespace argos
         std::shared_ptr<ParserData> m_data;
         std::vector<std::pair<std::string_view, const OptionData*>> m_options;
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        std::unique_ptr<IOptionIterator> m_iterator;
+        // std::unique_ptr<IOptionIterator> m_iterator;
+        OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 
         enum class State
@@ -1107,43 +1161,6 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-18.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    class OptionIterator final : public IOptionIterator
-    {
-    public:
-        OptionIterator();
-
-        explicit OptionIterator(std::vector<std::string_view> args,
-                                char prefix);
-
-        OptionIterator(const OptionIterator& rhs);
-
-        std::optional<std::string> next() final;
-
-        std::optional<std::string> next_value() final;
-
-        [[nodiscard]] std::string_view current() const final;
-
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const final;
-
-        [[nodiscard]] OptionIterator* clone() const final;
-    private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
-        size_t m_pos = 0;
-        char m_prefix = '-';
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
 // This file is distributed under the BSD License.
@@ -1249,18 +1266,18 @@ namespace argos
             return s[0] == (style == OptionStyle::SLASH ? '/' : '-');
         }
 
-        std::unique_ptr<IOptionIterator>
+        std::variant<OptionIterator, StandardOptionIterator>
         make_option_iterator(OptionStyle style,
                              std::vector<std::string_view> args)
         {
             switch (style)
             {
             case OptionStyle::SLASH:
-                return std::make_unique<OptionIterator>(std::move(args), '/');
+                return OptionIterator(std::move(args), '/');
             case OptionStyle::DASH:
-                return std::make_unique<OptionIterator>(std::move(args), '-');
+                return OptionIterator(std::move(args), '-');
             default:
-                return std::make_unique<StandardOptionIterator>(std::move(args));
+                return StandardOptionIterator(std::move(args));
             }
         }
     }
@@ -1271,8 +1288,8 @@ namespace argos
           m_options(make_option_index(m_data->command.options,
                                       m_data->parser_settings.case_insensitive)),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
-          m_iterator(make_option_iterator(m_data->parser_settings.option_style,
-                                          std::move(args)))
+          m_iterator{make_option_iterator(m_data->parser_settings.option_style,
+                                          std::move(args))}
     {
         for (const auto& option : m_data->command.options)
         {
@@ -1316,8 +1333,8 @@ namespace argos
             return {IteratorResultCode::DONE, {}, {}};
 
         const auto arg = m_state == State::ARGUMENTS_AND_OPTIONS
-                             ? m_iterator->next()
-                             : m_iterator->next_value();
+                             ? m_iterator.next()
+                             : m_iterator.next_value();
         if (!arg)
         {
             if (check_argument_and_option_counts())
@@ -1356,7 +1373,7 @@ namespace argos
                 m_parsed_args->assign_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (const auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator.next_value())
             {
                 arg = m_parsed_args->assign_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -1373,7 +1390,7 @@ namespace argos
                 m_parsed_args->append_value(opt.value_id, opt.constant,
                                             opt.argument_id);
             }
-            else if (const auto value = m_iterator->next_value())
+            else if (const auto value = m_iterator.next_value())
             {
                 arg = m_parsed_args->append_value(opt.value_id, *value,
                                                   opt.argument_id);
@@ -1459,16 +1476,16 @@ namespace argos
             }
         }
         if (!m_data->parser_settings.ignore_undefined_options
-            || !starts_with(m_iterator->current(), flag))
+            || !starts_with(m_iterator.current(), flag))
         {
-            error("Unknown option: " + std::string(m_iterator->current()));
+            error("Unknown option: " + std::string(m_iterator.current()));
             return {IteratorResultCode::ERROR, {}, {}};
         }
         else
         {
             m_parsed_args->add_unprocessed_argument(
-                std::string(m_iterator->current()));
-            return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
+                std::string(m_iterator.current()));
+            return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
     }
 
@@ -1501,22 +1518,22 @@ namespace argos
             error("Too many arguments, starting with \"" + name + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
-        return {IteratorResultCode::UNKNOWN, {}, m_iterator->current()};
+        return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
     }
 
     // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
-        for (auto str : m_iterator->remaining_arguments())
+        for (auto str : m_iterator.remaining_arguments())
             m_parsed_args->add_unprocessed_argument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::count_arguments() const
     {
         size_t result = 0;
-        const std::unique_ptr<IOptionIterator> it(m_iterator->clone());
+        auto it = m_iterator;
         bool arguments_only = false;
-        for (auto arg = it->next(); arg && !arguments_only; arg = it->next())
+        for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
         {
             const auto option = find_option(
                 m_options, *arg,
@@ -1526,7 +1543,7 @@ namespace argos
             if (option)
             {
                 if (!option->argument.empty())
-                    it->next_value();
+                    it.next_value();
                 switch (option->type)
                 {
                 case OptionType::HELP:
@@ -1546,7 +1563,7 @@ namespace argos
             }
         }
 
-        for (auto arg = it->next(); arg; arg = it->next())
+        for (auto arg = it.next(); arg; arg = it.next())
             ++result;
         return result;
     }
@@ -3925,11 +3942,6 @@ namespace argos
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
     }
-
-    OptionIterator* OptionIterator::clone() const
-    {
-        return new OptionIterator(*this);
-    }
 }
 
 //****************************************************************************
@@ -4017,6 +4029,165 @@ namespace argos
     ArgumentId OptionView::argument_id() const
     {
         return m_option->argument_id;
+    }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-13.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+#include <cstdlib>
+
+namespace argos
+{
+    namespace
+    {
+        template <typename T>
+        T str_to_int(const char* str, char** endp, int base);
+
+        template <>
+        long str_to_int<long>(const char* str, char** endp, int base)
+        {
+            return strtol(str, endp, base);
+        }
+
+        template <>
+        long long str_to_int<long long>(const char* str, char** endp, int base)
+        {
+            return strtoll(str, endp, base);
+        }
+
+        template <>
+        unsigned long
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
+        {
+            return strtoul(str, endp, base);
+        }
+
+        template <>
+        unsigned long long
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
+        {
+            return strtoull(str, endp, base);
+        }
+
+        template <typename T>
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
+    {
+        const auto n = parse_integer_impl<long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(int) != sizeof(long))
+        {
+            if (*n < INT_MIN || INT_MAX < *n)
+                return {};
+        }
+        return static_cast<int>(*n);
+    }
+
+    template <>
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
+    {
+        auto n = parse_integer_impl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long>(str, base);
+    }
+
+    template <>
+    std::optional<long long>
+    parse_integer<long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long>
+    parse_integer<unsigned long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long long>
+    parse_integer<unsigned long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long long>(str, base);
+    }
+
+    namespace
+    {
+        template <typename T>
+        T str_to_float(const char* str, char** endp);
+
+        template <>
+        float str_to_float<float>(const char* str, char** endp)
+        {
+            return strtof(str, endp);
+        }
+
+        template <>
+        double str_to_float<double>(const char* str, char** endp)
+        {
+            return strtod(str, endp);
+        }
+
+        template <typename T>
+        std::optional<T> parse_floating_point_impl(const std::string& str)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_float<T>(str.c_str(), &endp);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<float> parse_floating_point<float>(const std::string& str)
+    {
+        return parse_floating_point_impl<float>(str);
+    }
+
+    template <>
+    std::optional<double> parse_floating_point<double>(const std::string& str)
+    {
+        return parse_floating_point_impl<double>(str);
     }
 }
 
@@ -4644,165 +4815,6 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-13.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-#include <cstdlib>
-
-namespace argos
-{
-    namespace
-    {
-        template <typename T>
-        T str_to_int(const char* str, char** endp, int base);
-
-        template <>
-        long str_to_int<long>(const char* str, char** endp, int base)
-        {
-            return strtol(str, endp, base);
-        }
-
-        template <>
-        long long str_to_int<long long>(const char* str, char** endp, int base)
-        {
-            return strtoll(str, endp, base);
-        }
-
-        template <>
-        unsigned long
-        str_to_int<unsigned long>(const char* str, char** endp, int base)
-        {
-            return strtoul(str, endp, base);
-        }
-
-        template <>
-        unsigned long long
-        str_to_int<unsigned long long>(const char* str, char** endp, int base)
-        {
-            return strtoull(str, endp, base);
-        }
-
-        template <typename T>
-        std::optional<T> parse_integer_impl(const std::string& str, int base)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_int<T>(str.c_str(), &endp, base);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<int> parse_integer<int>(const std::string& str, int base)
-    {
-        const auto n = parse_integer_impl<long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(int) != sizeof(long))
-        {
-            if (*n < INT_MIN || INT_MAX < *n)
-                return {};
-        }
-        return static_cast<int>(*n);
-    }
-
-    template <>
-    std::optional<unsigned>
-    parse_integer<unsigned>(const std::string& str, int base)
-    {
-        auto n = parse_integer_impl<unsigned long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
-        {
-            if (UINT_MAX < *n)
-                return {};
-        }
-        return static_cast<unsigned>(*n);
-    }
-
-    template <>
-    std::optional<long> parse_integer<long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long>(str, base);
-    }
-
-    template <>
-    std::optional<long long>
-    parse_integer<long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long>
-    parse_integer<unsigned long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long long>
-    parse_integer<unsigned long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long long>(str, base);
-    }
-
-    namespace
-    {
-        template <typename T>
-        T str_to_float(const char* str, char** endp);
-
-        template <>
-        float str_to_float<float>(const char* str, char** endp)
-        {
-            return strtof(str, endp);
-        }
-
-        template <>
-        double str_to_float<double>(const char* str, char** endp)
-        {
-            return strtod(str, endp);
-        }
-
-        template <typename T>
-        std::optional<T> parse_floating_point_impl(const std::string& str)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_float<T>(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<float> parse_floating_point<float>(const std::string& str)
-    {
-        return parse_floating_point_impl<float>(str);
-    }
-
-    template <>
-    std::optional<double> parse_floating_point<double>(const std::string& str)
-    {
-        return parse_floating_point_impl<double>(str);
-    }
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
 // This file is distributed under the BSD License.
@@ -4904,11 +4916,6 @@ namespace argos
     std::span<std::string_view> StandardOptionIterator::remaining_arguments() const
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
-    }
-
-    IOptionIterator* StandardOptionIterator::clone() const
-    {
-        return new StandardOptionIterator(*this);
     }
 }
 

@@ -93,9 +93,4 @@ namespace argos
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
     }
-
-    OptionIterator* OptionIterator::clone() const
-    {
-        return new OptionIterator(*this);
-    }
 }
