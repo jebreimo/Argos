@@ -16,7 +16,7 @@ TEST_CASE("Test non-deterministic counter.")
     args.push_back(argos::Argument("1").count(0, 1).release());
     args.push_back(argos::Argument("2").count(2).release());
 
-    REQUIRE(argos::ArgumentCounter::requires_argument_count(args));
+    REQUIRE(argos::ArgumentCounter::requires_argument_count(command));
 
     SECTION("Unknown number of arguments")
     {

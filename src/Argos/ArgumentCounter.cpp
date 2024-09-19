@@ -11,9 +11,9 @@ namespace argos
 {
     namespace
     {
-        size_t find_first_optional(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+        size_t find_first_optional(const CommandData& command)
         {
+            auto& arguments = command.arguments;
             size_t result = 0;
             for (size_t i = 0; i < arguments.size(); ++i)
             {
@@ -28,7 +28,7 @@ namespace argos
             std::vector<std::pair<size_t, const ArgumentData*>>& counters,
             size_t& first_optional)
         {
-            first_optional = find_first_optional(command.arguments);
+            first_optional = find_first_optional(command);
             for (size_t i = 0; i < command.arguments.size(); ++i)
             {
                 auto& a = command.arguments[i];
@@ -45,11 +45,10 @@ namespace argos
         }
 
         std::vector<std::pair<size_t, const ArgumentData*>>
-        make_argument_counters(
-            const CommandData& command,
-            size_t n)
+        make_argument_counters(const CommandData& command,
+                               size_t n)
         {
-            const auto [lo, hi] = ArgumentCounter::get_min_max_count(command.arguments);
+            const auto [lo, hi] = ArgumentCounter::get_min_max_count(command);
             if (n < lo)
                 n = 0;
             else if (n > hi)
@@ -122,11 +121,10 @@ namespace argos
     }
 
     std::pair<size_t, size_t>
-    ArgumentCounter::get_min_max_count(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::get_min_max_count(const CommandData& command)
     {
         size_t lo = 0, hi = 0;
-        for (auto& arg : arguments)
+        for (auto& arg : command.arguments)
         {
             lo += arg->min_count;
             if (hi != SIZE_MAX)
@@ -140,11 +138,10 @@ namespace argos
         return {lo, hi};
     }
 
-    bool ArgumentCounter::requires_argument_count(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    bool ArgumentCounter::requires_argument_count(const CommandData& command)
     {
         bool deterministic = true;
-        for (auto& arg : arguments)
+        for (auto& arg : command.arguments)
         {
             if (!deterministic)
                 return true;

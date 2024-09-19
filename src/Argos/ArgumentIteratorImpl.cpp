@@ -69,7 +69,7 @@ namespace argos
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_command->arguments))
+        if (!ArgumentCounter::requires_argument_count(*m_command))
             m_argument_counter = ArgumentCounter(*m_command);
         else
             m_argument_counter = ArgumentCounter(*m_command,
@@ -368,7 +368,7 @@ namespace argos
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_command->arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(*m_command);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")
