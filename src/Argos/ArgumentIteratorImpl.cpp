@@ -56,8 +56,10 @@ namespace argos
         : m_data(std::move(data)),
           m_command(&m_data->command),
           m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_command, m_data)),
-          m_iterator{make_option_iterator(m_data->parser_settings.option_style,
-                                          std::move(args))}
+          m_iterator{
+              make_option_iterator(m_data->parser_settings.option_style,
+                                   std::move(args))
+          }
     {
         for (const auto& option : m_command->options)
         {
@@ -312,6 +314,7 @@ namespace argos
         size_t result = 0;
         auto it = m_iterator;
         bool arguments_only = false;
+        auto [min_count, _] = ArgumentCounter::get_min_max_count(*m_command);
         for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
         {
             const auto option = m_command->find_option(
@@ -338,6 +341,13 @@ namespace argos
             }
             else if (!is_option(*arg, m_data->parser_settings.option_style))
             {
+                // Check if the argument is a command.
+                if (result >= min_count && m_command->find_command(*arg,
+                        m_data->parser_settings.case_insensitive))
+                {
+                    return result;
+                }
+
                 ++result;
             }
         }

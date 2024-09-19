@@ -10,7 +10,6 @@
 #include <variant>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
-#include "StandardOptionIterator.hpp"
 #include "OptionData.hpp"
 #include "OptionIteratorWrapper.hpp"
 #include "ParsedArgumentsImpl.hpp"
@@ -94,7 +93,6 @@ namespace argos
         std::shared_ptr<ParserData> m_data;
         const CommandData* m_command = nullptr;
         std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        // std::unique_ptr<IOptionIterator> m_iterator;
         OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 

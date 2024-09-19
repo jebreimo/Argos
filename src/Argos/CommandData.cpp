@@ -180,6 +180,7 @@ namespace argos
             if (are_equal(c->name, name, case_insensitive))
                 return c.get();
         }
+        return nullptr;
     }
 
     namespace
