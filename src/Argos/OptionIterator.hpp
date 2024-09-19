@@ -6,12 +6,14 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "IOptionIterator.hpp"
+#include <optional>
+#include <span>
+#include <string_view>
 #include <vector>
 
 namespace argos
 {
-    class OptionIterator final : public IOptionIterator
+    class OptionIterator
     {
     public:
         OptionIterator();
@@ -21,15 +23,13 @@ namespace argos
 
         OptionIterator(const OptionIterator& rhs);
 
-        std::optional<std::string> next() final;
+        std::optional<std::string> next();
 
-        std::optional<std::string> next_value() final;
+        std::optional<std::string> next_value();
 
-        [[nodiscard]] std::string_view current() const final;
+        [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const final;
-
-        [[nodiscard]] OptionIterator* clone() const final;
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
     private:
         std::vector<std::string_view> m_all_args;
         std::span<std::string_view> m_args;

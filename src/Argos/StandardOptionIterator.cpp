@@ -106,9 +106,4 @@ namespace argos
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
     }
-
-    IOptionIterator* StandardOptionIterator::clone() const
-    {
-        return new StandardOptionIterator(*this);
-    }
 }
