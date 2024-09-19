@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     std::vector<Point> corners;
     for (auto value : args.values("X,Y"))
     {
-        auto coordinates = value.split(',', 2, 2).as_doubles();
+        auto coordinates = value.split_n(',', 2).as_doubles();
         corners.push_back({coordinates[0], coordinates[1]});
     }
 

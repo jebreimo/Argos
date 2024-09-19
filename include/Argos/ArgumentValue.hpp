@@ -242,7 +242,7 @@ namespace argos
 
         /**
          * @brief Splits the string from the command line on @a separator and
-         *      returns the resulting parts.
+         *  returns the resulting parts.
          *
          * An error message is displayed if the result has less than
          * @a min_parts parts (i.e. number of separators is less than
@@ -254,10 +254,29 @@ namespace argos
          * limit to the number of parts.
          *
          * @throw ArgosException if @a auto_exit is false and the result
-         *      has less than @a min_parts parts.
+         *  has less than @a min_parts parts.
          */
         [[nodiscard]] ArgumentValues
         split(char separator, size_t min_parts = 0, size_t max_parts = 0) const;
+
+
+        /**
+         * @brief Splits the string from the command line on @a separator into
+         *  exactly @a num_parts parts and returns them.
+         *
+         * An error message is displayed if the result has less than
+         * @a num_parts parts (i.e. number of separators is less than
+         * num_parts - 1). If there are more occurrences of @a separator, they
+         * will be included in the last part.
+         *
+         * @note This function is equivalent to calling
+         *  `split(separator, num_parts, num_parts)`.
+         *
+         * @throw ArgosException if @a auto_exit is false and the result
+         *  has less than @a min_parts parts.
+         */
+        [[nodiscard]] ArgumentValues
+        split_n(char separator, size_t num_parts) const;
 
         /**
          * Display @a message as if it was an error produced within Argos
