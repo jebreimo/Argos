@@ -11,22 +11,12 @@
 
 namespace argos
 {
-    using TextSource = std::variant <std::string, TextCallback>;
+    using TextSource = std::variant<std::string, TextCallback>;
 
     inline std::string get_text(const TextSource& source)
     {
-        struct Visitor
-        {
-            std::string operator()(const std::string& s) const
-            {
-                return s;
-            }
-
-            std::string operator()(const std::function<std::string()>& f) const
-            {
-                return f();
-            }
-        };
-        return std::visit(Visitor(), source);
+        if (auto str = std::get_if<std::string>(&source))
+            return *str;
+        return std::get<TextCallback>(source)();
     }
 }

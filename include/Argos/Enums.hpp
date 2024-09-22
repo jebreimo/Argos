@@ -25,7 +25,7 @@ namespace argos
          *  by one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
-         * equivalent as long as neither of them take an argument.
+         * equivalent as long as `-p` doesn't expect an argument.
          */
         STANDARD,
         /**
