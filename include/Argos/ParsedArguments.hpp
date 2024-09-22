@@ -65,6 +65,10 @@ namespace argos
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        CommandView command() const;
+
+        std::string_view command_name() const;
+
         /**
          * @brief Returns true if the argument or option named @a name
          *  was given on command line.
@@ -80,7 +84,7 @@ namespace argos
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        [[nodiscard]] std::vector<ParsedArguments> commands() const;
+        [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 
         /**
          * @brief Returns the value of the argument with the given name.
@@ -114,6 +118,9 @@ namespace argos
          *
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
+        *
+         * @warning The returned instances are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
@@ -124,12 +131,15 @@ namespace argos
          *
          * Intended for testing and debugging, for instance to list all
          * defined options along with their given values.
+         *
+         * @warning The returned instances are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
 
         [[nodiscard]]
-        std::vector<std::unique_ptr<CommandView>> all_commands() const;
+        std::vector<std::unique_ptr<CommandView>> all_subcommands() const;
 
         /**
          * @brief Returns the parser result code.

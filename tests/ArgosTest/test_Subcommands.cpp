@@ -37,5 +37,7 @@ TEST_CASE("One subcommand with one argument")
         .add(Command("foo")
             .add(Arg("ARG")))
         .parse(argv.size(), argv.data());
-    REQUIRE(args.commands().size() == 1);
+    auto subcommands = args.subcommands();
+    REQUIRE(subcommands[0].command_name() == "foo");
+    REQUIRE(subcommands.size() == 1);
 }

@@ -32,6 +32,16 @@ namespace argos
         return *this;
     }
 
+    CommandView ParsedArguments::command() const
+    {
+        return CommandView(m_impl->command());
+    }
+
+    std::string_view ParsedArguments::command_name() const
+    {
+        return m_impl->command()->name;
+    }
+
     bool ParsedArguments::has(const std::string& name) const
     {
         return m_impl->has(m_impl->get_value_id(name));
@@ -42,7 +52,7 @@ namespace argos
         return m_impl->has(arg.value_id());
     }
 
-    std::vector<ParsedArguments> ParsedArguments::commands() const
+    std::vector<ParsedArguments> ParsedArguments::subcommands() const
     {
         std::vector<ParsedArguments> result;
         for (const auto& subcommand : m_impl->subcommands())
@@ -99,7 +109,7 @@ namespace argos
     }
 
     std::vector<std::unique_ptr<CommandView>>
-    ParsedArguments::all_commands() const
+    ParsedArguments::all_subcommands() const
     {
         std::vector<std::unique_ptr<CommandView>> result;
         for (auto& c : m_impl->parser_data()->command.commands)

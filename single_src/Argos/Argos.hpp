@@ -91,7 +91,7 @@ namespace argos
          *  by one or more characters (long option).
          *
          * Short options can be concatenated making `-pq` and `-p -q`
-         * equivalent as long as neither of them take an argument.
+         * equivalent as long as `-p` doesn't expect an argument.
          */
         STANDARD,
         /**
@@ -205,6 +205,10 @@ namespace argos
         /**
          * @brief The last argument that will be treated as a normal
          *  argument or option.
+         *
+         * If sub-commands are used and multi-command is enabled, then this
+         * this option (or argument) can be used to mark the end of one
+         * sub-command and the start of the next.
          *
          * Unlike STOP, missing arguments and mandatory options will be
          * treated as errors when this option type is used.
@@ -1244,6 +1248,41 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-21.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    struct CommandData;
+
+    class CommandView : public IArgumentView
+    {
+    public:
+        explicit CommandView(const CommandData* command);
+
+        [[nodiscard]] std::string help() const override;
+
+        [[nodiscard]] const std::string& section() const override;
+
+        [[nodiscard]] const std::string& value() const override;
+
+        [[nodiscard]] Visibility visibility() const override;
+
+        [[nodiscard]] int id() const override;
+
+        [[nodiscard]] ValueId value_id() const override;
+
+        [[nodiscard]] ArgumentId argument_id() const override;
+    private:
+        const CommandData* m_command;
+    };
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
@@ -1425,6 +1464,10 @@ namespace argos
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        CommandView command() const;
+
+        std::string_view command_name() const;
+
         /**
          * @brief Returns true if the argument or option named @a name
          *  was given on command line.
@@ -1440,7 +1483,7 @@ namespace argos
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
-        [[nodiscard]] std::vector<ParsedArguments> commands() const;
+        [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 
         /**
          * @brief Returns the value of the argument with the given name.
@@ -1474,6 +1517,9 @@ namespace argos
          *
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
+        *
+         * @warning The returned instances are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
@@ -1484,9 +1530,15 @@ namespace argos
          *
          * Intended for testing and debugging, for instance to list all
          * defined options along with their given values.
+         *
+         * @warning The returned instances are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
+
+        [[nodiscard]]
+        std::vector<std::unique_ptr<CommandView>> all_subcommands() const;
 
         /**
          * @brief Returns the parser result code.
@@ -2532,6 +2584,8 @@ namespace argos
         Command& text(TextId textId, std::function<std::string()> callback);
 
         Command& visibility(Visibility visibility);
+
+        Command& id(int id);
 
         std::unique_ptr<CommandData> release();
     private:

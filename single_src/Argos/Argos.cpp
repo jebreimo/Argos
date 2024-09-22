@@ -27,23 +27,13 @@
 
 namespace argos
 {
-    using TextSource = std::variant <std::string, TextCallback>;
+    using TextSource = std::variant<std::string, TextCallback>;
 
     inline std::string get_text(const TextSource& source)
     {
-        struct Visitor
-        {
-            std::string operator()(const std::string& s) const
-            {
-                return s;
-            }
-
-            std::string operator()(const std::function<std::string()>& f) const
-            {
-                return f();
-            }
-        };
-        return std::visit(Visitor(), source);
+        if (auto str = std::get_if<std::string>(&source))
+            return *str;
+        return std::get<TextCallback>(source)();
     }
 }
 
@@ -231,211 +221,12 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-22.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-#include <memory>
-#include <vector>
-
-namespace argos
-{
-    class ArgumentCounter
-    {
-    public:
-        ArgumentCounter();
-
-        explicit ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
-
-        ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t argument_count);
-
-        const ArgumentData* next_argument();
-
-        [[nodiscard]] size_t count() const;
-
-        [[nodiscard]] bool is_complete() const;
-
-        static std::pair<size_t, size_t> get_min_max_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
-
-        static bool requires_argument_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
-    private:
-        using Counter = std::pair<size_t, const ArgumentData*>;
-        std::vector<Counter> m_counters;
-        size_t m_index = 0;
-        size_t m_first_optional = 0;
-        size_t m_counter = 0;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-22.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    namespace
-    {
-        size_t find_first_optional(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
-        {
-            size_t result = 0;
-            for (size_t i = 0; i < arguments.size(); ++i)
-            {
-                if (arguments[i]->min_count > 0)
-                    result = i + 1;
-            }
-            return result;
-        }
-
-        void make_argument_counters(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                std::vector<std::pair<size_t, const ArgumentData*>>& counters,
-                size_t& first_optional)
-        {
-            first_optional = find_first_optional(arguments);
-            for (size_t i = 0; i < arguments.size(); ++i)
-            {
-                auto& a = arguments[i];
-                if (i + 1 == first_optional && a->min_count != a->max_count)
-                {
-                    counters.emplace_back(a->min_count, a.get());
-                    counters.emplace_back(a->max_count - a->min_count, a.get());
-                }
-                else
-                {
-                    counters.emplace_back(a->max_count, a.get());
-                }
-            }
-        }
-
-        std::vector<std::pair<size_t, const ArgumentData*>>
-        make_argument_counters(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-            size_t n)
-        {
-            const auto [lo, hi] = ArgumentCounter::get_min_max_count(arguments);
-            if (n < lo)
-                n = 0;
-            else if (n > hi)
-                n = hi - lo;
-            else
-                n -= lo;
-
-            std::vector<std::pair<size_t, const ArgumentData*>> result;
-            for (auto& arg : arguments)
-            {
-                if (n == 0 || arg->min_count == arg->max_count)
-                {
-                    result.emplace_back(arg->min_count, arg.get());
-                }
-                else if (arg->min_count + n <= arg->max_count)
-                {
-                    result.emplace_back(arg->min_count + n, arg.get());
-                    n = 0;
-                }
-                else
-                {
-                    result.emplace_back(arg->max_count, arg.get());
-                    n -= arg->max_count - arg->min_count;
-                }
-            }
-            return result;
-        }
-    }
-
-    ArgumentCounter::ArgumentCounter()
-        : m_counters()
-    {}
-
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
-    {
-        make_argument_counters(arguments, m_counters, m_first_optional);
-    }
-
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-        size_t argument_count)
-        : m_counters(make_argument_counters(arguments, argument_count)),
-          m_first_optional(m_counters.size())
-    {}
-
-    const ArgumentData* ArgumentCounter::next_argument()
-    {
-        while (m_index != m_counters.size() && m_counters[m_index].first == 0)
-            ++m_index;
-
-        if (m_index == m_counters.size())
-            return nullptr;
-
-        ++m_counter;
-        --m_counters[m_index].first;
-        return m_counters[m_index].second;
-    }
-
-    size_t ArgumentCounter::count() const
-    {
-        return m_counter;
-    }
-
-    bool ArgumentCounter::is_complete() const
-    {
-        return m_index >= m_first_optional
-               || (m_index + 1 == m_first_optional
-                   && m_counters[m_index].first == 0);
-    }
-
-    std::pair<size_t, size_t>
-    ArgumentCounter::get_min_max_count(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
-    {
-        size_t lo = 0, hi = 0;
-        for (auto& arg : arguments)
-        {
-            lo += arg->min_count;
-            if (hi != SIZE_MAX)
-            {
-                if (arg->max_count > SIZE_MAX - hi)
-                    hi = SIZE_MAX;
-                else
-                    hi += arg->max_count;
-            }
-        }
-        return {lo, hi};
-    }
-
-    bool ArgumentCounter::requires_argument_count(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
-    {
-        bool deterministic = true;
-        for (auto& arg : arguments)
-        {
-            if (!deterministic)
-                return true;
-            if (arg->min_count != arg->max_count)
-                deterministic = false;
-        }
-        return false;
-    }
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <vector>
 
 namespace argos
 {
@@ -467,6 +258,7 @@ namespace argos
 // License text is included with the source distribution.
 //****************************************************************************
 #include <map>
+#include <memory>
 
 namespace argos
 {
@@ -486,12 +278,22 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
+        void build_option_index(bool case_insensitive);
+
+        const OptionData* find_option(std::string_view flag,
+                                      bool allow_abbreviations,
+                                      bool case_insensitive) const;
+
+        const CommandData* find_command(std::string_view name,
+                                        bool case_insensitive) const;
+
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
+        std::string current_section;
+
         std::string name;
         std::map<TextId, TextSource> texts;
-        std::string current_section;
         Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
         /**
@@ -499,6 +301,14 @@ namespace argos
          * command's help.
          */
         std::string section;
+        int id = 0;
+        ArgumentId argument_id = {};
+    private:
+        const OptionData* find_option_impl(std::string_view flag,
+                                           bool allow_abbreviations,
+                                           bool case_insensitive) const;
+
+        std::vector<std::pair<std::string_view, const OptionData*>> option_index;
     };
 
     struct ParserSettings;
@@ -514,6 +324,198 @@ namespace argos
     bool has_flag(const CommandData& cmd,
                   std::string_view flag,
                   const ParserSettings& settings);
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-22.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    class ArgumentCounter
+    {
+    public:
+        ArgumentCounter();
+
+        explicit ArgumentCounter(const CommandData& command);
+
+        ArgumentCounter(const CommandData& command, size_t argument_count);
+
+        const ArgumentData* next_argument();
+
+        [[nodiscard]] size_t count() const;
+
+        [[nodiscard]] bool is_complete() const;
+
+        static std::pair<size_t, size_t>
+        get_min_max_count(const CommandData& command);
+
+        static bool requires_argument_count(const CommandData& command);
+
+    private:
+        using Counter = std::pair<size_t, const ArgumentData*>;
+        std::vector<Counter> m_counters;
+        size_t m_index = 0;
+        size_t m_first_optional = 0;
+        size_t m_counter = 0;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-22.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    namespace
+    {
+        size_t find_first_optional(const CommandData& command)
+        {
+            auto& arguments = command.arguments;
+            size_t result = 0;
+            for (size_t i = 0; i < arguments.size(); ++i)
+            {
+                if (arguments[i]->min_count > 0)
+                    result = i + 1;
+            }
+            return result;
+        }
+
+        void make_argument_counters(
+            const CommandData& command,
+            std::vector<std::pair<size_t, const ArgumentData*>>& counters,
+            size_t& first_optional)
+        {
+            first_optional = find_first_optional(command);
+            for (size_t i = 0; i < command.arguments.size(); ++i)
+            {
+                auto& a = command.arguments[i];
+                if (i + 1 == first_optional && a->min_count != a->max_count)
+                {
+                    counters.emplace_back(a->min_count, a.get());
+                    counters.emplace_back(a->max_count - a->min_count, a.get());
+                }
+                else
+                {
+                    counters.emplace_back(a->max_count, a.get());
+                }
+            }
+        }
+
+        std::vector<std::pair<size_t, const ArgumentData*>>
+        make_argument_counters(const CommandData& command,
+                               size_t n)
+        {
+            const auto [lo, hi] = ArgumentCounter::get_min_max_count(command);
+            if (n < lo)
+                n = 0;
+            else if (n > hi)
+                n = hi - lo;
+            else
+                n -= lo;
+
+            std::vector<std::pair<size_t, const ArgumentData*>> result;
+            for (auto& arg : command.arguments)
+            {
+                if (n == 0 || arg->min_count == arg->max_count)
+                {
+                    result.emplace_back(arg->min_count, arg.get());
+                }
+                else if (arg->min_count + n <= arg->max_count)
+                {
+                    result.emplace_back(arg->min_count + n, arg.get());
+                    n = 0;
+                }
+                else
+                {
+                    result.emplace_back(arg->max_count, arg.get());
+                    n -= arg->max_count - arg->min_count;
+                }
+            }
+            return result;
+        }
+    }
+
+    ArgumentCounter::ArgumentCounter()
+        : m_counters()
+    {
+    }
+
+    ArgumentCounter::ArgumentCounter(const CommandData& command)
+    {
+        make_argument_counters(command, m_counters, m_first_optional);
+    }
+
+    ArgumentCounter::ArgumentCounter(const CommandData& command,
+                                     size_t argument_count)
+        : m_counters(make_argument_counters(command, argument_count)),
+          m_first_optional(m_counters.size())
+    {
+    }
+
+    const ArgumentData* ArgumentCounter::next_argument()
+    {
+        while (m_index != m_counters.size() && m_counters[m_index].first == 0)
+            ++m_index;
+
+        if (m_index == m_counters.size())
+            return nullptr;
+
+        ++m_counter;
+        --m_counters[m_index].first;
+        return m_counters[m_index].second;
+    }
+
+    size_t ArgumentCounter::count() const
+    {
+        return m_counter;
+    }
+
+    bool ArgumentCounter::is_complete() const
+    {
+        return m_index >= m_first_optional
+               || (m_index + 1 == m_first_optional
+                   && m_counters[m_index].first == 0);
+    }
+
+    std::pair<size_t, size_t>
+    ArgumentCounter::get_min_max_count(const CommandData& command)
+    {
+        size_t lo = 0, hi = 0;
+        for (auto& arg : command.arguments)
+        {
+            lo += arg->min_count;
+            if (hi != SIZE_MAX)
+            {
+                if (arg->max_count > SIZE_MAX - hi)
+                    hi = SIZE_MAX;
+                else
+                    hi += arg->max_count;
+            }
+        }
+        return {lo, hi};
+    }
+
+    bool ArgumentCounter::requires_argument_count(const CommandData& command)
+    {
+        bool deterministic = true;
+        for (auto& arg : command.arguments)
+        {
+            if (!deterministic)
+                return true;
+            if (arg->min_count != arg->max_count)
+                deterministic = false;
+        }
+        return false;
+    }
 }
 
 //****************************************************************************
@@ -733,46 +735,13 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-09.
+// Created by Jan Erik Breimo on 2020-02-18.
 //
 // This file is distributed under the BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <optional>
 #include <span>
-
-namespace argos
-{
-    class StandardOptionIterator
-    {
-    public:
-        StandardOptionIterator();
-
-        explicit StandardOptionIterator(std::vector<std::string_view> args);
-
-        StandardOptionIterator(const StandardOptionIterator& rhs);
-
-        std::optional<std::string> next();
-
-        std::optional<std::string> next_value();
-
-        [[nodiscard]] std::string_view current() const;
-
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
-    private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
-        size_t m_pos = 0;
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-18.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
 
 namespace argos
 {
@@ -798,6 +767,39 @@ namespace argos
         std::span<std::string_view> m_args;
         size_t m_pos = 0;
         char m_prefix = '-';
+    };
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-09.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    class StandardOptionIterator
+    {
+    public:
+        StandardOptionIterator();
+
+        explicit StandardOptionIterator(std::vector<std::string_view> args);
+
+        StandardOptionIterator(const StandardOptionIterator& rhs);
+
+        std::optional<std::string> next();
+
+        std::optional<std::string> next_value();
+
+        [[nodiscard]] std::string_view current() const;
+
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+    private:
+        std::vector<std::string_view> m_all_args;
+        std::span<std::string_view> m_args;
+        size_t m_pos = 0;
     };
 }
 
@@ -864,7 +866,8 @@ namespace argos
     class ParsedArgumentsImpl
     {
     public:
-        explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
+        explicit ParsedArgumentsImpl(const CommandData* command,
+                                     std::shared_ptr<ParserData> data);
 
         [[nodiscard]] bool has(ValueId value_id) const;
 
@@ -890,6 +893,12 @@ namespace argos
         [[nodiscard]] std::vector<std::pair<std::string_view, ArgumentId>>
         get_values(ValueId value_id) const;
 
+        const std::shared_ptr<ParsedArgumentsImpl>&
+        add_subcommand(const CommandData* command);
+
+        const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+        subcommands() const;
+
         [[nodiscard]] std::vector<std::unique_ptr<IArgumentView>>
         get_argument_views(ValueId value_id) const;
 
@@ -897,6 +906,8 @@ namespace argos
         get_argument_view(ArgumentId argument_id) const;
 
         [[nodiscard]] const std::shared_ptr<ParserData>& parser_data() const;
+
+        [[nodiscard]] const CommandData* command() const;
 
         [[nodiscard]] ParserResultCode result_code() const;
 
@@ -911,10 +922,15 @@ namespace argos
 
         [[noreturn]]
         void error(const std::string& message, ArgumentId argument_id);
+
     private:
+        /// The values received from ArgumentIteratorImpl.
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_values;
+        /// Index from flag, argument name or alias to ValueId and ArgumentId
         std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_ids;
         std::vector<std::string> m_unprocessed_arguments;
+        const CommandData* m_command;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_commands;
         std::shared_ptr<ParserData> m_data;
         ParserResultCode m_result_code = ParserResultCode::NONE;
         const OptionData* m_stop_option = nullptr;
@@ -935,6 +951,7 @@ namespace argos
     {
         ARGUMENT,
         OPTION,
+        COMMAND,
         DONE,
         UNKNOWN,
         ERROR
@@ -943,7 +960,8 @@ namespace argos
     using IteratorResultData = std::variant<
         std::monostate,
         const ArgumentData*,
-        const OptionData*>;
+        const OptionData*,
+        const CommandData*>;
 
     using IteratorResult = std::tuple<
         IteratorResultCode,
@@ -965,6 +983,9 @@ namespace argos
         [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
         parsed_arguments() const;
 
+        [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
+        toplevel_parsed_arguments() const;
+
     private:
         enum class OptionResult
         {
@@ -982,6 +1003,8 @@ namespace argos
 
         IteratorResult process_argument(const std::string& name);
 
+        IteratorResult process_command(const CommandData* command);
+
         void copy_remaining_arguments_to_parser_result();
 
         [[nodiscard]] size_t count_arguments() const;
@@ -991,9 +1014,8 @@ namespace argos
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;
-        std::vector<std::pair<std::string_view, const OptionData*>> m_options;
-        std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        // std::unique_ptr<IOptionIterator> m_iterator;
+        const CommandData* m_command = nullptr;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
         OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 
@@ -1052,6 +1074,11 @@ namespace argos
         case IteratorResultCode::OPTION:
             arg = std::make_unique<OptionView>(
                     std::get<const OptionData*>(std::get<1>(res)));
+            value = std::get<2>(res);
+            return true;
+        case IteratorResultCode::COMMAND:
+            arg = std::make_unique<CommandView>(
+                    std::get<const CommandData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
         case IteratorResultCode::UNKNOWN:
@@ -1173,91 +1200,6 @@ namespace argos
 {
     namespace
     {
-        using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
-
-        OptionTable make_option_index(
-            const std::vector<std::unique_ptr<OptionData>>& options,
-            bool case_insensitive)
-        {
-            OptionTable index;
-            for (auto& option : options)
-            {
-                for (auto& flag : option->flags)
-                    index.emplace_back(flag, option.get());
-            }
-
-            sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
-            {
-                return is_less(a.first, b.first, case_insensitive);
-            });
-
-            const auto it = adjacent_find(
-                index.begin(), index.end(),
-                [&](const auto& a, const auto& b)
-                {
-                    return are_equal(a.first, b.first, case_insensitive);
-                });
-
-            if (it == index.end())
-                return index;
-
-            if (it->first == next(it)->first)
-            {
-                ARGOS_THROW("Multiple definitions of flag "
-                            + std::string(it->first));
-            }
-
-            ARGOS_THROW("Conflicting flags: " + std::string(it->first)
-                        + " and " + std::string(next(it)->first));
-        }
-
-        const OptionData* find_option_impl(const OptionTable& options,
-                                           std::string_view arg,
-                                           bool allow_abbreviations,
-                                           bool case_insensitive)
-        {
-            const auto it = std::lower_bound(
-                options.begin(), options.end(),
-                OptionTable::value_type(arg, nullptr),
-                [&](auto& a, auto& b)
-                {
-                    return is_less(a.first, b.first, case_insensitive);
-                });
-            if (it == options.end())
-                return nullptr;
-            if (it->first == arg)
-                return it->second;
-            if (case_insensitive && are_equal_ci(it->first, arg))
-                return it->second;
-            if (!allow_abbreviations)
-                return nullptr;
-            if (!starts_with(it->first, arg, case_insensitive))
-                return nullptr;
-            const auto nxt = next(it);
-            if (nxt != options.end()
-                && starts_with(nxt->first, arg, case_insensitive))
-                return nullptr;
-            return it->second;
-        }
-
-        const OptionData* find_option(const OptionTable& options,
-                                      std::string_view arg,
-                                      bool allow_abbreviations,
-                                      bool case_insensitive)
-        {
-            auto opt = find_option_impl(options, arg, allow_abbreviations,
-                                        case_insensitive);
-            if (opt == nullptr && arg.size() > 2 && arg.back() == '=')
-            {
-                arg = arg.substr(0, arg.size() - 1);
-                opt = find_option_impl(options, arg, allow_abbreviations,
-                                       case_insensitive);
-                if (opt && opt->argument.empty())
-                    opt = nullptr;
-            }
-            return opt;
-        }
-
         bool is_option(const std::string& s, OptionStyle style)
         {
             if (s.size() < 2)
@@ -1285,26 +1227,28 @@ namespace argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
-          m_options(make_option_index(m_data->command.options,
-                                      m_data->parser_settings.case_insensitive)),
-          m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
-          m_iterator{make_option_iterator(m_data->parser_settings.option_style,
-                                          std::move(args))}
+          m_command(&m_data->command),
+          m_parsed_args{std::make_shared<ParsedArgumentsImpl>(m_command, m_data)},
+          m_iterator{
+              make_option_iterator(m_data->parser_settings.option_style,
+                                   std::move(args))
+          }
     {
-        for (const auto& option : m_data->command.options)
+        auto& parsed_args = *parsed_arguments();
+        for (const auto& option : m_command->options)
         {
             if (!option->initial_value.empty())
             {
-                m_parsed_args->append_value(option->value_id,
-                                            option->initial_value,
-                                            option->argument_id);
+                parsed_args.append_value(option->value_id,
+                                         option->initial_value,
+                                         option->argument_id);
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_data->command.arguments))
-            m_argument_counter = ArgumentCounter(m_data->command.arguments);
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+            m_argument_counter = ArgumentCounter(*m_command);
         else
-            m_argument_counter = ArgumentCounter(m_data->command.arguments,
+            m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
     }
 
@@ -1322,7 +1266,7 @@ namespace argos
                 break;
             }
         }
-        return iterator.m_parsed_args;
+        return iterator.toplevel_parsed_arguments();
     }
 
     IteratorResult ArgumentIteratorImpl::next()
@@ -1350,6 +1294,12 @@ namespace argos
         }
         else
         {
+            if (m_argument_counter.is_complete())
+            {
+                if (auto cmd = m_command->find_command(
+                    *arg, m_data->parser_settings.case_insensitive))
+                    return process_command(cmd);
+            }
             return process_argument(*arg);
         }
     }
@@ -1357,26 +1307,33 @@ namespace argos
     const std::shared_ptr<ParsedArgumentsImpl>&
     ArgumentIteratorImpl::parsed_arguments() const
     {
-        return m_parsed_args;
+        return m_parsed_args.back();
+    }
+
+    const std::shared_ptr<ParsedArgumentsImpl>&
+    ArgumentIteratorImpl::toplevel_parsed_arguments() const
+    {
+        return m_parsed_args.front();
     }
 
     std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
     ArgumentIteratorImpl::process_option(const OptionData& opt,
                                          const std::string& flag)
     {
+        const auto& parsed_args = parsed_arguments();
         std::string_view arg;
         switch (opt.operation)
         {
         case OptionOperation::ASSIGN:
             if (!opt.constant.empty())
             {
-                m_parsed_args->assign_value(opt.value_id, opt.constant,
-                                            opt.argument_id);
+                parsed_args->assign_value(opt.value_id, opt.constant,
+                                          opt.argument_id);
             }
             else if (const auto value = m_iterator.next_value())
             {
-                arg = m_parsed_args->assign_value(opt.value_id, *value,
-                                                  opt.argument_id);
+                arg = parsed_args->assign_value(opt.value_id, *value,
+                                                opt.argument_id);
             }
             else
             {
@@ -1387,13 +1344,13 @@ namespace argos
         case OptionOperation::APPEND:
             if (!opt.constant.empty())
             {
-                m_parsed_args->append_value(opt.value_id, opt.constant,
-                                            opt.argument_id);
+                parsed_args->append_value(opt.value_id, opt.constant,
+                                          opt.argument_id);
             }
             else if (const auto value = m_iterator.next_value())
             {
-                arg = m_parsed_args->append_value(opt.value_id, *value,
-                                                  opt.argument_id);
+                arg = parsed_args->append_value(opt.value_id, *value,
+                                                opt.argument_id);
             }
             else
             {
@@ -1402,7 +1359,7 @@ namespace argos
             }
             break;
         case OptionOperation::CLEAR:
-            m_parsed_args->clear_value(opt.value_id);
+            parsed_args->clear_value(opt.value_id);
             break;
         case OptionOperation::NONE:
             break;
@@ -1411,13 +1368,13 @@ namespace argos
         if (opt.callback)
         {
             opt.callback(OptionView(&opt), arg,
-                         ParsedArgumentsBuilder(m_parsed_args));
+                         ParsedArgumentsBuilder(parsed_args));
         }
         if (m_data->parser_settings.option_callback)
         {
             m_data->parser_settings.option_callback(
                 OptionView(&opt), arg,
-                ParsedArgumentsBuilder(m_parsed_args));
+                ParsedArgumentsBuilder(parsed_args));
         }
 
         switch (opt.type)
@@ -1425,15 +1382,15 @@ namespace argos
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            write_help_text(*m_data, m_data->command);
+            write_help_text(*m_data, *m_command);
             [[fallthrough]];
         case OptionType::EXIT:
             m_state = State::DONE;
-            m_parsed_args->set_breaking_option(&opt);
+            parsed_args->set_breaking_option(&opt);
             return {OptionResult::EXIT, arg};
         case OptionType::STOP:
             m_state = State::DONE;
-            m_parsed_args->set_breaking_option(&opt);
+            parsed_args->set_breaking_option(&opt);
             return {OptionResult::STOP, arg};
         case OptionType::LAST_ARGUMENT:
             m_state = State::DONE;
@@ -1448,8 +1405,8 @@ namespace argos
     IteratorResult
     ArgumentIteratorImpl::process_option(const std::string& flag)
     {
-        auto option = find_option(
-            m_options, flag,
+        auto option = m_command->find_option(
+            flag,
             m_data->parser_settings.allow_abbreviated_options,
             m_data->parser_settings.case_insensitive);
         if (option)
@@ -1483,7 +1440,7 @@ namespace argos
         }
         else
         {
-            m_parsed_args->add_unprocessed_argument(
+            parsed_arguments()->add_unprocessed_argument(
                 std::string(m_iterator.current()));
             return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
@@ -1492,26 +1449,27 @@ namespace argos
     IteratorResult
     ArgumentIteratorImpl::process_argument(const std::string& name)
     {
+        const auto& parsed_args = parsed_arguments();
         if (auto argument = m_argument_counter.next_argument())
         {
-            auto s = m_parsed_args->append_value(argument->value_id, name,
-                                                 argument->argument_id);
+            auto s = parsed_args->append_value(argument->value_id, name,
+                                               argument->argument_id);
             if (argument->callback)
             {
                 argument->callback(ArgumentView(argument), s,
-                                   ParsedArgumentsBuilder(m_parsed_args));
+                                   ParsedArgumentsBuilder(parsed_args));
             }
             if (m_data->parser_settings.argument_callback)
             {
                 m_data->parser_settings.argument_callback(
                     ArgumentView(argument), s,
-                    ParsedArgumentsBuilder(m_parsed_args));
+                    ParsedArgumentsBuilder(parsed_args));
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
         else if (m_data->parser_settings.ignore_undefined_arguments)
         {
-            m_parsed_args->add_unprocessed_argument(name);
+            parsed_args->add_unprocessed_argument(name);
         }
         else
         {
@@ -1521,11 +1479,25 @@ namespace argos
         return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
     }
 
+    IteratorResult
+    ArgumentIteratorImpl::process_command(const CommandData* command)
+    {
+        m_parsed_args.push_back(parsed_arguments()->add_subcommand(command));
+        m_command = command;
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+            m_argument_counter = ArgumentCounter(*m_command);
+        else
+            m_argument_counter = ArgumentCounter(*m_command,
+                                                 count_arguments());
+        return {IteratorResultCode::COMMAND, command, m_iterator.current()};
+    }
+
     // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
+        auto& parsed_args = *parsed_arguments();
         for (auto str : m_iterator.remaining_arguments())
-            m_parsed_args->add_unprocessed_argument(std::string(str));
+            parsed_args.add_unprocessed_argument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::count_arguments() const
@@ -1533,13 +1505,14 @@ namespace argos
         size_t result = 0;
         auto it = m_iterator;
         bool arguments_only = false;
+        auto [min_count, _] = ArgumentCounter::get_min_max_count(*m_command);
         for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
         {
-            const auto option = find_option(
-                m_options, *arg,
+            const auto option = m_command->find_option(
+                *arg,
                 m_data->parser_settings.allow_abbreviated_options,
                 m_data->parser_settings.case_insensitive
-                );
+            );
             if (option)
             {
                 if (!option->argument.empty())
@@ -1559,6 +1532,13 @@ namespace argos
             }
             else if (!is_option(*arg, m_data->parser_settings.option_style))
             {
+                // Check if the argument is a command.
+                if (result >= min_count && m_command->find_command(*arg,
+                        m_data->parser_settings.case_insensitive))
+                {
+                    return result;
+                }
+
                 ++result;
             }
         }
@@ -1570,9 +1550,10 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (const auto& o : m_data->command.options)
+        auto& parsed_args = *parsed_arguments();
+        for (const auto& o : m_command->options)
         {
-            if (!o->optional && !m_parsed_args->has(o->value_id))
+            if (!o->optional && !parsed_args.has(o->value_id))
             {
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)
@@ -1584,12 +1565,12 @@ namespace argos
         if (m_argument_counter.is_complete())
         {
             m_state = State::DONE;
-            m_parsed_args->set_result_code(ParserResultCode::SUCCESS);
+            parsed_args.set_result_code(ParserResultCode::SUCCESS);
             return true;
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->command.arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(*m_command);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")
@@ -1602,11 +1583,11 @@ namespace argos
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            write_error_message(*m_data, m_data->command, message);
+            write_error_message(*m_data, *m_command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();
-        m_parsed_args->set_result_code(ParserResultCode::FAILURE);
+        parsed_arguments()->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
 }
@@ -1756,6 +1737,7 @@ namespace argos
         auto cmd = command.release();
         if (!cmd)
             ARGOS_THROW("Command is empty (it has probably already been added).");
+        cmd->argument_id = next_argument_id();
         if (cmd->section.empty())
             cmd->section = m_data->command.current_section;
         m_data->command.commands.push_back(std::move(cmd));
@@ -2829,6 +2811,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::id(int id)
+    {
+        check_command();
+        data_->id = id;
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);
@@ -2858,7 +2847,9 @@ namespace argos
           texts(rhs.texts),
           current_section(rhs.current_section),
           require_command(rhs.require_command),
-          section(rhs.section)
+          section(rhs.section),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
     {
         arguments.reserve(rhs.arguments.size());
         for (const auto& a : rhs.arguments)
@@ -2876,7 +2867,9 @@ namespace argos
           texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section)),
           require_command(rhs.require_command),
-          section(std::move(rhs.section))
+          section(std::move(rhs.section)),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
     {
     }
 
@@ -2891,6 +2884,8 @@ namespace argos
         current_section = rhs.current_section;
         require_command = rhs.require_command;
         section = rhs.section;
+        id = rhs.id;
+        argument_id = rhs.argument_id;
 
         arguments.clear();
         arguments.reserve(rhs.arguments.size());
@@ -2923,7 +2918,102 @@ namespace argos
         commands = std::move(rhs.commands);
         require_command = rhs.require_command;
         section = std::move(rhs.section);
+        id = rhs.id;
+        argument_id = rhs.argument_id;
         return *this;
+    }
+
+    void CommandData::build_option_index(bool case_insensitive)
+    {
+        std::vector<std::pair<std::string_view, const OptionData*>> index;
+        for (auto& option : options)
+        {
+            for (auto& flag : option->flags)
+                index.emplace_back(flag, option.get());
+        }
+
+        sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
+        {
+            return is_less(a.first, b.first, case_insensitive);
+        });
+
+        const auto it = adjacent_find(
+            index.begin(), index.end(),
+            [&](const auto& a, const auto& b)
+            {
+                return are_equal(a.first, b.first, case_insensitive);
+            });
+
+        if (it == index.end())
+        {
+            option_index = std::move(index);
+            return;
+        }
+
+        if (it->first == next(it)->first)
+        {
+            ARGOS_THROW("Multiple definitions of flag "
+                + std::string(it->first));
+        }
+
+        ARGOS_THROW("Conflicting flags: " + std::string(it->first)
+            + " and " + std::string(next(it)->first));
+    }
+
+    const OptionData* CommandData::find_option(std::string_view flag,
+                                               bool allow_abbreviations,
+                                               bool case_insensitive) const
+    {
+        auto opt = find_option_impl(flag, allow_abbreviations,
+                                    case_insensitive);
+        if (opt == nullptr && flag.size() > 2 && flag.back() == '=')
+        {
+            flag = flag.substr(0, flag.size() - 1);
+            opt = find_option_impl(flag, allow_abbreviations,
+                                   case_insensitive);
+            if (opt && opt->argument.empty())
+                opt = nullptr;
+        }
+        return opt;
+    }
+
+    const OptionData* CommandData::find_option_impl(std::string_view flag,
+                                                    bool allow_abbreviations,
+                                                    bool case_insensitive) const
+    {
+        const auto it = std::lower_bound(
+            option_index.begin(), option_index.end(),
+            std::pair(flag, nullptr),
+            [&](auto& a, auto& b)
+            {
+                return is_less(a.first, b.first, case_insensitive);
+            });
+        if (it == option_index.end())
+            return nullptr;
+        if (it->first == flag)
+            return it->second;
+        if (case_insensitive && are_equal_ci(it->first, flag))
+            return it->second;
+        if (!allow_abbreviations)
+            return nullptr;
+        if (!starts_with(it->first, flag, case_insensitive))
+            return nullptr;
+        const auto nxt = next(it);
+        if (nxt != option_index.end()
+            && starts_with(nxt->first, flag, case_insensitive))
+            return nullptr;
+        return it->second;
+    }
+
+    const CommandData* CommandData::find_command(std::string_view name,
+                                                 bool case_insensitive) const
+    {
+        for (const auto& c : commands)
+        {
+            if (are_equal(c->name, name, case_insensitive))
+                return c.get();
+        }
+        return nullptr;
     }
 
     namespace
@@ -3088,8 +3178,60 @@ namespace argos
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
         start_id = set_value_ids(cmd, start_id);
+        cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
             finish_initialization(*c, data, start_id);
+    }
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-21.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    CommandView::CommandView(const CommandData* command)
+        : m_command(command)
+    {}
+
+    std::string CommandView::help() const
+    {
+        auto it = m_command->texts.find(TextId::ABOUT);
+        return it != m_command->texts.end() ? get_text(it->second) : "";
+    }
+
+    const std::string& CommandView::section() const
+    {
+        return m_command->section;
+    }
+
+    const std::string& CommandView::value() const
+    {
+        return m_command->name;
+    }
+
+    Visibility CommandView::visibility() const
+    {
+        return m_command->visibility;
+    }
+
+    int CommandView::id() const
+    {
+        return m_command->id;
+    }
+
+    ValueId CommandView::value_id() const
+    {
+        return {};
+    }
+
+    ArgumentId CommandView::argument_id() const
+    {
+        return m_command->argument_id;
     }
 }
 
@@ -4219,6 +4361,16 @@ namespace argos
         return *this;
     }
 
+    CommandView ParsedArguments::command() const
+    {
+        return CommandView(m_impl->command());
+    }
+
+    std::string_view ParsedArguments::command_name() const
+    {
+        return m_impl->command()->name;
+    }
+
     bool ParsedArguments::has(const std::string& name) const
     {
         return m_impl->has(m_impl->get_value_id(name));
@@ -4229,9 +4381,12 @@ namespace argos
         return m_impl->has(arg.value_id());
     }
 
-    std::vector<ParsedArguments> ParsedArguments::commands() const
+    std::vector<ParsedArguments> ParsedArguments::subcommands() const
     {
-        return {};
+        std::vector<ParsedArguments> result;
+        for (const auto& subcommand : m_impl->subcommands())
+            result.emplace_back(subcommand);
+        return result;
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const
@@ -4279,6 +4434,15 @@ namespace argos
         std::vector<std::unique_ptr<OptionView>> result;
         for (auto& o : m_impl->parser_data()->command.options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
+        return result;
+    }
+
+    std::vector<std::unique_ptr<CommandView>>
+    ParsedArguments::all_subcommands() const
+    {
+        std::vector<std::unique_ptr<CommandView>> result;
+        for (auto& c : m_impl->parser_data()->command.commands)
+            result.emplace_back(std::make_unique<CommandView>(c.get()));
         return result;
     }
 
@@ -4556,17 +4720,19 @@ namespace argos
         }
     }
 
-    ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
-        : m_data(std::move(data))
+    ParsedArgumentsImpl::ParsedArgumentsImpl(const CommandData* command,
+                                             std::shared_ptr<ParserData> data)
+        : m_command(command),
+          m_data(std::move(data))
     {
         assert(m_data);
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
             if (!a->value.empty())
                 m_ids.emplace_back(a->value, a->value_id, a->argument_id);
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->operation == OptionOperation::NONE)
                 continue;
@@ -4640,7 +4806,7 @@ namespace argos
     {
         using std::get;
         auto it = lower_bound(m_ids.begin(), m_ids.end(), value_name,
-                              [](auto& p, auto& s) {return get<0>(p) < s;});
+                              [](auto& p, auto& s) { return get<0>(p) < s; });
         if (it == m_ids.end() || get<0>(*it) != value_name)
             ARGOS_THROW("Unknown value: " + std::string(value_name));
         return get<1>(*it);
@@ -4670,16 +4836,30 @@ namespace argos
         return result;
     }
 
+    const std::shared_ptr<ParsedArgumentsImpl>&
+    ParsedArgumentsImpl::add_subcommand(const CommandData* command)
+    {
+        m_commands.push_back(std::make_shared<ParsedArgumentsImpl>(
+            command, m_data));
+        return m_commands.back();
+    }
+
+    const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+    ParsedArgumentsImpl::subcommands() const
+    {
+        return m_commands;
+    }
+
     std::vector<std::unique_ptr<IArgumentView>>
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->value_id == value_id)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->value_id == value_id)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
@@ -4690,12 +4870,12 @@ namespace argos
     std::unique_ptr<IArgumentView>
     ParsedArgumentsImpl::get_argument_view(ArgumentId argument_id) const
     {
-        for (auto& a : m_data->command.arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->argument_id == argument_id)
                 return std::make_unique<ArgumentView>(a.get());
         }
-        for (auto& o : m_data->command.options)
+        for (auto& o : m_command->options)
         {
             if (o->argument_id == argument_id)
                 return std::make_unique<OptionView>(o.get());
@@ -4706,6 +4886,11 @@ namespace argos
     const std::shared_ptr<ParserData>& ParsedArgumentsImpl::parser_data() const
     {
         return m_data;
+    }
+
+    const CommandData* ParsedArgumentsImpl::command() const
+    {
+        return m_command;
     }
 
     ParserResultCode ParsedArgumentsImpl::result_code() const
@@ -4731,7 +4916,7 @@ namespace argos
 
     void ParsedArgumentsImpl::error(const std::string& message) const
     {
-        write_error_message(*m_data, m_data->command, message);
+        write_error_message(*m_data, *m_command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
@@ -4741,7 +4926,7 @@ namespace argos
     void ParsedArgumentsImpl::error(const std::string& message,
                                     ArgumentId argument_id)
     {
-        write_error_message(*m_data, m_data->command, message, argument_id);
+        write_error_message(*m_data, *m_command, message, argument_id);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
