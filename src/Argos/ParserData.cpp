@@ -64,37 +64,4 @@ namespace argos
         add_version_option(data);
         finish_initialization(data.command, data);
     }
-
-    bool find_command_path(const std::vector<std::unique_ptr<CommandData>>& commands,
-                           const CommandData* command,
-                           std::vector<const CommandData*> path)
-    {
-        for (auto& cmd : commands)
-        {
-            path.push_back(cmd.get());
-            if (cmd.get() == command
-                || find_command_path(cmd->commands, command, path))
-            {
-                return true;
-            }
-            path.pop_back();
-        }
-        return false;
-    }
-
-    std::vector<const CommandData*>
-    get_command_path(const ParserData* parser_data, const CommandData* cmd)
-    {
-        // Use depth-first search to find the path to the command. While
-        // inefficient, it is unlikely that the command hierarchy will be
-        // deep enough for this to be a problem.
-        std::vector<const CommandData*> path;
-        path.push_back(&parser_data->command);
-        if (&parser_data->command == cmd
-            || find_command_path(parser_data->command.commands, cmd, path))
-        {
-            return path;
-        }
-        return {};
-    }
 }

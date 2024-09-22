@@ -18,9 +18,10 @@ namespace argos
     CommandData::CommandData() = default;
 
     CommandData::CommandData(const CommandData& rhs)
-        : name(rhs.name),
+        : current_section(rhs.current_section),
+          name(rhs.name),
+          full_name(rhs.full_name),
           texts(rhs.texts),
-          current_section(rhs.current_section),
           require_command(rhs.require_command),
           section(rhs.section),
           id(rhs.id),
@@ -38,9 +39,10 @@ namespace argos
         : arguments(std::move(rhs.arguments)),
           options(std::move(rhs.options)),
           commands(std::move(rhs.commands)),
-          name(std::move(rhs.name)),
-          texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section)),
+          name(std::move(rhs.name)),
+          full_name(std::move(rhs.full_name)),
+          texts(std::move(rhs.texts)),
           require_command(rhs.require_command),
           section(std::move(rhs.section)),
           id(rhs.id),
@@ -54,9 +56,10 @@ namespace argos
     {
         if (&rhs == this)
             return *this;
-        name = rhs.name;
-        texts = rhs.texts;
         current_section = rhs.current_section;
+        name = rhs.name;
+        full_name = rhs.full_name;
+        texts = rhs.texts;
         require_command = rhs.require_command;
         section = rhs.section;
         id = rhs.id;
@@ -85,9 +88,10 @@ namespace argos
         if (&rhs == this)
             return *this;
 
-        name = std::move(rhs.name);
-        texts = std::move(rhs.texts);
         current_section = std::move(rhs.current_section);
+        name = std::move(rhs.name);
+        full_name = std::move(rhs.full_name);
+        texts = std::move(rhs.texts);
         arguments = std::move(rhs.arguments);
         options = std::move(rhs.options);
         commands = std::move(rhs.commands);
@@ -350,11 +354,16 @@ namespace argos
                                const ParserData& data,
                                ValueId start_id)
     {
+        if (cmd.full_name.empty())
+            cmd.full_name = cmd.name;
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
         start_id = set_value_ids(cmd, start_id);
         cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
+        {
+            c->full_name = cmd.name + ' ' + c->name;
             finish_initialization(*c, data, start_id);
+        }
     }
 }

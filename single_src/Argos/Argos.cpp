@@ -293,6 +293,7 @@ namespace argos
         std::string current_section;
 
         std::string name;
+        std::string full_name;
         std::map<TextId, TextSource> texts;
         Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
@@ -2843,9 +2844,10 @@ namespace argos
     CommandData::CommandData() = default;
 
     CommandData::CommandData(const CommandData& rhs)
-        : name(rhs.name),
+        : current_section(rhs.current_section),
+          name(rhs.name),
+          full_name(rhs.full_name),
           texts(rhs.texts),
-          current_section(rhs.current_section),
           require_command(rhs.require_command),
           section(rhs.section),
           id(rhs.id),
@@ -2863,9 +2865,10 @@ namespace argos
         : arguments(std::move(rhs.arguments)),
           options(std::move(rhs.options)),
           commands(std::move(rhs.commands)),
-          name(std::move(rhs.name)),
-          texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section)),
+          name(std::move(rhs.name)),
+          full_name(std::move(rhs.full_name)),
+          texts(std::move(rhs.texts)),
           require_command(rhs.require_command),
           section(std::move(rhs.section)),
           id(rhs.id),
@@ -2879,9 +2882,10 @@ namespace argos
     {
         if (&rhs == this)
             return *this;
-        name = rhs.name;
-        texts = rhs.texts;
         current_section = rhs.current_section;
+        name = rhs.name;
+        full_name = rhs.full_name;
+        texts = rhs.texts;
         require_command = rhs.require_command;
         section = rhs.section;
         id = rhs.id;
@@ -2910,9 +2914,10 @@ namespace argos
         if (&rhs == this)
             return *this;
 
-        name = std::move(rhs.name);
-        texts = std::move(rhs.texts);
         current_section = std::move(rhs.current_section);
+        name = std::move(rhs.name);
+        full_name = std::move(rhs.full_name);
+        texts = std::move(rhs.texts);
         arguments = std::move(rhs.arguments);
         options = std::move(rhs.options);
         commands = std::move(rhs.commands);
@@ -3175,12 +3180,17 @@ namespace argos
                                const ParserData& data,
                                ValueId start_id)
     {
+        if (cmd.full_name.empty())
+            cmd.full_name = cmd.name;
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
         start_id = set_value_ids(cmd, start_id);
         cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
+        {
+            c->full_name = cmd.name + ' ' + c->name;
             finish_initialization(*c, data, start_id);
+        }
     }
 }
 
@@ -3459,9 +3469,9 @@ namespace argos
         }
 
         void write_stop_and_help_usage(TextFormatter& formatter,
-                                       const CommandData& data)
+                                       const CommandData& cmd)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : cmd.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -3469,7 +3479,7 @@ namespace argos
                     continue;
                 }
 
-                formatter.write_words(data.name);
+                formatter.write_words(cmd.full_name);
                 formatter.write_words(" ");
                 formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
                 formatter.write_lines(get_brief_option_name(*opt, true));
@@ -3666,7 +3676,7 @@ namespace argos
 
             formatter.push_indentation(2);
             write_stop_and_help_usage(formatter, command);
-            formatter.write_words(command.name);
+            formatter.write_words(command.full_name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
 

@@ -41,3 +41,19 @@ TEST_CASE("One subcommand with one argument")
     REQUIRE(subcommands[0].command_name() == "foo");
     REQUIRE(subcommands.size() == 1);
 }
+
+TEST_CASE("Check help text for subcommand")
+{
+    std::stringstream stream;
+    using namespace argos;
+    Argv argv{{"test", "foo", "--help"}};
+    auto parser = ArgumentParser()
+        .auto_exit(false)
+        .add(Command("foo").about("Does foo things"))
+        .add(Command("bar").about("Does bar things"))
+        .stream(&stream)
+        .auto_exit(false)
+        .parse(argv.size(), argv.data());
+    auto help_text = stream.str();
+    REQUIRE(help_text.find("test foo") != std::string::npos);
+}

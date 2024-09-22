@@ -206,10 +206,6 @@ namespace argos
          * @brief The last argument that will be treated as a normal
          *  argument or option.
          *
-         * If sub-commands are used and multi-command is enabled, then this
-         * this option (or argument) can be used to mark the end of one
-         * sub-command and the start of the next.
-         *
          * Unlike STOP, missing arguments and mandatory options will be
          * treated as errors when this option type is used.
          *

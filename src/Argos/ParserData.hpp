@@ -56,7 +56,4 @@ namespace argos
     };
 
     void finish_initialization(ParserData& data);
-
-    std::vector<const CommandData*>
-    get_command_path(const ParserData* parser_data, const CommandData* cmd);
 }

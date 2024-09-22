@@ -150,9 +150,9 @@ namespace argos
         }
 
         void write_stop_and_help_usage(TextFormatter& formatter,
-                                       const CommandData& data)
+                                       const CommandData& cmd)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : cmd.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -160,7 +160,7 @@ namespace argos
                     continue;
                 }
 
-                formatter.write_words(data.name);
+                formatter.write_words(cmd.full_name);
                 formatter.write_words(" ");
                 formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
                 formatter.write_lines(get_brief_option_name(*opt, true));
@@ -357,7 +357,7 @@ namespace argos
 
             formatter.push_indentation(2);
             write_stop_and_help_usage(formatter, command);
-            formatter.write_words(command.name);
+            formatter.write_words(command.full_name);
             formatter.write_words(" ");
             formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
 

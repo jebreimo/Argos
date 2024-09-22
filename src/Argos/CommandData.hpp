@@ -44,6 +44,7 @@ namespace argos
         std::string current_section;
 
         std::string name;
+        std::string full_name;
         std::map<TextId, TextSource> texts;
         Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
