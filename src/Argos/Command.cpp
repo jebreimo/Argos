@@ -103,6 +103,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::id(int id)
+    {
+        check_command();
+        data_->id = id;
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);

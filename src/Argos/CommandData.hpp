@@ -41,9 +41,10 @@ namespace argos
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
         std::vector<std::unique_ptr<CommandData>> commands;
+        std::string current_section;
+
         std::string name;
         std::map<TextId, TextSource> texts;
-        std::string current_section;
         Visibility visibility = Visibility::NORMAL;
         std::optional<bool> require_command;
         /**
@@ -51,7 +52,8 @@ namespace argos
          * command's help.
          */
         std::string section;
-
+        int id = 0;
+        ArgumentId argument_id = {};
     private:
         const OptionData* find_option_impl(std::string_view flag,
                                            bool allow_abbreviations,

@@ -34,8 +34,8 @@ TEST_CASE("One subcommand with one argument")
     Argv argv{{"test", "foo", "value"}};
     const auto args = ArgumentParser()
         .auto_exit(false)
-        .add(Command("foo").about("Does foo things")
-            .add(Arg("ARG").help("An argument")))
+        .add(Command("foo")
+            .add(Arg("ARG")))
         .parse(argv.size(), argv.data());
-    // REQUIRE(args.commands().size() == 1);
+    REQUIRE(args.commands().size() == 1);
 }

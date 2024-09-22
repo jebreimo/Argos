@@ -44,6 +44,8 @@ namespace argos
 
         Command& visibility(Visibility visibility);
 
+        Command& id(int id);
+
         std::unique_ptr<CommandData> release();
     private:
         void check_command() const;

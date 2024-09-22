@@ -150,6 +150,7 @@ namespace argos
         auto cmd = command.release();
         if (!cmd)
             ARGOS_THROW("Command is empty (it has probably already been added).");
+        cmd->argument_id = next_argument_id();
         if (cmd->section.empty())
             cmd->section = m_data->command.current_section;
         m_data->command.commands.push_back(std::move(cmd));

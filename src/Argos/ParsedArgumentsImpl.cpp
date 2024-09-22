@@ -150,6 +150,20 @@ namespace argos
         return result;
     }
 
+    const std::shared_ptr<ParsedArgumentsImpl>&
+    ParsedArgumentsImpl::add_subcommand(const CommandData* command)
+    {
+        m_commands.push_back(std::make_shared<ParsedArgumentsImpl>(
+            command, m_data));
+        return m_commands.back();
+    }
+
+    const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+    ParsedArgumentsImpl::subcommands() const
+    {
+        return m_commands;
+    }
+
     std::vector<std::unique_ptr<IArgumentView>>
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
@@ -186,6 +200,11 @@ namespace argos
     const std::shared_ptr<ParserData>& ParsedArgumentsImpl::parser_data() const
     {
         return m_data;
+    }
+
+    const CommandData* ParsedArgumentsImpl::command() const
+    {
+        return m_command;
     }
 
     ParserResultCode ParsedArgumentsImpl::result_code() const

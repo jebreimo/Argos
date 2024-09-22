@@ -22,7 +22,9 @@ namespace argos
           texts(rhs.texts),
           current_section(rhs.current_section),
           require_command(rhs.require_command),
-          section(rhs.section)
+          section(rhs.section),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
     {
         arguments.reserve(rhs.arguments.size());
         for (const auto& a : rhs.arguments)
@@ -40,7 +42,9 @@ namespace argos
           texts(std::move(rhs.texts)),
           current_section(std::move(rhs.current_section)),
           require_command(rhs.require_command),
-          section(std::move(rhs.section))
+          section(std::move(rhs.section)),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
     {
     }
 
@@ -55,6 +59,8 @@ namespace argos
         current_section = rhs.current_section;
         require_command = rhs.require_command;
         section = rhs.section;
+        id = rhs.id;
+        argument_id = rhs.argument_id;
 
         arguments.clear();
         arguments.reserve(rhs.arguments.size());
@@ -87,6 +93,8 @@ namespace argos
         commands = std::move(rhs.commands);
         require_command = rhs.require_command;
         section = std::move(rhs.section);
+        id = rhs.id;
+        argument_id = rhs.argument_id;
         return *this;
     }
 

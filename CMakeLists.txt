@@ -59,6 +59,7 @@ add_library(Argos
     include/Argos/ArgumentView.hpp
     include/Argos/Callbacks.hpp
     include/Argos/Command.hpp
+    include/Argos/CommandView.hpp
     include/Argos/Enums.hpp
     include/Argos/IArgumentView.hpp
     include/Argos/Option.hpp
@@ -81,6 +82,7 @@ add_library(Argos
     src/Argos/Command.cpp
     src/Argos/CommandData.cpp
     src/Argos/CommandData.hpp
+    src/Argos/CommandView.cpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
     src/Argos/HelpText.cpp

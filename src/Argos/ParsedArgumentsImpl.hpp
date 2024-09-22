@@ -44,6 +44,12 @@ namespace argos
         [[nodiscard]] std::vector<std::pair<std::string_view, ArgumentId>>
         get_values(ValueId value_id) const;
 
+        const std::shared_ptr<ParsedArgumentsImpl>&
+        add_subcommand(const CommandData* command);
+
+        const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+        subcommands() const;
+
         [[nodiscard]] std::vector<std::unique_ptr<IArgumentView>>
         get_argument_views(ValueId value_id) const;
 
@@ -51,6 +57,8 @@ namespace argos
         get_argument_view(ArgumentId argument_id) const;
 
         [[nodiscard]] const std::shared_ptr<ParserData>& parser_data() const;
+
+        [[nodiscard]] const CommandData* command() const;
 
         [[nodiscard]] ParserResultCode result_code() const;
 
@@ -67,10 +75,13 @@ namespace argos
         void error(const std::string& message, ArgumentId argument_id);
 
     private:
+        /// The values received from ArgumentIteratorImpl.
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_values;
+        /// Index from flag, argument name or alias to ValueId and ArgumentId
         std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_ids;
         std::vector<std::string> m_unprocessed_arguments;
         const CommandData* m_command;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_commands;
         std::shared_ptr<ParserData> m_data;
         ParserResultCode m_result_code = ParserResultCode::NONE;
         const OptionData* m_stop_option = nullptr;

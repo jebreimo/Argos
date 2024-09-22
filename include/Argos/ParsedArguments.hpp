@@ -11,6 +11,7 @@
 #include "ArgumentValue.hpp"
 #include "ArgumentValues.hpp"
 #include "ArgumentView.hpp"
+#include "CommandView.hpp"
 #include "OptionView.hpp"
 
 /**
@@ -126,6 +127,9 @@ namespace argos
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
+
+        [[nodiscard]]
+        std::vector<std::unique_ptr<CommandView>> all_commands() const;
 
         /**
          * @brief Returns the parser result code.

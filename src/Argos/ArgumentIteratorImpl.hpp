@@ -20,6 +20,7 @@ namespace argos
     {
         ARGUMENT,
         OPTION,
+        COMMAND,
         DONE,
         UNKNOWN,
         ERROR
@@ -28,7 +29,8 @@ namespace argos
     using IteratorResultData = std::variant<
         std::monostate,
         const ArgumentData*,
-        const OptionData*>;
+        const OptionData*,
+        const CommandData*>;
 
     using IteratorResult = std::tuple<
         IteratorResultCode,
@@ -50,6 +52,9 @@ namespace argos
         [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
         parsed_arguments() const;
 
+        [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
+        toplevel_parsed_arguments() const;
+
     private:
         enum class OptionResult
         {
@@ -67,7 +72,7 @@ namespace argos
 
         IteratorResult process_argument(const std::string& name);
 
-        IteratorResult process_command(const std::string& name);
+        IteratorResult process_command(const CommandData* command);
 
         void copy_remaining_arguments_to_parser_result();
 
@@ -77,22 +82,9 @@ namespace argos
 
         void error(const std::string& message = {});
 
-        struct Something
-        {
-            const CommandData* command;
-            std::shared_ptr<ParsedArgumentsImpl> parsed_args;
-            ArgumentCounter argument_counter;
-
-            Something(const CommandData* cmd,
-                      std::span<std::string_view> args,
-                      std::shared_ptr<ParserData> data);
-        };
-
-        std::vector<Something> m_somethings;
-
         std::shared_ptr<ParserData> m_data;
         const CommandData* m_command = nullptr;
-        std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
         OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 

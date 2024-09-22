@@ -44,7 +44,10 @@ namespace argos
 
     std::vector<ParsedArguments> ParsedArguments::commands() const
     {
-        return {};
+        std::vector<ParsedArguments> result;
+        for (const auto& subcommand : m_impl->subcommands())
+            result.emplace_back(subcommand);
+        return result;
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const
@@ -92,6 +95,15 @@ namespace argos
         std::vector<std::unique_ptr<OptionView>> result;
         for (auto& o : m_impl->parser_data()->command.options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
+        return result;
+    }
+
+    std::vector<std::unique_ptr<CommandView>>
+    ParsedArguments::all_commands() const
+    {
+        std::vector<std::unique_ptr<CommandView>> result;
+        for (auto& c : m_impl->parser_data()->command.commands)
+            result.emplace_back(std::make_unique<CommandView>(c.get()));
         return result;
     }
 

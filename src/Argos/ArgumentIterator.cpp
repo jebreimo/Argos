@@ -47,6 +47,11 @@ namespace argos
                     std::get<const OptionData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
+        case IteratorResultCode::COMMAND:
+            arg = std::make_unique<CommandView>(
+                    std::get<const CommandData*>(std::get<1>(res)));
+            value = std::get<2>(res);
+            return true;
         case IteratorResultCode::UNKNOWN:
             arg = {};
             value = std::get<2>(res);
