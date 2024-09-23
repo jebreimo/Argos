@@ -50,10 +50,20 @@ TEST_CASE("Check help text for subcommand")
     auto parser = ArgumentParser()
         .auto_exit(false)
         .add(Command("foo").about("Does foo things"))
-        .add(Command("bar").about("Does bar things"))
         .stream(&stream)
         .auto_exit(false)
         .parse(argv.size(), argv.data());
     auto help_text = stream.str();
     REQUIRE(help_text.find("test foo") != std::string::npos);
+}
+
+TEST_CASE("Command which requires a subcommand")
+{
+    using namespace argos;
+    Argv argv{{"test"}};
+    auto args = ArgumentParser()
+        .auto_exit(false)
+        .add(Command("foo"))
+        .parse(argv.size(), argv.data());
+    REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }

@@ -379,6 +379,11 @@ namespace argos
                 return false;
             }
         }
+        if (*m_command->require_command && parsed_args.subcommands().empty())
+        {
+            error("A subcommand is required.");
+            return false;
+        }
         if (m_argument_counter.is_complete())
         {
             m_state = State::DONE;
