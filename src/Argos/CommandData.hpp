@@ -13,8 +13,6 @@
 
 namespace argos
 {
-    struct ParserData;
-
     struct CommandData
     {
         CommandData();
@@ -31,12 +29,14 @@ namespace argos
 
         void build_option_index(bool case_insensitive);
 
-        const OptionData* find_option(std::string_view flag,
-                                      bool allow_abbreviations,
-                                      bool case_insensitive) const;
+        [[nodiscard]] const OptionData*
+        find_option(std::string_view flag,
+                    bool allow_abbreviations,
+                    bool case_insensitive) const;
 
-        const CommandData* find_command(std::string_view name,
-                                        bool case_insensitive) const;
+        [[nodiscard]] const CommandData*
+        find_command(std::string_view name,
+                     bool case_insensitive) const;
 
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
@@ -55,15 +55,17 @@ namespace argos
         std::string section;
         int id = 0;
         ArgumentId argument_id = {};
+
     private:
-        const OptionData* find_option_impl(std::string_view flag,
-                                           bool allow_abbreviations,
-                                           bool case_insensitive) const;
+        [[nodiscard]] const OptionData*
+        find_option_impl(std::string_view flag,
+                         bool allow_abbreviations,
+                         bool case_insensitive) const;
 
         std::vector<std::pair<std::string_view, const OptionData*>> option_index;
     };
 
-    struct ParserSettings;
+    struct ParserData;
 
     /**
      * Finish the initialization of this command and any subcommands, and
@@ -72,6 +74,8 @@ namespace argos
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
                                ValueId start_id = ValueId(0));
+
+    struct ParserSettings;
 
     bool has_flag(const CommandData& cmd,
                   std::string_view flag,

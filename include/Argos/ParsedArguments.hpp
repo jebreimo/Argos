@@ -65,9 +65,9 @@ namespace argos
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
-        CommandView command() const;
+        [[nodiscard]] CommandView command() const;
 
-        std::string_view command_name() const;
+        [[nodiscard]] std::string_view command_name() const;
 
         /**
          * @brief Returns true if the argument or option named @a name
