@@ -38,8 +38,11 @@ TEST_CASE("One subcommand with one argument")
             .add(Arg("ARG")))
         .parse(argv.size(), argv.data());
     auto subcommands = args.subcommands();
-    REQUIRE(subcommands[0].command_name() == "foo");
     REQUIRE(subcommands.size() == 1);
+    const auto& command = subcommands[0];
+    REQUIRE(command.command_name() == "foo");
+    REQUIRE(command.has("ARG"));
+    REQUIRE(command.value("ARG").as_string() == "value");
 }
 
 TEST_CASE("Check help text for subcommand")
@@ -60,9 +63,11 @@ TEST_CASE("Check help text for subcommand")
 TEST_CASE("Command which requires a subcommand")
 {
     using namespace argos;
+    std::stringstream stream;
     Argv argv{{"test"}};
     auto args = ArgumentParser()
         .auto_exit(false)
+        .stream(&stream)
         .add(Command("foo"))
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::FAILURE);
