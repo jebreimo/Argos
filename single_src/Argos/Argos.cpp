@@ -262,8 +262,6 @@ namespace argos
 
 namespace argos
 {
-    struct ParserData;
-
     struct CommandData
     {
         CommandData();
@@ -280,12 +278,14 @@ namespace argos
 
         void build_option_index(bool case_insensitive);
 
-        const OptionData* find_option(std::string_view flag,
-                                      bool allow_abbreviations,
-                                      bool case_insensitive) const;
+        [[nodiscard]] const OptionData*
+        find_option(std::string_view flag,
+                    bool allow_abbreviations,
+                    bool case_insensitive) const;
 
-        const CommandData* find_command(std::string_view name,
-                                        bool case_insensitive) const;
+        [[nodiscard]] const CommandData*
+        find_command(std::string_view name,
+                     bool case_insensitive) const;
 
         std::vector<std::unique_ptr<ArgumentData>> arguments;
         std::vector<std::unique_ptr<OptionData>> options;
@@ -304,15 +304,17 @@ namespace argos
         std::string section;
         int id = 0;
         ArgumentId argument_id = {};
+
     private:
-        const OptionData* find_option_impl(std::string_view flag,
-                                           bool allow_abbreviations,
-                                           bool case_insensitive) const;
+        [[nodiscard]] const OptionData*
+        find_option_impl(std::string_view flag,
+                         bool allow_abbreviations,
+                         bool case_insensitive) const;
 
         std::vector<std::pair<std::string_view, const OptionData*>> option_index;
     };
 
-    struct ParserSettings;
+    struct ParserData;
 
     /**
      * Finish the initialization of this command and any subcommands, and
@@ -321,6 +323,8 @@ namespace argos
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
                                ValueId start_id = ValueId(0));
+
+    struct ParserSettings;
 
     bool has_flag(const CommandData& cmd,
                   std::string_view flag,
@@ -1562,6 +1566,11 @@ namespace argos
                 error("Mandatory option \"" + flags + "\" is missing.");
                 return false;
             }
+        }
+        if (*m_command->require_command && parsed_args.subcommands().empty())
+        {
+            error("A subcommand is required.");
+            return false;
         }
         if (m_argument_counter.is_complete())
         {
@@ -4186,165 +4195,6 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-02-13.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-#include <cstdlib>
-
-namespace argos
-{
-    namespace
-    {
-        template <typename T>
-        T str_to_int(const char* str, char** endp, int base);
-
-        template <>
-        long str_to_int<long>(const char* str, char** endp, int base)
-        {
-            return strtol(str, endp, base);
-        }
-
-        template <>
-        long long str_to_int<long long>(const char* str, char** endp, int base)
-        {
-            return strtoll(str, endp, base);
-        }
-
-        template <>
-        unsigned long
-        str_to_int<unsigned long>(const char* str, char** endp, int base)
-        {
-            return strtoul(str, endp, base);
-        }
-
-        template <>
-        unsigned long long
-        str_to_int<unsigned long long>(const char* str, char** endp, int base)
-        {
-            return strtoull(str, endp, base);
-        }
-
-        template <typename T>
-        std::optional<T> parse_integer_impl(const std::string& str, int base)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_int<T>(str.c_str(), &endp, base);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<int> parse_integer<int>(const std::string& str, int base)
-    {
-        const auto n = parse_integer_impl<long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(int) != sizeof(long))
-        {
-            if (*n < INT_MIN || INT_MAX < *n)
-                return {};
-        }
-        return static_cast<int>(*n);
-    }
-
-    template <>
-    std::optional<unsigned>
-    parse_integer<unsigned>(const std::string& str, int base)
-    {
-        auto n = parse_integer_impl<unsigned long>(str, base);
-        if (!n)
-            return {};
-
-        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
-        {
-            if (UINT_MAX < *n)
-                return {};
-        }
-        return static_cast<unsigned>(*n);
-    }
-
-    template <>
-    std::optional<long> parse_integer<long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long>(str, base);
-    }
-
-    template <>
-    std::optional<long long>
-    parse_integer<long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<long long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long>
-    parse_integer<unsigned long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long>(str, base);
-    }
-
-    template <>
-    std::optional<unsigned long long>
-    parse_integer<unsigned long long>(const std::string& str, int base)
-    {
-        return parse_integer_impl<unsigned long long>(str, base);
-    }
-
-    namespace
-    {
-        template <typename T>
-        T str_to_float(const char* str, char** endp);
-
-        template <>
-        float str_to_float<float>(const char* str, char** endp)
-        {
-            return strtof(str, endp);
-        }
-
-        template <>
-        double str_to_float<double>(const char* str, char** endp)
-        {
-            return strtod(str, endp);
-        }
-
-        template <typename T>
-        std::optional<T> parse_floating_point_impl(const std::string& str)
-        {
-            if (str.empty())
-                return {};
-            char* endp = nullptr;
-            errno = 0;
-            auto value = str_to_float<T>(str.c_str(), &endp);
-            if (endp == str.c_str() + str.size() && errno == 0)
-                return value;
-            return {};
-        }
-    }
-
-    template <>
-    std::optional<float> parse_floating_point<float>(const std::string& str)
-    {
-        return parse_floating_point_impl<float>(str);
-    }
-
-    template <>
-    std::optional<double> parse_floating_point<double>(const std::string& str)
-    {
-        return parse_floating_point_impl<double>(str);
-    }
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
 // This file is distributed under the BSD License.
@@ -4359,17 +4209,15 @@ namespace argos
         : m_impl(std::move(impl))
     {}
 
-    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(std::move(rhs.m_impl))
-    {}
+    ParsedArguments::ParsedArguments(const ParsedArguments& rhs) = default;
+
+    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept = default;
 
     ParsedArguments::~ParsedArguments() = default;
 
-    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
-    {
-        m_impl = std::move(rhs.m_impl);
-        return *this;
-    }
+    ParsedArguments& ParsedArguments::operator=(const ParsedArguments&) = default;
+
+    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept = default;
 
     CommandView ParsedArguments::command() const
     {
@@ -5005,6 +4853,165 @@ namespace argos
     {
         add_version_option(data);
         finish_initialization(data.command, data);
+    }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-02-13.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+#include <cstdlib>
+
+namespace argos
+{
+    namespace
+    {
+        template <typename T>
+        T str_to_int(const char* str, char** endp, int base);
+
+        template <>
+        long str_to_int<long>(const char* str, char** endp, int base)
+        {
+            return strtol(str, endp, base);
+        }
+
+        template <>
+        long long str_to_int<long long>(const char* str, char** endp, int base)
+        {
+            return strtoll(str, endp, base);
+        }
+
+        template <>
+        unsigned long
+        str_to_int<unsigned long>(const char* str, char** endp, int base)
+        {
+            return strtoul(str, endp, base);
+        }
+
+        template <>
+        unsigned long long
+        str_to_int<unsigned long long>(const char* str, char** endp, int base)
+        {
+            return strtoull(str, endp, base);
+        }
+
+        template <typename T>
+        std::optional<T> parse_integer_impl(const std::string& str, int base)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_int<T>(str.c_str(), &endp, base);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<int> parse_integer<int>(const std::string& str, int base)
+    {
+        const auto n = parse_integer_impl<long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(int) != sizeof(long))
+        {
+            if (*n < INT_MIN || INT_MAX < *n)
+                return {};
+        }
+        return static_cast<int>(*n);
+    }
+
+    template <>
+    std::optional<unsigned>
+    parse_integer<unsigned>(const std::string& str, int base)
+    {
+        auto n = parse_integer_impl<unsigned long>(str, base);
+        if (!n)
+            return {};
+
+        if constexpr (sizeof(unsigned) != sizeof(unsigned long))
+        {
+            if (UINT_MAX < *n)
+                return {};
+        }
+        return static_cast<unsigned>(*n);
+    }
+
+    template <>
+    std::optional<long> parse_integer<long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long>(str, base);
+    }
+
+    template <>
+    std::optional<long long>
+    parse_integer<long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<long long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long>
+    parse_integer<unsigned long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long>(str, base);
+    }
+
+    template <>
+    std::optional<unsigned long long>
+    parse_integer<unsigned long long>(const std::string& str, int base)
+    {
+        return parse_integer_impl<unsigned long long>(str, base);
+    }
+
+    namespace
+    {
+        template <typename T>
+        T str_to_float(const char* str, char** endp);
+
+        template <>
+        float str_to_float<float>(const char* str, char** endp)
+        {
+            return strtof(str, endp);
+        }
+
+        template <>
+        double str_to_float<double>(const char* str, char** endp)
+        {
+            return strtod(str, endp);
+        }
+
+        template <typename T>
+        std::optional<T> parse_floating_point_impl(const std::string& str)
+        {
+            if (str.empty())
+                return {};
+            char* endp = nullptr;
+            errno = 0;
+            auto value = str_to_float<T>(str.c_str(), &endp);
+            if (endp == str.c_str() + str.size() && errno == 0)
+                return value;
+            return {};
+        }
+    }
+
+    template <>
+    std::optional<float> parse_floating_point<float>(const std::string& str)
+    {
+        return parse_floating_point_impl<float>(str);
+    }
+
+    template <>
+    std::optional<double> parse_floating_point<double>(const std::string& str)
+    {
+        return parse_floating_point_impl<double>(str);
     }
 }
 

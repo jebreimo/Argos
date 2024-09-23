@@ -1438,7 +1438,7 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments(const ParsedArguments&) = delete;
+        ParsedArguments(const ParsedArguments&);
 
         /**
          * @private
@@ -1453,16 +1453,16 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments& operator=(const ParsedArguments&) = delete;
+        ParsedArguments& operator=(const ParsedArguments&);
 
         /**
          * @private
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
-        CommandView command() const;
+        [[nodiscard]] CommandView command() const;
 
-        std::string_view command_name() const;
+        [[nodiscard]] std::string_view command_name() const;
 
         /**
          * @brief Returns true if the argument or option named @a name
