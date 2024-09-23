@@ -43,7 +43,7 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments(const ParsedArguments&) = delete;
+        ParsedArguments(const ParsedArguments&);
 
         /**
          * @private
@@ -58,7 +58,7 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments& operator=(const ParsedArguments&) = delete;
+        ParsedArguments& operator=(const ParsedArguments&);
 
         /**
          * @private

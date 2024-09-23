@@ -20,17 +20,15 @@ namespace argos
         : m_impl(std::move(impl))
     {}
 
-    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(std::move(rhs.m_impl))
-    {}
+    ParsedArguments::ParsedArguments(const ParsedArguments& rhs) = default;
+
+    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept = default;
 
     ParsedArguments::~ParsedArguments() = default;
 
-    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
-    {
-        m_impl = std::move(rhs.m_impl);
-        return *this;
-    }
+    ParsedArguments& ParsedArguments::operator=(const ParsedArguments&) = default;
+
+    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept = default;
 
     CommandView ParsedArguments::command() const
     {
