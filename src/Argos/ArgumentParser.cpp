@@ -303,6 +303,19 @@ namespace argos
         return *this;
     }
 
+    bool ArgumentParser::multi_command() const
+    {
+        check_data();
+        return m_data->command.multi_command;
+    }
+
+    ArgumentParser& ArgumentParser::multi_command(bool value)
+    {
+        check_data();
+        m_data->command.multi_command = value;
+        return *this;
+    }
+
     bool ArgumentParser::ignore_undefined_arguments() const
     {
         check_data();

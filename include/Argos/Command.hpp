@@ -46,6 +46,8 @@ namespace argos
 
         Command& id(int id);
 
+        Command& multi_command(bool multi_command);
+
         std::unique_ptr<CommandData> release();
     private:
         void check_command() const;

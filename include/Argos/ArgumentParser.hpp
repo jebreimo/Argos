@@ -287,6 +287,11 @@ namespace argos
 
         ArgumentParser& require_command(bool value);
 
+        // add functions for multi_command:
+        [[nodiscard]] bool multi_command() const;
+
+        ArgumentParser& multi_command(bool value);
+
         /**
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.

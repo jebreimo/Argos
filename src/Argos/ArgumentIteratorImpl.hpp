@@ -70,7 +70,7 @@ namespace argos
 
         IteratorResult process_option(const std::string& flag);
 
-        IteratorResult process_argument(const std::string& name);
+        IteratorResult process_argument(const std::string& value);
 
         IteratorResult process_command(const CommandData* command);
 
@@ -79,6 +79,8 @@ namespace argos
         [[nodiscard]] size_t count_arguments() const;
 
         bool check_argument_and_option_counts();
+
+        [[nodiscard]] const CommandData* find_sibling_command(std::string_view name) const;
 
         void error(const std::string& message = {});
 

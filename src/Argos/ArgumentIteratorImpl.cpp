@@ -241,6 +241,11 @@ namespace argos
             case OptionResult::LAST_ARGUMENT:
                 if (!check_argument_and_option_counts())
                     return {IteratorResultCode::ERROR, {}, {}};
+                // else if (m_parsed_args.size() > 1
+                //          && m_parsed_args[m_parsed_args.size() - 2]->command()
+                //                 ->find_command(*m_iterator.current(),
+                //                                m_data->parser_settings.case_insensitive))
+                //     m_parsed_args.pop_back();
                 [[fallthrough]];
             case OptionResult::STOP:
                 copy_remaining_arguments_to_parser_result();
@@ -264,12 +269,12 @@ namespace argos
     }
 
     IteratorResult
-    ArgumentIteratorImpl::process_argument(const std::string& name)
+    ArgumentIteratorImpl::process_argument(const std::string& value)
     {
         const auto& parsed_args = parsed_arguments();
         if (auto argument = m_argument_counter.next_argument())
         {
-            auto s = parsed_args->append_value(argument->value_id, name,
+            auto s = parsed_args->append_value(argument->value_id, value,
                                                argument->argument_id);
             if (argument->callback)
             {
@@ -284,16 +289,23 @@ namespace argos
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
+        else if (auto next_cmd = find_sibling_command(value))
+        {
+            m_parsed_args.pop_back();
+            m_command = m_parsed_args.back()->command();
+            m_argument_counter = {};
+            return process_command(next_cmd);
+        }
         else if (m_data->parser_settings.ignore_undefined_arguments)
         {
-            parsed_args->add_unprocessed_argument(name);
+            parsed_args->add_unprocessed_argument(value);
+            return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
         else
         {
-            error("Too many arguments, starting with \"" + name + "\".");
+            error("Too many arguments, starting with \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
-        return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
     }
 
     IteratorResult
@@ -400,6 +412,22 @@ namespace argos
                   + std::to_string(m_argument_counter.count()) + ".");
             return false;
         }
+    }
+
+    const CommandData*
+    ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
+    {
+        if (!m_argument_counter.is_complete())
+            return nullptr;
+
+        auto size = m_parsed_args.size();
+        if (size <= 1)
+            return nullptr;
+
+        const auto& parent = *m_parsed_args[size - 2]->command();
+        if (!parent.multi_command)
+            return nullptr;
+        return parent.find_command(name, m_data->parser_settings.case_insensitive);
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)

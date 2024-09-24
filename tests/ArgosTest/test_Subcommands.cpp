@@ -72,3 +72,17 @@ TEST_CASE("Command which requires a subcommand")
         .parse(argv.size(), argv.data());
     REQUIRE(args.result_code() == ParserResultCode::FAILURE);
 }
+
+TEST_CASE("Check multi-command")
+{
+    using namespace argos;
+    Argv argv{{"test", "foo", "bar", "foo"}};
+    auto args = ArgumentParser()
+        .auto_exit(false)
+        .multi_command(true)
+        .add(Command("foo"))
+        .add(Command("bar"))
+        .parse(argv.size(), argv.data());
+    auto subcommands = args.subcommands();
+    REQUIRE(subcommands.size() == 3);
+}

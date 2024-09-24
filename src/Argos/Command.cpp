@@ -110,6 +110,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::multi_command(bool multi_command)
+    {
+        check_command();
+        data_->multi_command = multi_command;
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);

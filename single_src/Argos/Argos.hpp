@@ -2583,6 +2583,8 @@ namespace argos
 
         Command& id(int id);
 
+        Command& multi_command(bool multi_command);
+
         std::unique_ptr<CommandData> release();
     private:
         void check_command() const;
@@ -2874,6 +2876,11 @@ namespace argos
         [[nodiscard]] std::optional<bool> require_command() const;
 
         ArgumentParser& require_command(bool value);
+
+        // add functions for multi_command:
+        [[nodiscard]] bool multi_command() const;
+
+        ArgumentParser& multi_command(bool value);
 
         /**
          * @brief Returns true if undefined arguments on the command line

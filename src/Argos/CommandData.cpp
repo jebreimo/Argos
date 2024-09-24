@@ -23,6 +23,7 @@ namespace argos
           full_name(rhs.full_name),
           texts(rhs.texts),
           require_command(rhs.require_command),
+          multi_command(rhs.multi_command),
           section(rhs.section),
           id(rhs.id),
           argument_id(rhs.argument_id)
@@ -44,6 +45,7 @@ namespace argos
           full_name(std::move(rhs.full_name)),
           texts(std::move(rhs.texts)),
           require_command(rhs.require_command),
+          multi_command(rhs.multi_command),
           section(std::move(rhs.section)),
           id(rhs.id),
           argument_id(rhs.argument_id)
@@ -61,6 +63,7 @@ namespace argos
         full_name = rhs.full_name;
         texts = rhs.texts;
         require_command = rhs.require_command;
+        multi_command = rhs.multi_command;
         section = rhs.section;
         id = rhs.id;
         argument_id = rhs.argument_id;
@@ -96,6 +99,7 @@ namespace argos
         options = std::move(rhs.options);
         commands = std::move(rhs.commands);
         require_command = rhs.require_command;
+        multi_command = rhs.multi_command;
         section = std::move(rhs.section);
         id = rhs.id;
         argument_id = rhs.argument_id;
