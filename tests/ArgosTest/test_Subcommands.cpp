@@ -86,3 +86,19 @@ TEST_CASE("Check multi-command")
     auto subcommands = args.subcommands();
     REQUIRE(subcommands.size() == 3);
 }
+
+TEST_CASE("Check multi-level multi-command")
+{
+    using namespace argos;
+    Argv argv{{"test", "foo", "zap", "bar"}};
+    auto args = ArgumentParser()
+        .auto_exit(false)
+        .multi_command(true)
+        .add(Command("foo")
+            .add(Command("zap"))
+            .add(Command("zip")))
+        .add(Command("bar"))
+        .parse(argv.size(), argv.data());
+    auto subcommands = args.subcommands();
+    REQUIRE(subcommands.size() == 2);
+}
