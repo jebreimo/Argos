@@ -47,24 +47,48 @@ namespace argos
         return *this;
     }
 
-    Command& Command::add(Argument argument)
+    Command& Command::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    Command& Command::add(Argument&& argument)
     {
         check_command();
-        data_->arguments.push_back(argument.release());
+        auto arg = argument.release();
+        if (!arg)
+            ARGOS_THROW("Argument has already been moved.");
+        data_->arguments.push_back(std::move(arg));
         return *this;
     }
 
-    Command& Command::add(Option option)
+    Command& Command::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    Command& Command::add(Option&& option)
     {
         check_command();
-        data_->options.push_back(option.release());
+        auto opt = option.release();
+        if (!opt)
+            ARGOS_THROW("Option has already been moved.");
+        data_->options.push_back(std::move(opt));
         return *this;
     }
 
-    Command& Command::add(Command command)
+    Command& Command::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    Command& Command::add(Command&& command)
     {
         check_command();
-        data_->commands.push_back(command.release());
+        auto cmd = command.release();
+        if (!cmd)
+            ARGOS_THROW("Command has already been moved.");
+        data_->commands.push_back(std::move(cmd));
         return *this;
     }
 

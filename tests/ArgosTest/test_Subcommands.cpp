@@ -90,15 +90,24 @@ TEST_CASE("Check multi-command")
 TEST_CASE("Check multi-level multi-command")
 {
     using namespace argos;
-    Argv argv{{"test", "foo", "zap", "bar"}};
-    auto args = ArgumentParser()
+    auto parser = ArgumentParser()
         .auto_exit(false)
         .multi_command(true)
         .add(Command("foo")
-            .add(Command("zap"))
-            .add(Command("zip")))
+            .add(Command("zap")))
         .add(Command("bar"))
-        .parse(argv.size(), argv.data());
-    auto subcommands = args.subcommands();
-    REQUIRE(subcommands.size() == 2);
+        .move();
+    SECTION("Continue with subcommand of grandparent")
+    {
+        Argv argv{{"test", "foo", "zap", "bar"}};
+        auto args = parser.parse(argv.size(), argv.data());
+        auto subcommands = args.subcommands();
+        REQUIRE(subcommands.size() == 2);
+    }
+    SECTION("Missing subcommand for child")
+    {
+        Argv argv{{"test", "foo"}};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.result_code() == ParserResultCode::FAILURE);
+    }
 }

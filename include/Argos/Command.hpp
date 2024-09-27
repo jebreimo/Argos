@@ -28,11 +28,17 @@ namespace argos
 
         Command& operator=(Command&&) noexcept;
 
-        Command& add(Argument argument);
+        Command& add(Argument& argument);
 
-        Command& add(Option option);
+        Command& add(Argument&& argument);
 
-        Command& add(Command command);
+        Command& add(Option& option);
+
+        Command& add(Option&& option);
+
+        Command& add(Command& command);
+
+        Command& add(Command&& command);
 
         Command& about(std::string text);
 

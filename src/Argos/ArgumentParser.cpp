@@ -115,7 +115,12 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Argument argument)
+    ArgumentParser& ArgumentParser::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    ArgumentParser& ArgumentParser::add(Argument&& argument)
     {
         check_data();
         auto ad = argument.release();
@@ -128,7 +133,12 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Option option)
+    ArgumentParser& ArgumentParser::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    ArgumentParser& ArgumentParser::add(Option&& option)
     {
         check_data();
 
@@ -143,7 +153,12 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Command command)
+    ArgumentParser& ArgumentParser::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    ArgumentParser& ArgumentParser::add(Command&& command)
     {
         check_data();
 

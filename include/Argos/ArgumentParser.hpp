@@ -76,7 +76,9 @@ namespace argos
          *
          * @throw ArgosException if the argument doesn't have a name.
          */
-        ArgumentParser& add(Argument argument);
+        ArgumentParser& add(Argument& argument);
+
+        ArgumentParser& add(Argument&& argument);
 
         /**
          * @brief Add a new option definition to the ArgumentParser.
@@ -91,9 +93,11 @@ namespace argos
          *      - an option with operation APPEND has neither argument nor
          *        constant.
          */
-        ArgumentParser& add(Option option);
+        ArgumentParser& add(Option& option);
+        ArgumentParser& add(Option&& option);
 
-        ArgumentParser& add(Command command);
+        ArgumentParser& add(Command& command);
+        ArgumentParser& add(Command&& command);
 
         /**
          * @brief Parses the arguments and options in argv.
