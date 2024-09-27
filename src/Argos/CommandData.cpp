@@ -34,6 +34,9 @@ namespace argos
         options.reserve(rhs.options.size());
         for (const auto& o : rhs.options)
             options.push_back(std::make_unique<OptionData>(*o));
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
     }
 
     CommandData::CommandData(CommandData&& rhs) noexcept

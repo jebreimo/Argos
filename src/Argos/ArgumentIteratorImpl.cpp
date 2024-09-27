@@ -289,9 +289,9 @@ namespace argos
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
-        else if (auto next_cmd = find_sibling_command(value))
+        else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
         {
-            m_parsed_args.pop_back();
+            m_parsed_args.resize(i + 1);
             m_command = m_parsed_args.back()->command();
             m_argument_counter = {};
             return process_command(next_cmd);
@@ -414,20 +414,23 @@ namespace argos
         }
     }
 
-    const CommandData*
+    std::pair<const CommandData*, size_t>
     ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
     {
         if (!m_argument_counter.is_complete())
-            return nullptr;
+            return {nullptr, 0};
 
         auto size = m_parsed_args.size();
         if (size <= 1)
-            return nullptr;
+            return {nullptr, 0};
 
-        const auto& parent = *m_parsed_args[size - 2]->command();
-        if (!parent.multi_command)
-            return nullptr;
-        return parent.find_command(name, m_data->parser_settings.case_insensitive);
+        for (size_t i = size - 1; i-- > 0;)
+        {
+            const auto& parent = *m_parsed_args[i]->command();
+            if (parent.multi_command)
+                return {parent.find_command(name, m_data->parser_settings.case_insensitive), i};
+        }
+        return {nullptr, 0};
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)

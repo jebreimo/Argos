@@ -80,7 +80,8 @@ namespace argos
 
         bool check_argument_and_option_counts();
 
-        [[nodiscard]] const CommandData* find_sibling_command(std::string_view name) const;
+        [[nodiscard]] std::pair<const CommandData*, size_t>
+        find_sibling_command(std::string_view name) const;
 
         void error(const std::string& message = {});
 
