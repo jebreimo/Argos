@@ -449,7 +449,7 @@ namespace argos
         else
             formatter.set_stream(&std::cerr);
         formatter.word_splitter().add_words(data.help_settings.word_split_rules);
-        formatter.write_words(cmd.name + ": ");
+        formatter.write_words(cmd.full_name + ": ");
         formatter.write_words(msg);
         formatter.newline();
         if (!write_custom_text(formatter, cmd, TextId::ERROR_USAGE))

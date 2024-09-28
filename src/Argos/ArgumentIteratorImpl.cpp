@@ -303,7 +303,7 @@ namespace argos
         }
         else
         {
-            error("Too many arguments, starting with \"" + value + "\".");
+            error("Too many arguments, starting at \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
     }
@@ -440,7 +440,8 @@ namespace argos
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();
-        parsed_arguments()->set_result_code(ParserResultCode::FAILURE);
+        for (auto& parsed_args : m_parsed_args)
+            parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
 }

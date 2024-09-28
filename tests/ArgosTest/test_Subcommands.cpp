@@ -90,24 +90,43 @@ TEST_CASE("Check multi-command")
 TEST_CASE("Check multi-level multi-command")
 {
     using namespace argos;
+    std::stringstream stream;
     auto parser = ArgumentParser()
         .auto_exit(false)
         .multi_command(true)
+        .stream(&stream)
         .add(Command("foo")
             .add(Command("zap")))
         .add(Command("bar"))
         .move();
     SECTION("Continue with subcommand of grandparent")
     {
-        Argv argv{{"test", "foo", "zap", "bar"}};
+        Argv argv{"test", "foo", "zap", "bar"};
         auto args = parser.parse(argv.size(), argv.data());
         auto subcommands = args.subcommands();
         REQUIRE(subcommands.size() == 2);
     }
     SECTION("Missing subcommand for child")
     {
-        Argv argv{{"test", "foo"}};
+        Argv argv{"test", "foo"};
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.result_code() == ParserResultCode::FAILURE);
     }
+}
+
+TEST_CASE("Check that error text refers to the correct command")
+{
+    using namespace argos;
+    std::stringstream stream;
+    auto parser = ArgumentParser()
+        .auto_exit(false)
+        .stream(&stream)
+        .add(Command("foo")
+            .add(Arg("ARG")))
+        .move();
+    Argv argv{"test", "foo"};
+    auto args = parser.parse(argv.size(), argv.data());
+    REQUIRE(args.result_code() == ParserResultCode::FAILURE);
+    auto error_text = stream.str();
+    REQUIRE(error_text.find("test foo") == 0);
 }
