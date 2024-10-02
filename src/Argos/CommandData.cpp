@@ -259,22 +259,22 @@ namespace argos
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
                 .help("Display the help text.")
                 .constant("1").release();
-            opt->argument_id = ArgumentId(cmd.options.size()
-                                          + cmd.arguments.size() + 1);
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
         }
 
-        ValueId set_value_ids(const CommandData& cmd,
-                              ValueId start_id = ValueId(0))
+        std::pair<ValueId, ArgumentId>
+        set_internal_ids(const CommandData& cmd,
+                         ValueId value_id_offset,
+                         ArgumentId argument_id_offset)
         {
             struct InternalIdMaker
             {
                 std::map<std::string_view, ValueId> explicit_ids;
-                ValueId n;
+                int id;
 
                 explicit InternalIdMaker(ValueId start_id)
-                    : n(start_id)
+                    : id(start_id)
                 {
                 }
 
@@ -286,59 +286,62 @@ namespace argos
                     return it->second;
                 }
 
-                ValueId make_value_id(std::string_view name)
+                ValueId get_value_id(std::string_view name)
                 {
                     if (const auto id = find_value_id(name))
                         return *id;
-                    n = ValueId(n + 1);
-                    explicit_ids.emplace(name, n);
-                    return n;
+                    id++;
+                    explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
                 }
 
-                ValueId make_value_id(const std::vector<std::string>& names)
+                ValueId get_value_id(const std::vector<std::string>& names)
                 {
                     for (const auto& name : names)
                     {
                         if (const auto id = find_value_id(name))
                             return *id;
                     }
-                    n = ValueId(n + 1);
+                    id++;
                     for (const auto& name : names)
-                        explicit_ids.emplace(name, n);
-                    return n;
+                        explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
                 }
             };
 
-            InternalIdMaker id_maker(start_id);
+            int argument_id = argument_id_offset;
+            InternalIdMaker id_maker(value_id_offset);
             for (const auto& a : cmd.arguments)
             {
-                if (!a->value.empty())
+                a->argument_id = ArgumentId(++argument_id);
+                if (!a->alias.empty())
                 {
-                    a->value_id = id_maker.make_value_id(a->value);
+                    a->value_id = id_maker.get_value_id(a->alias);
                     id_maker.explicit_ids.emplace(a->name, a->value_id);
                 }
                 else
                 {
-                    a->value_id = id_maker.make_value_id(a->name);
+                    a->value_id = id_maker.get_value_id(a->name);
                 }
             }
             for (const auto& o : cmd.options)
             {
+                o->argument_id = ArgumentId(++argument_id);
                 if (o->operation == OptionOperation::NONE)
                     continue;
                 if (!o->alias.empty())
                 {
-                    o->value_id = id_maker.make_value_id(o->alias);
+                    o->value_id = id_maker.get_value_id(o->alias);
                     for (auto& f : o->flags)
                         id_maker.explicit_ids.emplace(f, o->value_id);
                 }
                 else
                 {
-                    o->value_id = id_maker.make_value_id(o->flags);
+                    o->value_id = id_maker.get_value_id(o->flags);
                 }
             }
 
-            return id_maker.n;
+            return {ValueId(id_maker.id), ArgumentId(argument_id)};
         }
     }
 
@@ -359,18 +362,23 @@ namespace argos
 
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
-                               ValueId start_id)
+                               ValueId start_id,
+                               ArgumentId argument_id)
     {
         if (cmd.full_name.empty())
             cmd.full_name = cmd.name;
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
-        start_id = set_value_ids(cmd, start_id);
+
+        argument_id = ArgumentId(argument_id + 1);
+        cmd.argument_id = argument_id;
+        std::tie(start_id, argument_id) = set_internal_ids(cmd, start_id, argument_id);
+
         cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
         {
             c->full_name = cmd.name + ' ' + c->name;
-            finish_initialization(*c, data, start_id);
+            finish_initialization(*c, data, start_id, argument_id);
         }
     }
 }

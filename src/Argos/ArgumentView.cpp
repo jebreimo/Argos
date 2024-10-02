@@ -31,7 +31,7 @@ namespace argos
 
     const std::string& ArgumentView::value() const
     {
-        return m_argument->value;
+        return m_argument->alias;
     }
 
     Visibility ArgumentView::visibility() const

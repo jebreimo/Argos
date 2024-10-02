@@ -74,7 +74,8 @@ namespace argos
      */
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
-                               ValueId start_id = ValueId(0));
+                               ValueId start_id = {},
+                               ArgumentId argument_id = {});
 
     struct ParserSettings;
 

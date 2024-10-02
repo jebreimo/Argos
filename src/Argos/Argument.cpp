@@ -76,7 +76,7 @@ namespace argos
     Argument& Argument::alias(const std::string& id)
     {
         check_argument();
-        m_argument->value = id;
+        m_argument->alias = id;
         return *this;
     }
 

@@ -126,7 +126,6 @@ namespace argos
         auto ad = argument.release();
         if (ad->name.empty())
             ARGOS_THROW("Argument must have a name.");
-        ad->argument_id = next_argument_id();
         if (ad->section.empty())
             ad->section = m_data->command.current_section;
         m_data->command.arguments.emplace_back(std::move(ad));
@@ -146,7 +145,6 @@ namespace argos
         if (!od)
             ARGOS_THROW("Option is empty (it has probably already been added).");
         update_and_validate_option(*od);
-        od->argument_id = next_argument_id();
         if (od->section.empty())
             od->section = m_data->command.current_section;
         m_data->command.options.push_back(std::move(od));
@@ -165,7 +163,8 @@ namespace argos
         auto cmd = command.release();
         if (!cmd)
             ARGOS_THROW("Command is empty (it has probably already been added).");
-        cmd->argument_id = next_argument_id();
+        if (cmd->name.empty())
+            ARGOS_THROW("Command must have a name.");
         if (cmd->section.empty())
             cmd->section = m_data->command.current_section;
         m_data->command.commands.push_back(std::move(cmd));

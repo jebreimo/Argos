@@ -52,8 +52,6 @@ namespace argos
                         return true;
                     })
                 .release();
-            opt->argument_id = ArgumentId(cmd.options.size()
-                                          + cmd.arguments.size() + 1);
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
         }

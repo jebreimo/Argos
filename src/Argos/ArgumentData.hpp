@@ -18,7 +18,7 @@ namespace argos
         std::string name;
         TextSource help;
         std::string section;
-        std::string value;
+        std::string alias;
         ArgumentCallback callback;
         unsigned min_count = 1;
         unsigned max_count = 1;

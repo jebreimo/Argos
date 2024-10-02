@@ -43,8 +43,8 @@ namespace argos
         for (auto& a : m_command->arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
-            if (!a->value.empty())
-                m_ids.emplace_back(a->value, a->value_id, a->argument_id);
+            if (!a->alias.empty())
+                m_ids.emplace_back(a->alias, a->value_id, a->argument_id);
         }
         for (auto& o : m_command->options)
         {
