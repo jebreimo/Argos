@@ -114,7 +114,7 @@ TEST_CASE("Option that appends must have argument or value")
     using namespace argos;
     ArgumentParser parser("test");
     REQUIRE_THROWS(parser.add(Option({"-a"})
-        .operation(OptionOperation::APPEND)));
+        .operation(OptionOperation::APPEND)).parse({}));
 }
 
 TEST_CASE("List argument")
@@ -140,17 +140,17 @@ TEST_CASE("List argument")
 TEST_CASE("Incorrect standard options")
 {
     using namespace argos;
-    REQUIRE_THROWS(ArgumentParser().add(Option{"a"}));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"-a"}));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"--"}));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"-="}));
-    REQUIRE_THROWS(ArgumentParser().add(Option{"-ab"}));
-    REQUIRE_THROWS(ArgumentParser().add(Option{"--="}));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"--="}.argument("A")));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"--a"}));
-    REQUIRE_THROWS(ArgumentParser().add(Option{"--a="}));
-    REQUIRE_NOTHROW(ArgumentParser().add(Option{"--a="}.argument("A")));
-    REQUIRE_THROWS(ArgumentParser().add(Option{"--a=b"}));
+    REQUIRE_THROWS(ArgumentParser().add(Opt("a")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("-a")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("--")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("-=")).parse({}));
+    REQUIRE_THROWS(ArgumentParser().add(Opt("-ab")).parse({}));
+    REQUIRE_THROWS(ArgumentParser().add(Opt("--=")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("--=").argument("A")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("--a")).parse({}));
+    REQUIRE_THROWS(ArgumentParser().add(Opt("--a=")).parse({}));
+    REQUIRE_NOTHROW(ArgumentParser().add(Opt("--a=").argument("A")).parse({}));
+    REQUIRE_THROWS(ArgumentParser().add(Opt("--a=b")).parse({}));
 }
 
 TEST_CASE("Test dash options")
@@ -158,11 +158,11 @@ TEST_CASE("Test dash options")
     using namespace argos;
 
     REQUIRE_NOTHROW(ArgumentParser().option_style(OptionStyle::DASH)
-        .add(Option({"-="})));
+        .add(Option({"-="})).parse({}));
     REQUIRE_THROWS(ArgumentParser().option_style(OptionStyle::DASH)
-        .add(Option({"-a="})));
+        .add(Option({"-a="})).parse({}));
     REQUIRE_NOTHROW(ArgumentParser().option_style(OptionStyle::DASH)
-        .add(Option({"-a="}).argument("A")));
+        .add(Option({"-a="}).argument("A")).parse({}));
 
     Argv argv{"test", "-number", "12", "-number", "20", "-number=6", "-number", "15"};
     auto args = argos::ArgumentParser("test")
@@ -524,9 +524,9 @@ TEST_CASE("NONE option")
 {
     using namespace argos;
     REQUIRE_THROWS(ArgumentParser("p").add(
-        Option("-o").alias("f").operation(OptionOperation::NONE)));
+        Option("-o").constant("f").operation(OptionOperation::NONE)).parse({}));
     REQUIRE_THROWS(ArgumentParser("p").add(
-        Option("-o").alias("f").operation(OptionOperation::NONE)));
+        Option("-o").alias("f").operation(OptionOperation::NONE)).parse({}));
     auto args = ArgumentParser("test")
         .auto_exit(false)
         .add(Option("--f").argument("N").operation(OptionOperation::NONE))

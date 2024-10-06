@@ -32,4 +32,6 @@ namespace argos
         ArgumentId argument_id = {};
         ValueId value_id = {};
     };
+
+    void validate_and_update(OptionData& option, OptionStyle style);
 }

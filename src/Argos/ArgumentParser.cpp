@@ -144,7 +144,6 @@ namespace argos
         auto od = option.release();
         if (!od)
             ARGOS_THROW("Option is empty (it has probably already been added).");
-        update_and_validate_option(*od);
         if (od->section.empty())
             od->section = m_data->command.current_section;
         m_data->command.options.push_back(std::move(od));

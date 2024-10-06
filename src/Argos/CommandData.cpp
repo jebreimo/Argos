@@ -367,6 +367,8 @@ namespace argos
     {
         if (cmd.full_name.empty())
             cmd.full_name = cmd.name;
+        for (auto& o : cmd.options)
+            validate_and_update(*o, data.parser_settings.option_style);
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
 
