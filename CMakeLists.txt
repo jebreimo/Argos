@@ -88,6 +88,7 @@ add_library(Argos
     src/Argos/HelpText.cpp
     src/Argos/HelpText.hpp
     src/Argos/Option.cpp
+    src/Argos/OptionData.cpp
     src/Argos/OptionData.hpp
     src/Argos/OptionIterator.cpp
     src/Argos/OptionIterator.hpp
