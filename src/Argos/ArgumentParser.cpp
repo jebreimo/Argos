@@ -123,12 +123,7 @@ namespace argos
     ArgumentParser& ArgumentParser::add(Argument&& argument)
     {
         check_data();
-        auto ad = argument.release();
-        if (ad->name.empty())
-            ARGOS_THROW("Argument must have a name.");
-        if (ad->section.empty())
-            ad->section = m_data->command.current_section;
-        m_data->command.arguments.emplace_back(std::move(ad));
+        m_data->command.add(argument.release());
         return *this;
     }
 
@@ -140,13 +135,7 @@ namespace argos
     ArgumentParser& ArgumentParser::add(Option&& option)
     {
         check_data();
-
-        auto od = option.release();
-        if (!od)
-            ARGOS_THROW("Option is empty (it has probably already been added).");
-        if (od->section.empty())
-            od->section = m_data->command.current_section;
-        m_data->command.options.push_back(std::move(od));
+        m_data->command.add(option.release());
         return *this;
     }
 
@@ -158,15 +147,7 @@ namespace argos
     ArgumentParser& ArgumentParser::add(Command&& command)
     {
         check_data();
-
-        auto cmd = command.release();
-        if (!cmd)
-            ARGOS_THROW("Command is empty (it has probably already been added).");
-        if (cmd->name.empty())
-            ARGOS_THROW("Command must have a name.");
-        if (cmd->section.empty())
-            cmd->section = m_data->command.current_section;
-        m_data->command.commands.push_back(std::move(cmd));
+        m_data->command.add(command.release());
         return *this;
     }
 

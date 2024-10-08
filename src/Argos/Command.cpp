@@ -12,6 +12,10 @@
 
 namespace argos
 {
+    Command::Command()
+        : data_(std::make_unique<CommandData>())
+    {}
+
     Command::Command(std::string name)
         : data_(std::make_unique<CommandData>())
     {
@@ -55,10 +59,7 @@ namespace argos
     Command& Command::add(Argument&& argument)
     {
         check_command();
-        auto arg = argument.release();
-        if (!arg)
-            ARGOS_THROW("Argument has already been moved.");
-        data_->arguments.push_back(std::move(arg));
+        data_->add(argument.release());
         return *this;
     }
 
@@ -70,10 +71,7 @@ namespace argos
     Command& Command::add(Option&& option)
     {
         check_command();
-        auto opt = option.release();
-        if (!opt)
-            ARGOS_THROW("Option has already been moved.");
-        data_->options.push_back(std::move(opt));
+        data_->add(option.release());
         return *this;
     }
 
@@ -85,10 +83,14 @@ namespace argos
     Command& Command::add(Command&& command)
     {
         check_command();
-        auto cmd = command.release();
-        if (!cmd)
-            ARGOS_THROW("Command has already been moved.");
-        data_->commands.push_back(std::move(cmd));
+        data_->add(command.release());
+        return *this;
+    }
+
+    Command& Command::name(std::string name)
+    {
+        check_command();
+        data_->name = std::move(name);
         return *this;
     }
 
@@ -138,6 +140,18 @@ namespace argos
     {
         check_command();
         data_->multi_command = multi_command;
+        return *this;
+    }
+
+    Command& Command::copy_from(Command& command)
+    {
+        check_command();
+        for (auto& arg : command.data_->arguments)
+            data_->arguments.push_back(std::make_unique<ArgumentData>(*arg));
+        for (auto& opt : command.data_->options)
+            data_->options.push_back(std::make_unique<OptionData>(*opt));
+        for (auto& cmd : command.data_->commands)
+            data_->commands.push_back(std::make_unique<CommandData>(*cmd));
         return *this;
     }
 

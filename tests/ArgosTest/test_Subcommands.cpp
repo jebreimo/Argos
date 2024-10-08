@@ -130,3 +130,48 @@ TEST_CASE("Check that error text refers to the correct command")
     auto error_text = stream.str();
     REQUIRE(error_text.find("test foo") == 0);
 }
+
+TEST_CASE("Check that copy_from copies options and arguments")
+{
+    using namespace argos;
+    auto command = Command()
+        .add(Arg("FILE"))
+        .add(Opt("-c", "--compress").argument("ALGO"));
+    auto parser = ArgumentParser()
+        .auto_exit(false)
+        .add(Command("add").copy_from(command))
+        .add(Command("update").copy_from(command))
+        .move();
+    SECTION("Test add command")
+    {
+        Argv argv{"test", "add", "file.txt", "--compress", "gzip"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.subcommands().size() == 1);
+        args = args.subcommands()[0];
+        REQUIRE(args.command_name() == "add");
+        REQUIRE(args.has("FILE"));
+        REQUIRE(args.value("FILE").as_string() == "file.txt");
+        REQUIRE(args.has("-c"));
+        REQUIRE(args.value("-c").as_string() == "gzip");
+    }
+    SECTION("Test update command")
+    {
+        Argv argv{"test", "update", "file1.txt", "--compress", "lzh"};
+        auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.subcommands().size() == 1);
+        args = args.subcommands()[0];
+        REQUIRE(args.command_name() == "update");
+        REQUIRE(args.has("FILE"));
+        REQUIRE(args.value("FILE").as_string() == "file1.txt");
+        REQUIRE(args.has("-c"));
+        REQUIRE(args.value("-c").as_string() == "lzh");
+    }
+}
+
+TEST_CASE("It's illegal to add unnamed commands")
+{
+    using namespace argos;
+    REQUIRE_THROWS_AS(ArgumentParser().add(Command()), ArgosException);
+    Command cmd("a");
+    REQUIRE_THROWS_AS(cmd.add(Command()), ArgosException);
+}

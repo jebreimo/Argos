@@ -109,6 +109,37 @@ namespace argos
         return *this;
     }
 
+    void CommandData::add(std::unique_ptr<ArgumentData> arg)
+    {
+        if (!arg)
+            ARGOS_THROW("Argument is empty (it has probably already been added).");
+        if (arg->name.empty())
+            ARGOS_THROW("Argument must have a name.");
+        if (arg->section.empty())
+            arg->section = current_section;
+        arguments.emplace_back(std::move(arg));
+    }
+
+    void CommandData::add(std::unique_ptr<OptionData> opt)
+    {
+        if (!opt)
+            ARGOS_THROW("Option is empty (it has probably already been added).");
+        if (opt->section.empty())
+            opt->section = current_section;
+        options.push_back(std::move(opt));
+    }
+
+    void CommandData::add(std::unique_ptr<CommandData> cmd)
+    {
+        if (!cmd)
+            ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (cmd->name.empty())
+            ARGOS_THROW("Command must have a name.");
+        if (cmd->section.empty())
+            cmd->section = current_section;
+        commands.push_back(std::move(cmd));
+    }
+
     void CommandData::build_option_index(bool case_insensitive)
     {
         std::vector<std::pair<std::string_view, const OptionData*>> index;

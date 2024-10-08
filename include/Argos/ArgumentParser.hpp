@@ -99,6 +99,8 @@ namespace argos
         ArgumentParser& add(Command& command);
         ArgumentParser& add(Command&& command);
 
+        ArgumentParser& copy_from(Command& command);
+
         /**
          * @brief Parses the arguments and options in argv.
          *
@@ -440,14 +442,6 @@ namespace argos
         ArgumentParser& line_width(unsigned line_width);
 
         /**
-         * @brief Write the help text.
-         *
-         * @note The help text is displayed automatically when a help option
-         *      is used.
-         */
-        void write_help_text() const;
-
-        /**
          * @brief Inform Argos how a long word is to be split over multiple
          *  lines.
          *
@@ -480,8 +474,17 @@ namespace argos
         ArgumentParser& set_exit_codes(int error, int normal_exit);
 
         /**
+         * @brief Write the help text.
+         *
+         * @note The help text is displayed automatically when a help option
+         *      is used.
+         */
+        void write_help_text() const;
+
+        /**
          * @brief Makes it possible to construct an ArgumentParser with chained
-         *      method calls and assign it to a variable.
+         *      method calls and assign it to a variable without invoking
+         *      the copy constructor.
          */
         ArgumentParser&& move();
     private:

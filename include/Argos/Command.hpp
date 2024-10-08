@@ -16,6 +16,8 @@ namespace argos
     class Command
     {
     public:
+        Command();
+
         explicit Command(std::string name);
 
         Command(const Command&);
@@ -40,6 +42,8 @@ namespace argos
 
         Command& add(Command&& command);
 
+        Command& name(std::string name);
+
         Command& about(std::string text);
 
         Command& section(const std::string& name);
@@ -53,6 +57,8 @@ namespace argos
         Command& id(int id);
 
         Command& multi_command(bool multi_command);
+
+        Command& copy_from(Command& command);
 
         std::unique_ptr<CommandData> release();
     private:

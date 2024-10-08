@@ -27,6 +27,12 @@ namespace argos
 
         CommandData& operator=(CommandData&&) noexcept;
 
+        void add(std::unique_ptr<ArgumentData> arg);
+
+        void add(std::unique_ptr<OptionData> opt);
+
+        void add(std::unique_ptr<CommandData> cmd);
+
         void build_option_index(bool case_insensitive);
 
         [[nodiscard]] const OptionData*
