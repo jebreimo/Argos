@@ -10,10 +10,18 @@
 #include <algorithm>
 #include <iostream>
 
+
 namespace argos
 {
     namespace
     {
+        using namespace std::string_literals;
+
+        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS"s;
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS"s;
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS"s;
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE"s;
+
         std::string get_argument_name(const ArgumentData& arg)
         {
             if (arg.name[0] == '<' || arg.name[0] == '[')
@@ -225,7 +233,7 @@ namespace argos
 
             auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
             if (!cmd_title)
-                cmd_title = "COMMANDS";
+                cmd_title = DEFAULT_COMMANDS_TITLE;
             for (auto& c : command.commands)
             {
                 if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -237,7 +245,7 @@ namespace argos
 
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
-                arg_title = "ARGUMENTS";
+                arg_title = DEFAULT_ARGUMENTS_TITLE;
             for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -248,7 +256,7 @@ namespace argos
 
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
-                opt_title = "OPTIONS";
+                opt_title = DEFAULT_OPTIONS_TITLE;
             for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -384,7 +392,7 @@ namespace argos
             {
                 if (prepend_newline)
                     formatter.newline();
-                formatter.write_words("USAGE");
+                formatter.write_words(DEFAULT_USAGE_TITLE);
                 formatter.newline();
                 prepend_newline = false;
             }
