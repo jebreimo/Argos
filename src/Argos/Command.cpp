@@ -146,18 +146,19 @@ namespace argos
     Command& Command::copy_from(Command& command)
     {
         check_command();
-        for (auto& arg : command.data_->arguments)
-            data_->arguments.push_back(std::make_unique<ArgumentData>(*arg));
-        for (auto& opt : command.data_->options)
-            data_->options.push_back(std::make_unique<OptionData>(*opt));
-        for (auto& cmd : command.data_->commands)
-            data_->commands.push_back(std::make_unique<CommandData>(*cmd));
+        data_->copy_from(*command.data_);
         return *this;
     }
 
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);
+    }
+
+    const CommandData& Command::internal_ref() const
+    {
+        check_command();
+        return *data_;
     }
 
     void Command::check_command() const

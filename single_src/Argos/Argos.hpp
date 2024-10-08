@@ -2553,6 +2553,8 @@ namespace argos
     class Command
     {
     public:
+        Command();
+
         explicit Command(std::string name);
 
         Command(const Command&);
@@ -2565,11 +2567,19 @@ namespace argos
 
         Command& operator=(Command&&) noexcept;
 
-        Command& add(Argument argument);
+        Command& add(Argument& argument);
 
-        Command& add(Option option);
+        Command& add(Argument&& argument);
 
-        Command& add(Command command);
+        Command& add(Option& option);
+
+        Command& add(Option&& option);
+
+        Command& add(Command& command);
+
+        Command& add(Command&& command);
+
+        Command& name(std::string name);
 
         Command& about(std::string text);
 
@@ -2585,9 +2595,16 @@ namespace argos
 
         Command& multi_command(bool multi_command);
 
+        Command& copy_from(Command& command);
+
         std::unique_ptr<CommandData> release();
+
     private:
+        friend class ArgumentParser;
+
         void check_command() const;
+
+        const CommandData& internal_ref() const;
 
         std::unique_ptr<CommandData> data_;
     };
@@ -2666,7 +2683,9 @@ namespace argos
          *
          * @throw ArgosException if the argument doesn't have a name.
          */
-        ArgumentParser& add(Argument argument);
+        ArgumentParser& add(Argument& argument);
+
+        ArgumentParser& add(Argument&& argument);
 
         /**
          * @brief Add a new option definition to the ArgumentParser.
@@ -2681,9 +2700,13 @@ namespace argos
          *      - an option with operation APPEND has neither argument nor
          *        constant.
          */
-        ArgumentParser& add(Option option);
+        ArgumentParser& add(Option& option);
+        ArgumentParser& add(Option&& option);
 
-        ArgumentParser& add(Command command);
+        ArgumentParser& add(Command& command);
+        ArgumentParser& add(Command&& command);
+
+        ArgumentParser& copy_from(const Command& command);
 
         /**
          * @brief Parses the arguments and options in argv.
@@ -3026,14 +3049,6 @@ namespace argos
         ArgumentParser& line_width(unsigned line_width);
 
         /**
-         * @brief Write the help text.
-         *
-         * @note The help text is displayed automatically when a help option
-         *      is used.
-         */
-        void write_help_text() const;
-
-        /**
          * @brief Inform Argos how a long word is to be split over multiple
          *  lines.
          *
@@ -3066,8 +3081,17 @@ namespace argos
         ArgumentParser& set_exit_codes(int error, int normal_exit);
 
         /**
+         * @brief Write the help text.
+         *
+         * @note The help text is displayed automatically when a help option
+         *      is used.
+         */
+        void write_help_text() const;
+
+        /**
          * @brief Makes it possible to construct an ArgumentParser with chained
-         *      method calls and assign it to a variable.
+         *      method calls and assign it to a variable without invoking
+         *      the copy constructor.
          */
         ArgumentParser&& move();
     private:

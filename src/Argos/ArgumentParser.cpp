@@ -151,6 +151,13 @@ namespace argos
         return *this;
     }
 
+    ArgumentParser& ArgumentParser::copy_from(const Command& command)
+    {
+        check_data();
+        m_data->command.copy_from(command.internal_ref());
+        return *this;
+    }
+
     ParsedArguments ArgumentParser::parse(int argc, char** argv)
     {
         if (argc <= 0)

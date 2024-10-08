@@ -99,7 +99,7 @@ namespace argos
         ArgumentParser& add(Command& command);
         ArgumentParser& add(Command&& command);
 
-        ArgumentParser& copy_from(Command& command);
+        ArgumentParser& copy_from(const Command& command);
 
         /**
          * @brief Parses the arguments and options in argv.

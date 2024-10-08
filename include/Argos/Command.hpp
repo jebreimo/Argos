@@ -61,8 +61,13 @@ namespace argos
         Command& copy_from(Command& command);
 
         std::unique_ptr<CommandData> release();
+
     private:
+        friend class ArgumentParser;
+
         void check_command() const;
+
+        const CommandData& internal_ref() const;
 
         std::unique_ptr<CommandData> data_;
     };

@@ -53,7 +53,7 @@ namespace argos
         std::string name;
         TextSource help;
         std::string section;
-        std::string value;
+        std::string alias;
         ArgumentCallback callback;
         unsigned min_count = 1;
         unsigned max_count = 1;
@@ -138,7 +138,7 @@ namespace argos
     Argument& Argument::alias(const std::string& id)
     {
         check_argument();
-        m_argument->value = id;
+        m_argument->alias = id;
         return *this;
     }
 
@@ -248,6 +248,8 @@ namespace argos
         ArgumentId argument_id = {};
         ValueId value_id = {};
     };
+
+    void validate_and_update(OptionData& option, OptionStyle style);
 }
 
 //****************************************************************************
@@ -275,6 +277,14 @@ namespace argos
         CommandData& operator=(const CommandData&);
 
         CommandData& operator=(CommandData&&) noexcept;
+
+        void add(std::unique_ptr<ArgumentData> arg);
+
+        void add(std::unique_ptr<OptionData> opt);
+
+        void add(std::unique_ptr<CommandData> cmd);
+
+        void copy_from(const CommandData& cmd);
 
         void build_option_index(bool case_insensitive);
 
@@ -323,7 +333,8 @@ namespace argos
      */
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
-                               ValueId start_id = ValueId(0));
+                               ValueId start_id = {},
+                               ArgumentId argument_id = {});
 
     struct ParserSettings;
 
@@ -1017,7 +1028,8 @@ namespace argos
 
         bool check_argument_and_option_counts();
 
-        [[nodiscard]] const CommandData* find_sibling_command(std::string_view name) const;
+        [[nodiscard]] std::pair<const CommandData*, size_t>
+        find_sibling_command(std::string_view name) const;
 
         void error(const std::string& message = {});
 
@@ -1480,9 +1492,9 @@ namespace argos
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
-        else if (auto next_cmd = find_sibling_command(value))
+        else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
         {
-            m_parsed_args.pop_back();
+            m_parsed_args.resize(i + 1);
             m_command = m_parsed_args.back()->command();
             m_argument_counter = {};
             return process_command(next_cmd);
@@ -1494,7 +1506,7 @@ namespace argos
         }
         else
         {
-            error("Too many arguments, starting with \"" + value + "\".");
+            error("Too many arguments, starting at \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
     }
@@ -1605,20 +1617,23 @@ namespace argos
         }
     }
 
-    const CommandData*
+    std::pair<const CommandData*, size_t>
     ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
     {
         if (!m_argument_counter.is_complete())
-            return nullptr;
+            return {nullptr, 0};
 
         auto size = m_parsed_args.size();
         if (size <= 1)
-            return nullptr;
+            return {nullptr, 0};
 
-        const auto& parent = *m_parsed_args[size - 2]->command();
-        if (!parent.multi_command)
-            return nullptr;
-        return parent.find_command(name, m_data->parser_settings.case_insensitive);
+        for (size_t i = size - 1; i-- > 0;)
+        {
+            const auto& parent = *m_parsed_args[i]->command();
+            if (parent.multi_command)
+                return {parent.find_command(name, m_data->parser_settings.case_insensitive), i};
+        }
+        return {nullptr, 0};
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)
@@ -1628,7 +1643,8 @@ namespace argos
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         copy_remaining_arguments_to_parser_result();
-        parsed_arguments()->set_result_code(ParserResultCode::FAILURE);
+        for (auto& parsed_args : m_parsed_args)
+            parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
 }
@@ -1743,45 +1759,46 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Argument argument)
+    ArgumentParser& ArgumentParser::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    ArgumentParser& ArgumentParser::add(Argument&& argument)
     {
         check_data();
-        auto ad = argument.release();
-        if (ad->name.empty())
-            ARGOS_THROW("Argument must have a name.");
-        ad->argument_id = next_argument_id();
-        if (ad->section.empty())
-            ad->section = m_data->command.current_section;
-        m_data->command.arguments.emplace_back(std::move(ad));
+        m_data->command.add(argument.release());
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Option option)
+    ArgumentParser& ArgumentParser::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    ArgumentParser& ArgumentParser::add(Option&& option)
     {
         check_data();
-
-        auto od = option.release();
-        if (!od)
-            ARGOS_THROW("Option is empty (it has probably already been added).");
-        update_and_validate_option(*od);
-        od->argument_id = next_argument_id();
-        if (od->section.empty())
-            od->section = m_data->command.current_section;
-        m_data->command.options.push_back(std::move(od));
+        m_data->command.add(option.release());
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Command command)
+    ArgumentParser& ArgumentParser::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    ArgumentParser& ArgumentParser::add(Command&& command)
     {
         check_data();
+        m_data->command.add(command.release());
+        return *this;
+    }
 
-        auto cmd = command.release();
-        if (!cmd)
-            ARGOS_THROW("Command is empty (it has probably already been added).");
-        cmd->argument_id = next_argument_id();
-        if (cmd->section.empty())
-            cmd->section = m_data->command.current_section;
-        m_data->command.commands.push_back(std::move(cmd));
+    ArgumentParser& ArgumentParser::copy_from(const Command& command)
+    {
+        check_data();
+        m_data->command.copy_from(command.internal_ref());
         return *this;
     }
 
@@ -2725,7 +2742,7 @@ namespace argos
 
     const std::string& ArgumentView::value() const
     {
-        return m_argument->value;
+        return m_argument->alias;
     }
 
     Visibility ArgumentView::visibility() const
@@ -2774,6 +2791,10 @@ namespace argos
 
 namespace argos
 {
+    Command::Command()
+        : data_(std::make_unique<CommandData>())
+    {}
+
     Command::Command(std::string name)
         : data_(std::make_unique<CommandData>())
     {
@@ -2809,24 +2830,46 @@ namespace argos
         return *this;
     }
 
-    Command& Command::add(Argument argument)
+    Command& Command::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    Command& Command::add(Argument&& argument)
     {
         check_command();
-        data_->arguments.push_back(argument.release());
+        data_->add(argument.release());
         return *this;
     }
 
-    Command& Command::add(Option option)
+    Command& Command::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    Command& Command::add(Option&& option)
     {
         check_command();
-        data_->options.push_back(option.release());
+        data_->add(option.release());
         return *this;
     }
 
-    Command& Command::add(Command command)
+    Command& Command::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    Command& Command::add(Command&& command)
     {
         check_command();
-        data_->commands.push_back(command.release());
+        data_->add(command.release());
+        return *this;
+    }
+
+    Command& Command::name(std::string name)
+    {
+        check_command();
+        data_->name = std::move(name);
         return *this;
     }
 
@@ -2879,9 +2922,22 @@ namespace argos
         return *this;
     }
 
+    Command& Command::copy_from(Command& command)
+    {
+        check_command();
+        data_->copy_from(*command.data_);
+        return *this;
+    }
+
     std::unique_ptr<CommandData> Command::release()
     {
         return std::move(data_);
+    }
+
+    const CommandData& Command::internal_ref() const
+    {
+        check_command();
+        return *data_;
     }
 
     void Command::check_command() const
@@ -2920,6 +2976,9 @@ namespace argos
         options.reserve(rhs.options.size());
         for (const auto& o : rhs.options)
             options.push_back(std::make_unique<OptionData>(*o));
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
     }
 
     CommandData::CommandData(CommandData&& rhs) noexcept
@@ -2990,6 +3049,47 @@ namespace argos
         id = rhs.id;
         argument_id = rhs.argument_id;
         return *this;
+    }
+
+    void CommandData::add(std::unique_ptr<ArgumentData> arg)
+    {
+        if (!arg)
+            ARGOS_THROW("Argument is empty (it has probably already been added).");
+        if (arg->name.empty())
+            ARGOS_THROW("Argument must have a name.");
+        if (arg->section.empty())
+            arg->section = current_section;
+        arguments.emplace_back(std::move(arg));
+    }
+
+    void CommandData::add(std::unique_ptr<OptionData> opt)
+    {
+        if (!opt)
+            ARGOS_THROW("Option is empty (it has probably already been added).");
+        if (opt->section.empty())
+            opt->section = current_section;
+        options.push_back(std::move(opt));
+    }
+
+    void CommandData::add(std::unique_ptr<CommandData> cmd)
+    {
+        if (!cmd)
+            ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (cmd->name.empty())
+            ARGOS_THROW("Command must have a name.");
+        if (cmd->section.empty())
+            cmd->section = current_section;
+        commands.push_back(std::move(cmd));
+    }
+
+    void CommandData::copy_from(const CommandData& cmd)
+    {
+        for (const auto& a : cmd.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+        for (const auto& o : cmd.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+        for (const auto& c : cmd.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
     }
 
     void CommandData::build_option_index(bool case_insensitive)
@@ -3142,22 +3242,22 @@ namespace argos
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
                 .help("Display the help text.")
                 .constant("1").release();
-            opt->argument_id = ArgumentId(cmd.options.size()
-                                          + cmd.arguments.size() + 1);
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
         }
 
-        ValueId set_value_ids(const CommandData& cmd,
-                              ValueId start_id = ValueId(0))
+        std::pair<ValueId, ArgumentId>
+        set_internal_ids(const CommandData& cmd,
+                         ValueId value_id_offset,
+                         ArgumentId argument_id_offset)
         {
             struct InternalIdMaker
             {
                 std::map<std::string_view, ValueId> explicit_ids;
-                ValueId n;
+                int id;
 
                 explicit InternalIdMaker(ValueId start_id)
-                    : n(start_id)
+                    : id(start_id)
                 {
                 }
 
@@ -3169,59 +3269,62 @@ namespace argos
                     return it->second;
                 }
 
-                ValueId make_value_id(std::string_view name)
+                ValueId get_value_id(std::string_view name)
                 {
                     if (const auto id = find_value_id(name))
                         return *id;
-                    n = ValueId(n + 1);
-                    explicit_ids.emplace(name, n);
-                    return n;
+                    id++;
+                    explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
                 }
 
-                ValueId make_value_id(const std::vector<std::string>& names)
+                ValueId get_value_id(const std::vector<std::string>& names)
                 {
                     for (const auto& name : names)
                     {
                         if (const auto id = find_value_id(name))
                             return *id;
                     }
-                    n = ValueId(n + 1);
+                    id++;
                     for (const auto& name : names)
-                        explicit_ids.emplace(name, n);
-                    return n;
+                        explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
                 }
             };
 
-            InternalIdMaker id_maker(start_id);
+            int argument_id = argument_id_offset;
+            InternalIdMaker id_maker(value_id_offset);
             for (const auto& a : cmd.arguments)
             {
-                if (!a->value.empty())
+                a->argument_id = ArgumentId(++argument_id);
+                if (!a->alias.empty())
                 {
-                    a->value_id = id_maker.make_value_id(a->value);
+                    a->value_id = id_maker.get_value_id(a->alias);
                     id_maker.explicit_ids.emplace(a->name, a->value_id);
                 }
                 else
                 {
-                    a->value_id = id_maker.make_value_id(a->name);
+                    a->value_id = id_maker.get_value_id(a->name);
                 }
             }
             for (const auto& o : cmd.options)
             {
+                o->argument_id = ArgumentId(++argument_id);
                 if (o->operation == OptionOperation::NONE)
                     continue;
                 if (!o->alias.empty())
                 {
-                    o->value_id = id_maker.make_value_id(o->alias);
+                    o->value_id = id_maker.get_value_id(o->alias);
                     for (auto& f : o->flags)
                         id_maker.explicit_ids.emplace(f, o->value_id);
                 }
                 else
                 {
-                    o->value_id = id_maker.make_value_id(o->flags);
+                    o->value_id = id_maker.get_value_id(o->flags);
                 }
             }
 
-            return id_maker.n;
+            return {ValueId(id_maker.id), ArgumentId(argument_id)};
         }
     }
 
@@ -3242,18 +3345,25 @@ namespace argos
 
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
-                               ValueId start_id)
+                               ValueId start_id,
+                               ArgumentId argument_id)
     {
         if (cmd.full_name.empty())
             cmd.full_name = cmd.name;
+        for (auto& o : cmd.options)
+            validate_and_update(*o, data.parser_settings.option_style);
         update_require_command(cmd);
         add_help_option(cmd, data.parser_settings);
-        start_id = set_value_ids(cmd, start_id);
+
+        argument_id = ArgumentId(argument_id + 1);
+        cmd.argument_id = argument_id;
+        std::tie(start_id, argument_id) = set_internal_ids(cmd, start_id, argument_id);
+
         cmd.build_option_index(data.parser_settings.case_insensitive);
         for (auto& c : cmd.commands)
         {
             c->full_name = cmd.name + ' ' + c->name;
-            finish_initialization(*c, data, start_id);
+            finish_initialization(*c, data, start_id, argument_id);
         }
     }
 }
@@ -3397,6 +3507,13 @@ namespace argos
 {
     namespace
     {
+        using namespace std::string_literals;
+
+        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS"s;
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS"s;
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS"s;
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE"s;
+
         std::string get_argument_name(const ArgumentData& arg)
         {
             if (arg.name[0] == '<' || arg.name[0] == '[')
@@ -3608,7 +3725,7 @@ namespace argos
 
             auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
             if (!cmd_title)
-                cmd_title = "COMMANDS";
+                cmd_title = DEFAULT_COMMANDS_TITLE;
             for (auto& c : command.commands)
             {
                 if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -3620,7 +3737,7 @@ namespace argos
 
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
-                arg_title = "ARGUMENTS";
+                arg_title = DEFAULT_ARGUMENTS_TITLE;
             for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -3631,7 +3748,7 @@ namespace argos
 
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
-                opt_title = "OPTIONS";
+                opt_title = DEFAULT_OPTIONS_TITLE;
             for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
@@ -3767,7 +3884,7 @@ namespace argos
             {
                 if (prepend_newline)
                     formatter.newline();
-                formatter.write_words("USAGE");
+                formatter.write_words(DEFAULT_USAGE_TITLE);
                 formatter.newline();
                 prepend_newline = false;
             }
@@ -3832,7 +3949,7 @@ namespace argos
         else
             formatter.set_stream(&std::cerr);
         formatter.word_splitter().add_words(data.help_settings.word_split_rules);
-        formatter.write_words(cmd.name + ": ");
+        formatter.write_words(cmd.full_name + ": ");
         formatter.write_words(msg);
         formatter.newline();
         if (!write_custom_text(formatter, cmd, TextId::ERROR_USAGE))
@@ -4063,6 +4180,115 @@ namespace argos
         if (!m_option)
             ARGOS_THROW("Cannot use Option instance after"
                         " release() has been called.");
+    }
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-10-05.
+//
+// This file is distributed under the BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    namespace
+    {
+        bool check_flag_with_equal(const std::string& flag,
+                                   const OptionData& od)
+        {
+            const auto eq_pos = flag.find('=');
+            if (eq_pos == std::string::npos)
+                return true;
+            if (eq_pos != flag.size() - 1)
+                ARGOS_THROW("Options can not have a '=' in the middle: " + flag);
+            if (od.argument.empty())
+                ARGOS_THROW("Options ending with '=' must have a named argument: " + flag);
+            return true;
+        }
+
+        bool check_standard_flag(const std::string& flag,
+                                 const OptionData& od)
+        {
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
+                return false;
+            if (flag.size() < 2)
+                return false;
+            if (flag[0] != '-')
+                return false;
+            if (flag.size() == 2)
+                return true;
+            if (flag[1] != '-')
+                return false;
+            return check_flag_with_equal(flag, od);
+        }
+
+        bool check_flag(const std::string& flag, char prefix,
+                        const OptionData& od)
+        {
+            if (flag.size() < 2 || flag[0] != prefix)
+                return false;
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
+                return false;
+            if (flag.size() == 2)
+                return true;
+            return check_flag_with_equal(flag, od);
+        }
+    }
+
+    void validate_and_update(OptionData& option, OptionStyle style)
+    {
+        if (option.flags.empty())
+            ARGOS_THROW("Option must have one or more flags.");
+
+        for (auto& flag : option.flags)
+        {
+            bool ok = false;
+            switch (style)
+            {
+            case OptionStyle::STANDARD:
+                ok = check_standard_flag(flag, option);
+                break;
+            case OptionStyle::SLASH:
+                ok = check_flag(flag, '/', option);
+                break;
+            case OptionStyle::DASH:
+                ok = check_flag(flag, '-', option);
+                break;
+            default:
+                break;
+            }
+            if (!ok)
+                ARGOS_THROW("Invalid flag: '" + flag + "'.");
+        }
+
+        if (!option.argument.empty() && !option.constant.empty())
+            ARGOS_THROW("Option cannot have both argument and constant.");
+
+        switch (option.operation)
+        {
+        case OptionOperation::NONE:
+            if (!option.constant.empty())
+                ARGOS_THROW("NONE-options cannot have a constant.");
+            if (!option.alias.empty())
+                ARGOS_THROW("NONE-options cannot have an alias.");
+            break;
+        case OptionOperation::ASSIGN:
+            if (option.argument.empty() && option.constant.empty())
+                option.constant = "1";
+            break;
+        case OptionOperation::APPEND:
+            if (option.argument.empty() && option.constant.empty())
+                ARGOS_THROW("Options that appends must have either constant or argument.");
+            break;
+        case OptionOperation::CLEAR:
+            if (!option.argument.empty() || !option.constant.empty())
+                option.constant = "1";
+            if (!option.optional)
+                ARGOS_THROW("CLEAR-options must be optional.");
+            break;
+        }
     }
 }
 
@@ -4801,8 +5027,8 @@ namespace argos
         for (auto& a : m_command->arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
-            if (!a->value.empty())
-                m_ids.emplace_back(a->value, a->value_id, a->argument_id);
+            if (!a->alias.empty())
+                m_ids.emplace_back(a->alias, a->value_id, a->argument_id);
         }
         for (auto& o : m_command->options)
         {
@@ -5056,8 +5282,6 @@ namespace argos
                         return true;
                     })
                 .release();
-            opt->argument_id = ArgumentId(cmd.options.size()
-                                          + cmd.arguments.size() + 1);
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
         }

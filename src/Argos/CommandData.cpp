@@ -140,6 +140,16 @@ namespace argos
         commands.push_back(std::move(cmd));
     }
 
+    void CommandData::copy_from(const CommandData& cmd)
+    {
+        for (const auto& a : cmd.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+        for (const auto& o : cmd.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+        for (const auto& c : cmd.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
+    }
+
     void CommandData::build_option_index(bool case_insensitive)
     {
         std::vector<std::pair<std::string_view, const OptionData*>> index;

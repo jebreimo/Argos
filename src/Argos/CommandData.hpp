@@ -33,6 +33,8 @@ namespace argos
 
         void add(std::unique_ptr<CommandData> cmd);
 
+        void copy_from(const CommandData& cmd);
+
         void build_option_index(bool case_insensitive);
 
         [[nodiscard]] const OptionData*
