@@ -15,12 +15,10 @@ namespace argos
 {
     namespace
     {
-        using namespace std::string_literals;
-
-        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS"s;
-        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS"s;
-        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS"s;
-        constexpr auto DEFAULT_USAGE_TITLE = "USAGE"s;
+        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
 
         std::string get_argument_name(const ArgumentData& arg)
         {
