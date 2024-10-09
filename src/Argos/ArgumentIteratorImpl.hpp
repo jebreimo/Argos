@@ -83,6 +83,11 @@ namespace argos
         [[nodiscard]] std::pair<const CommandData*, size_t>
         find_sibling_command(std::string_view name) const;
 
+        [[nodiscard]]
+        std::optional<size_t> find_first_multi_command_parent() const;
+
+        void reactivate_multi_command_parent(size_t index);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;

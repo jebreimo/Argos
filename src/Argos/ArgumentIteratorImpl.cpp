@@ -63,10 +63,14 @@ namespace argos
         }
 
         if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
             m_argument_counter = ArgumentCounter(*m_command);
+        }
         else
+        {
             m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
+        }
     }
 
     std::shared_ptr<ParsedArgumentsImpl>
@@ -115,7 +119,9 @@ namespace argos
             {
                 if (auto cmd = m_command->find_command(
                     *arg, m_data->parser_settings.case_insensitive))
+                {
                     return process_command(cmd);
+                }
             }
             return process_argument(*arg);
         }
@@ -241,11 +247,13 @@ namespace argos
             case OptionResult::LAST_ARGUMENT:
                 if (!check_argument_and_option_counts())
                     return {IteratorResultCode::ERROR, {}, {}};
-                // else if (m_parsed_args.size() > 1
-                //          && m_parsed_args[m_parsed_args.size() - 2]->command()
-                //                 ->find_command(*m_iterator.current(),
-                //                                m_data->parser_settings.case_insensitive))
-                //     m_parsed_args.pop_back();
+
+                if (auto index = find_first_multi_command_parent())
+                {
+                    reactivate_multi_command_parent(*index);
+                    return {IteratorResultCode::OPTION, option, arg};
+                }
+
                 [[fallthrough]];
             case OptionResult::STOP:
                 copy_remaining_arguments_to_parser_result();
@@ -281,6 +289,7 @@ namespace argos
                 argument->callback(ArgumentView(argument), s,
                                    ParsedArgumentsBuilder(parsed_args));
             }
+
             if (m_data->parser_settings.argument_callback)
             {
                 m_data->parser_settings.argument_callback(
@@ -291,9 +300,7 @@ namespace argos
         }
         else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
         {
-            m_parsed_args.resize(i + 1);
-            m_command = m_parsed_args.back()->command();
-            m_argument_counter = {};
+            reactivate_multi_command_parent(i);
             return process_command(next_cmd);
         }
         else if (m_data->parser_settings.ignore_undefined_arguments)
@@ -314,10 +321,15 @@ namespace argos
         m_parsed_args.push_back(parsed_arguments()->add_subcommand(command));
         m_command = command;
         if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
             m_argument_counter = ArgumentCounter(*m_command);
+        }
         else
+        {
             m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
+        }
+        m_state = State::ARGUMENTS_AND_OPTIONS;
         return {IteratorResultCode::COMMAND, command, m_iterator.current()};
     }
 
@@ -414,31 +426,57 @@ namespace argos
         }
     }
 
+    std::optional<size_t>
+    ArgumentIteratorImpl::find_first_multi_command_parent() const
+    {
+        auto size = m_parsed_args.size();
+        if (size <= 1)
+            return {};
+
+        for (size_t i = size - 1; i-- > 0;)
+        {
+            const auto& parent = *m_parsed_args[i]->command();
+            if (parent.multi_command)
+                return i;
+        }
+
+        return {};
+    }
+
     std::pair<const CommandData*, size_t>
     ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
     {
         if (!m_argument_counter.is_complete())
             return {nullptr, 0};
 
-        auto size = m_parsed_args.size();
-        if (size <= 1)
-            return {nullptr, 0};
-
-        for (size_t i = size - 1; i-- > 0;)
+        if (auto index = find_first_multi_command_parent())
         {
-            const auto& parent = *m_parsed_args[i]->command();
-            if (parent.multi_command)
-                return {parent.find_command(name, m_data->parser_settings.case_insensitive), i};
+            return {
+                m_parsed_args[*index]->command()->find_command(
+                    name, m_data->parser_settings.case_insensitive),
+                *index
+            };
         }
+
         return {nullptr, 0};
+    }
+
+    void ArgumentIteratorImpl::reactivate_multi_command_parent(size_t index)
+    {
+        m_parsed_args.resize(index + 1);
+        m_command = m_parsed_args.back()->command();
+        m_argument_counter = {};
+        m_state = State::ARGUMENTS_ONLY;
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
             write_error_message(*m_data, *m_command, message);
+
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
+
         copy_remaining_arguments_to_parser_result();
         for (auto& parsed_args : m_parsed_args)
             parsed_args->set_result_code(ParserResultCode::FAILURE);

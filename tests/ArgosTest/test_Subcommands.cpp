@@ -175,3 +175,32 @@ TEST_CASE("It's illegal to add unnamed commands")
     Command cmd("a");
     REQUIRE_THROWS_AS(cmd.add(Command()), ArgosException);
 }
+
+TEST_CASE("Final argument option and multi-commands")
+{
+    using namespace argos;
+    auto common = Command()
+        .add(Arg("NAME").count(0, 1000))
+        .add(Opt("--").type(OptionType::LAST_ARGUMENT));
+    auto parser = ArgumentParser()
+        .auto_exit(false)
+        .multi_command(true)
+        .add(Command("foo")
+            .copy_from(common))
+        .add(Command("bar")
+            .copy_from(common)
+            .add(Opt("--baz").argument("S")))
+        .move();
+    auto args = parser.parse({"foo", "name1", "--", "bar", "name2", "--baz=qux"});
+    auto commands = args.subcommands();
+    REQUIRE(commands.size() == 2);
+    auto cmd = commands[0];
+    REQUIRE(cmd.command_name() == "foo");
+    REQUIRE(cmd.values("NAME").size() == 1);
+    REQUIRE(cmd.values("NAME")[0].as_string() == "name1");
+    cmd = commands[1];
+    REQUIRE(cmd.command_name() == "bar");
+    REQUIRE(cmd.values("NAME").size() == 1);
+    REQUIRE(cmd.values("NAME")[0].as_string() == "name2");
+    REQUIRE(cmd.value("--baz").as_string() == "qux");
+}
