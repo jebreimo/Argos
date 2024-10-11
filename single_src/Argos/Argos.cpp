@@ -3,7 +3,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-20.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -20,7 +20,7 @@
 // Copyright © 2023 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2023-10-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <variant>
@@ -41,7 +41,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <string>
@@ -68,7 +68,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -223,7 +223,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <vector>
@@ -256,7 +256,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-04.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <map>
@@ -347,7 +347,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-22.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -386,7 +386,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-22.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -539,7 +539,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-27.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <iosfwd>
@@ -598,7 +598,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <list>
@@ -633,7 +633,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <climits>
@@ -703,7 +703,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-13.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -754,7 +754,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-18.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <optional>
@@ -791,7 +791,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -824,7 +824,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-19.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -872,7 +872,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -958,7 +958,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1031,6 +1031,11 @@ namespace argos
         [[nodiscard]] std::pair<const CommandData*, size_t>
         find_sibling_command(std::string_view name) const;
 
+        [[nodiscard]]
+        std::optional<size_t> find_first_multi_command_parent() const;
+
+        void reactivate_multi_command_parent(size_t index);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;
@@ -1055,7 +1060,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1138,7 +1143,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1160,7 +1165,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-14.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1210,7 +1215,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1266,10 +1271,14 @@ namespace argos
         }
 
         if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
             m_argument_counter = ArgumentCounter(*m_command);
+        }
         else
+        {
             m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
+        }
     }
 
     std::shared_ptr<ParsedArgumentsImpl>
@@ -1318,7 +1327,9 @@ namespace argos
             {
                 if (auto cmd = m_command->find_command(
                     *arg, m_data->parser_settings.case_insensitive))
+                {
                     return process_command(cmd);
+                }
             }
             return process_argument(*arg);
         }
@@ -1444,11 +1455,13 @@ namespace argos
             case OptionResult::LAST_ARGUMENT:
                 if (!check_argument_and_option_counts())
                     return {IteratorResultCode::ERROR, {}, {}};
-                // else if (m_parsed_args.size() > 1
-                //          && m_parsed_args[m_parsed_args.size() - 2]->command()
-                //                 ->find_command(*m_iterator.current(),
-                //                                m_data->parser_settings.case_insensitive))
-                //     m_parsed_args.pop_back();
+
+                if (auto index = find_first_multi_command_parent())
+                {
+                    reactivate_multi_command_parent(*index);
+                    return {IteratorResultCode::OPTION, option, arg};
+                }
+
                 [[fallthrough]];
             case OptionResult::STOP:
                 copy_remaining_arguments_to_parser_result();
@@ -1484,6 +1497,7 @@ namespace argos
                 argument->callback(ArgumentView(argument), s,
                                    ParsedArgumentsBuilder(parsed_args));
             }
+
             if (m_data->parser_settings.argument_callback)
             {
                 m_data->parser_settings.argument_callback(
@@ -1494,9 +1508,7 @@ namespace argos
         }
         else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
         {
-            m_parsed_args.resize(i + 1);
-            m_command = m_parsed_args.back()->command();
-            m_argument_counter = {};
+            reactivate_multi_command_parent(i);
             return process_command(next_cmd);
         }
         else if (m_data->parser_settings.ignore_undefined_arguments)
@@ -1517,10 +1529,15 @@ namespace argos
         m_parsed_args.push_back(parsed_arguments()->add_subcommand(command));
         m_command = command;
         if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
             m_argument_counter = ArgumentCounter(*m_command);
+        }
         else
+        {
             m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
+        }
+        m_state = State::ARGUMENTS_AND_OPTIONS;
         return {IteratorResultCode::COMMAND, command, m_iterator.current()};
     }
 
@@ -1617,31 +1634,57 @@ namespace argos
         }
     }
 
+    std::optional<size_t>
+    ArgumentIteratorImpl::find_first_multi_command_parent() const
+    {
+        auto size = m_parsed_args.size();
+        if (size <= 1)
+            return {};
+
+        for (size_t i = size - 1; i-- > 0;)
+        {
+            const auto& parent = *m_parsed_args[i]->command();
+            if (parent.multi_command)
+                return i;
+        }
+
+        return {};
+    }
+
     std::pair<const CommandData*, size_t>
     ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
     {
         if (!m_argument_counter.is_complete())
             return {nullptr, 0};
 
-        auto size = m_parsed_args.size();
-        if (size <= 1)
-            return {nullptr, 0};
-
-        for (size_t i = size - 1; i-- > 0;)
+        if (auto index = find_first_multi_command_parent())
         {
-            const auto& parent = *m_parsed_args[i]->command();
-            if (parent.multi_command)
-                return {parent.find_command(name, m_data->parser_settings.case_insensitive), i};
+            return {
+                m_parsed_args[*index]->command()->find_command(
+                    name, m_data->parser_settings.case_insensitive),
+                *index
+            };
         }
+
         return {nullptr, 0};
+    }
+
+    void ArgumentIteratorImpl::reactivate_multi_command_parent(size_t index)
+    {
+        m_parsed_args.resize(index + 1);
+        m_command = m_parsed_args.back()->command();
+        m_argument_counter = {};
+        m_state = State::ARGUMENTS_ONLY;
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
             write_error_message(*m_data, *m_command, message);
+
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
+
         copy_remaining_arguments_to_parser_result();
         for (auto& parsed_args : m_parsed_args)
             parsed_args->set_result_code(ParserResultCode::FAILURE);
@@ -1653,7 +1696,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1664,47 +1707,6 @@ namespace argos
 {
     namespace
     {
-        bool check_flag_with_equal(const std::string& flag,
-                                   const OptionData& od)
-        {
-            const auto eq_pos = flag.find('=');
-            if (eq_pos == std::string::npos)
-                return true;
-            if (eq_pos != flag.size() - 1)
-                return false;
-            if (od.argument.empty())
-                ARGOS_THROW("Options ending with '=' must take an argument: " + flag);
-            return true;
-        }
-
-        bool check_standard_flag(const std::string& flag,
-                                 const OptionData& od)
-        {
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() < 2)
-                return false;
-            if (flag[0] != '-')
-                return false;
-            if (flag.size() == 2)
-                return true;
-            if (flag[1] != '-')
-                return false;
-            return check_flag_with_equal(flag, od);
-        }
-
-        bool check_flag(const std::string& flag, char prefix,
-                        const OptionData& od)
-        {
-            if (flag.size() < 2 || flag[0] != prefix)
-                return false;
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() == 2)
-                return true;
-            return check_flag_with_equal(flag, od);
-        }
-
         std::unique_ptr<ParserData> make_copy(const ParserData& data)
         {
             auto result = std::make_unique<ParserData>();
@@ -1935,26 +1937,26 @@ namespace argos
         return *this;
     }
 
-    std::optional<bool> ArgumentParser::require_command() const
+    std::optional<bool> ArgumentParser::require_subcommand() const
     {
         check_data();
         return m_data->command.require_command;
     }
 
-    ArgumentParser& ArgumentParser::require_command(bool value)
+    ArgumentParser& ArgumentParser::require_subcommand(bool value)
     {
         check_data();
         m_data->command.require_command = value;
         return *this;
     }
 
-    bool ArgumentParser::multi_command() const
+    bool ArgumentParser::allow_multiple_subcommands() const
     {
         check_data();
         return m_data->command.multi_command;
     }
 
-    ArgumentParser& ArgumentParser::multi_command(bool value)
+    ArgumentParser& ArgumentParser::allow_multiple_subcommands(bool value)
     {
         check_data();
         m_data->command.multi_command = value;
@@ -2082,10 +2084,22 @@ namespace argos
 
     void ArgumentParser::write_help_text() const
     {
+        write_subcommand_help_text({});
+    }
+
+    void ArgumentParser::write_subcommand_help_text(const std::vector<std::string>& path) const
+    {
         check_data();
         const auto data = make_copy(*m_data);
         finish_initialization(*data);
-        argos::write_help_text(*data, data->command);
+        const auto* cmd = &data->command;
+        for (auto& name : path)
+        {
+            cmd = cmd->find_command(name, data->parser_settings.case_insensitive);
+            if (!cmd)
+                ARGOS_THROW("Unknown command: " + name);
+        }
+        argos::write_help_text(*data, *cmd);
     }
 
     ArgumentParser& ArgumentParser::add_word_splitting_rule(std::string str)
@@ -2119,67 +2133,13 @@ namespace argos
         const auto& cmd = m_data->command;
         return ArgumentId(cmd.options.size() + cmd.arguments.size() + 1);
     }
-
-    void ArgumentParser::update_and_validate_option(OptionData& od)
-    {
-        if (od.flags.empty())
-            ARGOS_THROW("Option must have one or more flags.");
-
-        for (auto& flag : od.flags)
-        {
-            bool ok = false;
-            switch (m_data->parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                ok = check_standard_flag(flag, od);
-                break;
-            case OptionStyle::SLASH:
-                ok = check_flag(flag, '/', od);
-                break;
-            case OptionStyle::DASH:
-                ok = check_flag(flag, '-', od);
-                break;
-            default:
-                break;
-            }
-            if (!ok)
-                ARGOS_THROW("Invalid flag: '" + flag + "'.");
-        }
-
-        if (!od.argument.empty() && !od.constant.empty())
-            ARGOS_THROW("Option cannot have both argument and constant.");
-
-        switch (od.operation)
-        {
-        case OptionOperation::NONE:
-            if (!od.constant.empty())
-                ARGOS_THROW("NONE-options cannot have a constant.");
-            if (!od.alias.empty())
-                ARGOS_THROW("NONE-options cannot have an alias.");
-            break;
-        case OptionOperation::ASSIGN:
-            if (od.argument.empty() && od.constant.empty())
-                od.constant = "1";
-            break;
-        case OptionOperation::APPEND:
-            if (od.argument.empty() && od.constant.empty())
-                ARGOS_THROW("Options that appends must have either constant or argument.");
-            break;
-        case OptionOperation::CLEAR:
-            if (!od.argument.empty() || !od.constant.empty())
-                od.constant = "1";
-            if (!od.optional)
-                ARGOS_THROW("CLEAR-options must be optional.");
-            break;
-        }
-    }
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-03.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <cerrno>
@@ -2227,7 +2187,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-31.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2406,7 +2366,7 @@ namespace argos
 // Copyright © 2021 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2021-07-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2462,7 +2422,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-17.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2717,7 +2677,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2785,7 +2745,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-04.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2873,6 +2833,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::help(std::string text)
+    {
+        check_command();
+        data_->texts[TextId::HELP] = std::move(text);
+        return *this;
+    }
+
     Command& Command::about(std::string text)
     {
         check_command();
@@ -2915,7 +2882,7 @@ namespace argos
         return *this;
     }
 
-    Command& Command::multi_command(bool multi_command)
+    Command& Command::allow_multiple_subcommands(bool multi_command)
     {
         check_command();
         data_->multi_command = multi_command;
@@ -2951,12 +2918,14 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
 namespace argos
 {
+    constexpr char DEFAULT_HELP_TEXT[] = "Display this help text.";
+
     CommandData::CommandData() = default;
 
     CommandData::CommandData(const CommandData& rhs)
@@ -3240,7 +3209,7 @@ namespace argos
                 return;
 
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .help("Display the help text.")
+                .help(DEFAULT_HELP_TEXT)
                 .constant("1").release();
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
@@ -3372,7 +3341,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3423,7 +3392,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3438,7 +3407,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3499,7 +3468,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3507,12 +3476,10 @@ namespace argos
 {
     namespace
     {
-        using namespace std::string_literals;
-
-        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS"s;
-        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS"s;
-        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS"s;
-        constexpr auto DEFAULT_USAGE_TITLE = "USAGE"s;
+        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
 
         std::string get_argument_name(const ArgumentData& arg)
         {
@@ -3732,7 +3699,7 @@ namespace argos
                     continue;
                 auto& section = c->section.empty() ? *cmd_title : c->section;
                 add_help_text(section, c->name,
-                              get_custom_text(*c, TextId::ABOUT).value_or(""));
+                              get_custom_text(*c, TextId::HELP).value_or(""));
             }
 
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
@@ -3761,14 +3728,14 @@ namespace argos
                 return;
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
-            for (auto& [section, txts] : sections)
+            for (auto& [section, texts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text] : txts)
+                for (auto& [name, text] : texts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -3932,7 +3899,9 @@ namespace argos
         formatter.word_splitter().add_words(data.help_settings.word_split_rules);
         bool newline = !is_empty(write_custom_text(formatter, cmd, TextId::INITIAL_TEXT));
         newline = write_usage(formatter, cmd, newline) || newline;
-        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline)) || newline;
+        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline))
+                  || !is_empty(write_custom_text(formatter, cmd, TextId::HELP, newline))
+                  || newline;
         write_argument_sections(formatter, cmd, newline);
         write_custom_text(formatter, cmd, TextId::FINAL_TEXT, true);
     }
@@ -3972,7 +3941,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4187,7 +4156,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-10-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4296,7 +4265,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-18.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4390,7 +4359,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4478,7 +4447,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-13.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4637,7 +4606,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4865,7 +4834,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-29.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4992,7 +4961,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5236,7 +5205,7 @@ namespace argos
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-11.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5298,7 +5267,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5404,7 +5373,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-17.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5626,7 +5595,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5903,7 +5872,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-27.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -6014,7 +5983,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
