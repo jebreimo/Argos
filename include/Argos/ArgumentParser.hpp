@@ -289,12 +289,32 @@ namespace argos
          */
         ArgumentParser& option_style(OptionStyle value);
 
+        /**
+         * @brief Returns true if the program requires one or more
+         *  sub-commands.
+         */
         [[nodiscard]] std::optional<bool> require_subcommand() const;
 
+        /**
+         * @brief Set whether the program requires one or more sub-commands.
+         *
+         * If this property is true, the program requires that any options
+         * or arguments to the main program is followed by a sub-command.
+         *
+         * This property is only relevant if the program has sub-commands,
+         * and it is automatically set to true if it is unassigned and the
+         * program has sub-commands, but no arguments.
+         */
         ArgumentParser& require_subcommand(bool value);
 
         [[nodiscard]] bool allow_multiple_subcommands() const;
 
+        /**
+         * @brief Set whether the program can accept multiple sub-commands.
+         *
+         * If this property is true, a new sub-command can be given after
+         * the previous one has received all its arguments and options.
+         */
         ArgumentParser& allow_multiple_subcommands(bool value);
 
         /**
@@ -473,10 +493,12 @@ namespace argos
         ArgumentParser& set_exit_codes(int error, int normal_exit);
 
         /**
-         * @brief Write the help text.
+         * @brief Write the help text to the ArgumentParser's stream.
          *
          * @note The help text is displayed automatically when a help option
          *      is used.
+         *
+         * Set the stream with the stream() function.
          */
         void write_help_text() const;
 

@@ -65,8 +65,17 @@ namespace argos
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
 
+        /**
+         * @brief Returns the command that was parsed.
+         *
+         * This function can be used to access the metadata of the current
+         * sub-command.
+         */
         [[nodiscard]] CommandView command() const;
 
+        /**
+         * @brief Returns the name of the sub-command that was parsed.
+         */
         [[nodiscard]] std::string_view command_name() const;
 
         /**
@@ -84,6 +93,9 @@ namespace argos
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
 
+        /**
+         * @brief Returns parsed arguments of sub-commands.
+         */
         [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 
         /**
