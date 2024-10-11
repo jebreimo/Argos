@@ -20,47 +20,6 @@ namespace argos
 {
     namespace
     {
-        bool check_flag_with_equal(const std::string& flag,
-                                   const OptionData& od)
-        {
-            const auto eq_pos = flag.find('=');
-            if (eq_pos == std::string::npos)
-                return true;
-            if (eq_pos != flag.size() - 1)
-                return false;
-            if (od.argument.empty())
-                ARGOS_THROW("Options ending with '=' must take an argument: " + flag);
-            return true;
-        }
-
-        bool check_standard_flag(const std::string& flag,
-                                 const OptionData& od)
-        {
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() < 2)
-                return false;
-            if (flag[0] != '-')
-                return false;
-            if (flag.size() == 2)
-                return true;
-            if (flag[1] != '-')
-                return false;
-            return check_flag_with_equal(flag, od);
-        }
-
-        bool check_flag(const std::string& flag, char prefix,
-                        const OptionData& od)
-        {
-            if (flag.size() < 2 || flag[0] != prefix)
-                return false;
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() == 2)
-                return true;
-            return check_flag_with_equal(flag, od);
-        }
-
         std::unique_ptr<ParserData> make_copy(const ParserData& data)
         {
             auto result = std::make_unique<ParserData>();
@@ -480,65 +439,5 @@ namespace argos
     {
         if (!m_data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
-    }
-
-    ArgumentId ArgumentParser::next_argument_id() const
-    {
-        const auto& cmd = m_data->command;
-        return ArgumentId(cmd.options.size() + cmd.arguments.size() + 1);
-    }
-
-    void ArgumentParser::update_and_validate_option(OptionData& od)
-    {
-        if (od.flags.empty())
-            ARGOS_THROW("Option must have one or more flags.");
-
-        for (auto& flag : od.flags)
-        {
-            bool ok = false;
-            switch (m_data->parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                ok = check_standard_flag(flag, od);
-                break;
-            case OptionStyle::SLASH:
-                ok = check_flag(flag, '/', od);
-                break;
-            case OptionStyle::DASH:
-                ok = check_flag(flag, '-', od);
-                break;
-            default:
-                break;
-            }
-            if (!ok)
-                ARGOS_THROW("Invalid flag: '" + flag + "'.");
-        }
-
-        if (!od.argument.empty() && !od.constant.empty())
-            ARGOS_THROW("Option cannot have both argument and constant.");
-
-        switch (od.operation)
-        {
-        case OptionOperation::NONE:
-            if (!od.constant.empty())
-                ARGOS_THROW("NONE-options cannot have a constant.");
-            if (!od.alias.empty())
-                ARGOS_THROW("NONE-options cannot have an alias.");
-            break;
-        case OptionOperation::ASSIGN:
-            if (od.argument.empty() && od.constant.empty())
-                od.constant = "1";
-            break;
-        case OptionOperation::APPEND:
-            if (od.argument.empty() && od.constant.empty())
-                ARGOS_THROW("Options that appends must have either constant or argument.");
-            break;
-        case OptionOperation::CLEAR:
-            if (!od.argument.empty() || !od.constant.empty())
-                od.constant = "1";
-            if (!od.optional)
-                ARGOS_THROW("CLEAR-options must be optional.");
-            break;
-        }
     }
 }

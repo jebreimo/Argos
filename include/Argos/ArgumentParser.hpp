@@ -521,10 +521,6 @@ namespace argos
     private:
         void check_data() const;
 
-        void update_and_validate_option(OptionData& od);
-
-        [[nodiscard]] ArgumentId next_argument_id() const;
-
         std::unique_ptr<ParserData> m_data;
     };
 }
