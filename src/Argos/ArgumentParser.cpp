@@ -291,26 +291,26 @@ namespace argos
         return *this;
     }
 
-    std::optional<bool> ArgumentParser::require_command() const
+    std::optional<bool> ArgumentParser::require_subcommand() const
     {
         check_data();
         return m_data->command.require_command;
     }
 
-    ArgumentParser& ArgumentParser::require_command(bool value)
+    ArgumentParser& ArgumentParser::require_subcommand(bool value)
     {
         check_data();
         m_data->command.require_command = value;
         return *this;
     }
 
-    bool ArgumentParser::multi_command() const
+    bool ArgumentParser::allow_multiple_subcommands() const
     {
         check_data();
         return m_data->command.multi_command;
     }
 
-    ArgumentParser& ArgumentParser::multi_command(bool value)
+    ArgumentParser& ArgumentParser::allow_multiple_subcommands(bool value)
     {
         check_data();
         m_data->command.multi_command = value;

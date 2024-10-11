@@ -289,14 +289,13 @@ namespace argos
          */
         ArgumentParser& option_style(OptionStyle value);
 
-        [[nodiscard]] std::optional<bool> require_command() const;
+        [[nodiscard]] std::optional<bool> require_subcommand() const;
 
-        ArgumentParser& require_command(bool value);
+        ArgumentParser& require_subcommand(bool value);
 
-        // add functions for multi_command:
-        [[nodiscard]] bool multi_command() const;
+        [[nodiscard]] bool allow_multiple_subcommands() const;
 
-        ArgumentParser& multi_command(bool value);
+        ArgumentParser& allow_multiple_subcommands(bool value);
 
         /**
          * @brief Returns true if undefined arguments on the command line

@@ -94,6 +94,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::help(std::string text)
+    {
+        check_command();
+        data_->texts[TextId::HELP] = std::move(text);
+        return *this;
+    }
+
     Command& Command::about(std::string text)
     {
         check_command();
@@ -136,7 +143,7 @@ namespace argos
         return *this;
     }
 
-    Command& Command::multi_command(bool multi_command)
+    Command& Command::allow_multiple_subcommands(bool multi_command)
     {
         check_command();
         data_->multi_command = multi_command;

@@ -244,7 +244,8 @@ namespace argos
          * @brief Custom usage text for error messages (default is to use
          *      the same text as USAGE).
          */
-        ERROR_USAGE
+        ERROR_USAGE,
+        HELP
     };
 
     /**

@@ -44,6 +44,8 @@ namespace argos
 
         Command& name(std::string name);
 
+        Command& help(std::string text);
+
         Command& about(std::string text);
 
         Command& section(const std::string& name);
@@ -56,7 +58,7 @@ namespace argos
 
         Command& id(int id);
 
-        Command& multi_command(bool multi_command);
+        Command& allow_multiple_subcommands(bool multi_command);
 
         Command& copy_from(Command& command);
 
