@@ -438,10 +438,22 @@ namespace argos
 
     void ArgumentParser::write_help_text() const
     {
+        write_subcommand_help_text({});
+    }
+
+    void ArgumentParser::write_subcommand_help_text(const std::vector<std::string>& path) const
+    {
         check_data();
         const auto data = make_copy(*m_data);
         finish_initialization(*data);
-        argos::write_help_text(*data, data->command);
+        const auto* cmd = &data->command;
+        for (auto& name : path)
+        {
+            cmd = cmd->find_command(name, data->parser_settings.case_insensitive);
+            if (!cmd)
+                ARGOS_THROW("Unknown command: " + name);
+        }
+        argos::write_help_text(*data, *cmd);
     }
 
     ArgumentParser& ArgumentParser::add_word_splitting_rule(std::string str)

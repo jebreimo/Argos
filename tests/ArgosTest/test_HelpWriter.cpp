@@ -79,3 +79,64 @@ OPTIONS
   --opt Option
 )-");
 }
+
+TEST_CASE("Include ABOUT text.")
+{
+    using namespace argos;
+    std::stringstream ss;
+    auto parser = ArgumentParser("prog")
+        .about("Does stuff.")
+        .add(Arg("arg").help([](){return "Argument";}))
+        .generate_help_option(false)
+        .stream(&ss)
+        .move();
+    parser.write_help_text();
+    REQUIRE(ss.str() == R"-(USAGE
+  prog <arg>
+
+Does stuff.
+
+ARGUMENTS
+  <arg> Argument
+)-");
+}
+
+TEST_CASE("HELP is used if sub-commands lack ABOUT.")
+{
+    using namespace argos;
+    std::stringstream ss;
+    auto parser = ArgumentParser("prog")
+        .add(Command("foo").help("Does foo things."))
+        .add(Command("bar"))
+        .stream(&ss)
+        .move();
+
+    SECTION("top-level help text")
+    {
+        parser.write_help_text();
+        REQUIRE(ss.str() == R"-(USAGE
+  prog --help
+  prog foo|bar
+
+COMMANDS
+  foo        Does foo things.
+  bar
+
+OPTIONS
+  -h, --help Display this help text.
+)-");
+    }
+    SECTION("sub-command help text")
+    {
+        parser.write_subcommand_help_text({"foo"});
+        REQUIRE(ss.str() == R"-(USAGE
+  prog foo --help
+  prog foo
+
+Does foo things.
+
+OPTIONS
+  -h, --help Display this help text.
+)-");
+    }
+}

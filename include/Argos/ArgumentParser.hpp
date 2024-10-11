@@ -503,6 +503,16 @@ namespace argos
         void write_help_text() const;
 
         /**
+         * @brief Write the help text for the given sub-command.
+         *
+         * @param path The path to the sub-command. Typically the program
+         *  has only one set of sub-commands, thus the path will have only one
+         *  item, but it is possible to have sub-commands of sub-commands
+         *  and so on.
+         */
+        void write_subcommand_help_text(const std::vector<std::string>& path) const;
+
+        /**
          * @brief Makes it possible to construct an ArgumentParser with chained
          *      method calls and assign it to a variable without invoking
          *      the copy constructor.

@@ -238,7 +238,7 @@ namespace argos
                     continue;
                 auto& section = c->section.empty() ? *cmd_title : c->section;
                 add_help_text(section, c->name,
-                              get_custom_text(*c, TextId::ABOUT).value_or(""));
+                              get_custom_text(*c, TextId::HELP).value_or(""));
             }
 
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
@@ -267,14 +267,14 @@ namespace argos
                 return;
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
-            for (auto& [section, txts] : sections)
+            for (auto& [section, texts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text] : txts)
+                for (auto& [name, text] : texts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -438,7 +438,9 @@ namespace argos
         formatter.word_splitter().add_words(data.help_settings.word_split_rules);
         bool newline = !is_empty(write_custom_text(formatter, cmd, TextId::INITIAL_TEXT));
         newline = write_usage(formatter, cmd, newline) || newline;
-        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline)) || newline;
+        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline))
+                  || !is_empty(write_custom_text(formatter, cmd, TextId::HELP, newline))
+                  || newline;
         write_argument_sections(formatter, cmd, newline);
         write_custom_text(formatter, cmd, TextId::FINAL_TEXT, true);
     }

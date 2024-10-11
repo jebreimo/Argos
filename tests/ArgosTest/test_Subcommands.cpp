@@ -16,8 +16,8 @@ TEST_CASE("Check that help text contains information about commands")
     using namespace argos;
     auto parser = ArgumentParser("Test program")
         .auto_exit(false)
-        .add(Command("foo").about("Does foo things"))
-        .add(Command("bar").about("Does bar things"))
+        .add(Command("foo").help("Does foo things"))
+        .add(Command("bar").help("Does bar things"))
         .stream(&stream)
         .move();
     parser.write_help_text();

@@ -15,6 +15,8 @@
 
 namespace argos
 {
+    constexpr char DEFAULT_HELP_TEXT[] = "Display this help text.";
+
     CommandData::CommandData() = default;
 
     CommandData::CommandData(const CommandData& rhs)
@@ -298,7 +300,7 @@ namespace argos
                 return;
 
             auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .help("Display the help text.")
+                .help(DEFAULT_HELP_TEXT)
                 .constant("1").release();
             opt->section = cmd.current_section;
             cmd.options.push_back(std::move(opt));
