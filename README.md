@@ -29,7 +29,7 @@ The documentation for Argos can be found
 at [barsken.no/apidoc/argos](https://barsken.no/apidoc/argos).
 
 Argos is made available under
-the [2-clause BSD licence](https://raw.githubusercontent.com/jebreimo/Argos/master/LICENSE).
+the [Zero-Clause BSD licence](https://raw.githubusercontent.com/jebreimo/Argos/master/LICENSE).
 
 The source code can be cloned or forked on
 GitHub: [github.com/jebreimo/Argos](https://github.com/jebreimo/Argos).
