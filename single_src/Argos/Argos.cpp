@@ -2127,12 +2127,6 @@ namespace argos
         if (!m_data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
     }
-
-    ArgumentId ArgumentParser::next_argument_id() const
-    {
-        const auto& cmd = m_data->command;
-        return ArgumentId(cmd.options.size() + cmd.arguments.size() + 1);
-    }
 }
 
 //****************************************************************************
@@ -2700,7 +2694,7 @@ namespace argos
         return m_argument->section;
     }
 
-    const std::string& ArgumentView::value() const
+    const std::string& ArgumentView::alias() const
     {
         return m_argument->alias;
     }
@@ -3035,6 +3029,8 @@ namespace argos
     {
         if (!opt)
             ARGOS_THROW("Option is empty (it has probably already been added).");
+        if (opt->flags.empty())
+            ARGOS_THROW("Option must have at least one flag.");
         if (opt->section.empty())
             opt->section = current_section;
         options.push_back(std::move(opt));
@@ -3362,7 +3358,7 @@ namespace argos
         return m_command->section;
     }
 
-    const std::string& CommandView::value() const
+    const std::string& CommandView::alias() const
     {
         return m_command->name;
     }
@@ -3385,6 +3381,35 @@ namespace argos
     ArgumentId CommandView::argument_id() const
     {
         return m_command->argument_id;
+    }
+
+    std::string CommandView::name() const
+    {
+        return m_command->name;
+    }
+
+    std::vector<ArgumentView> CommandView::arguments() const
+    {
+        std::vector<ArgumentView> result;
+        for (const auto& arg : m_command->arguments)
+            result.emplace_back(arg.get());
+        return result;
+    }
+
+    std::vector<OptionView> CommandView::options() const
+    {
+        std::vector<OptionView> result;
+        for (const auto& opt : m_command->options)
+            result.emplace_back(opt.get());
+        return result;
+    }
+
+    std::vector<CommandView> CommandView::subcommands() const
+    {
+        std::vector<CommandView> result;
+        for (const auto& cmd : m_command->commands)
+            result.emplace_back(cmd.get());
+        return result;
     }
 }
 
@@ -3476,7 +3501,7 @@ namespace argos
 {
     namespace
     {
-        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_SUBCOMMANDS_TITLE = "COMMANDS";
         constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
         constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
         constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
@@ -3690,18 +3715,7 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
-            auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
-            if (!cmd_title)
-                cmd_title = DEFAULT_COMMANDS_TITLE;
-            for (auto& c : command.commands)
-            {
-                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
-                    continue;
-                auto& section = c->section.empty() ? *cmd_title : c->section;
-                add_help_text(section, c->name,
-                              get_custom_text(*c, TextId::HELP).value_or(""));
-            }
-
+            // List all arguments
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = DEFAULT_ARGUMENTS_TITLE;
@@ -3713,6 +3727,21 @@ namespace argos
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
 
+            // List all sub-commands after arguments, as arguments must be
+            // given first.
+            auto cmd_title = get_custom_text(command, TextId::SUBCOMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = DEFAULT_SUBCOMMANDS_TITLE;
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::HELP).value_or(""));
+            }
+
+            // List all options.
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = DEFAULT_OPTIONS_TITLE;
@@ -3726,6 +3755,7 @@ namespace argos
 
             if (sections.empty())
                 return;
+
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
             for (auto& [section, texts] : sections)
@@ -4382,7 +4412,7 @@ namespace argos
         return m_option->section;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::alias() const
     {
         return m_option->alias;
     }

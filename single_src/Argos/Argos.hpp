@@ -288,12 +288,13 @@ namespace argos
          */
         ABOUT,
         /**
-         * @brief The title of the list of commands (default is "COMMANDS").
+         * @brief The title of the list of sub-commands
+         *  (default is "COMMANDS").
          *
-         * @note This will only be used for commands where the section
+         * @note This will only be used for sub-commands where the section
          *      property has not been set.
          */
-        COMMANDS_TITLE,
+        SUBCOMMANDS_TITLE,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *
@@ -401,28 +402,28 @@ namespace argos
         virtual ~IArgumentView() = default;
 
         /**
-         * @brief Returns the argument's or option's help text.
+         * @brief Returns the object's help text.
          */
         [[nodiscard]] virtual std::string help() const = 0;
 
         /**
-         * @brief Returns the argument's or option's section name.
+         * @brief Returns the object's section name.
          */
         [[nodiscard]] virtual const std::string& section() const = 0;
 
         /**
-         * @brief Returns the argument's or option's value name.
+         * @brief Returns the object's alias.
          */
-        [[nodiscard]] virtual const std::string& value() const = 0;
+        [[nodiscard]] virtual const std::string& alias() const = 0;
 
         /**
-         * @brief Returns the argument's or option's visibility in
-         *      the help text and error messages.
+         * @brief Returns the object's visibility in the help text and
+         *  error messages.
          */
         [[nodiscard]] virtual Visibility visibility() const = 0;
 
         /**
-         * @brief Returns the argument's or option's custom id.
+         * @brief Returns the object's custom id.
          */
         [[nodiscard]] virtual int id() const = 0;
 
@@ -442,7 +443,7 @@ namespace argos
         [[nodiscard]] virtual ValueId value_id() const = 0;
 
         /**
-         * @brief Returns the argument's or option's argument_id().
+         * @brief Returns the object's argument_id().
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
@@ -1197,9 +1198,9 @@ namespace argos
         [[nodiscard]] const std::string& section() const final;
 
         /**
-         * @brief Returns the argument's value name.
+         * @brief Returns the argument's alias name.
          */
-        [[nodiscard]] const std::string& value() const final;
+        [[nodiscard]] const std::string& alias() const final;
 
         /**
          * @brief Returns the argument's visibility in
@@ -1258,41 +1259,6 @@ namespace argos
 }
 
 //****************************************************************************
-// Copyright © 2024 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2024-09-21.
-//
-// This file is distributed under the Zero-Clause BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    struct CommandData;
-
-    class CommandView : public IArgumentView
-    {
-    public:
-        explicit CommandView(const CommandData* command);
-
-        [[nodiscard]] std::string help() const override;
-
-        [[nodiscard]] const std::string& section() const override;
-
-        [[nodiscard]] const std::string& value() const override;
-
-        [[nodiscard]] Visibility visibility() const override;
-
-        [[nodiscard]] int id() const override;
-
-        [[nodiscard]] ValueId value_id() const override;
-
-        [[nodiscard]] ArgumentId argument_id() const override;
-    private:
-        const CommandData* m_command;
-    };
-}
-
-//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
@@ -1334,9 +1300,9 @@ namespace argos
         [[nodiscard]] const std::string& section() const final;
 
         /**
-         * @brief Returns the option's value name.
+         * @brief Returns the option's alias.
          */
-        [[nodiscard]] const std::string& value() const final;
+        [[nodiscard]] const std::string& alias() const final;
 
         /**
          * @brief Returns the option's visibility in
@@ -1411,6 +1377,83 @@ namespace argos
         [[nodiscard]] bool optional() const;
     private:
         const OptionData* m_option;
+    };
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-21.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    struct CommandData;
+
+    /**
+     * @brief Provides read-only access to a command definition.
+     */
+    class CommandView : public IArgumentView
+    {
+    public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
+        explicit CommandView(const CommandData* command);
+
+        /**
+         * @brief Returns the command's help text.
+         *
+         * This is the text that is displayed in the parent command's list
+         * of sub-commands. It will also be used as the about text if the
+         * command doesn't have an explicit about text.
+         */
+        [[nodiscard]] std::string help() const override;
+
+        /**
+         * @brief Returns the command's section name.
+         */
+        [[nodiscard]] const std::string& section() const override;
+
+        /**
+         * @brief Returns the command's value name.
+         */
+        [[nodiscard]] const std::string& alias() const override;
+
+        [[nodiscard]] Visibility visibility() const override;
+
+        [[nodiscard]] int id() const override;
+
+        [[nodiscard]] ValueId value_id() const override;
+
+        [[nodiscard]] ArgumentId argument_id() const override;
+
+        /**
+         * @brief Returns the command's name.
+         */
+        [[nodiscard]] std::string name() const;
+
+        /**
+         * @brief Returns the command's arguments.
+         */
+        [[nodiscard]] std::vector<ArgumentView> arguments() const;
+
+        /**
+         * @brief Returns the command's options.
+         */
+        [[nodiscard]] std::vector<OptionView> options() const;
+
+        /**
+         * @brief Returns the command's sub-commands.
+         */
+        [[nodiscard]] std::vector<CommandView> subcommands() const;
+    private:
+        const CommandData* m_command;
     };
 }
 
@@ -1534,31 +1577,44 @@ namespace argos
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
         /**
-         * @brief Returns all argument definitions that were registered with
+         * @brief Returns all argument definitions that were added to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
-        *
-         * @warning The returned instances are only guaranteed to remain
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
          *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
 
         /**
-         * @brief Returns all option definitions that were registered with
+         * @brief Returns all option definitions that were add to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined options along with their given values.
          *
-         * @warning The returned instances are only guaranteed to remain
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
          *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
 
+        /**
+         * @brief Returns all sub-command definitions that were added
+         *  to the ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined sub-commands along with their given values.
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
+         */
         [[nodiscard]]
         std::vector<std::unique_ptr<CommandView>> all_subcommands() const;
 
@@ -2700,12 +2756,49 @@ namespace argos
          */
         Command& help(std::string text);
 
+        /**
+         * @brief Set the about text for the command.
+         *
+         * The about text is displayed in the command's own help text between
+         * the USAGE section and the sections describing the command's
+         * sub-commands, arguments, and options.
+         */
         Command& about(std::string text);
 
+        /**
+         * @brief Sets a section (or heading) that is automatically assigned
+         *   to arguments, sub-commands and options when they are added.
+         *
+         * This value only applies to arguments, sub-commands and options that
+         * have not been assigned a section with Argument::section or Option::section.
+         * If this value is an empty string, the values from
+         * TextId::ARGUMENTS_TITLE, TextId::SUBCOMMANDS_TITLE and
+         * TextId::OPTIONS_TITLE are used.
+         *
+         * @param name All arguments, sub-commands and options with the same
+         *  section name will be listed under the same heading.
+         */
         Command& section(const std::string& name);
 
+        /**
+         * @brief Set the given part of the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
         Command& text(TextId textId, std::string text);
 
+        /**
+         * @brief Set a function that will produce the given part of
+         *  the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
         Command& text(TextId textId, std::function<std::string()> callback);
 
         /**
@@ -2730,6 +2823,13 @@ namespace argos
          */
         Command& id(int id);
 
+        /**
+         * @brief Set whether the command can accept multiple sub-commands.
+         *
+         * If this property is true, a sequence of sub-commands can be given.
+         * Each sub-command can be followed by a new one when it has been
+         * given all the arguments it requires.
+         */
         Command& allow_multiple_subcommands(bool multi_command);
 
         /**
@@ -2738,6 +2838,14 @@ namespace argos
          */
         Command& copy_from(Command& command);
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         *
+         * The object is no longer usable after this function has
+         * been called.
+         * @return Pointer to the argument implementation.
+         */
         std::unique_ptr<CommandData> release();
 
     private:
@@ -2822,31 +2930,57 @@ namespace argos
         /**
          * @brief Add a new argument definition to the ArgumentParser.
          *
-         * @throw ArgosException if the argument doesn't have a name.
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
          */
         ArgumentParser& add(Argument& argument);
 
+        /**
+         * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Argument&& argument);
 
         /**
          * @brief Add a new option definition to the ArgumentParser.
          *
-         * @throw ArgosException if the option doesn't have any flags
-         *      or any of the flags doesn't match the current option style.
-         * @throw ArgosException if certain meaningless combinations of
-         *      option operation and properties are found:
-         *      - an option with operation NONE has constant
-         *        or alias.
-         *      - an option with operation CLEAR is mandatory.
-         *      - an option with operation APPEND has neither argument nor
-         *        constant.
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
          */
         ArgumentParser& add(Option& option);
+
+        /**
+         * @brief Add a new option definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
+         */
         ArgumentParser& add(Option&& option);
 
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Command& command);
+
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Command&& command);
 
+        /**
+         * @brief Copy arguments, options and sub-commands from @a command
+         *  to this ArgumentParser.
+         *
+         * All other settings are left unchanged.
+         */
         ArgumentParser& copy_from(const Command& command);
 
         /**
@@ -2861,8 +2995,8 @@ namespace argos
          *      the non-const version of parse(). All method calls on an invalid
          *      ArgumentParser will throw an exception.
          *
-         * @throw ArgosException if argc is 0 or if there are two or more
-         *      options that use the same flag.
+         * @throw ArgosException if argc is 0, or if any conflicting or
+         *  invalid options, arguments or sub-commands are encountered.
          */
         [[nodiscard]] ParsedArguments parse(int argc, char* argv[]);
 
@@ -3055,13 +3189,18 @@ namespace argos
          */
         ArgumentParser& require_subcommand(bool value);
 
+        /**
+         * @brief Returns true if the program can accept multiple
+         *  sub-commands.
+         */
         [[nodiscard]] bool allow_multiple_subcommands() const;
 
         /**
          * @brief Set whether the program can accept multiple sub-commands.
          *
-         * If this property is true, a new sub-command can be given after
-         * the previous one has received all its arguments and options.
+         * If this property is true, a sequence of sub-commands can be given.
+         * Each sub-command can be followed by a new one when it has been
+         * given all the arguments it requires.
          */
         ArgumentParser& allow_multiple_subcommands(bool value);
 
@@ -3167,15 +3306,16 @@ namespace argos
 
         /**
          * @brief Sets a section (or heading) that is automatically assigned
-         *   to arguments and options when they are added.
+         *   to arguments, sub-commands and options when they are added.
          *
-         * This value is only applied to arguments and options that have not
-         * been assigned a section with Argument::section or Option::section.
+         * This value only applies to arguments, sub-commands and options that
+         * have not been assigned a section with Argument::section or Option::section.
          * If this value is an empty string, the values from
-         * TextId::ARGUMENTS_TITLE and TextId::OPTIONS_TITLE are used.
+         * TextId::ARGUMENTS_TITLE, TextId::SUBCOMMANDS_TITLE and
+         * TextId::OPTIONS_TITLE are used.
          *
-         * @param name All arguments and options with the same section name
-         *  will be listed under the same heading.
+         * @param name All arguments, sub-commands and options with the same
+         *  section name will be listed under the same heading.
          */
         ArgumentParser& section(const std::string& name);
 
@@ -3268,8 +3408,6 @@ namespace argos
         ArgumentParser&& move();
     private:
         void check_data() const;
-
-        [[nodiscard]] ArgumentId next_argument_id() const;
 
         std::unique_ptr<ParserData> m_data;
     };
