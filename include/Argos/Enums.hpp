@@ -222,12 +222,13 @@ namespace argos
          */
         ABOUT,
         /**
-         * @brief The title of the list of commands (default is "COMMANDS").
+         * @brief The title of the list of sub-commands
+         *  (default is "COMMANDS").
          *
-         * @note This will only be used for commands where the section
+         * @note This will only be used for sub-commands where the section
          *      property has not been set.
          */
-        COMMANDS_TITLE,
+        SUBCOMMANDS_TITLE,
         /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *

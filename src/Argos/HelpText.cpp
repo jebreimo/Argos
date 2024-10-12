@@ -15,7 +15,7 @@ namespace argos
 {
     namespace
     {
-        constexpr auto DEFAULT_COMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_SUBCOMMANDS_TITLE = "COMMANDS";
         constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
         constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
         constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
@@ -229,18 +229,7 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
-            auto cmd_title = get_custom_text(command, TextId::COMMANDS_TITLE);
-            if (!cmd_title)
-                cmd_title = DEFAULT_COMMANDS_TITLE;
-            for (auto& c : command.commands)
-            {
-                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
-                    continue;
-                auto& section = c->section.empty() ? *cmd_title : c->section;
-                add_help_text(section, c->name,
-                              get_custom_text(*c, TextId::HELP).value_or(""));
-            }
-
+            // List all arguments
             auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
                 arg_title = DEFAULT_ARGUMENTS_TITLE;
@@ -252,6 +241,21 @@ namespace argos
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
 
+            // List all sub-commands after arguments, as arguments must be
+            // given first.
+            auto cmd_title = get_custom_text(command, TextId::SUBCOMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = DEFAULT_SUBCOMMANDS_TITLE;
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::HELP).value_or(""));
+            }
+
+            // List all options.
             auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
                 opt_title = DEFAULT_OPTIONS_TITLE;
@@ -265,6 +269,7 @@ namespace argos
 
             if (sections.empty())
                 return;
+
             const unsigned name_width = get_help_text_label_width(formatter, sections);
 
             for (auto& [section, texts] : sections)
