@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/ArgumentIterator.hpp"
@@ -45,6 +45,11 @@ namespace argos
         case IteratorResultCode::OPTION:
             arg = std::make_unique<OptionView>(
                     std::get<const OptionData*>(std::get<1>(res)));
+            value = std::get<2>(res);
+            return true;
+        case IteratorResultCode::COMMAND:
+            arg = std::make_unique<CommandView>(
+                    std::get<const CommandData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
         case IteratorResultCode::UNKNOWN:

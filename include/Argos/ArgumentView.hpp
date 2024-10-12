@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -43,9 +43,9 @@ namespace argos
         [[nodiscard]] const std::string& section() const final;
 
         /**
-         * @brief Returns the argument's value name.
+         * @brief Returns the argument's alias name.
          */
-        [[nodiscard]] const std::string& value() const final;
+        [[nodiscard]] const std::string& alias() const final;
 
         /**
          * @brief Returns the argument's visibility in

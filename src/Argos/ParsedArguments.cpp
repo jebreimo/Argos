@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/ParsedArguments.hpp"
@@ -20,16 +20,24 @@ namespace argos
         : m_impl(std::move(impl))
     {}
 
-    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(std::move(rhs.m_impl))
-    {}
+    ParsedArguments::ParsedArguments(const ParsedArguments& rhs) = default;
+
+    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept = default;
 
     ParsedArguments::~ParsedArguments() = default;
 
-    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
+    ParsedArguments& ParsedArguments::operator=(const ParsedArguments&) = default;
+
+    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept = default;
+
+    CommandView ParsedArguments::command() const
     {
-        m_impl = std::move(rhs.m_impl);
-        return *this;
+        return CommandView(m_impl->command());
+    }
+
+    std::string_view ParsedArguments::command_name() const
+    {
+        return m_impl->command()->name;
     }
 
     bool ParsedArguments::has(const std::string& name) const
@@ -40,6 +48,14 @@ namespace argos
     bool ParsedArguments::has(const IArgumentView& arg) const
     {
         return m_impl->has(arg.value_id());
+    }
+
+    std::vector<ParsedArguments> ParsedArguments::subcommands() const
+    {
+        std::vector<ParsedArguments> result;
+        for (const auto& subcommand : m_impl->subcommands())
+            result.emplace_back(subcommand);
+        return result;
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const
@@ -76,7 +92,7 @@ namespace argos
     ParsedArguments::all_arguments() const
     {
         std::vector<std::unique_ptr<ArgumentView>> result;
-        for (auto& a : m_impl->parser_data()->arguments)
+        for (auto& a : m_impl->parser_data()->command.arguments)
             result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         return result;
     }
@@ -85,8 +101,17 @@ namespace argos
     ParsedArguments::all_options() const
     {
         std::vector<std::unique_ptr<OptionView>> result;
-        for (auto& o : m_impl->parser_data()->options)
+        for (auto& o : m_impl->parser_data()->command.options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
+        return result;
+    }
+
+    std::vector<std::unique_ptr<CommandView>>
+    ParsedArguments::all_subcommands() const
+    {
+        std::vector<std::unique_ptr<CommandView>> result;
+        for (auto& c : m_impl->parser_data()->command.commands)
+            result.emplace_back(std::make_unique<CommandView>(c.get()));
         return result;
     }
 

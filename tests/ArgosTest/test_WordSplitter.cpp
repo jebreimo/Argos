@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/WordSplitter.hpp"
@@ -53,6 +53,13 @@ TEST_CASE("Test default splitter")
     test_default_split("bbbbbbccccccdddddd", 6, 7, {"cccccc", '-', "dddddd"});
 }
 
+TEST_CASE("Test split double-dash option")
+{
+    // I'm adding this test case to highlight a behavior that I'm not
+    // entirely sure I want.
+    test_default_split("--help", 0, 5, {"--", '\0', "help"});
+}
+
 TEST_CASE("Test default splitter with UTF-8")
 {
     argos::WordSplitter splitter;
@@ -87,4 +94,14 @@ TEST_CASE("Test splitter with UTF-8")
     test_split(U8("Brønn øy sund"), 0, 10, {U8("Brønnøy"), '-', U8("sund")});
     test_split(U8("Brønn øy sund"), 0, 11, {U8("Brønnøysund"), '\0', {}});
     test_split(U8("Brønn øy sund"), 4, 7, {U8("nnøy"), '-', U8("sund")});
+}
+
+TEST_CASE("Test splitter handles case and punctuation.")
+{
+    argos::WordSplitter splitter;
+    splitter.add_word("in compre hensi bili ties");
+    auto [txt, sep, rem] = splitter.split("Incomprehensibilities.", 0, 12, false);
+    REQUIRE(txt == "Incompre");
+    REQUIRE(sep == '-');
+    REQUIRE(rem == "hensibilities.");
 }

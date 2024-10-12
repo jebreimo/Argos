@@ -2,12 +2,13 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-14.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
 
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -38,6 +39,14 @@ namespace argos
     size_t count_code_points(std::string_view str);
 
     size_t find_nth_code_point(std::string_view str, size_t n);
+
+    char to_lower(char c);
+
+    void to_lower(std::string& word);
+
+    std::string to_lower(std::string_view word);
+
+    bool is_lower(std::string_view word);
 
     inline void pop_front(std::span<std::string_view>& span)
     {

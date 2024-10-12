@@ -2,15 +2,14 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
 #include <iosfwd>
 #include <memory>
-#include "Argument.hpp"
 #include "ArgumentIterator.hpp"
-#include "Option.hpp"
+#include "Command.hpp"
 
 /**
  * @file
@@ -75,24 +74,58 @@ namespace argos
         /**
          * @brief Add a new argument definition to the ArgumentParser.
          *
-         * @throw ArgosException if the argument doesn't have a name.
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
          */
-        ArgumentParser& add(Argument argument);
+        ArgumentParser& add(Argument& argument);
+
+        /**
+         * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
+         */
+        ArgumentParser& add(Argument&& argument);
 
         /**
          * @brief Add a new option definition to the ArgumentParser.
          *
-         * @throw ArgosException if the option doesn't have any flags
-         *      or any of the flags doesn't match the current option style.
-         * @throw ArgosException if certain meaningless combinations of
-         *      option operation and properties are found:
-         *      - an option with operation NONE has constant
-         *        or alias.
-         *      - an option with operation CLEAR is mandatory.
-         *      - an option with operation APPEND has neither argument nor
-         *        constant.
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
          */
-        ArgumentParser& add(Option option);
+        ArgumentParser& add(Option& option);
+
+        /**
+         * @brief Add a new option definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
+         */
+        ArgumentParser& add(Option&& option);
+
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
+        ArgumentParser& add(Command& command);
+
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
+        ArgumentParser& add(Command&& command);
+
+        /**
+         * @brief Copy arguments, options and sub-commands from @a command
+         *  to this ArgumentParser.
+         *
+         * All other settings are left unchanged.
+         */
+        ArgumentParser& copy_from(const Command& command);
 
         /**
          * @brief Parses the arguments and options in argv.
@@ -106,8 +139,8 @@ namespace argos
          *      the non-const version of parse(). All method calls on an invalid
          *      ArgumentParser will throw an exception.
          *
-         * @throw ArgosException if argc is 0 or if there are two or more
-         *      options that use the same flag.
+         * @throw ArgosException if argc is 0, or if any conflicting or
+         *  invalid options, arguments or sub-commands are encountered.
          */
         [[nodiscard]] ParsedArguments parse(int argc, char* argv[]);
 
@@ -283,6 +316,40 @@ namespace argos
         ArgumentParser& option_style(OptionStyle value);
 
         /**
+         * @brief Returns true if the program requires one or more
+         *  sub-commands.
+         */
+        [[nodiscard]] std::optional<bool> require_subcommand() const;
+
+        /**
+         * @brief Set whether the program requires one or more sub-commands.
+         *
+         * If this property is true, the program requires that any options
+         * or arguments to the main program is followed by a sub-command,
+         * and will exit with an error message if not.
+         *
+         * This property is only relevant if the program has sub-commands,
+         * and it is automatically set to true if it is unassigned and the
+         * program has sub-commands, but no arguments.
+         */
+        ArgumentParser& require_subcommand(bool value);
+
+        /**
+         * @brief Returns true if the program can accept multiple
+         *  sub-commands.
+         */
+        [[nodiscard]] bool allow_multiple_subcommands() const;
+
+        /**
+         * @brief Set whether the program can accept multiple sub-commands.
+         *
+         * If this property is true, a sequence of sub-commands can be given.
+         * Each sub-command can be followed by a new one when it has been
+         * given all the arguments it requires.
+         */
+        ArgumentParser& allow_multiple_subcommands(bool value);
+
+        /**
          * @brief Returns true if undefined arguments on the command line
          *      will not be treated as errors.
          */
@@ -384,15 +451,16 @@ namespace argos
 
         /**
          * @brief Sets a section (or heading) that is automatically assigned
-         *   to arguments and options when they are added.
+         *   to arguments, sub-commands and options when they are added.
          *
-         * This value is only applied to arguments and options that have not
-         * been assigned a section with Argument::section or Option::section.
+         * This value only applies to arguments, sub-commands and options that
+         * have not been assigned a section with Argument::section or Option::section.
          * If this value is an empty string, the values from
-         * TextId::ARGUMENTS_TITLE and TextId::OPTIONS_TITLE are used.
+         * TextId::ARGUMENTS_TITLE, TextId::SUBCOMMANDS_TITLE and
+         * TextId::OPTIONS_TITLE are used.
          *
-         * @param name All arguments and options with the same section name
-         *  will be listed under the same heading.
+         * @param name All arguments, sub-commands and options with the same
+         *  section name will be listed under the same heading.
          */
         ArgumentParser& section(const std::string& name);
 
@@ -424,14 +492,6 @@ namespace argos
          * window.
          */
         ArgumentParser& line_width(unsigned line_width);
-
-        /**
-         * @brief Write the help text.
-         *
-         * @note The help text is displayed automatically when a help option
-         *      is used.
-         */
-        void write_help_text() const;
 
         /**
          * @brief Inform Argos how a long word is to be split over multiple
@@ -466,16 +526,33 @@ namespace argos
         ArgumentParser& set_exit_codes(int error, int normal_exit);
 
         /**
+         * @brief Write the help text to the ArgumentParser's stream.
+         *
+         * @note The help text is displayed automatically when a help option
+         *      is used.
+         *
+         * Set the stream with the stream() function.
+         */
+        void write_help_text() const;
+
+        /**
+         * @brief Write the help text for the given sub-command.
+         *
+         * @param path The path to the sub-command. Typically the program
+         *  has only one set of sub-commands, thus the path will have only one
+         *  item, but it is possible to have sub-commands of sub-commands
+         *  and so on.
+         */
+        void write_subcommand_help_text(const std::vector<std::string>& path) const;
+
+        /**
          * @brief Makes it possible to construct an ArgumentParser with chained
-         *      method calls and assign it to a variable.
+         *      method calls and assign it to a variable without invoking
+         *      the copy constructor.
          */
         ArgumentParser&& move();
     private:
         void check_data() const;
-
-        void update_and_validate_option(OptionData& od);
-
-        [[nodiscard]] ArgumentId next_argument_id() const;
 
         std::unique_ptr<ParserData> m_data;
     };

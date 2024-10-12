@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-13.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -12,6 +12,7 @@
 #include "Argos/Enums.hpp"
 #include "ArgumentData.hpp"
 #include "OptionData.hpp"
+#include "CommandData.hpp"
 #include "TextFormatter.hpp"
 
 #ifndef ARGOS_EX_USAGE
@@ -41,22 +42,18 @@ namespace argos
 
     struct HelpSettings
     {
-        std::string program_name;
-        std::string version;
-        std::map<TextId, TextSource> texts;
         std::ostream* output_stream = nullptr;
+        unsigned line_width = 0;
+        std::vector<std::string> word_split_rules;
     };
 
     struct ParserData
     {
-        std::vector<std::unique_ptr<ArgumentData>> arguments;
-        std::vector<std::unique_ptr<OptionData>> options;
-
+        CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
-
-        TextFormatter text_formatter;
-
-        std::string current_section;
+        std::string version;
     };
+
+    void finish_initialization(ParserData& data);
 }

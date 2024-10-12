@@ -2,13 +2,13 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-22.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
 #include <memory>
 #include <vector>
-#include "ArgumentData.hpp"
+#include "CommandData.hpp"
 
 namespace argos
 {
@@ -17,12 +17,9 @@ namespace argos
     public:
         ArgumentCounter();
 
-        explicit ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        explicit ArgumentCounter(const CommandData& command);
 
-        ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t argument_count);
+        ArgumentCounter(const CommandData& command, size_t argument_count);
 
         const ArgumentData* next_argument();
 
@@ -30,11 +27,11 @@ namespace argos
 
         [[nodiscard]] bool is_complete() const;
 
-        static std::pair<size_t, size_t> get_min_max_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        static std::pair<size_t, size_t>
+        get_min_max_count(const CommandData& command);
 
-        static bool requires_argument_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        static bool requires_argument_count(const CommandData& command);
+
     private:
         using Counter = std::pair<size_t, const ArgumentData*>;
         std::vector<Counter> m_counters;

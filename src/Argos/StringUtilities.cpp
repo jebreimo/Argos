@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-17.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "StringUtilities.hpp"
@@ -193,5 +193,31 @@ namespace argos
             }
         }
         return char_len ? n : std::string_view::npos;
+    }
+
+    char to_lower(char c)
+    {
+        return ('A' <= c && c <= 'Z') ? char(c - 'A' + 'a') : c;
+    }
+
+    void to_lower(std::string& word)
+    {
+        for (auto& c: word)
+            c = to_lower(c);
+    }
+
+    std::string to_lower(std::string_view word)
+    {
+        std::string result(word);
+        to_lower(result);
+        return result;
+    }
+
+    bool is_lower(std::string_view word)
+    {
+        return std::all_of(word.begin(), word.end(), [](char c)
+        {
+            return c < 'A' || 'Z' < c;
+        });
     }
 }

@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/OptionView.hpp"
@@ -29,7 +29,7 @@ namespace argos
         return m_option->section;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::alias() const
     {
         return m_option->alias;
     }

@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -81,10 +81,10 @@ namespace argos
          * ~~~{.cpp}
          *  ArgumentParser()
          *      ...
-         *      .add(Option({"--include="}).argument("FILE")
+         *      .add(Option("--include=").argument("FILE")
          *          .operation(OptionOperation::APPEND)
          *          .text("Add FILE to the list of included files."))
-         *      .add(Option({"--include"}).operation(OptionOperation::CLEAR)
+         *      .add(Option("--include").operation(OptionOperation::CLEAR)
          *          .text("Clear the list of included files.")
          *      ...
          * ~~~
@@ -143,17 +143,21 @@ namespace argos
          * Unlike STOP, missing arguments and mandatory options will be
          * treated as errors when this option type is used.
          *
-         * All remaining arguments and options on the command line are
-         * available in ParsedArgument's unprocessed_arguments. The flag for
-         * this option type is typically '--'.
+         * If the current command is a subcommand, and the parent command
+         * allows multiple sub-commands, control will be passed to the parent,
+         * otherwise all remaining arguments and options on the command line
+         * are available in ParsedArgument's unprocessed_arguments.
+         *
+         * The flag for this option type is typically '--'.
          */
         LAST_ARGUMENT,
         /**
          * @brief The last argument that will be treated as an option.
          *
-         * Subsequent arguments will not be considered options even if they
-         * start with a '-' (or '/' when using SLASH options). The flag for
-         * this option type is typically '--'.
+         * Subsequent arguments will not be considered as options even if they
+         * start with a '-' (or '/' when using SLASH options).
+         *
+         * The flag for this option type is typically '--'.
          */
         LAST_OPTION
     };
@@ -212,18 +216,29 @@ namespace argos
         /**
          * @brief Text that appears between the usage section and the lists of
          *      arguments and options (empty by default).
+         *
+         * If there is no text for ABOUT, but the current command has a text
+         * for HELP, that text will be used instead.
          */
         ABOUT,
         /**
+         * @brief The title of the list of sub-commands
+         *  (default is "COMMANDS").
+         *
+         * @note This will only be used for sub-commands where the section
+         *      property has not been set.
+         */
+        SUBCOMMANDS_TITLE,
+        /**
          * @brief The title of the list of arguments (default is "ARGUMENTS").
          *
-         * @note This will only be used for arguments without the section
-         *      property.
+         * @note This will only be used for arguments where the section
+         *      property has not been set.
          */
         ARGUMENTS_TITLE,
         /**
          * @brief The title of the list of options (default is "OPTIONS").
-
+         *
          * @note This will only be used for options without the section
          *      property.
          */
@@ -237,7 +252,14 @@ namespace argos
          * @brief Custom usage text for error messages (default is to use
          *      the same text as USAGE).
          */
-        ERROR_USAGE
+        ERROR_USAGE,
+        /**
+         * @brief The help text after each command in a list of sub-commands.
+         *
+         * This text will also be used for ABOUT if there is no text for that
+         * TextId.
+         */
+        HELP
     };
 
     /**

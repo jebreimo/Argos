@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "Argos/Argument.hpp"
@@ -76,7 +76,7 @@ namespace argos
     Argument& Argument::alias(const std::string& id)
     {
         check_argument();
-        m_argument->value = id;
+        m_argument->alias = id;
         return *this;
     }
 
@@ -153,7 +153,6 @@ namespace argos
     void Argument::check_argument() const
     {
         if (!m_argument)
-            ARGOS_THROW("Cannot use Argument instance after"
-                        " release() has been called.");
+            ARGOS_THROW("Argument has been moved.");
     }
 }

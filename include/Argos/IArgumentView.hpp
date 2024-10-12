@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -27,28 +27,28 @@ namespace argos
         virtual ~IArgumentView() = default;
 
         /**
-         * @brief Returns the argument's or option's help text.
+         * @brief Returns the object's help text.
          */
         [[nodiscard]] virtual std::string help() const = 0;
 
         /**
-         * @brief Returns the argument's or option's section name.
+         * @brief Returns the object's section name.
          */
         [[nodiscard]] virtual const std::string& section() const = 0;
 
         /**
-         * @brief Returns the argument's or option's value name.
+         * @brief Returns the object's alias.
          */
-        [[nodiscard]] virtual const std::string& value() const = 0;
+        [[nodiscard]] virtual const std::string& alias() const = 0;
 
         /**
-         * @brief Returns the argument's or option's visibility in
-         *      the help text and error messages.
+         * @brief Returns the object's visibility in the help text and
+         *  error messages.
          */
         [[nodiscard]] virtual Visibility visibility() const = 0;
 
         /**
-         * @brief Returns the argument's or option's custom id.
+         * @brief Returns the object's custom id.
          */
         [[nodiscard]] virtual int id() const = 0;
 
@@ -58,17 +58,17 @@ namespace argos
          *
          * This value is created internally in Argos and must not be
          * confused with the customizable value returned by id().
-         * If different options or arguments have the same value name, they
-         * will also have the same value id.
+         * If different options or arguments are aliases for each other,
+         * they will also have the same value id.
          *
-         * @return options with operation OptionOperation::NONE have
+         * @return all options with operation OptionOperation::NONE have
          *   a value of 0, all other options and arguments have a value
          *   greater than 0.
          */
         [[nodiscard]] virtual ValueId value_id() const = 0;
 
         /**
-         * @brief Returns the argument's or option's argument_id().
+         * @brief Returns the object's argument_id().
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.

@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -40,8 +40,14 @@ namespace argos
          */
         Option();
 
+        /**
+         * @brief Creates a new option with the given flag.
+         */
         explicit Option(std::string flag);
 
+        /**
+         * @brief Creates a new option with the given flags.
+         */
         Option(std::string flag1, std::string flag2);
 
         /**

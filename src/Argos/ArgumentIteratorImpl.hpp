@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -10,7 +10,6 @@
 #include <variant>
 #include "ArgumentCounter.hpp"
 #include "ParserData.hpp"
-#include "StandardOptionIterator.hpp"
 #include "OptionData.hpp"
 #include "OptionIteratorWrapper.hpp"
 #include "ParsedArgumentsImpl.hpp"
@@ -21,6 +20,7 @@ namespace argos
     {
         ARGUMENT,
         OPTION,
+        COMMAND,
         DONE,
         UNKNOWN,
         ERROR
@@ -29,7 +29,8 @@ namespace argos
     using IteratorResultData = std::variant<
         std::monostate,
         const ArgumentData*,
-        const OptionData*>;
+        const OptionData*,
+        const CommandData*>;
 
     using IteratorResult = std::tuple<
         IteratorResultCode,
@@ -51,6 +52,9 @@ namespace argos
         [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
         parsed_arguments() const;
 
+        [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
+        toplevel_parsed_arguments() const;
+
     private:
         enum class OptionResult
         {
@@ -66,7 +70,9 @@ namespace argos
 
         IteratorResult process_option(const std::string& flag);
 
-        IteratorResult process_argument(const std::string& name);
+        IteratorResult process_argument(const std::string& value);
+
+        IteratorResult process_command(const CommandData* command);
 
         void copy_remaining_arguments_to_parser_result();
 
@@ -74,12 +80,19 @@ namespace argos
 
         bool check_argument_and_option_counts();
 
+        [[nodiscard]] std::pair<const CommandData*, size_t>
+        find_sibling_command(std::string_view name) const;
+
+        [[nodiscard]]
+        std::optional<size_t> find_first_multi_command_parent() const;
+
+        void reactivate_multi_command_parent(size_t index);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;
-        std::vector<std::pair<std::string_view, const OptionData*>> m_options;
-        std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        // std::unique_ptr<IOptionIterator> m_iterator;
+        const CommandData* m_command = nullptr;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
         OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 

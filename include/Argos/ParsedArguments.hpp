@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
@@ -11,6 +11,7 @@
 #include "ArgumentValue.hpp"
 #include "ArgumentValues.hpp"
 #include "ArgumentView.hpp"
+#include "CommandView.hpp"
 #include "OptionView.hpp"
 
 /**
@@ -42,7 +43,7 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments(const ParsedArguments&) = delete;
+        ParsedArguments(const ParsedArguments&);
 
         /**
          * @private
@@ -57,12 +58,25 @@ namespace argos
         /**
          * @private
          */
-        ParsedArguments& operator=(const ParsedArguments&) = delete;
+        ParsedArguments& operator=(const ParsedArguments&);
 
         /**
          * @private
          */
         ParsedArguments& operator=(ParsedArguments&&) noexcept;
+
+        /**
+         * @brief Returns the command that was parsed.
+         *
+         * This function can be used to access the metadata of the current
+         * sub-command.
+         */
+        [[nodiscard]] CommandView command() const;
+
+        /**
+         * @brief Returns the name of the sub-command that was parsed.
+         */
+        [[nodiscard]] std::string_view command_name() const;
 
         /**
          * @brief Returns true if the argument or option named @a name
@@ -78,6 +92,11 @@ namespace argos
          *  value on command line.
          */
         [[nodiscard]] bool has(const IArgumentView& arg) const;
+
+        /**
+         * @brief Returns parsed arguments of sub-commands.
+         */
+        [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 
         /**
          * @brief Returns the value of the argument with the given name.
@@ -106,24 +125,46 @@ namespace argos
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
         /**
-         * @brief Returns all argument definitions that were registered with
+         * @brief Returns all argument definitions that were added to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
 
         /**
-         * @brief Returns all option definitions that were registered with
+         * @brief Returns all option definitions that were add to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined options along with their given values.
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
+
+        /**
+         * @brief Returns all sub-command definitions that were added
+         *  to the ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined sub-commands along with their given values.
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
+         */
+        [[nodiscard]]
+        std::vector<std::unique_ptr<CommandView>> all_subcommands() const;
 
         /**
          * @brief Returns the parser result code.
@@ -132,7 +173,7 @@ namespace argos
 
         /**
          * @brief If the parser stopped early because it encountered an option
-         *  of type, this function returns that option.
+         *  of type 'STOP', this function returns that option.
          */
         [[nodiscard]] OptionView stop_option() const;
 
@@ -145,8 +186,8 @@ namespace argos
          *
          * - ArgumentParser::ignore_undefined_arguments is true.
          * - ArgumentParser::ignore_undefined_options is true.
-         * - ArgumentParser::auto_exit is false and there are options with type
-         *   set to OptionType::STOP.
+         * - ArgumentParser::auto_exit is false and there are options with
+         *   type set to OptionType::STOP.
          */
         [[nodiscard]]
         const std::vector<std::string>& unprocessed_arguments() const;

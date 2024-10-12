@@ -2,7 +2,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include "HelpText.hpp"
@@ -10,10 +10,16 @@
 #include <algorithm>
 #include <iostream>
 
+
 namespace argos
 {
     namespace
     {
+        constexpr auto DEFAULT_SUBCOMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
+
         std::string get_argument_name(const ArgumentData& arg)
         {
             if (arg.name[0] == '<' || arg.name[0] == '[')
@@ -58,8 +64,8 @@ namespace argos
             std::string_view flag;
             if (prefer_long_flag)
             {
-                const auto it = std::find_if(opt.flags.begin(),  opt.flags.end(),
-                                             [](auto& s){return s.size() > 2;});
+                const auto it = std::find_if(opt.flags.begin(), opt.flags.end(),
+                                             [](auto& s) { return s.size() > 2; });
                 if (it != opt.flags.end())
                     flag = *it;
             }
@@ -116,13 +122,12 @@ namespace argos
         }
 
         std::optional<std::string>
-        get_custom_text(ParserData& data, TextId text_id)
+        get_custom_text(const CommandData& data, TextId text_id)
         {
-            const auto it = data.help_settings.texts.find(text_id);
-            if (it != data.help_settings.texts.end())
+            const auto it = data.texts.find(text_id);
+            if (it != data.texts.end())
             {
                 return get_text(it->second);
-
             }
             return {};
         }
@@ -133,24 +138,27 @@ namespace argos
         }
 
         std::optional<std::string>
-        write_custom_text(ParserData& data, TextId text_id,
+        write_custom_text(TextFormatter& formatter,
+                          const CommandData& cmd,
+                          TextId text_id,
                           bool prepend_newline = false)
         {
-            auto text = get_custom_text(data, text_id);
+            auto text = get_custom_text(cmd, text_id);
             if (!is_empty(text))
             {
                 if (prepend_newline)
-                    data.text_formatter.newline();
-                data.text_formatter.write_words(*text);
-                if (!data.text_formatter.is_current_line_empty())
-                    data.text_formatter.newline();
+                    formatter.newline();
+                formatter.write_words(*text);
+                if (!formatter.is_current_line_empty())
+                    formatter.newline();
             }
             return text;
         }
 
-        void write_stop_and_help_usage(ParserData& data)
+        void write_stop_and_help_usage(TextFormatter& formatter,
+                                       const CommandData& cmd)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : cmd.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -158,13 +166,13 @@ namespace argos
                     continue;
                 }
 
-                data.text_formatter.write_words(data.help_settings.program_name);
-                data.text_formatter.write_words(" ");
-                data.text_formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-                data.text_formatter.write_lines(get_brief_option_name(*opt, true));
-                data.text_formatter.write_words(" ");
-                data.text_formatter.pop_indentation();
-                data.text_formatter.newline();
+                formatter.write_words(cmd.full_name);
+                formatter.write_words(" ");
+                formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
+                formatter.write_lines(get_brief_option_name(*opt, true));
+                formatter.write_words(" ");
+                formatter.pop_indentation();
+                formatter.newline();
             }
         }
 
@@ -173,7 +181,7 @@ namespace argos
         using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
 
         unsigned int get_help_text_label_width(
-            const ParserData& data,
+            const TextFormatter& formatter,
             const std::vector<SectionHelpTexts>& sections)
         {
             // Determine what width should be reserved for the argument names
@@ -191,7 +199,7 @@ namespace argos
 
             std::sort(name_widths.begin(), name_widths.end());
             std::sort(text_widths.begin(), text_widths.end());
-            const auto line_width = data.text_formatter.line_width();
+            const auto line_width = formatter.line_width();
             // Check if both the longest name and the longest help text
             // can fit on the same line.
             const auto name_width = name_widths.back() + 3;
@@ -200,7 +208,9 @@ namespace argos
             return name_width;
         }
 
-        void write_argument_sections(ParserData& data, bool prepend_newline)
+        void write_argument_sections(TextFormatter& formatter,
+                                     const CommandData& command,
+                                     bool prepend_newline)
         {
             std::vector<SectionHelpTexts> sections;
 
@@ -208,7 +218,9 @@ namespace argos
             {
                 auto it = find_if(sections.begin(), sections.end(),
                                   [&](const auto& v)
-                                  {return v.first == s;});
+                                  {
+                                      return v.first == s;
+                                  });
                 if (it == sections.end())
                 {
                     sections.push_back({s, {}});
@@ -217,20 +229,37 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
-            auto arg_title = get_custom_text(data, TextId::ARGUMENTS_TITLE);
+            // List all arguments
+            auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
-                arg_title = "ARGUMENTS";
-            for (auto& a : data.arguments)
+                arg_title = DEFAULT_ARGUMENTS_TITLE;
+            for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *arg_title : a->section;
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
-            auto opt_title = get_custom_text(data, TextId::OPTIONS_TITLE);
+
+            // List all sub-commands after arguments, as arguments must be
+            // given first.
+            auto cmd_title = get_custom_text(command, TextId::SUBCOMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = DEFAULT_SUBCOMMANDS_TITLE;
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::HELP).value_or(""));
+            }
+
+            // List all options.
+            auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
-                opt_title = "OPTIONS";
-            for (auto& o : data.options)
+                opt_title = DEFAULT_OPTIONS_TITLE;
+            for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -240,17 +269,17 @@ namespace argos
 
             if (sections.empty())
                 return;
-            const unsigned name_width = get_help_text_label_width(data, sections);
 
-            auto& formatter = data.text_formatter;
-            for (auto&[section, txts] : sections)
+            const unsigned name_width = get_help_text_label_width(formatter, sections);
+
+            for (auto& [section, texts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text] : txts)
+                for (auto& [name, text] : texts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -276,18 +305,10 @@ namespace argos
             }
         }
 
-        void write_brief_usage(ParserData& data, bool prepend_newline)
+        void write_brief_regular_options(TextFormatter& formatter,
+                                         const CommandData& command)
         {
-            auto& formatter = data.text_formatter;
-            if (prepend_newline)
-                formatter.newline();
-
-            formatter.push_indentation(2);
-            write_stop_and_help_usage(data);
-            formatter.write_words(data.help_settings.program_name);
-            formatter.write_words(" ");
-            formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt : data.options)
+            for (auto& opt : command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || is_stop_option(opt->type))
@@ -298,46 +319,100 @@ namespace argos
                 formatter.write_lines(get_brief_option_name(*opt, false));
                 formatter.write_words(" ");
             }
-            for (auto& arg : data.arguments)
+        }
+
+        void write_brief_arguments(TextFormatter& formatter,
+                                   const CommandData& command)
+        {
+            for (auto& arg : command.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
                 formatter.write_lines(get_argument_name(*arg));
                 formatter.write_words(" ");
             }
+        }
+
+        void write_brief_commands(TextFormatter& formatter,
+                                  const CommandData& command)
+        {
+            if (command.commands.empty())
+                return;
+
+            auto brackets = !command.require_subcommand.value_or(false);
+
+            if (brackets)
+                formatter.write_words("[");
+
+            bool first_command = true;
+            for (auto& cmd : command.commands)
+            {
+                if ((cmd->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                if (!first_command)
+                    formatter.write_words("|");
+                first_command = false;
+                formatter.write_words(cmd->name);
+            }
+
+            if (brackets)
+                formatter.write_words("]");
+        }
+
+        void write_brief_usage(TextFormatter& formatter,
+                               const CommandData& command,
+                               bool prepend_newline)
+        {
+            if (prepend_newline)
+                formatter.newline();
+
+            formatter.push_indentation(2);
+            write_stop_and_help_usage(formatter, command);
+            formatter.write_words(command.full_name);
+            formatter.write_words(" ");
+            formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
+
+            write_brief_regular_options(formatter, command);
+            write_brief_arguments(formatter, command);
+            write_brief_commands(formatter, command);
+
             formatter.pop_indentation();
             formatter.newline();
             formatter.pop_indentation();
         }
 
-        bool write_usage(ParserData& data, bool prepend_newline = false)
+        bool write_usage(TextFormatter& formatter,
+                         const CommandData& command,
+                         bool prepend_newline = false)
         {
-            if (const auto t = get_custom_text(data, TextId::USAGE); t && t->empty())
+            if (const auto t = get_custom_text(command, TextId::USAGE); t && t->empty())
                 return false;
 
-            const auto text1 = write_custom_text(data, TextId::USAGE_TITLE,
+            const auto text1 = write_custom_text(formatter, command,
+                                                 TextId::USAGE_TITLE,
                                                  prepend_newline);
             if (!text1)
             {
                 if (prepend_newline)
-                    data.text_formatter.newline();
-                data.text_formatter.write_words("USAGE");
-                data.text_formatter.newline();
+                    formatter.newline();
+                formatter.write_words(DEFAULT_USAGE_TITLE);
+                formatter.newline();
                 prepend_newline = false;
             }
             else
             {
                 prepend_newline = prepend_newline && is_empty(text1);
             }
-            const auto text2 = write_custom_text(data, TextId::USAGE,
+            const auto text2 = write_custom_text(formatter, command,
+                                                 TextId::USAGE,
                                                  prepend_newline);
             if (text2)
                 return !is_empty(text1) || !is_empty(text2);
-            write_brief_usage(data, prepend_newline);
+            write_brief_usage(formatter, command, prepend_newline);
             return true;
         }
 
-        std::string get_name(const ParserData& data, ArgumentId argument_id)
+        std::string get_name(const CommandData& data, ArgumentId argument_id)
         {
             for (const auto& a : data.arguments)
             {
@@ -358,36 +433,50 @@ namespace argos
         }
     }
 
-    void write_help_text(ParserData& data)
+    void write_help_text(const ParserData& data, const CommandData& cmd)
     {
+        TextFormatter formatter;
+        if (data.help_settings.line_width)
+            formatter.set_line_width(data.help_settings.line_width);
         if (data.help_settings.output_stream)
-            data.text_formatter.set_stream(data.help_settings.output_stream);
-        bool newline = !is_empty(write_custom_text(data, TextId::INITIAL_TEXT));
-        newline = write_usage(data, newline) || newline;
-        newline = !is_empty(write_custom_text(data, TextId::ABOUT, newline)) || newline;
-        write_argument_sections(data, newline);
-        write_custom_text(data, TextId::FINAL_TEXT, true);
+            formatter.set_stream(data.help_settings.output_stream);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
+        bool newline = !is_empty(write_custom_text(formatter, cmd, TextId::INITIAL_TEXT));
+        newline = write_usage(formatter, cmd, newline) || newline;
+        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline))
+                  || !is_empty(write_custom_text(formatter, cmd, TextId::HELP, newline))
+                  || newline;
+        write_argument_sections(formatter, cmd, newline);
+        write_custom_text(formatter, cmd, TextId::FINAL_TEXT, true);
     }
 
-    void write_error_message(ParserData& data, const std::string& msg)
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg)
     {
+        TextFormatter formatter;
+        if (data.help_settings.line_width)
+            formatter.set_line_width(data.help_settings.line_width);
         if (data.help_settings.output_stream)
-            data.text_formatter.set_stream(data.help_settings.output_stream);
+            formatter.set_stream(data.help_settings.output_stream);
         else
-            data.text_formatter.set_stream(&std::cerr);
-        data.text_formatter.write_words(data.help_settings.program_name + ": ");
-        data.text_formatter.write_words(msg);
-        data.text_formatter.newline();
-        if (!write_custom_text(data, TextId::ERROR_USAGE))
-            write_usage(data);
+            formatter.set_stream(&std::cerr);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
+        formatter.write_words(cmd.full_name + ": ");
+        formatter.write_words(msg);
+        formatter.newline();
+        if (!write_custom_text(formatter, cmd, TextId::ERROR_USAGE))
+            write_usage(formatter, cmd);
     }
 
-    void write_error_message(ParserData& data, const std::string& msg,
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg,
                              ArgumentId argument_id)
     {
-        if (const auto name = get_name(data, argument_id); !name.empty())
-            write_error_message(data, name + ": " + msg);
+        if (const auto name = get_name(cmd, argument_id); !name.empty())
+            write_error_message(data, cmd, name + ": " + msg);
         else
-            write_error_message(data, msg);
+            write_error_message(data, cmd, msg);
     }
 }

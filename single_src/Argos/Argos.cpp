@@ -3,7 +3,7 @@
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-20.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -20,30 +20,20 @@
 // Copyright © 2023 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2023-10-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <variant>
 
 namespace argos
 {
-    using TextSource = std::variant <std::string, TextCallback>;
+    using TextSource = std::variant<std::string, TextCallback>;
 
     inline std::string get_text(const TextSource& source)
     {
-        struct Visitor
-        {
-            std::string operator()(const std::string& s) const
-            {
-                return s;
-            }
-
-            std::string operator()(const std::function<std::string()>& f) const
-            {
-                return f();
-            }
-        };
-        return std::visit(Visitor(), source);
+        if (auto str = std::get_if<std::string>(&source))
+            return *str;
+        return std::get<TextCallback>(source)();
     }
 }
 
@@ -51,7 +41,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <string>
@@ -63,7 +53,7 @@ namespace argos
         std::string name;
         TextSource help;
         std::string section;
-        std::string value;
+        std::string alias;
         ArgumentCallback callback;
         unsigned min_count = 1;
         unsigned max_count = 1;
@@ -78,7 +68,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -148,7 +138,7 @@ namespace argos
     Argument& Argument::alias(const std::string& id)
     {
         check_argument();
-        m_argument->value = id;
+        m_argument->alias = id;
         return *this;
     }
 
@@ -225,20 +215,141 @@ namespace argos
     void Argument::check_argument() const
     {
         if (!m_argument)
-            ARGOS_THROW("Cannot use Argument instance after"
-                        " release() has been called.");
+            ARGOS_THROW("Argument has been moved.");
     }
+}
+
+//****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-09.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+#include <vector>
+
+namespace argos
+{
+    struct OptionData
+    {
+        std::vector<std::string> flags;
+        TextSource help;
+        std::string section;
+        std::string alias;
+        std::string argument;
+        std::string constant;
+        std::string initial_value;
+        OptionCallback callback;
+        OptionOperation operation = OptionOperation::ASSIGN;
+        OptionType type = OptionType::NORMAL;
+        Visibility visibility = Visibility::NORMAL;
+        bool optional = true;
+        int id = 0;
+        ArgumentId argument_id = {};
+        ValueId value_id = {};
+    };
+
+    void validate_and_update(OptionData& option, OptionStyle style);
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-04.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+#include <map>
+#include <memory>
+
+namespace argos
+{
+    struct CommandData
+    {
+        CommandData();
+
+        CommandData(const CommandData&);
+
+        CommandData(CommandData&&) noexcept;
+
+        ~CommandData();
+
+        CommandData& operator=(const CommandData&);
+
+        CommandData& operator=(CommandData&&) noexcept;
+
+        void add(std::unique_ptr<ArgumentData> arg);
+
+        void add(std::unique_ptr<OptionData> opt);
+
+        void add(std::unique_ptr<CommandData> cmd);
+
+        void copy_from(const CommandData& cmd);
+
+        void build_option_index(bool case_insensitive);
+
+        [[nodiscard]] const OptionData*
+        find_option(std::string_view flag,
+                    bool allow_abbreviations,
+                    bool case_insensitive) const;
+
+        [[nodiscard]] const CommandData*
+        find_command(std::string_view name,
+                     bool case_insensitive) const;
+
+        std::vector<std::unique_ptr<ArgumentData>> arguments;
+        std::vector<std::unique_ptr<OptionData>> options;
+        std::vector<std::unique_ptr<CommandData>> commands;
+        std::string current_section;
+
+        std::string name;
+        std::string full_name;
+        std::map<TextId, TextSource> texts;
+        Visibility visibility = Visibility::NORMAL;
+        std::optional<bool> require_subcommand;
+        bool multi_command = false;
+        /**
+         * The heading the command is listed under in the parent
+         * command's help.
+         */
+        std::string section;
+        int id = 0;
+        ArgumentId argument_id = {};
+
+    private:
+        [[nodiscard]] const OptionData*
+        find_option_impl(std::string_view flag,
+                         bool allow_abbreviations,
+                         bool case_insensitive) const;
+
+        std::vector<std::pair<std::string_view, const OptionData*>> option_index;
+    };
+
+    struct ParserData;
+
+    /**
+     * Finish the initialization of this command and any subcommands, and
+     * make them ready for parsing arguments.
+     */
+    void finish_initialization(CommandData& cmd,
+                               const ParserData& data,
+                               ValueId start_id = {},
+                               ArgumentId argument_id = {});
+
+    struct ParserSettings;
+
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings);
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-22.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include <memory>
-#include <vector>
 
 namespace argos
 {
@@ -247,12 +358,9 @@ namespace argos
     public:
         ArgumentCounter();
 
-        explicit ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        explicit ArgumentCounter(const CommandData& command);
 
-        ArgumentCounter(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                size_t argument_count);
+        ArgumentCounter(const CommandData& command, size_t argument_count);
 
         const ArgumentData* next_argument();
 
@@ -260,11 +368,11 @@ namespace argos
 
         [[nodiscard]] bool is_complete() const;
 
-        static std::pair<size_t, size_t> get_min_max_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        static std::pair<size_t, size_t>
+        get_min_max_count(const CommandData& command);
 
-        static bool requires_argument_count(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments);
+        static bool requires_argument_count(const CommandData& command);
+
     private:
         using Counter = std::pair<size_t, const ArgumentData*>;
         std::vector<Counter> m_counters;
@@ -278,7 +386,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-22.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -286,9 +394,9 @@ namespace argos
 {
     namespace
     {
-        size_t find_first_optional(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+        size_t find_first_optional(const CommandData& command)
         {
+            auto& arguments = command.arguments;
             size_t result = 0;
             for (size_t i = 0; i < arguments.size(); ++i)
             {
@@ -299,14 +407,14 @@ namespace argos
         }
 
         void make_argument_counters(
-                const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-                std::vector<std::pair<size_t, const ArgumentData*>>& counters,
-                size_t& first_optional)
+            const CommandData& command,
+            std::vector<std::pair<size_t, const ArgumentData*>>& counters,
+            size_t& first_optional)
         {
-            first_optional = find_first_optional(arguments);
-            for (size_t i = 0; i < arguments.size(); ++i)
+            first_optional = find_first_optional(command);
+            for (size_t i = 0; i < command.arguments.size(); ++i)
             {
-                auto& a = arguments[i];
+                auto& a = command.arguments[i];
                 if (i + 1 == first_optional && a->min_count != a->max_count)
                 {
                     counters.emplace_back(a->min_count, a.get());
@@ -320,11 +428,10 @@ namespace argos
         }
 
         std::vector<std::pair<size_t, const ArgumentData*>>
-        make_argument_counters(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-            size_t n)
+        make_argument_counters(const CommandData& command,
+                               size_t n)
         {
-            const auto [lo, hi] = ArgumentCounter::get_min_max_count(arguments);
+            const auto [lo, hi] = ArgumentCounter::get_min_max_count(command);
             if (n < lo)
                 n = 0;
             else if (n > hi)
@@ -333,7 +440,7 @@ namespace argos
                 n -= lo;
 
             std::vector<std::pair<size_t, const ArgumentData*>> result;
-            for (auto& arg : arguments)
+            for (auto& arg : command.arguments)
             {
                 if (n == 0 || arg->min_count == arg->max_count)
                 {
@@ -356,20 +463,20 @@ namespace argos
 
     ArgumentCounter::ArgumentCounter()
         : m_counters()
-    {}
-
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
     {
-        make_argument_counters(arguments, m_counters, m_first_optional);
     }
 
-    ArgumentCounter::ArgumentCounter(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments,
-        size_t argument_count)
-        : m_counters(make_argument_counters(arguments, argument_count)),
+    ArgumentCounter::ArgumentCounter(const CommandData& command)
+    {
+        make_argument_counters(command, m_counters, m_first_optional);
+    }
+
+    ArgumentCounter::ArgumentCounter(const CommandData& command,
+                                     size_t argument_count)
+        : m_counters(make_argument_counters(command, argument_count)),
           m_first_optional(m_counters.size())
-    {}
+    {
+    }
 
     const ArgumentData* ArgumentCounter::next_argument()
     {
@@ -397,11 +504,10 @@ namespace argos
     }
 
     std::pair<size_t, size_t>
-    ArgumentCounter::get_min_max_count(
-        const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    ArgumentCounter::get_min_max_count(const CommandData& command)
     {
         size_t lo = 0, hi = 0;
-        for (auto& arg : arguments)
+        for (auto& arg : command.arguments)
         {
             lo += arg->min_count;
             if (hi != SIZE_MAX)
@@ -415,11 +521,10 @@ namespace argos
         return {lo, hi};
     }
 
-    bool ArgumentCounter::requires_argument_count(
-            const std::vector<std::unique_ptr<ArgumentData>>& arguments)
+    bool ArgumentCounter::requires_argument_count(const CommandData& command)
     {
         bool deterministic = true;
-        for (auto& arg : arguments)
+        for (auto& arg : command.arguments)
         {
             if (!deterministic)
                 return true;
@@ -432,39 +537,9 @@ namespace argos
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-09.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    struct OptionData
-    {
-        std::vector<std::string> flags;
-        TextSource help;
-        std::string section;
-        std::string alias;
-        std::string argument;
-        std::string constant;
-        std::string initial_value;
-        OptionCallback callback;
-        OptionOperation operation = OptionOperation::ASSIGN;
-        OptionType type = OptionType::NORMAL;
-        Visibility visibility = Visibility::NORMAL;
-        bool optional = true;
-        int id = 0;
-        ArgumentId argument_id = {};
-        ValueId value_id = {};
-    };
-}
-
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-27.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <iosfwd>
@@ -523,11 +598,10 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <list>
-#include <map>
 
 namespace argos
 {
@@ -535,6 +609,8 @@ namespace argos
     {
     public:
         void add_word(std::string word_rule);
+
+        void add_words(std::vector<std::string> word_rules);
 
         [[nodiscard]] std::tuple<std::string_view, char, std::string_view>
         split(std::string_view word, size_t start_index, size_t max_length,
@@ -557,7 +633,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <climits>
@@ -627,7 +703,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-13.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -658,68 +734,31 @@ namespace argos
 
     struct HelpSettings
     {
-        std::string program_name;
-        std::string version;
-        std::map<TextId, TextSource> texts;
         std::ostream* output_stream = nullptr;
+        unsigned line_width = 0;
+        std::vector<std::string> word_split_rules;
     };
 
     struct ParserData
     {
-        std::vector<std::unique_ptr<ArgumentData>> arguments;
-        std::vector<std::unique_ptr<OptionData>> options;
-
+        CommandData command;
         ParserSettings parser_settings;
         HelpSettings help_settings;
-
-        TextFormatter text_formatter;
-
-        std::string current_section;
+        std::string version;
     };
-}
 
-//****************************************************************************
-// Copyright © 2020 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2020-01-09.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-#include <optional>
-#include <span>
-
-namespace argos
-{
-    class StandardOptionIterator
-    {
-    public:
-        StandardOptionIterator();
-
-        explicit StandardOptionIterator(std::vector<std::string_view> args);
-
-        StandardOptionIterator(const StandardOptionIterator& rhs);
-
-        std::optional<std::string> next();
-
-        std::optional<std::string> next_value();
-
-        [[nodiscard]] std::string_view current() const;
-
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
-    private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
-        size_t m_pos = 0;
-    };
+    void finish_initialization(ParserData& data);
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-18.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <optional>
+#include <span>
 
 namespace argos
 {
@@ -749,10 +788,43 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2020 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2020-01-09.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    class StandardOptionIterator
+    {
+    public:
+        StandardOptionIterator();
+
+        explicit StandardOptionIterator(std::vector<std::string_view> args);
+
+        StandardOptionIterator(const StandardOptionIterator& rhs);
+
+        std::optional<std::string> next();
+
+        std::optional<std::string> next_value();
+
+        [[nodiscard]] std::string_view current() const;
+
+        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+    private:
+        std::vector<std::string_view> m_all_args;
+        std::span<std::string_view> m_args;
+        size_t m_pos = 0;
+    };
+}
+
+//****************************************************************************
 // Copyright © 2024 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2024-09-19.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -800,7 +872,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -811,7 +883,8 @@ namespace argos
     class ParsedArgumentsImpl
     {
     public:
-        explicit ParsedArgumentsImpl(std::shared_ptr<ParserData> data);
+        explicit ParsedArgumentsImpl(const CommandData* command,
+                                     std::shared_ptr<ParserData> data);
 
         [[nodiscard]] bool has(ValueId value_id) const;
 
@@ -837,6 +910,12 @@ namespace argos
         [[nodiscard]] std::vector<std::pair<std::string_view, ArgumentId>>
         get_values(ValueId value_id) const;
 
+        const std::shared_ptr<ParsedArgumentsImpl>&
+        add_subcommand(const CommandData* command);
+
+        const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+        subcommands() const;
+
         [[nodiscard]] std::vector<std::unique_ptr<IArgumentView>>
         get_argument_views(ValueId value_id) const;
 
@@ -844,6 +923,8 @@ namespace argos
         get_argument_view(ArgumentId argument_id) const;
 
         [[nodiscard]] const std::shared_ptr<ParserData>& parser_data() const;
+
+        [[nodiscard]] const CommandData* command() const;
 
         [[nodiscard]] ParserResultCode result_code() const;
 
@@ -858,10 +939,15 @@ namespace argos
 
         [[noreturn]]
         void error(const std::string& message, ArgumentId argument_id);
+
     private:
+        /// The values received from ArgumentIteratorImpl.
         std::multimap<ValueId, std::pair<std::string, ArgumentId>> m_values;
+        /// Index from flag, argument name or alias to ValueId and ArgumentId
         std::vector<std::tuple<std::string_view, ValueId, ArgumentId>> m_ids;
         std::vector<std::string> m_unprocessed_arguments;
+        const CommandData* m_command;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_commands;
         std::shared_ptr<ParserData> m_data;
         ParserResultCode m_result_code = ParserResultCode::NONE;
         const OptionData* m_stop_option = nullptr;
@@ -872,7 +958,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -882,6 +968,7 @@ namespace argos
     {
         ARGUMENT,
         OPTION,
+        COMMAND,
         DONE,
         UNKNOWN,
         ERROR
@@ -890,7 +977,8 @@ namespace argos
     using IteratorResultData = std::variant<
         std::monostate,
         const ArgumentData*,
-        const OptionData*>;
+        const OptionData*,
+        const CommandData*>;
 
     using IteratorResult = std::tuple<
         IteratorResultCode,
@@ -912,6 +1000,9 @@ namespace argos
         [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
         parsed_arguments() const;
 
+        [[nodiscard]] const std::shared_ptr<ParsedArgumentsImpl>&
+        toplevel_parsed_arguments() const;
+
     private:
         enum class OptionResult
         {
@@ -927,7 +1018,9 @@ namespace argos
 
         IteratorResult process_option(const std::string& flag);
 
-        IteratorResult process_argument(const std::string& name);
+        IteratorResult process_argument(const std::string& value);
+
+        IteratorResult process_command(const CommandData* command);
 
         void copy_remaining_arguments_to_parser_result();
 
@@ -935,12 +1028,19 @@ namespace argos
 
         bool check_argument_and_option_counts();
 
+        [[nodiscard]] std::pair<const CommandData*, size_t>
+        find_sibling_command(std::string_view name) const;
+
+        [[nodiscard]]
+        std::optional<size_t> find_first_multi_command_parent() const;
+
+        void reactivate_multi_command_parent(size_t index);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;
-        std::vector<std::pair<std::string_view, const OptionData*>> m_options;
-        std::shared_ptr<ParsedArgumentsImpl> m_parsed_args;
-        // std::unique_ptr<IOptionIterator> m_iterator;
+        const CommandData* m_command = nullptr;
+        std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
         OptionIteratorWrapper m_iterator;
         ArgumentCounter m_argument_counter;
 
@@ -960,7 +1060,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1001,6 +1101,11 @@ namespace argos
                     std::get<const OptionData*>(std::get<1>(res)));
             value = std::get<2>(res);
             return true;
+        case IteratorResultCode::COMMAND:
+            arg = std::make_unique<CommandView>(
+                    std::get<const CommandData*>(std::get<1>(res)));
+            value = std::get<2>(res);
+            return true;
         case IteratorResultCode::UNKNOWN:
             arg = {};
             value = std::get<2>(res);
@@ -1038,17 +1143,20 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
 namespace argos
 {
-    void write_help_text(ParserData& data);
+    void write_help_text(const ParserData& data, const CommandData& cmd);
 
-    void write_error_message(ParserData& data, const std::string& msg);
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg);
 
-    void write_error_message(ParserData& data,
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
                              const std::string& msg,
                              ArgumentId argument_id);
 }
@@ -1057,7 +1165,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-14.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1089,6 +1197,14 @@ namespace argos
 
     size_t find_nth_code_point(std::string_view str, size_t n);
 
+    char to_lower(char c);
+
+    void to_lower(std::string& word);
+
+    std::string to_lower(std::string_view word);
+
+    bool is_lower(std::string_view word);
+
     inline void pop_front(std::span<std::string_view>& span)
     {
         span = span.subspan(1);
@@ -1099,7 +1215,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1109,91 +1225,6 @@ namespace argos
 {
     namespace
     {
-        using OptionTable = std::vector<std::pair<std::string_view, const OptionData*>>;
-
-        OptionTable make_option_index(
-            const std::vector<std::unique_ptr<OptionData>>& options,
-            bool case_insensitive)
-        {
-            OptionTable index;
-            for (auto& option : options)
-            {
-                for (auto& flag : option->flags)
-                    index.emplace_back(flag, option.get());
-            }
-
-            sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
-            {
-                return is_less(a.first, b.first, case_insensitive);
-            });
-
-            const auto it = adjacent_find(
-                index.begin(), index.end(),
-                [&](const auto& a, const auto& b)
-                {
-                    return are_equal(a.first, b.first, case_insensitive);
-                });
-
-            if (it == index.end())
-                return index;
-
-            if (it->first == next(it)->first)
-            {
-                ARGOS_THROW("Multiple definitions of flag "
-                            + std::string(it->first));
-            }
-
-            ARGOS_THROW("Conflicting flags: " + std::string(it->first)
-                        + " and " + std::string(next(it)->first));
-        }
-
-        const OptionData* find_option_impl(const OptionTable& options,
-                                           std::string_view arg,
-                                           bool allow_abbreviations,
-                                           bool case_insensitive)
-        {
-            const auto it = std::lower_bound(
-                options.begin(), options.end(),
-                OptionTable::value_type(arg, nullptr),
-                [&](auto& a, auto& b)
-                {
-                    return is_less(a.first, b.first, case_insensitive);
-                });
-            if (it == options.end())
-                return nullptr;
-            if (it->first == arg)
-                return it->second;
-            if (case_insensitive && are_equal_ci(it->first, arg))
-                return it->second;
-            if (!allow_abbreviations)
-                return nullptr;
-            if (!starts_with(it->first, arg, case_insensitive))
-                return nullptr;
-            const auto nxt = next(it);
-            if (nxt != options.end()
-                && starts_with(nxt->first, arg, case_insensitive))
-                return nullptr;
-            return it->second;
-        }
-
-        const OptionData* find_option(const OptionTable& options,
-                                      std::string_view arg,
-                                      bool allow_abbreviations,
-                                      bool case_insensitive)
-        {
-            auto opt = find_option_impl(options, arg, allow_abbreviations,
-                                        case_insensitive);
-            if (opt == nullptr && arg.size() > 2 && arg.back() == '=')
-            {
-                arg = arg.substr(0, arg.size() - 1);
-                opt = find_option_impl(options, arg, allow_abbreviations,
-                                       case_insensitive);
-                if (opt && opt->argument.empty())
-                    opt = nullptr;
-            }
-            return opt;
-        }
-
         bool is_option(const std::string& s, OptionStyle style)
         {
             if (s.size() < 2)
@@ -1221,27 +1252,33 @@ namespace argos
     ArgumentIteratorImpl::ArgumentIteratorImpl(std::vector<std::string_view> args,
                                                std::shared_ptr<ParserData> data)
         : m_data(std::move(data)),
-          m_options(make_option_index(m_data->options,
-                                      m_data->parser_settings.case_insensitive)),
-          m_parsed_args(std::make_shared<ParsedArgumentsImpl>(m_data)),
-          m_iterator{make_option_iterator(m_data->parser_settings.option_style,
-                                          std::move(args))}
+          m_command(&m_data->command),
+          m_parsed_args{std::make_shared<ParsedArgumentsImpl>(m_command, m_data)},
+          m_iterator{
+              make_option_iterator(m_data->parser_settings.option_style,
+                                   std::move(args))
+          }
     {
-        for (const auto& option : m_data->options)
+        auto& parsed_args = *parsed_arguments();
+        for (const auto& option : m_command->options)
         {
             if (!option->initial_value.empty())
             {
-                m_parsed_args->append_value(option->value_id,
-                                            option->initial_value,
-                                            option->argument_id);
+                parsed_args.append_value(option->value_id,
+                                         option->initial_value,
+                                         option->argument_id);
             }
         }
 
-        if (!ArgumentCounter::requires_argument_count(m_data->arguments))
-            m_argument_counter = ArgumentCounter(m_data->arguments);
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
+            m_argument_counter = ArgumentCounter(*m_command);
+        }
         else
-            m_argument_counter = ArgumentCounter(m_data->arguments,
+        {
+            m_argument_counter = ArgumentCounter(*m_command,
                                                  count_arguments());
+        }
     }
 
     std::shared_ptr<ParsedArgumentsImpl>
@@ -1258,7 +1295,7 @@ namespace argos
                 break;
             }
         }
-        return iterator.m_parsed_args;
+        return iterator.toplevel_parsed_arguments();
     }
 
     IteratorResult ArgumentIteratorImpl::next()
@@ -1286,6 +1323,14 @@ namespace argos
         }
         else
         {
+            if (m_argument_counter.is_complete())
+            {
+                if (auto cmd = m_command->find_command(
+                    *arg, m_data->parser_settings.case_insensitive))
+                {
+                    return process_command(cmd);
+                }
+            }
             return process_argument(*arg);
         }
     }
@@ -1293,26 +1338,33 @@ namespace argos
     const std::shared_ptr<ParsedArgumentsImpl>&
     ArgumentIteratorImpl::parsed_arguments() const
     {
-        return m_parsed_args;
+        return m_parsed_args.back();
+    }
+
+    const std::shared_ptr<ParsedArgumentsImpl>&
+    ArgumentIteratorImpl::toplevel_parsed_arguments() const
+    {
+        return m_parsed_args.front();
     }
 
     std::pair<ArgumentIteratorImpl::OptionResult, std::string_view>
     ArgumentIteratorImpl::process_option(const OptionData& opt,
                                          const std::string& flag)
     {
+        const auto& parsed_args = parsed_arguments();
         std::string_view arg;
         switch (opt.operation)
         {
         case OptionOperation::ASSIGN:
             if (!opt.constant.empty())
             {
-                m_parsed_args->assign_value(opt.value_id, opt.constant,
-                                            opt.argument_id);
+                parsed_args->assign_value(opt.value_id, opt.constant,
+                                          opt.argument_id);
             }
             else if (const auto value = m_iterator.next_value())
             {
-                arg = m_parsed_args->assign_value(opt.value_id, *value,
-                                                  opt.argument_id);
+                arg = parsed_args->assign_value(opt.value_id, *value,
+                                                opt.argument_id);
             }
             else
             {
@@ -1323,13 +1375,13 @@ namespace argos
         case OptionOperation::APPEND:
             if (!opt.constant.empty())
             {
-                m_parsed_args->append_value(opt.value_id, opt.constant,
-                                            opt.argument_id);
+                parsed_args->append_value(opt.value_id, opt.constant,
+                                          opt.argument_id);
             }
             else if (const auto value = m_iterator.next_value())
             {
-                arg = m_parsed_args->append_value(opt.value_id, *value,
-                                                  opt.argument_id);
+                arg = parsed_args->append_value(opt.value_id, *value,
+                                                opt.argument_id);
             }
             else
             {
@@ -1338,7 +1390,7 @@ namespace argos
             }
             break;
         case OptionOperation::CLEAR:
-            m_parsed_args->clear_value(opt.value_id);
+            parsed_args->clear_value(opt.value_id);
             break;
         case OptionOperation::NONE:
             break;
@@ -1347,13 +1399,13 @@ namespace argos
         if (opt.callback)
         {
             opt.callback(OptionView(&opt), arg,
-                         ParsedArgumentsBuilder(m_parsed_args));
+                         ParsedArgumentsBuilder(parsed_args));
         }
         if (m_data->parser_settings.option_callback)
         {
             m_data->parser_settings.option_callback(
                 OptionView(&opt), arg,
-                ParsedArgumentsBuilder(m_parsed_args));
+                ParsedArgumentsBuilder(parsed_args));
         }
 
         switch (opt.type)
@@ -1361,15 +1413,15 @@ namespace argos
         case OptionType::NORMAL:
             return {OptionResult::NORMAL, arg};
         case OptionType::HELP:
-            write_help_text(*m_data);
+            write_help_text(*m_data, *m_command);
             [[fallthrough]];
         case OptionType::EXIT:
             m_state = State::DONE;
-            m_parsed_args->set_breaking_option(&opt);
+            parsed_args->set_breaking_option(&opt);
             return {OptionResult::EXIT, arg};
         case OptionType::STOP:
             m_state = State::DONE;
-            m_parsed_args->set_breaking_option(&opt);
+            parsed_args->set_breaking_option(&opt);
             return {OptionResult::STOP, arg};
         case OptionType::LAST_ARGUMENT:
             m_state = State::DONE;
@@ -1384,8 +1436,8 @@ namespace argos
     IteratorResult
     ArgumentIteratorImpl::process_option(const std::string& flag)
     {
-        auto option = find_option(
-            m_options, flag,
+        auto option = m_command->find_option(
+            flag,
             m_data->parser_settings.allow_abbreviated_options,
             m_data->parser_settings.case_insensitive);
         if (option)
@@ -1403,6 +1455,13 @@ namespace argos
             case OptionResult::LAST_ARGUMENT:
                 if (!check_argument_and_option_counts())
                     return {IteratorResultCode::ERROR, {}, {}};
+
+                if (auto index = find_first_multi_command_parent())
+                {
+                    reactivate_multi_command_parent(*index);
+                    return {IteratorResultCode::OPTION, option, arg};
+                }
+
                 [[fallthrough]];
             case OptionResult::STOP:
                 copy_remaining_arguments_to_parser_result();
@@ -1419,49 +1478,75 @@ namespace argos
         }
         else
         {
-            m_parsed_args->add_unprocessed_argument(
+            parsed_arguments()->add_unprocessed_argument(
                 std::string(m_iterator.current()));
             return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
     }
 
     IteratorResult
-    ArgumentIteratorImpl::process_argument(const std::string& name)
+    ArgumentIteratorImpl::process_argument(const std::string& value)
     {
+        const auto& parsed_args = parsed_arguments();
         if (auto argument = m_argument_counter.next_argument())
         {
-            auto s = m_parsed_args->append_value(argument->value_id, name,
-                                                 argument->argument_id);
+            auto s = parsed_args->append_value(argument->value_id, value,
+                                               argument->argument_id);
             if (argument->callback)
             {
                 argument->callback(ArgumentView(argument), s,
-                                   ParsedArgumentsBuilder(m_parsed_args));
+                                   ParsedArgumentsBuilder(parsed_args));
             }
+
             if (m_data->parser_settings.argument_callback)
             {
                 m_data->parser_settings.argument_callback(
                     ArgumentView(argument), s,
-                    ParsedArgumentsBuilder(m_parsed_args));
+                    ParsedArgumentsBuilder(parsed_args));
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
+        else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
+        {
+            reactivate_multi_command_parent(i);
+            return process_command(next_cmd);
+        }
         else if (m_data->parser_settings.ignore_undefined_arguments)
         {
-            m_parsed_args->add_unprocessed_argument(name);
+            parsed_args->add_unprocessed_argument(value);
+            return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
         else
         {
-            error("Too many arguments, starting with \"" + name + "\".");
+            error("Too many arguments, starting from \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
-        return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
+    }
+
+    IteratorResult
+    ArgumentIteratorImpl::process_command(const CommandData* command)
+    {
+        m_parsed_args.push_back(parsed_arguments()->add_subcommand(command));
+        m_command = command;
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+        {
+            m_argument_counter = ArgumentCounter(*m_command);
+        }
+        else
+        {
+            m_argument_counter = ArgumentCounter(*m_command,
+                                                 count_arguments());
+        }
+        m_state = State::ARGUMENTS_AND_OPTIONS;
+        return {IteratorResultCode::COMMAND, command, m_iterator.current()};
     }
 
     // ReSharper disable once CppMemberFunctionMayBeConst
     void ArgumentIteratorImpl::copy_remaining_arguments_to_parser_result()
     {
+        auto& parsed_args = *parsed_arguments();
         for (auto str : m_iterator.remaining_arguments())
-            m_parsed_args->add_unprocessed_argument(std::string(str));
+            parsed_args.add_unprocessed_argument(std::string(str));
     }
 
     size_t ArgumentIteratorImpl::count_arguments() const
@@ -1469,13 +1554,14 @@ namespace argos
         size_t result = 0;
         auto it = m_iterator;
         bool arguments_only = false;
+        auto [min_count, _] = ArgumentCounter::get_min_max_count(*m_command);
         for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
         {
-            const auto option = find_option(
-                m_options, *arg,
+            const auto option = m_command->find_option(
+                *arg,
                 m_data->parser_settings.allow_abbreviated_options,
                 m_data->parser_settings.case_insensitive
-                );
+            );
             if (option)
             {
                 if (!option->argument.empty())
@@ -1495,6 +1581,13 @@ namespace argos
             }
             else if (!is_option(*arg, m_data->parser_settings.option_style))
             {
+                // Check if the argument is a command.
+                if (result >= min_count && m_command->find_command(*arg,
+                        m_data->parser_settings.case_insensitive))
+                {
+                    return result;
+                }
+
                 ++result;
             }
         }
@@ -1506,26 +1599,32 @@ namespace argos
 
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
-        for (const auto& o : m_data->options)
+        auto& parsed_args = *parsed_arguments();
+        for (const auto& o : m_command->options)
         {
-            if (!o->optional && !m_parsed_args->has(o->value_id))
+            if (!o->optional && !parsed_args.has(o->value_id))
             {
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)
                     flags += ", " + o->flags[i];
-                error("Mandatory option \"" + flags + "\" is missing.");
+                error("Mandatory option is missing: " + flags);
                 return false;
             }
+        }
+        if (*m_command->require_subcommand && parsed_args.subcommands().empty())
+        {
+            error("No command was given.");
+            return false;
         }
         if (m_argument_counter.is_complete())
         {
             m_state = State::DONE;
-            m_parsed_args->set_result_code(ParserResultCode::SUCCESS);
+            parsed_args.set_result_code(ParserResultCode::SUCCESS);
             return true;
         }
         else
         {
-            auto [lo, hi] = ArgumentCounter::get_min_max_count(m_data->arguments);
+            auto [lo, hi] = ArgumentCounter::get_min_max_count(*m_command);
             error((lo == hi
                        ? "Too few arguments. Expected "
                        : "Too few arguments. Expected at least ")
@@ -1535,43 +1634,69 @@ namespace argos
         }
     }
 
+    std::optional<size_t>
+    ArgumentIteratorImpl::find_first_multi_command_parent() const
+    {
+        auto size = m_parsed_args.size();
+        if (size <= 1)
+            return {};
+
+        for (size_t i = size - 1; i-- > 0;)
+        {
+            const auto& parent = *m_parsed_args[i]->command();
+            if (parent.multi_command)
+                return i;
+        }
+
+        return {};
+    }
+
+    std::pair<const CommandData*, size_t>
+    ArgumentIteratorImpl::find_sibling_command(std::string_view name) const
+    {
+        if (!m_argument_counter.is_complete())
+            return {nullptr, 0};
+
+        if (auto index = find_first_multi_command_parent())
+        {
+            return {
+                m_parsed_args[*index]->command()->find_command(
+                    name, m_data->parser_settings.case_insensitive),
+                *index
+            };
+        }
+
+        return {nullptr, 0};
+    }
+
+    void ArgumentIteratorImpl::reactivate_multi_command_parent(size_t index)
+    {
+        m_parsed_args.resize(index + 1);
+        m_command = m_parsed_args.back()->command();
+        m_argument_counter = {};
+        m_state = State::ARGUMENTS_ONLY;
+    }
+
     void ArgumentIteratorImpl::error(const std::string& message)
     {
         if (!message.empty())
-            write_error_message(*m_data, message);
+            write_error_message(*m_data, *m_command, message);
+
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
+
         copy_remaining_arguments_to_parser_result();
-        m_parsed_args->set_result_code(ParserResultCode::FAILURE);
+        for (auto& parsed_args : m_parsed_args)
+            parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
-}
-
-//****************************************************************************
-// Copyright © 2024 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2024-09-03.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    ParsedArguments parse_arguments(std::vector<std::string_view> args,
-                                    const std::shared_ptr<ParserData>& data);
-
-    ArgumentIterator
-    make_argument_iterator(std::vector<std::string_view> args,
-                           const std::shared_ptr<ParserData>& data);
-
-    void add_missing_options(ParserData& data);
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -1582,80 +1707,51 @@ namespace argos
 {
     namespace
     {
-        bool check_flag_with_equal(const std::string& flag,
-                                   const OptionData& od)
-        {
-            const auto eq_pos = flag.find('=');
-            if (eq_pos == std::string::npos)
-                return true;
-            if (eq_pos != flag.size() - 1)
-                return false;
-            if (od.argument.empty())
-                ARGOS_THROW("Options ending with '=' must take an argument: " + flag);
-            return true;
-        }
-
-        bool check_standard_flag(const std::string& flag,
-                                 const OptionData& od)
-        {
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() < 2)
-                return false;
-            if (flag[0] != '-')
-                return false;
-            if (flag.size() == 2)
-                return true;
-            if (flag[1] != '-')
-                return false;
-            return check_flag_with_equal(flag, od);
-        }
-
-        bool check_flag(const std::string& flag, char prefix,
-                        const OptionData& od)
-        {
-            if (flag.size() < 2 || flag[0] != prefix)
-                return false;
-            if (flag.find_first_of(" \t\n\r") != std::string::npos)
-                return false;
-            if (flag.size() == 2)
-                return true;
-            return check_flag_with_equal(flag, od);
-        }
-
         std::unique_ptr<ParserData> make_copy(const ParserData& data)
         {
             auto result = std::make_unique<ParserData>();
             result->parser_settings = data.parser_settings;
             result->help_settings = data.help_settings;
-            result->arguments.reserve(data.arguments.size());
-            for (const auto& a : data.arguments)
-                result->arguments.push_back(std::make_unique<ArgumentData>(*a));
-            result->options.reserve(data.options.size());
-            for (const auto& o : data.options)
-                result->options.push_back(std::make_unique<OptionData>(*o));
+            result->command = data.command;
             return result;
         }
 
         constexpr char DEFAULT_NAME[] = "UNINITIALIZED";
+
+        ParsedArguments parse_arguments(std::vector<std::string_view> args,
+                                        const std::shared_ptr<ParserData>& data)
+        {
+            finish_initialization(*data);
+            return ParsedArguments(
+                ArgumentIteratorImpl::parse(std::move(args), data));
+        }
+
+        ArgumentIterator
+        make_argument_iterator(std::vector<std::string_view> args,
+                               const std::shared_ptr<ParserData>& data)
+        {
+            finish_initialization(*data);
+            return {std::move(args), data};
+        }
     }
 
     ArgumentParser::ArgumentParser()
-            : ArgumentParser(DEFAULT_NAME)
+        : ArgumentParser(DEFAULT_NAME)
     {}
 
     ArgumentParser::ArgumentParser(std::string_view program_name,
                                    bool extract_file_name)
         : m_data(std::make_unique<ParserData>())
     {
-        m_data->help_settings.program_name = extract_file_name
-                                           ? get_base_name(program_name)
-                                           : program_name;
+        m_data->command.name = extract_file_name
+                                   ? get_base_name(program_name)
+                                   : program_name;
     }
 
     ArgumentParser::ArgumentParser(ArgumentParser&& rhs) noexcept
         : m_data(std::move(rhs.m_data))
-    {}
+    {
+    }
 
     ArgumentParser::~ArgumentParser() = default;
 
@@ -1665,31 +1761,46 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Argument argument)
+    ArgumentParser& ArgumentParser::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    ArgumentParser& ArgumentParser::add(Argument&& argument)
     {
         check_data();
-        auto ad = argument.release();
-        if (ad->name.empty())
-            ARGOS_THROW("Argument must have a name.");
-        ad->argument_id = next_argument_id();
-        if (ad->section.empty())
-            ad->section = m_data->current_section;
-        m_data->arguments.emplace_back(std::move(ad));
+        m_data->command.add(argument.release());
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::add(Option option)
+    ArgumentParser& ArgumentParser::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    ArgumentParser& ArgumentParser::add(Option&& option)
     {
         check_data();
+        m_data->command.add(option.release());
+        return *this;
+    }
 
-        auto od = option.release();
-        if (!od)
-            ARGOS_THROW("Option is empty (it has probably already been added).");
-        update_and_validate_option(*od);
-        od->argument_id = next_argument_id();
-        if (od->section.empty())
-            od->section = m_data->current_section;
-        m_data->options.push_back(std::move(od));
+    ArgumentParser& ArgumentParser::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    ArgumentParser& ArgumentParser::add(Command&& command)
+    {
+        check_data();
+        m_data->command.add(command.release());
+        return *this;
+    }
+
+    ArgumentParser& ArgumentParser::copy_from(const Command& command)
+    {
+        check_data();
+        m_data->command.copy_from(command.internal_ref());
         return *this;
     }
 
@@ -1698,10 +1809,10 @@ namespace argos
         if (argc <= 0)
             return parse(std::vector<std::string_view>());
 
-        if (m_data->help_settings.program_name == DEFAULT_NAME
+        if (m_data->command.name == DEFAULT_NAME
             && std::strlen(argv[0]) != 0)
         {
-            m_data->help_settings.program_name = get_base_name(argv[0]);
+            m_data->command.name = get_base_name(argv[0]);
         }
 
         return parse(std::vector<std::string_view>(argv + 1, argv + argc));
@@ -1818,11 +1929,37 @@ namespace argos
         check_data();
         if (value != m_data->parser_settings.option_style)
         {
-            if (!m_data->options.empty())
+            if (!m_data->command.options.empty())
                 ARGOS_THROW("Can't change option style after"
                             " options have been added.");
             m_data->parser_settings.option_style = value;
         }
+        return *this;
+    }
+
+    std::optional<bool> ArgumentParser::require_subcommand() const
+    {
+        check_data();
+        return m_data->command.require_subcommand;
+    }
+
+    ArgumentParser& ArgumentParser::require_subcommand(bool value)
+    {
+        check_data();
+        m_data->command.require_subcommand = value;
+        return *this;
+    }
+
+    bool ArgumentParser::allow_multiple_subcommands() const
+    {
+        check_data();
+        return m_data->command.multi_command;
+    }
+
+    ArgumentParser& ArgumentParser::allow_multiple_subcommands(bool value)
+    {
+        check_data();
+        m_data->command.multi_command = value;
         return *this;
     }
 
@@ -1894,13 +2031,13 @@ namespace argos
     const std::string& ArgumentParser::program_name() const
     {
         check_data();
-        return m_data->help_settings.program_name;
+        return m_data->command.name;
     }
 
     ArgumentParser& ArgumentParser::program_name(const std::string& name)
     {
         check_data();
-        m_data->help_settings.program_name = name;
+        m_data->command.name = name;
         return *this;
     }
 
@@ -1912,7 +2049,7 @@ namespace argos
     ArgumentParser& ArgumentParser::text(TextId textId, std::string text)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(text);
+        m_data->command.texts[textId] = std::move(text);
         return *this;
     }
 
@@ -1920,43 +2057,55 @@ namespace argos
                                          std::function<std::string()> callback)
     {
         check_data();
-        m_data->help_settings.texts[textId] = std::move(callback);
+        m_data->command.texts[textId] = std::move(callback);
         return *this;
     }
 
     ArgumentParser& ArgumentParser::version(const std::string& version)
     {
         check_data();
-        m_data->help_settings.version = version;
+        m_data->version = version;
         return *this;
     }
 
-    ArgumentParser &ArgumentParser::section(const std::string &name)
+    ArgumentParser& ArgumentParser::section(const std::string& name)
     {
         check_data();
-        m_data->current_section = name;
+        m_data->command.current_section = name;
         return *this;
     }
 
     ArgumentParser& ArgumentParser::line_width(unsigned int line_width)
     {
         check_data();
-        m_data->text_formatter.set_line_width(line_width);
+        m_data->help_settings.line_width = line_width;
         return *this;
     }
 
     void ArgumentParser::write_help_text() const
     {
+        write_subcommand_help_text({});
+    }
+
+    void ArgumentParser::write_subcommand_help_text(const std::vector<std::string>& path) const
+    {
         check_data();
         const auto data = make_copy(*m_data);
-        add_missing_options(*data);
-        argos::write_help_text(*data);
+        finish_initialization(*data);
+        const auto* cmd = &data->command;
+        for (auto& name : path)
+        {
+            cmd = cmd->find_command(name, data->parser_settings.case_insensitive);
+            if (!cmd)
+                ARGOS_THROW("Unknown command: " + name);
+        }
+        argos::write_help_text(*data, *cmd);
     }
 
     ArgumentParser& ArgumentParser::add_word_splitting_rule(std::string str)
     {
         check_data();
-        m_data->text_formatter.word_splitter().add_word(std::move(str));
+        m_data->help_settings.word_split_rules.push_back(std::move(str));
         return *this;
     }
 
@@ -1978,73 +2127,13 @@ namespace argos
         if (!m_data)
             ARGOS_THROW("This instance of ArgumentParser can no longer be used.");
     }
-
-    ArgumentId ArgumentParser::next_argument_id() const
-    {
-        const auto& d = *m_data;
-        return ArgumentId(d.options.size() + d.arguments.size() + 1);
-    }
-
-    void ArgumentParser::update_and_validate_option(OptionData& od)
-    {
-        if (od.flags.empty())
-            ARGOS_THROW("Option must have one or more flags.");
-
-        for (auto& flag: od.flags)
-        {
-            bool ok = false;
-            switch (m_data->parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                ok = check_standard_flag(flag, od);
-                break;
-            case OptionStyle::SLASH:
-                ok = check_flag(flag, '/', od);
-                break;
-            case OptionStyle::DASH:
-                ok = check_flag(flag, '-', od);
-                break;
-            default:
-                break;
-            }
-            if (!ok)
-                ARGOS_THROW("Invalid flag: '" + flag + "'.");
-        }
-
-        if (!od.argument.empty() && !od.constant.empty())
-            ARGOS_THROW("Option cannot have both argument and constant.");
-
-        switch (od.operation)
-        {
-        case OptionOperation::NONE:
-            if (!od.constant.empty())
-                ARGOS_THROW("NONE-options cannot have a constant.");
-            if (!od.alias.empty())
-                ARGOS_THROW("NONE-options cannot have an alias.");
-            break;
-        case OptionOperation::ASSIGN:
-            if (od.argument.empty() && od.constant.empty())
-                od.constant = "1";
-            break;
-        case OptionOperation::APPEND:
-            if (od.argument.empty() && od.constant.empty())
-                ARGOS_THROW("Options that appends must have either constant or argument.");
-            break;
-        case OptionOperation::CLEAR:
-            if (!od.argument.empty() || !od.constant.empty())
-                od.constant = "1";
-            if (!od.optional)
-                ARGOS_THROW("CLEAR-options must be optional.");
-            break;
-        }
-    }
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-03.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 #include <cerrno>
@@ -2092,7 +2181,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-31.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2271,7 +2360,7 @@ namespace argos
 // Copyright © 2021 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2021-07-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2327,7 +2416,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-17.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2582,7 +2671,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2605,9 +2694,9 @@ namespace argos
         return m_argument->section;
     }
 
-    const std::string& ArgumentView::value() const
+    const std::string& ArgumentView::alias() const
     {
-        return m_argument->value;
+        return m_argument->alias;
     }
 
     Visibility ArgumentView::visibility() const
@@ -2647,10 +2736,703 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-04.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    Command::Command()
+        : data_(std::make_unique<CommandData>())
+    {}
+
+    Command::Command(std::string name)
+        : data_(std::make_unique<CommandData>())
+    {
+        data_->name = std::move(name);
+    }
+
+    Command::Command(const Command& rhs)
+        : data_(rhs.data_ ? std::make_unique<CommandData>(*rhs.data_) : nullptr)
+    {
+    }
+
+    Command::Command(Command&& rhs) noexcept
+        : data_(std::move(rhs.data_))
+    {
+    }
+
+    Command::~Command() = default;
+
+    Command& Command::operator=(const Command& rhs)
+    {
+        if (this != &rhs)
+        {
+            data_ = rhs.data_
+                        ? std::make_unique<CommandData>(*rhs.data_)
+                        : nullptr;
+        }
+        return *this;
+    }
+
+    Command& Command::operator=(Command&& rhs) noexcept
+    {
+        data_ = std::move(rhs.data_);
+        return *this;
+    }
+
+    Command& Command::add(Argument& argument)
+    {
+        return add(std::move(argument));
+    }
+
+    Command& Command::add(Argument&& argument)
+    {
+        check_command();
+        data_->add(argument.release());
+        return *this;
+    }
+
+    Command& Command::add(Option& option)
+    {
+        return add(std::move(option));
+    }
+
+    Command& Command::add(Option&& option)
+    {
+        check_command();
+        data_->add(option.release());
+        return *this;
+    }
+
+    Command& Command::add(Command& command)
+    {
+        return add(std::move(command));
+    }
+
+    Command& Command::add(Command&& command)
+    {
+        check_command();
+        data_->add(command.release());
+        return *this;
+    }
+
+    Command& Command::name(std::string name)
+    {
+        check_command();
+        data_->name = std::move(name);
+        return *this;
+    }
+
+    Command& Command::help(std::string text)
+    {
+        check_command();
+        data_->texts[TextId::HELP] = std::move(text);
+        return *this;
+    }
+
+    Command& Command::about(std::string text)
+    {
+        check_command();
+        data_->texts[TextId::ABOUT] = std::move(text);
+        return *this;
+    }
+
+    Command& Command::section(const std::string& name)
+    {
+        check_command();
+        data_->current_section = name;
+        return *this;
+    }
+
+    Command& Command::text(TextId textId, std::string text)
+    {
+        check_command();
+        data_->texts[textId] = std::move(text);
+        return *this;
+    }
+
+    Command& Command::text(TextId textId, std::function<std::string()> callback)
+    {
+        check_command();
+        data_->texts[textId] = std::move(callback);
+        return *this;
+    }
+
+    Command& Command::visibility(Visibility visibility)
+    {
+        check_command();
+        data_->visibility = visibility;
+        return *this;
+    }
+
+    Command& Command::id(int id)
+    {
+        check_command();
+        data_->id = id;
+        return *this;
+    }
+
+    Command& Command::allow_multiple_subcommands(bool multi_command)
+    {
+        check_command();
+        data_->multi_command = multi_command;
+        return *this;
+    }
+
+    Command& Command::require_subcommand(bool require_subcommand)
+    {
+        check_command();
+        data_->require_subcommand = require_subcommand;
+        return *this;
+    }
+
+    Command& Command::copy_from(Command& command)
+    {
+        check_command();
+        data_->copy_from(*command.data_);
+        return *this;
+    }
+
+    std::unique_ptr<CommandData> Command::release()
+    {
+        return std::move(data_);
+    }
+
+    const CommandData& Command::internal_ref() const
+    {
+        check_command();
+        return *data_;
+    }
+
+    void Command::check_command() const
+    {
+        if (!data_)
+            ARGOS_THROW("Command has been moved.");
+    }
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-05.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    constexpr char DEFAULT_HELP_TEXT[] = "Display this help text.";
+
+    CommandData::CommandData() = default;
+
+    CommandData::CommandData(const CommandData& rhs)
+        : current_section(rhs.current_section),
+          name(rhs.name),
+          full_name(rhs.full_name),
+          texts(rhs.texts),
+          require_subcommand(rhs.require_subcommand),
+          multi_command(rhs.multi_command),
+          section(rhs.section),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
+    {
+        arguments.reserve(rhs.arguments.size());
+        for (const auto& a : rhs.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+        options.reserve(rhs.options.size());
+        for (const auto& o : rhs.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
+    }
+
+    CommandData::CommandData(CommandData&& rhs) noexcept
+        : arguments(std::move(rhs.arguments)),
+          options(std::move(rhs.options)),
+          commands(std::move(rhs.commands)),
+          current_section(std::move(rhs.current_section)),
+          name(std::move(rhs.name)),
+          full_name(std::move(rhs.full_name)),
+          texts(std::move(rhs.texts)),
+          require_subcommand(rhs.require_subcommand),
+          multi_command(rhs.multi_command),
+          section(std::move(rhs.section)),
+          id(rhs.id),
+          argument_id(rhs.argument_id)
+    {
+    }
+
+    CommandData::~CommandData() = default;
+
+    CommandData& CommandData::operator=(const CommandData& rhs)
+    {
+        if (&rhs == this)
+            return *this;
+        current_section = rhs.current_section;
+        name = rhs.name;
+        full_name = rhs.full_name;
+        texts = rhs.texts;
+        require_subcommand = rhs.require_subcommand;
+        multi_command = rhs.multi_command;
+        section = rhs.section;
+        id = rhs.id;
+        argument_id = rhs.argument_id;
+
+        arguments.clear();
+        arguments.reserve(rhs.arguments.size());
+        for (const auto& a : rhs.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+
+        options.clear();
+        options.reserve(rhs.options.size());
+        for (const auto& o : rhs.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+
+        commands.clear();
+        commands.reserve(rhs.commands.size());
+        for (const auto& c : rhs.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
+
+        return *this;
+    }
+
+    CommandData& CommandData::operator=(CommandData&& rhs) noexcept
+    {
+        if (&rhs == this)
+            return *this;
+
+        current_section = std::move(rhs.current_section);
+        name = std::move(rhs.name);
+        full_name = std::move(rhs.full_name);
+        texts = std::move(rhs.texts);
+        arguments = std::move(rhs.arguments);
+        options = std::move(rhs.options);
+        commands = std::move(rhs.commands);
+        require_subcommand = rhs.require_subcommand;
+        multi_command = rhs.multi_command;
+        section = std::move(rhs.section);
+        id = rhs.id;
+        argument_id = rhs.argument_id;
+        return *this;
+    }
+
+    void CommandData::add(std::unique_ptr<ArgumentData> arg)
+    {
+        if (!arg)
+            ARGOS_THROW("Argument is empty (it has probably already been added).");
+        if (arg->name.empty())
+            ARGOS_THROW("Argument must have a name.");
+        if (arg->section.empty())
+            arg->section = current_section;
+        arguments.emplace_back(std::move(arg));
+    }
+
+    void CommandData::add(std::unique_ptr<OptionData> opt)
+    {
+        if (!opt)
+            ARGOS_THROW("Option is empty (it has probably already been added).");
+        if (opt->flags.empty())
+            ARGOS_THROW("Option must have at least one flag.");
+        if (opt->section.empty())
+            opt->section = current_section;
+        options.push_back(std::move(opt));
+    }
+
+    void CommandData::add(std::unique_ptr<CommandData> cmd)
+    {
+        if (!cmd)
+            ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (cmd->name.empty())
+            ARGOS_THROW("Command must have a name.");
+        if (cmd->section.empty())
+            cmd->section = current_section;
+        commands.push_back(std::move(cmd));
+    }
+
+    void CommandData::copy_from(const CommandData& cmd)
+    {
+        for (const auto& a : cmd.arguments)
+            arguments.push_back(std::make_unique<ArgumentData>(*a));
+        for (const auto& o : cmd.options)
+            options.push_back(std::make_unique<OptionData>(*o));
+        for (const auto& c : cmd.commands)
+            commands.push_back(std::make_unique<CommandData>(*c));
+    }
+
+    void CommandData::build_option_index(bool case_insensitive)
+    {
+        std::vector<std::pair<std::string_view, const OptionData*>> index;
+        for (auto& option : options)
+        {
+            for (auto& flag : option->flags)
+                index.emplace_back(flag, option.get());
+        }
+
+        sort(index.begin(), index.end(), [&](const auto& a, const auto& b)
+        {
+            return is_less(a.first, b.first, case_insensitive);
+        });
+
+        const auto it = adjacent_find(
+            index.begin(), index.end(),
+            [&](const auto& a, const auto& b)
+            {
+                return are_equal(a.first, b.first, case_insensitive);
+            });
+
+        if (it == index.end())
+        {
+            option_index = std::move(index);
+            return;
+        }
+
+        if (it->first == next(it)->first)
+        {
+            ARGOS_THROW("Multiple definitions of flag "
+                + std::string(it->first));
+        }
+
+        ARGOS_THROW("Conflicting flags: " + std::string(it->first)
+            + " and " + std::string(next(it)->first));
+    }
+
+    const OptionData* CommandData::find_option(std::string_view flag,
+                                               bool allow_abbreviations,
+                                               bool case_insensitive) const
+    {
+        auto opt = find_option_impl(flag, allow_abbreviations,
+                                    case_insensitive);
+        if (opt == nullptr && flag.size() > 2 && flag.back() == '=')
+        {
+            flag = flag.substr(0, flag.size() - 1);
+            opt = find_option_impl(flag, allow_abbreviations,
+                                   case_insensitive);
+            if (opt && opt->argument.empty())
+                opt = nullptr;
+        }
+        return opt;
+    }
+
+    const OptionData* CommandData::find_option_impl(std::string_view flag,
+                                                    bool allow_abbreviations,
+                                                    bool case_insensitive) const
+    {
+        const auto it = std::lower_bound(
+            option_index.begin(), option_index.end(),
+            std::pair(flag, nullptr),
+            [&](auto& a, auto& b)
+            {
+                return is_less(a.first, b.first, case_insensitive);
+            });
+        if (it == option_index.end())
+            return nullptr;
+        if (it->first == flag)
+            return it->second;
+        if (case_insensitive && are_equal_ci(it->first, flag))
+            return it->second;
+        if (!allow_abbreviations)
+            return nullptr;
+        if (!starts_with(it->first, flag, case_insensitive))
+            return nullptr;
+        const auto nxt = next(it);
+        if (nxt != option_index.end()
+            && starts_with(nxt->first, flag, case_insensitive))
+            return nullptr;
+        return it->second;
+    }
+
+    const CommandData* CommandData::find_command(std::string_view name,
+                                                 bool case_insensitive) const
+    {
+        for (const auto& c : commands)
+        {
+            if (are_equal(c->name, name, case_insensitive))
+                return c.get();
+        }
+        return nullptr;
+    }
+
+    namespace
+    {
+        void update_require_command(CommandData& cmd)
+        {
+            if (cmd.require_subcommand.value_or(false) && cmd.commands.empty())
+                ARGOS_THROW("require_command is true, but no commands have been added.");
+
+            if (!cmd.require_subcommand)
+            {
+                cmd.require_subcommand = !cmd.commands.empty()
+                                      && cmd.arguments.empty();
+            }
+        }
+
+        bool has_help_option(const CommandData& cmd)
+        {
+            for (const auto& o : cmd.options)
+            {
+                if (o->type == OptionType::HELP)
+                    return true;
+            }
+            return false;
+        }
+
+        void add_help_option(CommandData& cmd, const ParserSettings& settings)
+        {
+            if (!settings.generate_help_option)
+                return;
+            if (has_help_option(cmd))
+                return;
+            std::vector<std::string> flags;
+            switch (settings.option_style)
+            {
+            case OptionStyle::STANDARD:
+                if (!has_flag(cmd, "-h", settings))
+                    flags.emplace_back("-h");
+                if (!has_flag(cmd, "--help", settings))
+                    flags.emplace_back("--help");
+                break;
+            case OptionStyle::SLASH:
+                if (!has_flag(cmd, "/?", settings))
+                    flags.emplace_back("/?");
+                break;
+            case OptionStyle::DASH:
+                if (!has_flag(cmd, "-h", settings))
+                    flags.emplace_back("-h");
+                else if (!has_flag(cmd, "-help", settings))
+                    flags.emplace_back("-help");
+                break;
+            }
+
+            if (flags.empty())
+                return;
+
+            auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
+                .help(DEFAULT_HELP_TEXT)
+                .constant("1").release();
+            opt->section = cmd.current_section;
+            cmd.options.push_back(std::move(opt));
+        }
+
+        std::pair<ValueId, ArgumentId>
+        set_internal_ids(const CommandData& cmd,
+                         ValueId value_id_offset,
+                         ArgumentId argument_id_offset)
+        {
+            struct InternalIdMaker
+            {
+                std::map<std::string_view, ValueId> explicit_ids;
+                int id;
+
+                explicit InternalIdMaker(ValueId start_id)
+                    : id(start_id)
+                {
+                }
+
+                std::optional<ValueId> find_value_id(std::string_view name)
+                {
+                    const auto it = explicit_ids.find(name);
+                    if (it == explicit_ids.end())
+                        return {};
+                    return it->second;
+                }
+
+                ValueId get_value_id(std::string_view name)
+                {
+                    if (const auto id = find_value_id(name))
+                        return *id;
+                    id++;
+                    explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
+                }
+
+                ValueId get_value_id(const std::vector<std::string>& names)
+                {
+                    for (const auto& name : names)
+                    {
+                        if (const auto id = find_value_id(name))
+                            return *id;
+                    }
+                    id++;
+                    for (const auto& name : names)
+                        explicit_ids.emplace(name, ValueId(id));
+                    return ValueId(id);
+                }
+            };
+
+            int argument_id = argument_id_offset;
+            InternalIdMaker id_maker(value_id_offset);
+            for (const auto& a : cmd.arguments)
+            {
+                a->argument_id = ArgumentId(++argument_id);
+                if (!a->alias.empty())
+                {
+                    a->value_id = id_maker.get_value_id(a->alias);
+                    id_maker.explicit_ids.emplace(a->name, a->value_id);
+                }
+                else
+                {
+                    a->value_id = id_maker.get_value_id(a->name);
+                }
+            }
+            for (const auto& o : cmd.options)
+            {
+                o->argument_id = ArgumentId(++argument_id);
+                if (o->operation == OptionOperation::NONE)
+                    continue;
+                if (!o->alias.empty())
+                {
+                    o->value_id = id_maker.get_value_id(o->alias);
+                    for (auto& f : o->flags)
+                        id_maker.explicit_ids.emplace(f, o->value_id);
+                }
+                else
+                {
+                    o->value_id = id_maker.get_value_id(o->flags);
+                }
+            }
+
+            return {ValueId(id_maker.id), ArgumentId(argument_id)};
+        }
+    }
+
+    bool has_flag(const CommandData& cmd,
+                  std::string_view flag,
+                  const ParserSettings& settings)
+    {
+        for (auto& o : cmd.options)
+        {
+            for (auto& f : o->flags)
+            {
+                if (are_equal(f, flag, settings.case_insensitive))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    void finish_initialization(CommandData& cmd,
+                               const ParserData& data,
+                               ValueId start_id,
+                               ArgumentId argument_id)
+    {
+        if (cmd.full_name.empty())
+            cmd.full_name = cmd.name;
+        for (auto& o : cmd.options)
+            validate_and_update(*o, data.parser_settings.option_style);
+        update_require_command(cmd);
+        add_help_option(cmd, data.parser_settings);
+
+        argument_id = ArgumentId(argument_id + 1);
+        cmd.argument_id = argument_id;
+        std::tie(start_id, argument_id) = set_internal_ids(cmd, start_id, argument_id);
+
+        cmd.build_option_index(data.parser_settings.case_insensitive);
+        for (auto& c : cmd.commands)
+        {
+            c->full_name = cmd.name + ' ' + c->name;
+            finish_initialization(*c, data, start_id, argument_id);
+        }
+    }
+}
+
+//****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-21.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    CommandView::CommandView(const CommandData* command)
+        : m_command(command)
+    {}
+
+    std::string CommandView::help() const
+    {
+        auto it = m_command->texts.find(TextId::ABOUT);
+        return it != m_command->texts.end() ? get_text(it->second) : "";
+    }
+
+    const std::string& CommandView::section() const
+    {
+        return m_command->section;
+    }
+
+    const std::string& CommandView::alias() const
+    {
+        return m_command->name;
+    }
+
+    Visibility CommandView::visibility() const
+    {
+        return m_command->visibility;
+    }
+
+    int CommandView::id() const
+    {
+        return m_command->id;
+    }
+
+    ValueId CommandView::value_id() const
+    {
+        return {};
+    }
+
+    ArgumentId CommandView::argument_id() const
+    {
+        return m_command->argument_id;
+    }
+
+    std::string CommandView::name() const
+    {
+        return m_command->name;
+    }
+
+    std::vector<ArgumentView> CommandView::arguments() const
+    {
+        std::vector<ArgumentView> result;
+        for (const auto& arg : m_command->arguments)
+            result.emplace_back(arg.get());
+        return result;
+    }
+
+    std::vector<OptionView> CommandView::options() const
+    {
+        std::vector<OptionView> result;
+        for (const auto& opt : m_command->options)
+            result.emplace_back(opt.get());
+        return result;
+    }
+
+    std::vector<CommandView> CommandView::subcommands() const
+    {
+        std::vector<CommandView> result;
+        for (const auto& cmd : m_command->commands)
+            result.emplace_back(cmd.get());
+        return result;
+    }
+
+    bool CommandView::require_subcommand() const
+    {
+        // Instances of CommandView are only created after require_subcommand
+        // has been automatically set, the or-value should therefore never
+        // be returned, and it doesn't matter that it might not be correct.
+        return m_command->require_subcommand.value_or(false);
+    }
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2665,7 +3447,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2726,7 +3508,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-21.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -2734,6 +3516,11 @@ namespace argos
 {
     namespace
     {
+        constexpr auto DEFAULT_SUBCOMMANDS_TITLE = "COMMANDS";
+        constexpr auto DEFAULT_ARGUMENTS_TITLE = "ARGUMENTS";
+        constexpr auto DEFAULT_OPTIONS_TITLE = "OPTIONS";
+        constexpr auto DEFAULT_USAGE_TITLE = "USAGE";
+
         std::string get_argument_name(const ArgumentData& arg)
         {
             if (arg.name[0] == '<' || arg.name[0] == '[')
@@ -2778,8 +3565,8 @@ namespace argos
             std::string_view flag;
             if (prefer_long_flag)
             {
-                const auto it = std::find_if(opt.flags.begin(),  opt.flags.end(),
-                                             [](auto& s){return s.size() > 2;});
+                const auto it = std::find_if(opt.flags.begin(), opt.flags.end(),
+                                             [](auto& s) { return s.size() > 2; });
                 if (it != opt.flags.end())
                     flag = *it;
             }
@@ -2836,13 +3623,12 @@ namespace argos
         }
 
         std::optional<std::string>
-        get_custom_text(ParserData& data, TextId text_id)
+        get_custom_text(const CommandData& data, TextId text_id)
         {
-            const auto it = data.help_settings.texts.find(text_id);
-            if (it != data.help_settings.texts.end())
+            const auto it = data.texts.find(text_id);
+            if (it != data.texts.end())
             {
                 return get_text(it->second);
-
             }
             return {};
         }
@@ -2853,24 +3639,27 @@ namespace argos
         }
 
         std::optional<std::string>
-        write_custom_text(ParserData& data, TextId text_id,
+        write_custom_text(TextFormatter& formatter,
+                          const CommandData& cmd,
+                          TextId text_id,
                           bool prepend_newline = false)
         {
-            auto text = get_custom_text(data, text_id);
+            auto text = get_custom_text(cmd, text_id);
             if (!is_empty(text))
             {
                 if (prepend_newline)
-                    data.text_formatter.newline();
-                data.text_formatter.write_words(*text);
-                if (!data.text_formatter.is_current_line_empty())
-                    data.text_formatter.newline();
+                    formatter.newline();
+                formatter.write_words(*text);
+                if (!formatter.is_current_line_empty())
+                    formatter.newline();
             }
             return text;
         }
 
-        void write_stop_and_help_usage(ParserData& data)
+        void write_stop_and_help_usage(TextFormatter& formatter,
+                                       const CommandData& cmd)
         {
-            for (auto& opt : data.options)
+            for (auto& opt : cmd.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || !is_stop_option(opt->type))
@@ -2878,13 +3667,13 @@ namespace argos
                     continue;
                 }
 
-                data.text_formatter.write_words(data.help_settings.program_name);
-                data.text_formatter.write_words(" ");
-                data.text_formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-                data.text_formatter.write_lines(get_brief_option_name(*opt, true));
-                data.text_formatter.write_words(" ");
-                data.text_formatter.pop_indentation();
-                data.text_formatter.newline();
+                formatter.write_words(cmd.full_name);
+                formatter.write_words(" ");
+                formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
+                formatter.write_lines(get_brief_option_name(*opt, true));
+                formatter.write_words(" ");
+                formatter.pop_indentation();
+                formatter.newline();
             }
         }
 
@@ -2893,7 +3682,7 @@ namespace argos
         using SectionHelpTexts = std::pair<std::string_view, HelpTextVector>;
 
         unsigned int get_help_text_label_width(
-            const ParserData& data,
+            const TextFormatter& formatter,
             const std::vector<SectionHelpTexts>& sections)
         {
             // Determine what width should be reserved for the argument names
@@ -2911,7 +3700,7 @@ namespace argos
 
             std::sort(name_widths.begin(), name_widths.end());
             std::sort(text_widths.begin(), text_widths.end());
-            const auto line_width = data.text_formatter.line_width();
+            const auto line_width = formatter.line_width();
             // Check if both the longest name and the longest help text
             // can fit on the same line.
             const auto name_width = name_widths.back() + 3;
@@ -2920,7 +3709,9 @@ namespace argos
             return name_width;
         }
 
-        void write_argument_sections(ParserData& data, bool prepend_newline)
+        void write_argument_sections(TextFormatter& formatter,
+                                     const CommandData& command,
+                                     bool prepend_newline)
         {
             std::vector<SectionHelpTexts> sections;
 
@@ -2928,7 +3719,9 @@ namespace argos
             {
                 auto it = find_if(sections.begin(), sections.end(),
                                   [&](const auto& v)
-                                  {return v.first == s;});
+                                  {
+                                      return v.first == s;
+                                  });
                 if (it == sections.end())
                 {
                     sections.push_back({s, {}});
@@ -2937,20 +3730,37 @@ namespace argos
                 it->second.emplace_back(std::move(a), std::move(b));
             };
 
-            auto arg_title = get_custom_text(data, TextId::ARGUMENTS_TITLE);
+            // List all arguments
+            auto arg_title = get_custom_text(command, TextId::ARGUMENTS_TITLE);
             if (!arg_title)
-                arg_title = "ARGUMENTS";
-            for (auto& a : data.arguments)
+                arg_title = DEFAULT_ARGUMENTS_TITLE;
+            for (auto& a : command.arguments)
             {
                 if ((a->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
                 auto& section = a->section.empty() ? *arg_title : a->section;
                 add_help_text(section, get_argument_name(*a), get_text(a->help));
             }
-            auto opt_title = get_custom_text(data, TextId::OPTIONS_TITLE);
+
+            // List all sub-commands after arguments, as arguments must be
+            // given first.
+            auto cmd_title = get_custom_text(command, TextId::SUBCOMMANDS_TITLE);
+            if (!cmd_title)
+                cmd_title = DEFAULT_SUBCOMMANDS_TITLE;
+            for (auto& c : command.commands)
+            {
+                if ((c->visibility & Visibility::TEXT) == Visibility::HIDDEN)
+                    continue;
+                auto& section = c->section.empty() ? *cmd_title : c->section;
+                add_help_text(section, c->name,
+                              get_custom_text(*c, TextId::HELP).value_or(""));
+            }
+
+            // List all options.
+            auto opt_title = get_custom_text(command, TextId::OPTIONS_TITLE);
             if (!opt_title)
-                opt_title = "OPTIONS";
-            for (auto& o : data.options)
+                opt_title = DEFAULT_OPTIONS_TITLE;
+            for (auto& o : command.options)
             {
                 if ((o->visibility & Visibility::TEXT) == Visibility::HIDDEN)
                     continue;
@@ -2960,17 +3770,17 @@ namespace argos
 
             if (sections.empty())
                 return;
-            const unsigned name_width = get_help_text_label_width(data, sections);
 
-            auto& formatter = data.text_formatter;
-            for (auto&[section, txts] : sections)
+            const unsigned name_width = get_help_text_label_width(formatter, sections);
+
+            for (auto& [section, texts] : sections)
             {
                 if (prepend_newline)
                     formatter.newline();
                 formatter.write_words(section);
                 formatter.newline();
                 formatter.push_indentation(2);
-                for (auto& [name, text] : txts)
+                for (auto& [name, text] : texts)
                 {
                     formatter.write_words(name);
                     if (!text.empty())
@@ -2996,18 +3806,10 @@ namespace argos
             }
         }
 
-        void write_brief_usage(ParserData& data, bool prepend_newline)
+        void write_brief_regular_options(TextFormatter& formatter,
+                                         const CommandData& command)
         {
-            auto& formatter = data.text_formatter;
-            if (prepend_newline)
-                formatter.newline();
-
-            formatter.push_indentation(2);
-            write_stop_and_help_usage(data);
-            formatter.write_words(data.help_settings.program_name);
-            formatter.write_words(" ");
-            formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
-            for (auto& opt : data.options)
+            for (auto& opt : command.options)
             {
                 if ((opt->visibility & Visibility::USAGE) == Visibility::HIDDEN
                     || is_stop_option(opt->type))
@@ -3018,46 +3820,100 @@ namespace argos
                 formatter.write_lines(get_brief_option_name(*opt, false));
                 formatter.write_words(" ");
             }
-            for (auto& arg : data.arguments)
+        }
+
+        void write_brief_arguments(TextFormatter& formatter,
+                                   const CommandData& command)
+        {
+            for (auto& arg : command.arguments)
             {
                 if ((arg->visibility & Visibility::USAGE) == Visibility::HIDDEN)
                     continue;
                 formatter.write_lines(get_argument_name(*arg));
                 formatter.write_words(" ");
             }
+        }
+
+        void write_brief_commands(TextFormatter& formatter,
+                                  const CommandData& command)
+        {
+            if (command.commands.empty())
+                return;
+
+            auto brackets = !command.require_subcommand.value_or(false);
+
+            if (brackets)
+                formatter.write_words("[");
+
+            bool first_command = true;
+            for (auto& cmd : command.commands)
+            {
+                if ((cmd->visibility & Visibility::USAGE) == Visibility::HIDDEN)
+                    continue;
+                if (!first_command)
+                    formatter.write_words("|");
+                first_command = false;
+                formatter.write_words(cmd->name);
+            }
+
+            if (brackets)
+                formatter.write_words("]");
+        }
+
+        void write_brief_usage(TextFormatter& formatter,
+                               const CommandData& command,
+                               bool prepend_newline)
+        {
+            if (prepend_newline)
+                formatter.newline();
+
+            formatter.push_indentation(2);
+            write_stop_and_help_usage(formatter, command);
+            formatter.write_words(command.full_name);
+            formatter.write_words(" ");
+            formatter.push_indentation(TextFormatter::CURRENT_COLUMN);
+
+            write_brief_regular_options(formatter, command);
+            write_brief_arguments(formatter, command);
+            write_brief_commands(formatter, command);
+
             formatter.pop_indentation();
             formatter.newline();
             formatter.pop_indentation();
         }
 
-        bool write_usage(ParserData& data, bool prepend_newline = false)
+        bool write_usage(TextFormatter& formatter,
+                         const CommandData& command,
+                         bool prepend_newline = false)
         {
-            if (const auto t = get_custom_text(data, TextId::USAGE); t && t->empty())
+            if (const auto t = get_custom_text(command, TextId::USAGE); t && t->empty())
                 return false;
 
-            const auto text1 = write_custom_text(data, TextId::USAGE_TITLE,
+            const auto text1 = write_custom_text(formatter, command,
+                                                 TextId::USAGE_TITLE,
                                                  prepend_newline);
             if (!text1)
             {
                 if (prepend_newline)
-                    data.text_formatter.newline();
-                data.text_formatter.write_words("USAGE");
-                data.text_formatter.newline();
+                    formatter.newline();
+                formatter.write_words(DEFAULT_USAGE_TITLE);
+                formatter.newline();
                 prepend_newline = false;
             }
             else
             {
                 prepend_newline = prepend_newline && is_empty(text1);
             }
-            const auto text2 = write_custom_text(data, TextId::USAGE,
+            const auto text2 = write_custom_text(formatter, command,
+                                                 TextId::USAGE,
                                                  prepend_newline);
             if (text2)
                 return !is_empty(text1) || !is_empty(text2);
-            write_brief_usage(data, prepend_newline);
+            write_brief_usage(formatter, command, prepend_newline);
             return true;
         }
 
-        std::string get_name(const ParserData& data, ArgumentId argument_id)
+        std::string get_name(const CommandData& data, ArgumentId argument_id)
         {
             for (const auto& a : data.arguments)
             {
@@ -3078,37 +3934,51 @@ namespace argos
         }
     }
 
-    void write_help_text(ParserData& data)
+    void write_help_text(const ParserData& data, const CommandData& cmd)
     {
+        TextFormatter formatter;
+        if (data.help_settings.line_width)
+            formatter.set_line_width(data.help_settings.line_width);
         if (data.help_settings.output_stream)
-            data.text_formatter.set_stream(data.help_settings.output_stream);
-        bool newline = !is_empty(write_custom_text(data, TextId::INITIAL_TEXT));
-        newline = write_usage(data, newline) || newline;
-        newline = !is_empty(write_custom_text(data, TextId::ABOUT, newline)) || newline;
-        write_argument_sections(data, newline);
-        write_custom_text(data, TextId::FINAL_TEXT, true);
+            formatter.set_stream(data.help_settings.output_stream);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
+        bool newline = !is_empty(write_custom_text(formatter, cmd, TextId::INITIAL_TEXT));
+        newline = write_usage(formatter, cmd, newline) || newline;
+        newline = !is_empty(write_custom_text(formatter, cmd, TextId::ABOUT, newline))
+                  || !is_empty(write_custom_text(formatter, cmd, TextId::HELP, newline))
+                  || newline;
+        write_argument_sections(formatter, cmd, newline);
+        write_custom_text(formatter, cmd, TextId::FINAL_TEXT, true);
     }
 
-    void write_error_message(ParserData& data, const std::string& msg)
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg)
     {
+        TextFormatter formatter;
+        if (data.help_settings.line_width)
+            formatter.set_line_width(data.help_settings.line_width);
         if (data.help_settings.output_stream)
-            data.text_formatter.set_stream(data.help_settings.output_stream);
+            formatter.set_stream(data.help_settings.output_stream);
         else
-            data.text_formatter.set_stream(&std::cerr);
-        data.text_formatter.write_words(data.help_settings.program_name + ": ");
-        data.text_formatter.write_words(msg);
-        data.text_formatter.newline();
-        if (!write_custom_text(data, TextId::ERROR_USAGE))
-            write_usage(data);
+            formatter.set_stream(&std::cerr);
+        formatter.word_splitter().add_words(data.help_settings.word_split_rules);
+        formatter.write_words(cmd.full_name + ": ");
+        formatter.write_words(msg);
+        formatter.newline();
+        if (!write_custom_text(formatter, cmd, TextId::ERROR_USAGE))
+            write_usage(formatter, cmd);
     }
 
-    void write_error_message(ParserData& data, const std::string& msg,
+    void write_error_message(const ParserData& data,
+                             const CommandData& cmd,
+                             const std::string& msg,
                              ArgumentId argument_id)
     {
-        if (const auto name = get_name(data, argument_id); !name.empty())
-            write_error_message(data, name + ": " + msg);
+        if (const auto name = get_name(cmd, argument_id); !name.empty())
+            write_error_message(data, cmd, name + ": " + msg);
         else
-            write_error_message(data, msg);
+            write_error_message(data, cmd, msg);
     }
 }
 
@@ -3116,7 +3986,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-10.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3328,10 +4198,119 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-10-05.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    namespace
+    {
+        bool check_flag_with_equal(const std::string& flag,
+                                   const OptionData& od)
+        {
+            const auto eq_pos = flag.find('=');
+            if (eq_pos == std::string::npos)
+                return true;
+            if (eq_pos != flag.size() - 1)
+                ARGOS_THROW("Options can not have a '=' in the middle: " + flag);
+            if (od.argument.empty())
+                ARGOS_THROW("Options ending with '=' must have a named argument: " + flag);
+            return true;
+        }
+
+        bool check_standard_flag(const std::string& flag,
+                                 const OptionData& od)
+        {
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
+                return false;
+            if (flag.size() < 2)
+                return false;
+            if (flag[0] != '-')
+                return false;
+            if (flag.size() == 2)
+                return true;
+            if (flag[1] != '-')
+                return false;
+            return check_flag_with_equal(flag, od);
+        }
+
+        bool check_flag(const std::string& flag, char prefix,
+                        const OptionData& od)
+        {
+            if (flag.size() < 2 || flag[0] != prefix)
+                return false;
+            if (flag.find_first_of(" \t\n\r") != std::string::npos)
+                return false;
+            if (flag.size() == 2)
+                return true;
+            return check_flag_with_equal(flag, od);
+        }
+    }
+
+    void validate_and_update(OptionData& option, OptionStyle style)
+    {
+        if (option.flags.empty())
+            ARGOS_THROW("Option must have one or more flags.");
+
+        for (auto& flag : option.flags)
+        {
+            bool ok = false;
+            switch (style)
+            {
+            case OptionStyle::STANDARD:
+                ok = check_standard_flag(flag, option);
+                break;
+            case OptionStyle::SLASH:
+                ok = check_flag(flag, '/', option);
+                break;
+            case OptionStyle::DASH:
+                ok = check_flag(flag, '-', option);
+                break;
+            default:
+                break;
+            }
+            if (!ok)
+                ARGOS_THROW("Invalid flag: '" + flag + "'.");
+        }
+
+        if (!option.argument.empty() && !option.constant.empty())
+            ARGOS_THROW("Option cannot have both argument and constant.");
+
+        switch (option.operation)
+        {
+        case OptionOperation::NONE:
+            if (!option.constant.empty())
+                ARGOS_THROW("NONE-options cannot have a constant.");
+            if (!option.alias.empty())
+                ARGOS_THROW("NONE-options cannot have an alias.");
+            break;
+        case OptionOperation::ASSIGN:
+            if (option.argument.empty() && option.constant.empty())
+                option.constant = "1";
+            break;
+        case OptionOperation::APPEND:
+            if (option.argument.empty() && option.constant.empty())
+                ARGOS_THROW("Options that appends must have either constant or argument.");
+            break;
+        case OptionOperation::CLEAR:
+            if (!option.argument.empty() || !option.constant.empty())
+                option.constant = "1";
+            if (!option.optional)
+                ARGOS_THROW("CLEAR-options must be optional.");
+            break;
+        }
+    }
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-18.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3425,7 +4404,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-28.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3448,7 +4427,7 @@ namespace argos
         return m_option->section;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::alias() const
     {
         return m_option->alias;
     }
@@ -3510,221 +4489,10 @@ namespace argos
 }
 
 //****************************************************************************
-// Copyright © 2024 Jan Erik Breimo. All rights reserved.
-// Created by Jan Erik Breimo on 2024-09-03.
-//
-// This file is distributed under the BSD License.
-// License text is included with the source distribution.
-//****************************************************************************
-
-namespace argos
-{
-    namespace
-    {
-        void set_value_ids(const ParserData& data)
-        {
-            struct InternalIdMaker
-            {
-                std::map<std::string_view, ValueId> explicit_ids;
-                ValueId n = ValueId(0);
-
-                std::optional<ValueId> find_value_id(std::string_view name)
-                {
-                    const auto it = explicit_ids.find(name);
-                    if (it == explicit_ids.end())
-                        return {};
-                    return it->second;
-                }
-
-                ValueId make_value_id(std::string_view name)
-                {
-                    if (const auto id = find_value_id(name))
-                        return *id;
-                    n = ValueId(n + 1);
-                    explicit_ids.emplace(name, n);
-                    return n;
-                }
-
-                ValueId make_value_id(const std::vector<std::string>& names)
-                {
-                    for (const auto& name: names)
-                    {
-                        if (const auto id = find_value_id(name))
-                            return *id;
-                    }
-                    n = ValueId(n + 1);
-                    for (const auto& name: names)
-                        explicit_ids.emplace(name, n);
-                    return n;
-                }
-            };
-
-            InternalIdMaker id_maker;
-            for (const auto& a: data.arguments)
-            {
-                if (!a->value.empty())
-                {
-                    a->value_id = id_maker.make_value_id(a->value);
-                    id_maker.explicit_ids.emplace(a->name, a->value_id);
-                }
-                else
-                {
-                    a->value_id = id_maker.make_value_id(a->name);
-                }
-            }
-            for (const auto& o: data.options)
-            {
-                if (o->operation == OptionOperation::NONE)
-                    continue;
-                if (!o->alias.empty())
-                {
-                    o->value_id = id_maker.make_value_id(o->alias);
-                    for (auto& f: o->flags)
-                        id_maker.explicit_ids.emplace(f, o->value_id);
-                }
-                else
-                {
-                    o->value_id = id_maker.make_value_id(o->flags);
-                }
-            }
-        }
-
-        inline bool has_help_option(const ParserData& data)
-        {
-            return std::any_of(data.options.begin(), data.options.end(),
-                               [](const auto& o)
-                               {
-                                   return o->type == OptionType::HELP;
-                               });
-        }
-
-        inline bool has_flag(const ParserData& data, std::string_view flag)
-        {
-            bool ci = data.parser_settings.case_insensitive;
-            return any_of(data.options.begin(), data.options.end(),
-                          [&](const auto& o)
-                          {
-                              return any_of(o->flags.begin(), o->flags.end(),
-                                            [&](const auto& f)
-                                            {
-                                                return are_equal(f, flag, ci);
-                                            });
-                          });
-        }
-
-        void add_help_option(ParserData& data)
-        {
-            if (!data.parser_settings.generate_help_option)
-                return;
-            if (has_help_option(data))
-                return;
-            std::vector<std::string> flags;
-            switch (data.parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                if (!has_flag(data, "-h"))
-                    flags.emplace_back("-h");
-                if (!has_flag(data, "--help"))
-                    flags.emplace_back("--help");
-                break;
-            case OptionStyle::SLASH:
-                if (!has_flag(data, "/?"))
-                    flags.emplace_back("/?");
-                break;
-            case OptionStyle::DASH:
-                if (!has_flag(data, "-h"))
-                    flags.emplace_back("-h");
-                else if (!has_flag(data, "-help"))
-                    flags.emplace_back("-help");
-                break;
-            }
-
-            if (flags.empty())
-                return;
-
-            auto opt = Option().flags(std::move(flags)).type(OptionType::HELP)
-                .help("Display the help text.")
-                .constant("1").release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
-        }
-
-        void add_version_option(ParserData& data)
-        {
-            if (data.help_settings.version.empty())
-                return;
-            std::string flag;
-            switch (data.parser_settings.option_style)
-            {
-            case OptionStyle::STANDARD:
-                if (!has_flag(data, "--version"))
-                    flag = "--version";
-                break;
-            case OptionStyle::SLASH:
-                if (!has_flag(data, "/VERSION"))
-                    flag = "/VERSION";
-                break;
-            case OptionStyle::DASH:
-                if (!has_flag(data, "-version"))
-                    flag = "-version";
-                break;
-            }
-
-            if (flag.empty())
-                return;
-
-            auto stream = data.help_settings.output_stream
-                              ? data.help_settings.output_stream
-                              : &std::cout;
-            auto opt = Option().flag(flag).type(OptionType::STOP)
-                .help("Display the program version.")
-                .constant("1")
-                .callback([v = data.help_settings.version, stream]
-                (auto, auto, auto pa)
-                    {
-                        *stream << pa.program_name() << " " << v << "\n";
-                        return true;
-                    })
-                .release();
-            opt->argument_id = ArgumentId(data.options.size()
-                                          + data.arguments.size() + 1);
-            opt->section = data.current_section;
-            data.options.push_back(std::move(opt));
-        }
-    }
-
-    void add_missing_options(ParserData& data)
-    {
-        add_help_option(data);
-        add_version_option(data);
-    }
-
-    ParsedArguments parse_arguments(std::vector<std::string_view> args,
-                                    const std::shared_ptr<ParserData>& data)
-    {
-        add_missing_options(*data);
-        set_value_ids(*data);
-        return ParsedArguments(
-            ArgumentIteratorImpl::parse(std::move(args), data));
-    }
-
-    ArgumentIterator
-    make_argument_iterator(std::vector<std::string_view> args,
-                       const std::shared_ptr<ParserData>& data)
-    {
-        add_missing_options(*data);
-        set_value_ids(*data);
-        return {std::move(args), data};
-    }
-}
-
-//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-13.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3883,7 +4651,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-26.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -3895,16 +4663,24 @@ namespace argos
         : m_impl(std::move(impl))
     {}
 
-    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept
-        : m_impl(std::move(rhs.m_impl))
-    {}
+    ParsedArguments::ParsedArguments(const ParsedArguments& rhs) = default;
+
+    ParsedArguments::ParsedArguments(ParsedArguments&& rhs) noexcept = default;
 
     ParsedArguments::~ParsedArguments() = default;
 
-    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept
+    ParsedArguments& ParsedArguments::operator=(const ParsedArguments&) = default;
+
+    ParsedArguments& ParsedArguments::operator=(ParsedArguments&& rhs) noexcept = default;
+
+    CommandView ParsedArguments::command() const
     {
-        m_impl = std::move(rhs.m_impl);
-        return *this;
+        return CommandView(m_impl->command());
+    }
+
+    std::string_view ParsedArguments::command_name() const
+    {
+        return m_impl->command()->name;
     }
 
     bool ParsedArguments::has(const std::string& name) const
@@ -3915,6 +4691,14 @@ namespace argos
     bool ParsedArguments::has(const IArgumentView& arg) const
     {
         return m_impl->has(arg.value_id());
+    }
+
+    std::vector<ParsedArguments> ParsedArguments::subcommands() const
+    {
+        std::vector<ParsedArguments> result;
+        for (const auto& subcommand : m_impl->subcommands())
+            result.emplace_back(subcommand);
+        return result;
     }
 
     ArgumentValue ParsedArguments::value(const std::string& name) const
@@ -3951,7 +4735,7 @@ namespace argos
     ParsedArguments::all_arguments() const
     {
         std::vector<std::unique_ptr<ArgumentView>> result;
-        for (auto& a : m_impl->parser_data()->arguments)
+        for (auto& a : m_impl->parser_data()->command.arguments)
             result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         return result;
     }
@@ -3960,8 +4744,17 @@ namespace argos
     ParsedArguments::all_options() const
     {
         std::vector<std::unique_ptr<OptionView>> result;
-        for (auto& o : m_impl->parser_data()->options)
+        for (auto& o : m_impl->parser_data()->command.options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
+        return result;
+    }
+
+    std::vector<std::unique_ptr<CommandView>>
+    ParsedArguments::all_subcommands() const
+    {
+        std::vector<std::unique_ptr<CommandView>> result;
+        for (auto& c : m_impl->parser_data()->command.commands)
+            result.emplace_back(std::make_unique<CommandView>(c.get()));
         return result;
     }
 
@@ -4086,7 +4879,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-29.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4205,7 +4998,7 @@ namespace argos
 
     const std::string& ParsedArgumentsBuilder::program_name() const
     {
-      return m_impl->parser_data()->help_settings.program_name;
+      return m_impl->parser_data()->command.name;
     }
 }
 
@@ -4213,7 +5006,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-07.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4239,17 +5032,19 @@ namespace argos
         }
     }
 
-    ParsedArgumentsImpl::ParsedArgumentsImpl(std::shared_ptr<ParserData> data)
-        : m_data(std::move(data))
+    ParsedArgumentsImpl::ParsedArgumentsImpl(const CommandData* command,
+                                             std::shared_ptr<ParserData> data)
+        : m_command(command),
+          m_data(std::move(data))
     {
         assert(m_data);
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_command->arguments)
         {
             m_ids.emplace_back(a->name, a->value_id, a->argument_id);
-            if (!a->value.empty())
-                m_ids.emplace_back(a->value, a->value_id, a->argument_id);
+            if (!a->alias.empty())
+                m_ids.emplace_back(a->alias, a->value_id, a->argument_id);
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_command->options)
         {
             if (o->operation == OptionOperation::NONE)
                 continue;
@@ -4323,7 +5118,7 @@ namespace argos
     {
         using std::get;
         auto it = lower_bound(m_ids.begin(), m_ids.end(), value_name,
-                              [](auto& p, auto& s) {return get<0>(p) < s;});
+                              [](auto& p, auto& s) { return get<0>(p) < s; });
         if (it == m_ids.end() || get<0>(*it) != value_name)
             ARGOS_THROW("Unknown value: " + std::string(value_name));
         return get<1>(*it);
@@ -4353,16 +5148,30 @@ namespace argos
         return result;
     }
 
+    const std::shared_ptr<ParsedArgumentsImpl>&
+    ParsedArgumentsImpl::add_subcommand(const CommandData* command)
+    {
+        m_commands.push_back(std::make_shared<ParsedArgumentsImpl>(
+            command, m_data));
+        return m_commands.back();
+    }
+
+    const std::vector<std::shared_ptr<ParsedArgumentsImpl>>&
+    ParsedArgumentsImpl::subcommands() const
+    {
+        return m_commands;
+    }
+
     std::vector<std::unique_ptr<IArgumentView>>
     ParsedArgumentsImpl::get_argument_views(ValueId value_id) const
     {
         std::vector<std::unique_ptr<IArgumentView>> result;
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->value_id == value_id)
                 result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_command->options)
         {
             if (o->value_id == value_id)
                 result.emplace_back(std::make_unique<OptionView>(o.get()));
@@ -4373,12 +5182,12 @@ namespace argos
     std::unique_ptr<IArgumentView>
     ParsedArgumentsImpl::get_argument_view(ArgumentId argument_id) const
     {
-        for (auto& a : m_data->arguments)
+        for (auto& a : m_command->arguments)
         {
             if (a->argument_id == argument_id)
                 return std::make_unique<ArgumentView>(a.get());
         }
-        for (auto& o : m_data->options)
+        for (auto& o : m_command->options)
         {
             if (o->argument_id == argument_id)
                 return std::make_unique<OptionView>(o.get());
@@ -4389,6 +5198,11 @@ namespace argos
     const std::shared_ptr<ParserData>& ParsedArgumentsImpl::parser_data() const
     {
         return m_data;
+    }
+
+    const CommandData* ParsedArgumentsImpl::command() const
+    {
+        return m_command;
     }
 
     ParserResultCode ParsedArgumentsImpl::result_code() const
@@ -4414,7 +5228,7 @@ namespace argos
 
     void ParsedArgumentsImpl::error(const std::string& message) const
     {
-        write_error_message(*m_data, message);
+        write_error_message(*m_data, *m_command, message);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
@@ -4424,7 +5238,7 @@ namespace argos
     void ParsedArgumentsImpl::error(const std::string& message,
                                     ArgumentId argument_id)
     {
-        write_error_message(*m_data, message, argument_id);
+        write_error_message(*m_data, *m_command, message, argument_id);
         if (m_data->parser_settings.auto_exit)
             exit(m_data->parser_settings.error_exit_code);
         else
@@ -4433,10 +5247,72 @@ namespace argos
 }
 
 //****************************************************************************
+// Copyright © 2024 Jan Erik Breimo. All rights reserved.
+// Created by Jan Erik Breimo on 2024-09-11.
+//
+// This file is distributed under the Zero-Clause BSD License.
+// License text is included with the source distribution.
+//****************************************************************************
+
+namespace argos
+{
+    namespace
+    {
+        void add_version_option(ParserData& data)
+        {
+            if (data.version.empty())
+                return;
+            auto& cmd = data.command;
+            std::string flag;
+            switch (data.parser_settings.option_style)
+            {
+            case OptionStyle::STANDARD:
+                if (!has_flag(cmd, "--version", data.parser_settings))
+                    flag = "--version";
+                break;
+            case OptionStyle::SLASH:
+                if (!has_flag(cmd, "/VERSION", data.parser_settings))
+                    flag = "/VERSION";
+                break;
+            case OptionStyle::DASH:
+                if (!has_flag(cmd, "-version", data.parser_settings))
+                    flag = "-version";
+                break;
+            }
+
+            if (flag.empty())
+                return;
+
+            auto stream = data.help_settings.output_stream
+                              ? data.help_settings.output_stream
+                              : &std::cout;
+            auto opt = Option().flag(flag).type(OptionType::STOP)
+                .help("Display the program version.")
+                .constant("1")
+                .callback([v = data.version, stream]
+                (auto, auto, auto pa)
+                    {
+                        *stream << pa.program_name() << " " << v << "\n";
+                        return true;
+                    })
+                .release();
+            opt->section = cmd.current_section;
+            cmd.options.push_back(std::move(opt));
+        }
+    }
+
+    void finish_initialization(ParserData& data)
+    {
+        add_version_option(data);
+        finish_initialization(data.command, data);
+    }
+}
+
+//****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-09.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4542,7 +5418,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-01-17.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4732,13 +5608,39 @@ namespace argos
         }
         return char_len ? n : std::string_view::npos;
     }
+
+    char to_lower(char c)
+    {
+        return ('A' <= c && c <= 'Z') ? char(c - 'A' + 'a') : c;
+    }
+
+    void to_lower(std::string& word)
+    {
+        for (auto& c: word)
+            c = to_lower(c);
+    }
+
+    std::string to_lower(std::string_view word)
+    {
+        std::string result(word);
+        to_lower(result);
+        return result;
+    }
+
+    bool is_lower(std::string_view word)
+    {
+        return std::all_of(word.begin(), word.end(), [](char c)
+        {
+            return c < 'A' || 'Z' < c;
+        });
+    }
 }
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-05.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -4805,17 +5707,17 @@ namespace argos
     }
 
     TextFormatter::TextFormatter()
-        : TextFormatter(&std::cout, get_console_width(32))
+        : TextFormatter(&std::cout, 0)
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream)
-        : TextFormatter(stream, get_console_width(32))
+        : TextFormatter(stream, 0)
     {}
 
     TextFormatter::TextFormatter(std::ostream* stream, unsigned line_width)
-        : m_writer(line_width)
+        : m_writer(line_width ? line_width : get_console_width(32))
     {
-        if (line_width <= 2)
+        if (m_writer.line_width() <= 2)
             ARGOS_THROW("Line width must be greater than 2.");
         m_writer.set_stream(stream);
         m_indents.push_back(0);
@@ -5015,7 +5917,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-27.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5043,7 +5945,7 @@ namespace argos
 
     bool TextWriter::set_indentation(unsigned indent)
     {
-        if (m_indent >= m_line_width)
+        if (indent >= m_line_width)
             return false;
         m_indent = indent;
         return true;
@@ -5126,7 +6028,7 @@ namespace argos
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
 // Created by Jan Erik Breimo on 2020-02-06.
 //
-// This file is distributed under the BSD License.
+// This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
 
@@ -5137,6 +6039,12 @@ namespace argos
         bool is_utf8_continuation(char c)
         {
             return (uint8_t(c) & 0xC0u) == 0x80;
+        }
+
+        std::string_view remove_punctuation(std::string_view word)
+        {
+            auto last = word.find_last_not_of(".,;:!?()[]{}<>\"'`");
+            return word.substr(0, last + 1);
         }
     }
 
@@ -5156,20 +6064,30 @@ namespace argos
         splits.push_back({unsigned(word_rule.size() - offset), '\0'});
         word_rule.erase(remove(word_rule.begin(), word_rule.end(), ' '),
                         word_rule.end());
+        to_lower(word_rule);
         m_strings.push_back(std::move(word_rule));
         m_splits.insert({std::string_view(m_strings.back()), std::move(splits)});
+    }
+
+    void WordSplitter::add_words(std::vector<std::string> word_rules)
+    {
+        for (auto& word_rule: word_rules)
+            add_word(std::move(word_rule));
     }
 
     std::tuple<std::string_view, char, std::string_view>
     WordSplitter::split(std::string_view word, size_t start_index,
                         size_t max_length, bool must_split) const
     {
-        const auto it = m_splits.find(word);
+        auto key = remove_punctuation(word);
+        const auto it = is_lower(key)
+                            ? m_splits.find(key)
+                            : m_splits.find(to_lower(key));
         if (it != m_splits.end())
         {
             Split prev = {unsigned(start_index), '\0'};
             size_t length = 0;
-            for (const auto split : it->second)
+            for (const auto split: it->second)
             {
                 if (split.index < start_index + 1)
                     continue;
@@ -5179,9 +6097,11 @@ namespace argos
                 prev = split;
             }
             if (prev.index > start_index + 1)
-                return {word.substr(start_index, prev.index - start_index),
-                        prev.separator,
-                        word.substr(prev.index)};
+                return {
+                    word.substr(start_index, prev.index - start_index),
+                    prev.separator,
+                    word.substr(prev.index)
+                };
         }
         if (must_split)
             return default_rule(word.substr(start_index), max_length);
@@ -5221,8 +6141,10 @@ namespace argos
             if ((isdigit(word[index - 1]) == 0) != (isdigit(word[index]) == 0))
                 return {word.substr(0, index), '-', word.substr(index)};
         }
-        return {word.substr(0, max_pos),
-                '-',
-                word.substr(max_pos)};
+        return {
+            word.substr(0, max_pos),
+            '-',
+            word.substr(max_pos)
+        };
     }
 }

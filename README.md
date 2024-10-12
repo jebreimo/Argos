@@ -7,7 +7,8 @@ easy to use, yet support advanced command line interfaces.
 
 Its features include:
 
-- Automatic formatting of help texts, including word wrapping based on the terminal's width.
+- Automatic formatting of help texts to fit the current terminal's width.
+- Support for sub-commands with their own options and arguments (like `git commit` or `docker run`).
 - A flexible parser that supports arguments of many different types like for instance `int`, `unsigned long long`, `float` and `double`.
 - Takes care of most of the command line-related error handling automatically.
 - Three different option styles:
@@ -17,10 +18,7 @@ Its features include:
       off.
     - Dash options: arbitrary flags preceded by a single dash.
 - More powerful features like linking two or more options, e.g. `--quiet` and `--verbose`, are
-  trivial
-  with [aliases](https://barsken.no/apidoc/argos/classargos_1_1_option.html#aaca269866e4b341f215726511c2992c6)
-  and [callbacks](https://barsken.no/apidoc/argos/classargos_1_1_option.html#a030255e044955d037aba30bc88b2da3f)
-  .
+  trivial with [aliases](https://barsken.no/apidoc/argos/classargos_1_1_option.html#aaca269866e4b341f215726511c2992c6) and [callbacks](https://barsken.no/apidoc/argos/classargos_1_1_option.html#a030255e044955d037aba30bc88b2da3f).
 - Tested on Linux, macOS and Windows.
 
 # Documentation, source code and licence
@@ -29,7 +27,7 @@ The documentation for Argos can be found
 at [barsken.no/apidoc/argos](https://barsken.no/apidoc/argos).
 
 Argos is made available under
-the [2-clause BSD licence](https://raw.githubusercontent.com/jebreimo/Argos/master/LICENSE).
+the [Zero-Clause BSD licence](https://raw.githubusercontent.com/jebreimo/Argos/master/LICENSE).
 
 The source code can be cloned or forked on
 GitHub: [github.com/jebreimo/Argos](https://github.com/jebreimo/Argos).
