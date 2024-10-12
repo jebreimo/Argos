@@ -39,7 +39,7 @@ namespace argos
         /**
          * @brief Returns the argument's or option's value name.
          */
-        [[nodiscard]] virtual const std::string& value() const = 0;
+        [[nodiscard]] virtual const std::string& alias() const = 0;
 
         /**
          * @brief Returns the argument's or option's visibility in

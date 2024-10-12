@@ -45,7 +45,7 @@ namespace argos
         /**
          * @brief Returns the option's value name.
          */
-        [[nodiscard]] const std::string& value() const final;
+        [[nodiscard]] const std::string& alias() const final;
 
         /**
          * @brief Returns the option's visibility in

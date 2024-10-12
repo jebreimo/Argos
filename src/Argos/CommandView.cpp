@@ -27,7 +27,7 @@ namespace argos
         return m_command->section;
     }
 
-    const std::string& CommandView::value() const
+    const std::string& CommandView::alias() const
     {
         return m_command->name;
     }

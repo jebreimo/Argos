@@ -29,7 +29,7 @@ namespace argos
         return m_option->section;
     }
 
-    const std::string& OptionView::value() const
+    const std::string& OptionView::alias() const
     {
         return m_option->alias;
     }

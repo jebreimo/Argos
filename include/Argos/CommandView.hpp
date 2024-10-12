@@ -21,7 +21,7 @@ namespace argos
 
         [[nodiscard]] const std::string& section() const override;
 
-        [[nodiscard]] const std::string& value() const override;
+        [[nodiscard]] const std::string& alias() const override;
 
         [[nodiscard]] Visibility visibility() const override;
 

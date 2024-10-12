@@ -29,7 +29,7 @@ namespace argos
         return m_argument->section;
     }
 
-    const std::string& ArgumentView::value() const
+    const std::string& ArgumentView::alias() const
     {
         return m_argument->alias;
     }
