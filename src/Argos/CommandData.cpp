@@ -126,6 +126,8 @@ namespace argos
     {
         if (!opt)
             ARGOS_THROW("Option is empty (it has probably already been added).");
+        if (opt->flags.empty())
+            ARGOS_THROW("Option must have at least one flag.");
         if (opt->section.empty())
             opt->section = current_section;
         options.push_back(std::move(opt));
