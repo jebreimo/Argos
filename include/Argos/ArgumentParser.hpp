@@ -74,31 +74,57 @@ namespace argos
         /**
          * @brief Add a new argument definition to the ArgumentParser.
          *
-         * @throw ArgosException if the argument doesn't have a name.
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
          */
         ArgumentParser& add(Argument& argument);
 
+        /**
+         * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a argument has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Argument&& argument);
 
         /**
          * @brief Add a new option definition to the ArgumentParser.
          *
-         * @throw ArgosException if the option doesn't have any flags
-         *      or any of the flags doesn't match the current option style.
-         * @throw ArgosException if certain meaningless combinations of
-         *      option operation and properties are found:
-         *      - an option with operation NONE has constant
-         *        or alias.
-         *      - an option with operation CLEAR is mandatory.
-         *      - an option with operation APPEND has neither argument nor
-         *        constant.
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
          */
         ArgumentParser& add(Option& option);
+
+        /**
+         * @brief Add a new option definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a option has been moved-from or
+         *  doesn't have at least one flag.
+         */
         ArgumentParser& add(Option&& option);
 
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Command& command);
+
+        /**
+         * @brief Add a new sub-command definition to the ArgumentParser.
+         *
+         * @throw ArgosException if @a command has been moved-from or
+         *  doesn't have a name.
+         */
         ArgumentParser& add(Command&& command);
 
+        /**
+         * @brief Copy arguments, options and sub-commands from @a command
+         *  to this ArgumentParser.
+         *
+         * All other settings are left unchanged.
+         */
         ArgumentParser& copy_from(const Command& command);
 
         /**
@@ -113,8 +139,8 @@ namespace argos
          *      the non-const version of parse(). All method calls on an invalid
          *      ArgumentParser will throw an exception.
          *
-         * @throw ArgosException if argc is 0 or if there are two or more
-         *      options that use the same flag.
+         * @throw ArgosException if argc is 0, or if any conflicting or
+         *  invalid options, arguments or sub-commands are encountered.
          */
         [[nodiscard]] ParsedArguments parse(int argc, char* argv[]);
 
@@ -307,13 +333,18 @@ namespace argos
          */
         ArgumentParser& require_subcommand(bool value);
 
+        /**
+         * @brief Returns true if the program can accept multiple
+         *  sub-commands.
+         */
         [[nodiscard]] bool allow_multiple_subcommands() const;
 
         /**
          * @brief Set whether the program can accept multiple sub-commands.
          *
-         * If this property is true, a new sub-command can be given after
-         * the previous one has received all its arguments and options.
+         * If this property is true, a sequence of sub-commands can be given.
+         * Each sub-command can be followed by a new one when it has been
+         * given all the arguments it requires.
          */
         ArgumentParser& allow_multiple_subcommands(bool value);
 
@@ -419,15 +450,16 @@ namespace argos
 
         /**
          * @brief Sets a section (or heading) that is automatically assigned
-         *   to arguments and options when they are added.
+         *   to arguments, sub-commands and options when they are added.
          *
-         * This value is only applied to arguments and options that have not
-         * been assigned a section with Argument::section or Option::section.
+         * This value only applies to arguments, sub-commands and options that
+         * have not been assigned a section with Argument::section or Option::section.
          * If this value is an empty string, the values from
-         * TextId::ARGUMENTS_TITLE and TextId::OPTIONS_TITLE are used.
+         * TextId::ARGUMENTS_TITLE, TextId::SUBCOMMANDS_TITLE and
+         * TextId::OPTIONS_TITLE are used.
          *
-         * @param name All arguments and options with the same section name
-         *  will be listed under the same heading.
+         * @param name All arguments, sub-commands and options with the same
+         *  section name will be listed under the same heading.
          */
         ArgumentParser& section(const std::string& name);
 

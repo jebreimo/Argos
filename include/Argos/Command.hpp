@@ -131,12 +131,49 @@ namespace argos
          */
         Command& help(std::string text);
 
+        /**
+         * @brief Set the about text for the command.
+         *
+         * The about text is displayed in the command's own help text between
+         * the USAGE section and the sections describing the command's
+         * sub-commands, arguments, and options.
+         */
         Command& about(std::string text);
 
+        /**
+         * @brief Sets a section (or heading) that is automatically assigned
+         *   to arguments, sub-commands and options when they are added.
+         *
+         * This value only applies to arguments, sub-commands and options that
+         * have not been assigned a section with Argument::section or Option::section.
+         * If this value is an empty string, the values from
+         * TextId::ARGUMENTS_TITLE, TextId::SUBCOMMANDS_TITLE and
+         * TextId::OPTIONS_TITLE are used.
+         *
+         * @param name All arguments, sub-commands and options with the same
+         *  section name will be listed under the same heading.
+         */
         Command& section(const std::string& name);
 
+        /**
+         * @brief Set the given part of the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
         Command& text(TextId textId, std::string text);
 
+        /**
+         * @brief Set a function that will produce the given part of
+         *  the help text.
+         *
+         * With this function it is possible to override otherwise
+         * auto-generated parts of the text, e.g. TextId::USAGE, or
+         * add additional text, e.g. TextId::INITIAL_TEXT and
+         * TextId::FINAL_TEXT.
+         */
         Command& text(TextId textId, std::function<std::string()> callback);
 
         /**
@@ -161,6 +198,13 @@ namespace argos
          */
         Command& id(int id);
 
+        /**
+         * @brief Set whether the command can accept multiple sub-commands.
+         *
+         * If this property is true, a sequence of sub-commands can be given.
+         * Each sub-command can be followed by a new one when it has been
+         * given all the arguments it requires.
+         */
         Command& allow_multiple_subcommands(bool multi_command);
 
         /**
@@ -169,6 +213,14 @@ namespace argos
          */
         Command& copy_from(Command& command);
 
+        /**
+         * @private
+         * @brief Used internally in Argos.
+         *
+         * The object is no longer usable after this function has
+         * been called.
+         * @return Pointer to the argument implementation.
+         */
         std::unique_ptr<CommandData> release();
 
     private:

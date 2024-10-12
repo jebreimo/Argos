@@ -43,7 +43,7 @@ namespace argos
         [[nodiscard]] const std::string& section() const final;
 
         /**
-         * @brief Returns the argument's value name.
+         * @brief Returns the argument's alias name.
          */
         [[nodiscard]] const std::string& alias() const final;
 

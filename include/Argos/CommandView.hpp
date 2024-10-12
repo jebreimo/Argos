@@ -6,21 +6,44 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
-#include "IArgumentView.hpp"
+#include "ArgumentView.hpp"
+#include "OptionView.hpp"
 
 namespace argos
 {
     struct CommandData;
 
+    /**
+     * @brief Provides read-only access to a command definition.
+     */
     class CommandView : public IArgumentView
     {
     public:
+        /**
+         * @private
+         * @brief For internal use only.
+         *
+         * Client code can only receive objects, not construct them.
+         */
         explicit CommandView(const CommandData* command);
 
+        /**
+         * @brief Returns the command's help text.
+         *
+         * This is the text that is displayed in the parent command's list
+         * of sub-commands. It will also be used as the about text if the
+         * command doesn't have an explicit about text.
+         */
         [[nodiscard]] std::string help() const override;
 
+        /**
+         * @brief Returns the command's section name.
+         */
         [[nodiscard]] const std::string& section() const override;
 
+        /**
+         * @brief Returns the command's value name.
+         */
         [[nodiscard]] const std::string& alias() const override;
 
         [[nodiscard]] Visibility visibility() const override;

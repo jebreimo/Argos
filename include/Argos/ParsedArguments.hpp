@@ -125,31 +125,44 @@ namespace argos
         [[nodiscard]] ArgumentValues values(const IArgumentView& arg) const;
 
         /**
-         * @brief Returns all argument definitions that were registered with
+         * @brief Returns all argument definitions that were added to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined arguments along with their given values.
-        *
-         * @warning The returned instances are only guaranteed to remain
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
          *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<ArgumentView>> all_arguments() const;
 
         /**
-         * @brief Returns all option definitions that were registered with
+         * @brief Returns all option definitions that were add to the
          *  ArgumentParser.
          *
          * Intended for testing and debugging, for instance to list all
          * defined options along with their given values.
          *
-         * @warning The returned instances are only guaranteed to remain
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
          *  valid as long the ParsedArguments instance is valid.
          */
         [[nodiscard]]
         std::vector<std::unique_ptr<OptionView>> all_options() const;
 
+        /**
+         * @brief Returns all sub-command definitions that were added
+         *  to the ArgumentParser.
+         *
+         * Intended for testing and debugging, for instance to list all
+         * defined sub-commands along with their given values.
+         *
+         * @warning The returned instances are referring to data managed
+         *  by the ParsedArguments, and are only guaranteed to remain
+         *  valid as long the ParsedArguments instance is valid.
+         */
         [[nodiscard]]
         std::vector<std::unique_ptr<CommandView>> all_subcommands() const;
 

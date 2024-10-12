@@ -27,28 +27,28 @@ namespace argos
         virtual ~IArgumentView() = default;
 
         /**
-         * @brief Returns the argument's or option's help text.
+         * @brief Returns the object's help text.
          */
         [[nodiscard]] virtual std::string help() const = 0;
 
         /**
-         * @brief Returns the argument's or option's section name.
+         * @brief Returns the object's section name.
          */
         [[nodiscard]] virtual const std::string& section() const = 0;
 
         /**
-         * @brief Returns the argument's or option's value name.
+         * @brief Returns the object's alias.
          */
         [[nodiscard]] virtual const std::string& alias() const = 0;
 
         /**
-         * @brief Returns the argument's or option's visibility in
-         *      the help text and error messages.
+         * @brief Returns the object's visibility in the help text and
+         *  error messages.
          */
         [[nodiscard]] virtual Visibility visibility() const = 0;
 
         /**
-         * @brief Returns the argument's or option's custom id.
+         * @brief Returns the object's custom id.
          */
         [[nodiscard]] virtual int id() const = 0;
 
@@ -68,7 +68,7 @@ namespace argos
         [[nodiscard]] virtual ValueId value_id() const = 0;
 
         /**
-         * @brief Returns the argument's or option's argument_id().
+         * @brief Returns the object's argument_id().
          *
          * This id is assigned and used internally to uniquely identify
          * each argument and option.
