@@ -30,6 +30,26 @@ namespace argos
         [[nodiscard]] ValueId value_id() const override;
 
         [[nodiscard]] ArgumentId argument_id() const override;
+
+        /**
+         * @brief Returns the command's name.
+         */
+        [[nodiscard]] std::string name() const;
+
+        /**
+         * @brief Returns the command's arguments.
+         */
+        [[nodiscard]] std::vector<ArgumentView> arguments() const;
+
+        /**
+         * @brief Returns the command's options.
+         */
+        [[nodiscard]] std::vector<OptionView> options() const;
+
+        /**
+         * @brief Returns the command's sub-commands.
+         */
+        [[nodiscard]] std::vector<CommandView> subcommands() const;
     private:
         const CommandData* m_command;
     };

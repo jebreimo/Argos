@@ -51,4 +51,33 @@ namespace argos
     {
         return m_command->argument_id;
     }
+
+    std::string CommandView::name() const
+    {
+        return m_command->name;
+    }
+
+    std::vector<ArgumentView> CommandView::arguments() const
+    {
+        std::vector<ArgumentView> result;
+        for (const auto& arg : m_command->arguments)
+            result.emplace_back(arg.get());
+        return result;
+    }
+
+    std::vector<OptionView> CommandView::options() const
+    {
+        std::vector<OptionView> result;
+        for (const auto& opt : m_command->options)
+            result.emplace_back(opt.get());
+        return result;
+    }
+
+    std::vector<CommandView> CommandView::subcommands() const
+    {
+        std::vector<CommandView> result;
+        for (const auto& cmd : m_command->commands)
+            result.emplace_back(cmd.get());
+        return result;
+    }
 }
