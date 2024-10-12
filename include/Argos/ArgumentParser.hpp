@@ -325,7 +325,8 @@ namespace argos
          * @brief Set whether the program requires one or more sub-commands.
          *
          * If this property is true, the program requires that any options
-         * or arguments to the main program is followed by a sub-command.
+         * or arguments to the main program is followed by a sub-command,
+         * and will exit with an error message if not.
          *
          * This property is only relevant if the program has sub-commands,
          * and it is automatically set to true if it is unassigned and the

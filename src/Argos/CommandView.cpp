@@ -80,4 +80,12 @@ namespace argos
             result.emplace_back(cmd.get());
         return result;
     }
+
+    bool CommandView::require_subcommand() const
+    {
+        // Instances of CommandView are only created after require_subcommand
+        // has been automatically set, the or-value should therefore never
+        // be returned, and it doesn't matter that it might not be correct.
+        return m_command->require_subcommand.value_or(false);
+    }
 }

@@ -73,6 +73,12 @@ namespace argos
          * @brief Returns the command's sub-commands.
          */
         [[nodiscard]] std::vector<CommandView> subcommands() const;
+
+        /**
+         * @brief Returns true if the program requires one or more
+         *  sub-commands.
+         */
+        [[nodiscard]] bool require_subcommand() const;
     private:
         const CommandData* m_command;
     };

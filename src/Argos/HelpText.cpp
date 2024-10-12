@@ -339,7 +339,7 @@ namespace argos
             if (command.commands.empty())
                 return;
 
-            auto brackets = !command.require_command.value_or(false);
+            auto brackets = !command.require_subcommand.value_or(false);
 
             if (brackets)
                 formatter.write_words("[");

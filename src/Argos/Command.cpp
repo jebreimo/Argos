@@ -150,6 +150,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::require_subcommand(bool require_subcommand)
+    {
+        check_command();
+        data_->require_subcommand = require_subcommand;
+        return *this;
+    }
+
     Command& Command::copy_from(Command& command)
     {
         check_command();

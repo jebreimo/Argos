@@ -310,7 +310,7 @@ namespace argos
         }
         else
         {
-            error("Too many arguments, starting at \"" + value + "\".");
+            error("Too many arguments, starting from \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
     }
@@ -399,13 +399,13 @@ namespace argos
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)
                     flags += ", " + o->flags[i];
-                error("Mandatory option \"" + flags + "\" is missing.");
+                error("Mandatory option is missing: " + flags);
                 return false;
             }
         }
-        if (*m_command->require_command && parsed_args.subcommands().empty())
+        if (*m_command->require_subcommand && parsed_args.subcommands().empty())
         {
-            error("A subcommand is required.");
+            error("No command was given.");
             return false;
         }
         if (m_argument_counter.is_complete())

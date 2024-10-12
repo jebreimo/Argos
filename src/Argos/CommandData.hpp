@@ -55,7 +55,7 @@ namespace argos
         std::string full_name;
         std::map<TextId, TextSource> texts;
         Visibility visibility = Visibility::NORMAL;
-        std::optional<bool> require_command;
+        std::optional<bool> require_subcommand;
         bool multi_command = false;
         /**
          * The heading the command is listed under in the parent

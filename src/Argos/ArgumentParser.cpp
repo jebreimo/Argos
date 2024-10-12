@@ -253,13 +253,13 @@ namespace argos
     std::optional<bool> ArgumentParser::require_subcommand() const
     {
         check_data();
-        return m_data->command.require_command;
+        return m_data->command.require_subcommand;
     }
 
     ArgumentParser& ArgumentParser::require_subcommand(bool value)
     {
         check_data();
-        m_data->command.require_command = value;
+        m_data->command.require_subcommand = value;
         return *this;
     }
 
