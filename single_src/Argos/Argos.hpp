@@ -1452,6 +1452,12 @@ namespace argos
          * @brief Returns the command's sub-commands.
          */
         [[nodiscard]] std::vector<CommandView> subcommands() const;
+
+        /**
+         * @brief Returns true if the program requires one or more
+         *  sub-commands.
+         */
+        [[nodiscard]] bool require_subcommand() const;
     private:
         const CommandData* m_command;
     };
@@ -2833,6 +2839,19 @@ namespace argos
         Command& allow_multiple_subcommands(bool multi_command);
 
         /**
+         * @brief Set whether the commands requires one or more sub-commands.
+         *
+         * If this property is true, the command requires that any options
+         * or arguments to the main program is followed by a sub-command,
+         * and will exit with an error message if not.
+         *
+         * This property is only relevant if the command has sub-commands,
+         * and it is automatically set to true if it is unassigned and the
+         * command has sub-commands, but no arguments.
+         */
+        Command& require_subcommand(bool value);
+
+        /**
          * @brief Add copies of all arguments, options and sub-commands in
          *  @a command.
          */
@@ -3181,7 +3200,8 @@ namespace argos
          * @brief Set whether the program requires one or more sub-commands.
          *
          * If this property is true, the program requires that any options
-         * or arguments to the main program is followed by a sub-command.
+         * or arguments to the main program is followed by a sub-command,
+         * and will exit with an error message if not.
          *
          * This property is only relevant if the program has sub-commands,
          * and it is automatically set to true if it is unassigned and the

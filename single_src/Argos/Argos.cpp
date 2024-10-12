@@ -306,7 +306,7 @@ namespace argos
         std::string full_name;
         std::map<TextId, TextSource> texts;
         Visibility visibility = Visibility::NORMAL;
-        std::optional<bool> require_command;
+        std::optional<bool> require_subcommand;
         bool multi_command = false;
         /**
          * The heading the command is listed under in the parent
@@ -1518,7 +1518,7 @@ namespace argos
         }
         else
         {
-            error("Too many arguments, starting at \"" + value + "\".");
+            error("Too many arguments, starting from \"" + value + "\".");
             return {IteratorResultCode::ERROR, {}, {}};
         }
     }
@@ -1607,13 +1607,13 @@ namespace argos
                 auto flags = o->flags.front();
                 for (unsigned i = 1; i < o->flags.size(); ++i)
                     flags += ", " + o->flags[i];
-                error("Mandatory option \"" + flags + "\" is missing.");
+                error("Mandatory option is missing: " + flags);
                 return false;
             }
         }
-        if (*m_command->require_command && parsed_args.subcommands().empty())
+        if (*m_command->require_subcommand && parsed_args.subcommands().empty())
         {
-            error("A subcommand is required.");
+            error("No command was given.");
             return false;
         }
         if (m_argument_counter.is_complete())
@@ -1940,13 +1940,13 @@ namespace argos
     std::optional<bool> ArgumentParser::require_subcommand() const
     {
         check_data();
-        return m_data->command.require_command;
+        return m_data->command.require_subcommand;
     }
 
     ArgumentParser& ArgumentParser::require_subcommand(bool value)
     {
         check_data();
-        m_data->command.require_command = value;
+        m_data->command.require_subcommand = value;
         return *this;
     }
 
@@ -2883,6 +2883,13 @@ namespace argos
         return *this;
     }
 
+    Command& Command::require_subcommand(bool require_subcommand)
+    {
+        check_command();
+        data_->require_subcommand = require_subcommand;
+        return *this;
+    }
+
     Command& Command::copy_from(Command& command)
     {
         check_command();
@@ -2927,7 +2934,7 @@ namespace argos
           name(rhs.name),
           full_name(rhs.full_name),
           texts(rhs.texts),
-          require_command(rhs.require_command),
+          require_subcommand(rhs.require_subcommand),
           multi_command(rhs.multi_command),
           section(rhs.section),
           id(rhs.id),
@@ -2952,7 +2959,7 @@ namespace argos
           name(std::move(rhs.name)),
           full_name(std::move(rhs.full_name)),
           texts(std::move(rhs.texts)),
-          require_command(rhs.require_command),
+          require_subcommand(rhs.require_subcommand),
           multi_command(rhs.multi_command),
           section(std::move(rhs.section)),
           id(rhs.id),
@@ -2970,7 +2977,7 @@ namespace argos
         name = rhs.name;
         full_name = rhs.full_name;
         texts = rhs.texts;
-        require_command = rhs.require_command;
+        require_subcommand = rhs.require_subcommand;
         multi_command = rhs.multi_command;
         section = rhs.section;
         id = rhs.id;
@@ -3006,7 +3013,7 @@ namespace argos
         arguments = std::move(rhs.arguments);
         options = std::move(rhs.options);
         commands = std::move(rhs.commands);
-        require_command = rhs.require_command;
+        require_subcommand = rhs.require_subcommand;
         multi_command = rhs.multi_command;
         section = std::move(rhs.section);
         id = rhs.id;
@@ -3154,12 +3161,12 @@ namespace argos
     {
         void update_require_command(CommandData& cmd)
         {
-            if (cmd.require_command.value_or(false) && cmd.commands.empty())
+            if (cmd.require_subcommand.value_or(false) && cmd.commands.empty())
                 ARGOS_THROW("require_command is true, but no commands have been added.");
 
-            if (!cmd.require_command)
+            if (!cmd.require_subcommand)
             {
-                cmd.require_command = !cmd.commands.empty()
+                cmd.require_subcommand = !cmd.commands.empty()
                                       && cmd.arguments.empty();
             }
         }
@@ -3410,6 +3417,14 @@ namespace argos
         for (const auto& cmd : m_command->commands)
             result.emplace_back(cmd.get());
         return result;
+    }
+
+    bool CommandView::require_subcommand() const
+    {
+        // Instances of CommandView are only created after require_subcommand
+        // has been automatically set, the or-value should therefore never
+        // be returned, and it doesn't matter that it might not be correct.
+        return m_command->require_subcommand.value_or(false);
     }
 }
 
@@ -3825,7 +3840,7 @@ namespace argos
             if (command.commands.empty())
                 return;
 
-            auto brackets = !command.require_command.value_or(false);
+            auto brackets = !command.require_subcommand.value_or(false);
 
             if (brackets)
                 formatter.write_words("[");
