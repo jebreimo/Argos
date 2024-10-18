@@ -223,6 +223,12 @@ namespace argos
         /**
          * @brief Add copies of all arguments, options and sub-commands in
          *  @a command.
+         *
+         * Any texts (help, about, etc.) set in @a command will be copied
+         * as well.
+         *
+         * @throw ArgosException if this command already has any of the texts
+         *  in @a command.
          */
         Command& copy_from(Command& command);
 

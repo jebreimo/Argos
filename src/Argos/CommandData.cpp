@@ -148,10 +148,22 @@ namespace argos
     {
         for (const auto& a : cmd.arguments)
             arguments.push_back(std::make_unique<ArgumentData>(*a));
+
         for (const auto& o : cmd.options)
             options.push_back(std::make_unique<OptionData>(*o));
+
         for (const auto& c : cmd.commands)
             commands.push_back(std::make_unique<CommandData>(*c));
+
+        for (const auto& [text_id, source] : cmd.texts)
+        {
+            if (texts.contains(text_id))
+                ARGOS_THROW("Text with ID " + to_string(text_id) + " already exists.");
+            texts.emplace(text_id, source);
+        }
+
+        if (!multi_command)
+            multi_command = cmd.multi_command;
     }
 
     void CommandData::build_option_index(bool case_insensitive)
@@ -232,16 +244,18 @@ namespace argos
         const auto nxt = next(it);
         if (nxt != option_index.end()
             && starts_with(nxt->first, flag, case_insensitive))
+        {
             return nullptr;
+        }
         return it->second;
     }
 
-    const CommandData* CommandData::find_command(std::string_view name,
+    const CommandData* CommandData::find_command(std::string_view cmd_name,
                                                  bool case_insensitive) const
     {
         for (const auto& c : commands)
         {
-            if (are_equal(c->name, name, case_insensitive))
+            if (are_equal(c->name, cmd_name, case_insensitive))
                 return c.get();
         }
         return nullptr;
@@ -333,8 +347,8 @@ namespace argos
 
                 ValueId get_value_id(std::string_view name)
                 {
-                    if (const auto id = find_value_id(name))
-                        return *id;
+                    if (const auto value_id = find_value_id(name))
+                        return *value_id;
                     id++;
                     explicit_ids.emplace(name, ValueId(id));
                     return ValueId(id);
@@ -344,8 +358,8 @@ namespace argos
                 {
                     for (const auto& name : names)
                     {
-                        if (const auto id = find_value_id(name))
-                            return *id;
+                        if (const auto value_id = find_value_id(name))
+                            return *value_id;
                     }
                     id++;
                     for (const auto& name : names)
@@ -405,6 +419,7 @@ namespace argos
         return false;
     }
 
+    // NOLINT(*-no-recursion)
     void finish_initialization(CommandData& cmd,
                                const ParserData& data,
                                ValueId start_id,

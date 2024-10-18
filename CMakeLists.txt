@@ -85,6 +85,7 @@ add_library(Argos
     src/Argos/CommandView.cpp
     src/Argos/ConsoleWidth.cpp
     src/Argos/ConsoleWidth.hpp
+    src/Argos/Enums.cpp
     src/Argos/HelpText.cpp
     src/Argos/HelpText.hpp
     src/Argos/Option.cpp

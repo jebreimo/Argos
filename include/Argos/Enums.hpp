@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <string>
 
 /**
  * @file
@@ -261,6 +262,8 @@ namespace argos
          */
         HELP
     };
+
+    std::string to_string(TextId id);
 
     /**
      * @brief Controls where in the auto-generated help text an argument or
