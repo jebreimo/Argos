@@ -72,6 +72,7 @@ namespace argos
 // This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
+#include <string>
 
 /**
  * @file
@@ -328,6 +329,8 @@ namespace argos
         HELP
     };
 
+    std::string to_string(TextId id);
+
     /**
      * @brief Controls where in the auto-generated help text an argument or
      *      option is displayed.
@@ -382,8 +385,6 @@ namespace argos
 // This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-
-#include <string>
 
 /**
  * @file
@@ -2854,6 +2855,12 @@ namespace argos
         /**
          * @brief Add copies of all arguments, options and sub-commands in
          *  @a command.
+         *
+         * Any texts (help, about, etc.) set in @a command will be copied
+         * as well.
+         *
+         * @throw ArgosException if this command already has any of the texts
+         *  in @a command.
          */
         Command& copy_from(Command& command);
 

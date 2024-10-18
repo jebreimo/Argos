@@ -43,7 +43,7 @@ namespace argos
                     bool case_insensitive) const;
 
         [[nodiscard]] const CommandData*
-        find_command(std::string_view name,
+        find_command(std::string_view cmd_name,
                      bool case_insensitive) const;
 
         std::vector<std::unique_ptr<ArgumentData>> arguments;
