@@ -204,3 +204,19 @@ TEST_CASE("Final argument option and multi-commands")
     REQUIRE(cmd.values("NAME")[0].as_string() == "name2");
     REQUIRE(cmd.value("--baz").as_string() == "qux");
 }
+
+TEST_CASE("Cannot mix arguments and subcommands")
+{
+    using namespace argos;
+    Command cmd;
+    SECTION("Command after argument")
+    {
+        cmd.add(Arg("arg"));
+        REQUIRE_THROWS_AS(cmd.add(Command("foo")), ArgosException);
+    }
+    SECTION("Argument after command")
+    {
+        cmd.add(Command("foo"));
+        REQUIRE_THROWS_AS(cmd.add(Arg("arg")), ArgosException);
+    }
+}

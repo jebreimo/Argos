@@ -2705,6 +2705,11 @@ namespace argos
          * @a argument will be moved from, and can not be used
          * afterwards. To avoid this, create a copy of @a argument and
          * add that to the command instead.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         Command& add(Argument& argument);
 
@@ -2712,6 +2717,11 @@ namespace argos
          * @brief Adds an argument to the command.
          *
          * @a argument will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         Command& add(Argument&& argument);
 
@@ -2719,9 +2729,8 @@ namespace argos
          * @brief Adds an option to the command.
          *
          * @a option will be moved from, and can not be used afterwards.
-         *
-         * To avoid this, create a copy of @a option and
-         * add that to the command instead.
+         * To avoid this, create a copy of @a option and add that to the
+         * command instead.
          */
         Command& add(Option& option);
 
@@ -2736,6 +2745,11 @@ namespace argos
          * @brief Adds a sub-command to the command.
          *
          * @a command will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         Command& add(Command& command);
 
@@ -2743,6 +2757,11 @@ namespace argos
          * @brief Adds a sub-command to the command.
          *
          * @a command will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         Command& add(Command&& command);
 
@@ -2883,6 +2902,11 @@ namespace argos
 
         std::unique_ptr<CommandData> data_;
     };
+
+    /**
+     * @brief A convenient short alias for Command.
+     */
+    using Cmd = Command;
 }
 
 //****************************************************************************
@@ -2956,13 +2980,17 @@ namespace argos
         /**
          * @brief Add a new argument definition to the ArgumentParser.
          *
-         * @throw ArgosException if @a argument has been moved-from or
-         *  doesn't have a name.
+         * @note The program cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         ArgumentParser& add(Argument& argument);
 
         /**
          * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @note The program cannot have both arguments and sub-commands.
          *
          * @throw ArgosException if @a argument has been moved-from or
          *  doesn't have a name.
@@ -2988,24 +3016,32 @@ namespace argos
         /**
          * @brief Add a new sub-command definition to the ArgumentParser.
          *
-         * @throw ArgosException if @a command has been moved-from or
-         *  doesn't have a name.
+         * @note The program cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         ArgumentParser& add(Command& command);
 
         /**
          * @brief Add a new sub-command definition to the ArgumentParser.
+        *
+         * @note The program cannot have both arguments and sub-commands.
          *
-         * @throw ArgosException if @a command has been moved-from or
-         *  doesn't have a name.
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         ArgumentParser& add(Command&& command);
 
         /**
-         * @brief Copy arguments, options and sub-commands from @a command
-         *  to this ArgumentParser.
+        * @brief Add copies of all arguments, options and sub-commands in
+         *  @a command.
          *
-         * All other settings are left unchanged.
+         * Any texts (help, about, etc.) set in @a command will be copied
+         * as well.
+         *
+         * @throw ArgosException if the parser already has any of the texts
+         *  in @a command.
          */
         ArgumentParser& copy_from(const Command& command);
 
