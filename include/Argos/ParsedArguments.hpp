@@ -74,9 +74,9 @@ namespace argos
         [[nodiscard]] CommandView command() const;
 
         /**
-         * @brief Returns the name of the sub-command that was parsed.
+         * @brief Returns the name of the program or the current sub-command.
          */
-        [[nodiscard]] std::string_view command_name() const;
+        [[nodiscard]] std::string_view name() const;
 
         /**
          * @brief Returns true if the argument or option named @a name

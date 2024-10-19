@@ -4678,7 +4678,7 @@ namespace argos
         return CommandView(m_impl->command());
     }
 
-    std::string_view ParsedArguments::command_name() const
+    std::string_view ParsedArguments::name() const
     {
         return m_impl->command()->name;
     }

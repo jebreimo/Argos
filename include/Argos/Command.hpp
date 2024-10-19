@@ -245,4 +245,9 @@ namespace argos
 
         std::unique_ptr<CommandData> data_;
     };
+
+    /**
+     * @brief A convenient short alias for Command.
+     */
+    using Cmd = Command;
 }

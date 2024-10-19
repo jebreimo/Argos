@@ -40,7 +40,7 @@ TEST_CASE("One subcommand with one argument")
     auto subcommands = args.subcommands();
     REQUIRE(subcommands.size() == 1);
     const auto& command = subcommands[0];
-    REQUIRE(command.command_name() == "foo");
+    REQUIRE(command.name() == "foo");
     REQUIRE(command.has("ARG"));
     REQUIRE(command.value("ARG").as_string() == "value");
 }
@@ -148,7 +148,7 @@ TEST_CASE("Check that copy_from copies options and arguments")
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.subcommands().size() == 1);
         args = args.subcommands()[0];
-        REQUIRE(args.command_name() == "add");
+        REQUIRE(args.name() == "add");
         REQUIRE(args.has("FILE"));
         REQUIRE(args.value("FILE").as_string() == "file.txt");
         REQUIRE(args.has("-c"));
@@ -160,7 +160,7 @@ TEST_CASE("Check that copy_from copies options and arguments")
         auto args = parser.parse(argv.size(), argv.data());
         REQUIRE(args.subcommands().size() == 1);
         args = args.subcommands()[0];
-        REQUIRE(args.command_name() == "update");
+        REQUIRE(args.name() == "update");
         REQUIRE(args.has("FILE"));
         REQUIRE(args.value("FILE").as_string() == "file1.txt");
         REQUIRE(args.has("-c"));
@@ -195,11 +195,11 @@ TEST_CASE("Final argument option and multi-commands")
     auto commands = args.subcommands();
     REQUIRE(commands.size() == 2);
     auto cmd = commands[0];
-    REQUIRE(cmd.command_name() == "foo");
+    REQUIRE(cmd.name() == "foo");
     REQUIRE(cmd.values("NAME").size() == 1);
     REQUIRE(cmd.values("NAME")[0].as_string() == "name1");
     cmd = commands[1];
-    REQUIRE(cmd.command_name() == "bar");
+    REQUIRE(cmd.name() == "bar");
     REQUIRE(cmd.values("NAME").size() == 1);
     REQUIRE(cmd.values("NAME")[0].as_string() == "name2");
     REQUIRE(cmd.value("--baz").as_string() == "qux");
