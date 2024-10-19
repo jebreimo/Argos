@@ -34,11 +34,11 @@ int main(int argc, char* argv[])
 
         const auto subcommand = args.subcommands()[0];
         std::string a;
-        if (subcommand.command_name() == "greet")
+        if (subcommand.name() == "greet")
         {
             a = "Hello";
         }
-        else if (subcommand.command_name() == "congratulate")
+        else if (subcommand.name() == "congratulate")
         {
             a = "Congratulations";
             if (const auto occasion = subcommand.value("--occasion"))
