@@ -113,17 +113,19 @@ namespace argos
         {
             return process_option(*arg);
         }
+        else if (m_command->commands.empty())
+        {
+            return process_argument(*arg);
+        }
+        else if (auto cmd = m_command->find_command(
+                *arg, m_data->parser_settings.case_insensitive))
+        {
+            return process_command(cmd);
+        }
         else
         {
-            if (m_argument_counter.is_complete())
-            {
-                if (auto cmd = m_command->find_command(
-                    *arg, m_data->parser_settings.case_insensitive))
-                {
-                    return process_command(cmd);
-                }
-            }
-            return process_argument(*arg);
+            error("Unknown command: " + std::string(*arg));
+            return {IteratorResultCode::ERROR, {}, {}};
         }
     }
 

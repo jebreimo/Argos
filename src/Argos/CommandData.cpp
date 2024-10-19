@@ -115,6 +115,8 @@ namespace argos
     {
         if (!arg)
             ARGOS_THROW("Argument is empty (it has probably already been added).");
+        if (!commands.empty())
+            ARGOS_THROW("A command cannot have both arguments and subcommands.");
         if (arg->name.empty())
             ARGOS_THROW("Argument must have a name.");
         if (arg->section.empty())
@@ -137,6 +139,8 @@ namespace argos
     {
         if (!cmd)
             ARGOS_THROW("Command is empty (it has probably already been added).");
+        if (!arguments.empty())
+            ARGOS_THROW("A command cannot have both arguments and subcommands.");
         if (cmd->name.empty())
             ARGOS_THROW("Command must have a name.");
         if (cmd->section.empty())
@@ -270,8 +274,7 @@ namespace argos
 
             if (!cmd.require_subcommand)
             {
-                cmd.require_subcommand = !cmd.commands.empty()
-                                      && cmd.arguments.empty();
+                cmd.require_subcommand = !cmd.commands.empty();
             }
         }
 

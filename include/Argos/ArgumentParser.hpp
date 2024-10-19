@@ -74,13 +74,17 @@ namespace argos
         /**
          * @brief Add a new argument definition to the ArgumentParser.
          *
-         * @throw ArgosException if @a argument has been moved-from or
-         *  doesn't have a name.
+         * @note The program cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         ArgumentParser& add(Argument& argument);
 
         /**
          * @brief Add a new argument definition to the ArgumentParser.
+         *
+         * @note The program cannot have both arguments and sub-commands.
          *
          * @throw ArgosException if @a argument has been moved-from or
          *  doesn't have a name.
@@ -106,24 +110,32 @@ namespace argos
         /**
          * @brief Add a new sub-command definition to the ArgumentParser.
          *
-         * @throw ArgosException if @a command has been moved-from or
-         *  doesn't have a name.
+         * @note The program cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         ArgumentParser& add(Command& command);
 
         /**
          * @brief Add a new sub-command definition to the ArgumentParser.
+        *
+         * @note The program cannot have both arguments and sub-commands.
          *
-         * @throw ArgosException if @a command has been moved-from or
-         *  doesn't have a name.
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         ArgumentParser& add(Command&& command);
 
         /**
-         * @brief Copy arguments, options and sub-commands from @a command
-         *  to this ArgumentParser.
+        * @brief Add copies of all arguments, options and sub-commands in
+         *  @a command.
          *
-         * All other settings are left unchanged.
+         * Any texts (help, about, etc.) set in @a command will be copied
+         * as well.
+         *
+         * @throw ArgosException if the parser already has any of the texts
+         *  in @a command.
          */
         ArgumentParser& copy_from(const Command& command);
 

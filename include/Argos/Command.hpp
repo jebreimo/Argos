@@ -73,6 +73,11 @@ namespace argos
          * @a argument will be moved from, and can not be used
          * afterwards. To avoid this, create a copy of @a argument and
          * add that to the command instead.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         Command& add(Argument& argument);
 
@@ -80,6 +85,11 @@ namespace argos
          * @brief Adds an argument to the command.
          *
          * @a argument will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a argument has been moved-from,
+         *  doesn't have a name, or sub-commands have already been added.
          */
         Command& add(Argument&& argument);
 
@@ -87,9 +97,8 @@ namespace argos
          * @brief Adds an option to the command.
          *
          * @a option will be moved from, and can not be used afterwards.
-         *
-         * To avoid this, create a copy of @a option and
-         * add that to the command instead.
+         * To avoid this, create a copy of @a option and add that to the
+         * command instead.
          */
         Command& add(Option& option);
 
@@ -104,6 +113,11 @@ namespace argos
          * @brief Adds a sub-command to the command.
          *
          * @a command will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         Command& add(Command& command);
 
@@ -111,6 +125,11 @@ namespace argos
          * @brief Adds a sub-command to the command.
          *
          * @a command will be moved from, and can not be used afterwards.
+         *
+         * @note A command cannot have both arguments and sub-commands.
+         *
+         * @throw ArgosException if @a command has been moved-from,
+         *  doesn't have a name, or arguments have already been added.
          */
         Command& add(Command&& command);
 
