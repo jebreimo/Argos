@@ -229,5 +229,11 @@ namespace argos
             for (auto& arg : parsed_args.unprocessed_arguments())
                 stream << " \"" << arg << "\"";
         }
+
+        for (const auto& subcommand : parsed_args.subcommands())
+        {
+            stream << "\nSubcommand: " << subcommand.name() << "\n";
+            print(subcommand, stream);
+        }
     }
 }

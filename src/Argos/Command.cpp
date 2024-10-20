@@ -108,10 +108,17 @@ namespace argos
         return *this;
     }
 
-    Command& Command::section(const std::string& name)
+    Command& Command::section(std::string name)
     {
         check_command();
-        data_->current_section = name;
+        data_->section = std::move(name);
+        return *this;
+    }
+
+    Command& Command::current_section(std::string name)
+    {
+        check_command();
+        data_->current_section = std::move(name);
         return *this;
     }
 
