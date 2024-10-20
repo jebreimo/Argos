@@ -4794,7 +4794,7 @@ namespace argos
     ParsedArguments::all_arguments() const
     {
         std::vector<std::unique_ptr<ArgumentView>> result;
-        for (auto& a : m_impl->parser_data()->command.arguments)
+        for (auto& a : m_impl->command()->arguments)
             result.emplace_back(std::make_unique<ArgumentView>(a.get()));
         return result;
     }
@@ -4803,7 +4803,7 @@ namespace argos
     ParsedArguments::all_options() const
     {
         std::vector<std::unique_ptr<OptionView>> result;
-        for (auto& o : m_impl->parser_data()->command.options)
+        for (auto& o : m_impl->command()->options)
             result.emplace_back(std::make_unique<OptionView>(o.get()));
         return result;
     }
@@ -4812,7 +4812,7 @@ namespace argos
     ParsedArguments::all_subcommands() const
     {
         std::vector<std::unique_ptr<CommandView>> result;
-        for (auto& c : m_impl->parser_data()->command.commands)
+        for (auto& c : m_impl->command()->commands)
             result.emplace_back(std::make_unique<CommandView>(c.get()));
         return result;
     }

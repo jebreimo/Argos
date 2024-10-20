@@ -2792,8 +2792,8 @@ namespace argos
         Command& about(std::string text);
 
         /**
-         * @brief Sets the heading that the command will appear
-         *      under in the help text.
+         * @brief Sets the heading that the command will be listed under in
+         *      the parent command's help text.
          *
          * The default heading for commands is "COMMANDS".
          * @param name All arguments, options and commands that share the same
