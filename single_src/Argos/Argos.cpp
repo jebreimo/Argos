@@ -2843,10 +2843,17 @@ namespace argos
         return *this;
     }
 
-    Command& Command::section(const std::string& name)
+    Command& Command::section(std::string name)
     {
         check_command();
-        data_->current_section = name;
+        data_->section = std::move(name);
+        return *this;
+    }
+
+    Command& Command::current_section(std::string name)
+    {
+        check_command();
+        data_->current_section = std::move(name);
         return *this;
     }
 
@@ -4923,6 +4930,12 @@ namespace argos
             stream << "Unprocessed arguments:";
             for (auto& arg : parsed_args.unprocessed_arguments())
                 stream << " \"" << arg << "\"";
+        }
+
+        for (const auto& subcommand : parsed_args.subcommands())
+        {
+            stream << "\nSubcommand: " << subcommand.name() << "\n";
+            print(subcommand, stream);
         }
     }
 }

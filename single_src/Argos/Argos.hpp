@@ -2792,6 +2792,18 @@ namespace argos
         Command& about(std::string text);
 
         /**
+         * @brief Sets the heading that the command will appear
+         *      under in the help text.
+         *
+         * The default heading for commands is "COMMANDS".
+         * @param name All arguments, options and commands that share the same
+         *      section name will be listed under the same heading.
+         * @return Reference to itself. This makes it possible to chain
+         *      method calls.
+         */
+        Command& section(std::string name);
+
+        /**
          * @brief Sets a section (or heading) that is automatically assigned
          *   to arguments, sub-commands and options when they are added.
          *
@@ -2804,7 +2816,7 @@ namespace argos
          * @param name All arguments, sub-commands and options with the same
          *  section name will be listed under the same heading.
          */
-        Command& section(const std::string& name);
+        Command& current_section(std::string name);
 
         /**
          * @brief Set the given part of the help text.
