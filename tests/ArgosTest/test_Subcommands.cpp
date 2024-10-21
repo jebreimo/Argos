@@ -220,3 +220,56 @@ TEST_CASE("Cannot mix arguments and subcommands")
         REQUIRE_THROWS_AS(cmd.add(Arg("arg")), ArgosException);
     }
 }
+
+TEST_CASE("Optional arguments and multi-commands")
+{
+    using namespace argos;
+    auto parser = ArgumentParser()
+        .auto_exit(false)
+        .allow_multiple_subcommands(true)
+        .add(Command("foo")
+            .add(Arg("ARG").optional())
+            .add(Arg("BLARG"))
+            .add(Opt("--").type(OptionType::LAST_OPTION)))
+        .add(Command("bar"))
+        .move();
+    SECTION("No args before next subcommand")
+    {
+        auto args = parser.parse({"foo", "foo", "bar"});
+        auto commands = args.subcommands();
+        REQUIRE(commands.size() == 1);
+        const auto& cmd = commands[0];
+        REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("BLARG").as_string() == "bar");
+    }
+    SECTION("One arg before next subcommand")
+    {
+        auto args = parser.parse({"foo", "foo", "blarg", "bar"});
+        auto commands = args.subcommands();
+        REQUIRE(commands.size() == 2);
+        const auto& cmd = commands[0];
+        REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("BLARG").as_string() == "blarg");
+        REQUIRE(commands[1].name() == "bar");
+    }
+    SECTION("Two args before next subcommand")
+    {
+        auto args = parser.parse({"foo", "arg", "blarg", "bar"});
+        auto commands = args.subcommands();
+        REQUIRE(commands.size() == 2);
+        const auto& cmd = commands[0];
+        REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("BLARG").as_string() == "blarg");
+        REQUIRE(commands[1].name() == "bar");
+    }
+    SECTION("Last option plus one arg before next subcommand")
+    {
+        auto args = parser.parse({"foo", "--", "-blarg", "bar"});
+        auto commands = args.subcommands();
+        REQUIRE(commands.size() == 2);
+        const auto& cmd = commands[0];
+        REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("BLARG").as_string() == "-blarg");
+        REQUIRE(commands[1].name() == "bar");
+    }
+}
