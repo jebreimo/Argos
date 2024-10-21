@@ -1326,7 +1326,7 @@ namespace argos
             return process_argument(*arg);
         }
         else if (auto cmd = m_command->find_command(
-                *arg, m_data->parser_settings.case_insensitive))
+            *arg, m_data->parser_settings.case_insensitive))
         {
             return process_command(cmd);
         }
@@ -1555,19 +1555,21 @@ namespace argos
     {
         size_t result = 0;
         auto it = m_iterator;
-        bool arguments_only = false;
         auto [min_count, _] = ArgumentCounter::get_min_max_count(*m_command);
-        for (auto arg = it.next(); arg && !arguments_only; arg = it.next())
+        for (auto arg = it.next(); arg; arg = it.next())
         {
-            const auto option = m_command->find_option(
+            const OptionData* option = m_command->find_option(
                 *arg,
                 m_data->parser_settings.allow_abbreviated_options,
-                m_data->parser_settings.case_insensitive
-            );
+                m_data->parser_settings.case_insensitive);
+
             if (option)
             {
                 if (!option->argument.empty())
                     it.next_value();
+
+                bool arguments_only = false;
+
                 switch (option->type)
                 {
                 case OptionType::HELP:
@@ -1580,22 +1582,32 @@ namespace argos
                 default:
                     break;
                 }
+
+                if (arguments_only)
+                    break;
             }
             else if (!is_option(*arg, m_data->parser_settings.option_style))
             {
-                // Check if the argument is a command.
-                if (result >= min_count && m_command->find_command(*arg,
-                        m_data->parser_settings.case_insensitive))
-                {
+                if (m_command->find_command(*arg, m_data->parser_settings.case_insensitive))
                     return result;
-                }
+
+                if (result >= min_count && find_sibling_command(*arg).first)
+                    return result;
 
                 ++result;
             }
         }
 
-        for (auto arg = it.next(); arg; arg = it.next())
+        for (auto arg = it.next_value(); arg; arg = it.next_value())
+        {
+            if (m_command->find_command(*arg, m_data->parser_settings.case_insensitive))
+                return result;
+
+            if (result >= min_count && find_sibling_command(*arg).first)
+                return result;
+
             ++result;
+        }
         return result;
     }
 

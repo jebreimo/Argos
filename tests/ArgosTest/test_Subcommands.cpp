@@ -235,7 +235,7 @@ TEST_CASE("Optional arguments and multi-commands")
         .move();
     SECTION("No args before next subcommand")
     {
-        auto args = parser.parse({"foo", "foo", "bar"});
+        auto args = parser.parse({"foo", "bar"});
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 1);
         const auto& cmd = commands[0];
@@ -259,6 +259,7 @@ TEST_CASE("Optional arguments and multi-commands")
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
         REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("ARG").as_string() == "arg");
         REQUIRE(cmd.value("BLARG").as_string() == "blarg");
         REQUIRE(commands[1].name() == "bar");
     }
@@ -269,6 +270,17 @@ TEST_CASE("Optional arguments and multi-commands")
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
         REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("BLARG").as_string() == "-blarg");
+        REQUIRE(commands[1].name() == "bar");
+    }
+    SECTION("Last option plus two args before next subcommand")
+    {
+        auto args = parser.parse({"foo", "arg", "--", "-blarg", "bar"});
+        auto commands = args.subcommands();
+        REQUIRE(commands.size() == 2);
+        const auto& cmd = commands[0];
+        REQUIRE(cmd.name() == "foo");
+        REQUIRE(cmd.value("ARG").as_string() == "arg");
         REQUIRE(cmd.value("BLARG").as_string() == "-blarg");
         REQUIRE(commands[1].name() == "bar");
     }
