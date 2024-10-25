@@ -474,6 +474,9 @@ namespace argos
          * @param name All arguments, sub-commands and options with the same
          *  section name will be listed under the same heading.
          */
+        ArgumentParser& current_section(const std::string& name);
+
+        [[deprecated("Use current_section() instead.")]]
         ArgumentParser& section(const std::string& name);
 
         /**
