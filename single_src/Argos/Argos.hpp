@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.5.1";
+constexpr char ARGOS_VERSION[] = "1.6.0";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -28,12 +28,12 @@ constexpr char ARGOS_VERSION[] = "1.5.1";
  * @brief Incremented when Argos's interface is modified in ways that are
  *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 5
+#define ARGOS_VERSION_MINOR 6
 
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 1
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
