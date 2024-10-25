@@ -146,6 +146,7 @@ TEST_CASE("Check that copy_from copies options and arguments")
     {
         Argv argv{"test", "add", "file.txt", "--compress", "gzip"};
         auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         REQUIRE(args.subcommands().size() == 1);
         args = args.subcommands()[0];
         REQUIRE(args.name() == "add");
@@ -158,6 +159,7 @@ TEST_CASE("Check that copy_from copies options and arguments")
     {
         Argv argv{"test", "update", "file1.txt", "--compress", "lzh"};
         auto args = parser.parse(argv.size(), argv.data());
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         REQUIRE(args.subcommands().size() == 1);
         args = args.subcommands()[0];
         REQUIRE(args.name() == "update");
@@ -192,6 +194,7 @@ TEST_CASE("Final argument option and multi-commands")
             .add(Opt("--baz").argument("S")))
         .move();
     auto args = parser.parse({"foo", "name1", "--", "bar", "name2", "--baz=qux"});
+    REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
     auto commands = args.subcommands();
     REQUIRE(commands.size() == 2);
     auto cmd = commands[0];
@@ -236,6 +239,7 @@ TEST_CASE("Optional arguments and multi-commands")
     SECTION("No args before next subcommand")
     {
         auto args = parser.parse({"foo", "bar"});
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 1);
         const auto& cmd = commands[0];
@@ -244,7 +248,8 @@ TEST_CASE("Optional arguments and multi-commands")
     }
     SECTION("One arg before next subcommand")
     {
-        auto args = parser.parse({"foo", "foo", "blarg", "bar"});
+        auto args = parser.parse({"foo", "blarg", "bar"});
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
@@ -255,6 +260,7 @@ TEST_CASE("Optional arguments and multi-commands")
     SECTION("Two args before next subcommand")
     {
         auto args = parser.parse({"foo", "arg", "blarg", "bar"});
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
@@ -266,6 +272,7 @@ TEST_CASE("Optional arguments and multi-commands")
     SECTION("Last option plus one arg before next subcommand")
     {
         auto args = parser.parse({"foo", "--", "-blarg", "bar"});
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
@@ -276,6 +283,7 @@ TEST_CASE("Optional arguments and multi-commands")
     SECTION("Last option plus two args before next subcommand")
     {
         auto args = parser.parse({"foo", "arg", "--", "-blarg", "bar"});
+        REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
         auto commands = args.subcommands();
         REQUIRE(commands.size() == 2);
         const auto& cmd = commands[0];
@@ -284,4 +292,19 @@ TEST_CASE("Optional arguments and multi-commands")
         REQUIRE(cmd.value("BLARG").as_string() == "-blarg");
         REQUIRE(commands[1].name() == "bar");
     }
+}
+
+TEST_CASE("Multi-commands with arguments with count")
+{
+    using namespace argos;
+    auto args = ArgumentParser()
+        .auto_exit(false)
+        .allow_multiple_subcommands(true)
+        .add(Command("foo")
+            .add(Arg("ARG").count(1, 2)))
+        .add(Command("bar")
+            .add(Arg("ARG")))
+        .parse({"foo", "A", "bar", "B"});
+    REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
+    REQUIRE(args.subcommands().size() == 2);
 }

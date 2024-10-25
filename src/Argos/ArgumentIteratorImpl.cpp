@@ -282,6 +282,11 @@ namespace argos
     ArgumentIteratorImpl::process_argument(const std::string& value)
     {
         const auto& parsed_args = parsed_arguments();
+        if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
+        {
+            reactivate_multi_command_parent(i);
+            return process_command(next_cmd);
+        }
         if (auto argument = m_argument_counter.next_argument())
         {
             auto s = parsed_args->append_value(argument->value_id, value,
@@ -300,21 +305,14 @@ namespace argos
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
-        else if (auto [next_cmd, i] = find_sibling_command(value); next_cmd)
-        {
-            reactivate_multi_command_parent(i);
-            return process_command(next_cmd);
-        }
-        else if (m_data->parser_settings.ignore_undefined_arguments)
+        if (m_data->parser_settings.ignore_undefined_arguments)
         {
             parsed_args->add_unprocessed_argument(value);
             return {IteratorResultCode::UNKNOWN, {}, m_iterator.current()};
         }
-        else
-        {
-            error("Too many arguments, starting from \"" + value + "\".");
-            return {IteratorResultCode::ERROR, {}, {}};
-        }
+
+        error("Too many arguments, starting from \"" + value + "\".");
+        return {IteratorResultCode::ERROR, {}, {}};
     }
 
     IteratorResult
@@ -425,7 +423,8 @@ namespace argos
         if (m_argument_counter.is_complete())
         {
             m_state = State::DONE;
-            parsed_args.set_result_code(ParserResultCode::SUCCESS);
+            for (const auto& parsed_args : m_parsed_args)
+                parsed_args->set_result_code(ParserResultCode::SUCCESS);
             return true;
         }
         else
@@ -492,7 +491,7 @@ namespace argos
             exit(m_data->parser_settings.error_exit_code);
 
         copy_remaining_arguments_to_parser_result();
-        for (auto& parsed_args : m_parsed_args)
+        for (const auto& parsed_args : m_parsed_args)
             parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
     }
