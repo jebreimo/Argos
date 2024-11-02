@@ -95,6 +95,9 @@ namespace argos
 
         /**
          * @brief Returns parsed arguments of sub-commands.
+         *
+         * There can be more than one sub-command if
+         * ArgumentParser::allow_multiple_subcommands is true.
          */
         [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 

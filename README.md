@@ -95,20 +95,24 @@ OPTIONS
   -h, --help               Display the help text.
 ~~~
 
-The interface of Argos is centred upon two classes: `ArgumentParser` and `ParsedArguments`. `ArgumentParser`
-is where the arguments and options are defined, as well as where various configuration settings are set (e.g. `ArgumentParser::option_style()` to for instance change to Windows-style options, or `ArgumentParser::allow_abbreviated_options()` to allow using less than the complete flag of options, as long as the
-option is uniquely identified). `ParsedArguments` is the result of `ArgumentParser::parse()`, and is where
-the values of the arguments and options can be retrieved.
+The Argos interface revolves around two main classes: `ArgumentParser` and `ParsedArguments`. The
+`ArgumentParser` class is responsible for defining arguments and options, as well as setting various
+configuration parameters. For example, you can use `ArgumentParser::option_style()` to switch to
+Windows-style options or `ArgumentParser::allow_abbreviated_options()` to allow shortened option
+flags, provided they uniquely identify an option.
 
-Arguments and options are defined by adding instances of `Argument` and `Option` to the `ArgumentParser`.
-`Argument`'s constructor takes the name that will appear in the help text as its argument, `Option`'s
-constructor takes a list of flags. Both classes have several properties that define their behaviour,
-important ones include `help` which sets the help text and `argument` which sets the name of an
-option's argument.
+The `ParsedArguments` class represents the outcome of calling `ArgumentParser::parse()`. This is where
+you retrieve the values of arguments and options after parsing.
 
-Unlike some other argument parsers, the value types and default values are not declared along with
-the arguments and options in the ArgumentParser, instead they are specified when the values are
-retrieved. The line
+To define arguments and options, you add instances of `Argument` and `Option` to `ArgumentParser`. The
+`Argument` constructor takes a name that appears in the help text, while the `Option` constructor
+accepts a list of flags. Both classes include several properties that control their behavior;
+important ones include help, which sets the help text, and argument, which specifies the name of an
+option’s argument.
+
+In contrast to some other argument parsers, Argos does not require you to declare value types and
+default values with the arguments and options in `ArgumentParser`. Instead, you specify these details
+when you retrieve the values.
 
 ~~~c++
     int n = args.value("--number").as_int(1);
@@ -184,7 +188,7 @@ USAGE
   hello [<NAME>]
 
 ~/Argos/examples/tutorial/build % ./hello planet Earth
-hello: Too many arguments, starting with "Earth".
+hello: Too many arguments, starting from "Earth".
 USAGE
   hello --help
   hello [<NAME>]
@@ -205,6 +209,54 @@ be turned off with
     const argos::ParsedArguments args = argos::ArgumentParser("hello")
         .auto_exit(false)
         ...
+~~~
+
+# Sub-commands
+
+Argos supports sub-commands, like `git commit` or `docker run`. The following is a simple example
+of a program with two sub-commands, `add` and `remove`, each with their own options and arguments.
+
+~~~c++
+#include <iostream>
+#include <Argos/Argos.hpp>
+
+int main(int argc, char* argv[])
+{
+    auto args = argos::ArgumentParser("subcommands")
+        .about("A program with sub-commands.")
+        .add(argos::Command("add")
+            .about("Add a file to the repository.")
+            .add(argos::Argument("FILE")
+                .help("The file to add."))
+            .add(argos::Option{"-f", "--force"}
+                .help("Add the file even if it is ignored."))
+            )
+        .add(argos::Command("remove")
+            .about("Remove a file from the repository.")
+            .add(argos::Argument("FILE")
+                .help("The file to remove."))
+            .add(argos::Option{"-f", "--force"}
+                .help("Remove the file even if it is staged."))
+            )
+        .parse(argc, argv);
+
+    // Get the arguments and options of the sub-command.
+    // It is safe to assume that there is exactly one sub-command, as the
+    // parser will have exited with an error message if there were none or
+    // more than one.
+    auto subcommand = args.subcommands().front(); 
+    if (subcommand.name() == "add")
+    {
+        std::cout << "Adding " << args.value("FILE").as_string() << ".\n";
+    }
+    else if (subcommand.name() == "remove")
+    {
+        std::cout << "Removing " << args.value("FILE").as_string() << ".\n";
+    }
+
+    return 0;
+}
+
 ~~~
 
 # More examples
