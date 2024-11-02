@@ -225,17 +225,17 @@ int main(int argc, char* argv[])
     auto args = argos::ArgumentParser("subcommands")
         .about("A program with sub-commands.")
         .add(argos::Command("add")
-            .about("Add a file to the repository.")
+            .help("Add a file to the repository.")
             .add(argos::Argument("FILE")
                 .help("The file to add."))
-            .add(argos::Option{"-f", "--force"}
+            .add(argos::Option("-f", "--force")
                 .help("Add the file even if it is ignored."))
             )
         .add(argos::Command("remove")
-            .about("Remove a file from the repository.")
+            .help("Remove a file from the repository.")
             .add(argos::Argument("FILE")
                 .help("The file to remove."))
-            .add(argos::Option{"-f", "--force"}
+            .add(argos::Option("-f", "--force")
                 .help("Remove the file even if it is staged."))
             )
         .parse(argc, argv);
@@ -244,14 +244,14 @@ int main(int argc, char* argv[])
     // It is safe to assume that there is exactly one sub-command, as the
     // parser will have exited with an error message if there were none or
     // more than one.
-    auto subcommand = args.subcommands().front(); 
-    if (subcommand.name() == "add")
+    auto cmd = args.subcommands().front(); 
+    if (cmd.name() == "add")
     {
-        std::cout << "Adding " << args.value("FILE").as_string() << ".\n";
+        std::cout << "Adding " << cmd.value("FILE").as_string() << ".\n";
     }
-    else if (subcommand.name() == "remove")
+    else if (cmd.name() == "remove")
     {
-        std::cout << "Removing " << args.value("FILE").as_string() << ".\n";
+        std::cout << "Removing " << cmd.value("FILE").as_string() << ".\n";
     }
 
     return 0;
