@@ -1554,6 +1554,9 @@ namespace argos
 
         /**
          * @brief Returns parsed arguments of sub-commands.
+         *
+         * There can be more than one sub-command if
+         * ArgumentParser::allow_multiple_subcommands is true.
          */
         [[nodiscard]] std::vector<ParsedArguments> subcommands() const;
 
@@ -3394,8 +3397,18 @@ namespace argos
          */
         ArgumentParser& current_section(const std::string& name);
 
-        [[deprecated("Use current_section() instead.")]]
-        ArgumentParser& section(const std::string& name);
+        /**
+         * @brief Returns the current section name.
+         */
+        [[nodiscard]] const std::string& current_section() const;
+
+        /**
+         * @brief Sets the current section name.
+         *
+         * @deprecated Use current_section() instead.
+         */
+        // [[deprecated("Use current_section() instead.")]]
+        // ArgumentParser& section(const std::string& name);
 
         /**
          * @brief Set the given part of the help text.

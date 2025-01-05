@@ -476,6 +476,16 @@ namespace argos
          */
         ArgumentParser& current_section(const std::string& name);
 
+        /**
+         * @brief Returns the current section name.
+         */
+        [[nodiscard]] const std::string& current_section() const;
+
+        /**
+         * @brief Sets the current section name.
+         *
+         * @deprecated Use current_section() instead.
+         */
         [[deprecated("Use current_section() instead.")]]
         ArgumentParser& section(const std::string& name);
 

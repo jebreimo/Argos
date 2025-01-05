@@ -2088,10 +2088,16 @@ namespace argos
         return *this;
     }
 
-    ArgumentParser& ArgumentParser::section(const std::string& name)
+    const std::string& ArgumentParser::current_section() const
     {
-        return current_section(name);
+        check_data();
+        return m_data->command.current_section;
     }
+
+    // ArgumentParser& ArgumentParser::section(const std::string& name)
+    // {
+    //     return current_section(name);
+    // }
 
     ArgumentParser& ArgumentParser::line_width(unsigned int line_width)
     {

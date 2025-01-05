@@ -388,6 +388,12 @@ namespace argos
         return *this;
     }
 
+    const std::string& ArgumentParser::current_section() const
+    {
+        check_data();
+        return m_data->command.current_section;
+    }
+
     ArgumentParser& ArgumentParser::section(const std::string& name)
     {
         return current_section(name);
