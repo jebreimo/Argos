@@ -17,7 +17,7 @@ namespace argos
     }
 
     OptionIterator::OptionIterator(std::vector<std::string_view> args, char prefix)
-        : m_all_args(std::move(args)),
+        : m_all_args(args.begin(), args.end()),
           m_args(m_all_args),
           m_prefix(prefix)
     {
@@ -89,8 +89,19 @@ namespace argos
         return m_args[0];
     }
 
-    std::span<std::string_view> OptionIterator::remaining_arguments() const
+    std::span<std::string> OptionIterator::remaining_arguments() const
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
+    }
+
+    void OptionIterator::insert(const std::vector<std::string>& args)
+    {
+        auto args_index = m_all_args.size() - m_args.size();
+        auto insert_index = args_index;
+        if (m_pos != 0)
+            insert_index++;
+        m_all_args.insert(m_all_args.begin() + insert_index,
+                          args.begin(), args.end());
+        m_args = std::span(m_all_args.begin() + args_index, m_all_args.end());
     }
 }

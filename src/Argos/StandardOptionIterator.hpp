@@ -29,10 +29,14 @@ namespace argos
 
         [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+        [[nodiscard]] std::span<std::string> remaining_arguments();
+
+        void insert(std::vector<std::string> args);
     private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
+        void split_concatenated_flags();
+
+        std::vector<std::string> m_all_args;
+        std::span<std::string> m_args;
         size_t m_pos = 0;
     };
 }

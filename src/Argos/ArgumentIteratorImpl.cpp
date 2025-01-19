@@ -192,14 +192,15 @@ namespace argos
 
         if (opt.callback)
         {
-            opt.callback(OptionView(&opt), arg,
-                         ParsedArgumentsBuilder(parsed_args));
+            CallbackArguments args(OptionView(&opt), arg, parsed_args);
+            opt.callback(args);
+            update_arguments(args.new_arguments);
         }
         if (m_data->parser_settings.option_callback)
         {
-            m_data->parser_settings.option_callback(
-                OptionView(&opt), arg,
-                ParsedArgumentsBuilder(parsed_args));
+            CallbackArguments args(OptionView(&opt), arg, parsed_args);
+            m_data->parser_settings.option_callback(args);
+            update_arguments(args.new_arguments);
         }
 
         switch (opt.type)
@@ -293,15 +294,16 @@ namespace argos
                                                argument->argument_id);
             if (argument->callback)
             {
-                argument->callback(ArgumentView(argument), s,
-                                   ParsedArgumentsBuilder(parsed_args));
+                CallbackArguments args(ArgumentView(argument), s, parsed_args);
+                argument->callback(args);
+                update_arguments(args.new_arguments);
             }
 
             if (m_data->parser_settings.argument_callback)
             {
-                m_data->parser_settings.argument_callback(
-                    ArgumentView(argument), s,
-                    ParsedArgumentsBuilder(parsed_args));
+                CallbackArguments args(ArgumentView(argument), s, parsed_args);
+                m_data->parser_settings.argument_callback(args);
+                update_arguments(args.new_arguments);
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
@@ -480,6 +482,22 @@ namespace argos
         m_command = m_parsed_args.back()->command();
         m_argument_counter = {};
         m_state = State::ARGUMENTS_ONLY;
+    }
+
+    void ArgumentIteratorImpl::update_arguments(
+        const std::vector<std::string>& args)
+    {
+        if (args.empty())
+            return;
+
+        m_iterator.insert(args);
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+            return;
+
+        auto current_count = m_argument_counter.count();
+        auto total_count = current_count + count_arguments();
+        m_argument_counter = ArgumentCounter(*m_command, total_count,
+                                             current_count);
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)

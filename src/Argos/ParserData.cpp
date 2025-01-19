@@ -46,9 +46,9 @@ namespace argos
                 .help("Display the program version.")
                 .constant("1")
                 .callback([v = data.version, stream]
-                (auto, auto, auto pa)
+                (auto& a)
                     {
-                        *stream << pa.program_name() << " " << v << "\n";
+                        *stream << a.builder.program_name() << " " << v << "\n";
                         return true;
                     })
                 .release();

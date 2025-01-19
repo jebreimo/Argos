@@ -19,7 +19,9 @@ namespace argos
 
         explicit ArgumentCounter(const CommandData& command);
 
-        ArgumentCounter(const CommandData& command, size_t argument_count);
+        ArgumentCounter(const CommandData& command,
+                        size_t argument_count,
+                        size_t initial_count = 0);
 
         const ArgumentData* next_argument();
 

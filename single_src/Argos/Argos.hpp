@@ -15,7 +15,7 @@
 /**
  * @brief String representation of the complete version number.
  */
-constexpr char ARGOS_VERSION[] = "1.6.2";
+constexpr char ARGOS_VERSION[] = "1.99.0";
 
 /**
  * @brief Incremented when a new version contains significant changes. It
@@ -28,12 +28,12 @@ constexpr char ARGOS_VERSION[] = "1.6.2";
  * @brief Incremented when Argos's interface is modified in ways that are
  *  compatible with existing client code.
  */
-#define ARGOS_VERSION_MINOR 6
+#define ARGOS_VERSION_MINOR 99
 
 /**
  * @brief Incremented when the changes does not affect the interface.
  */
-#define ARGOS_VERSION_PATCH 2
+#define ARGOS_VERSION_PATCH 0
 
 //****************************************************************************
 // Copyright © 2020 Jan Erik Breimo. All rights reserved.
@@ -2010,42 +2010,71 @@ namespace argos
 namespace argos
 {
     /**
+     * @brief The parameter type for argument and option callbacks.
+     * @tparam ViewT Either ArgumentView or OptionView.
+     */
+    template <typename ViewT>
+    struct CallbackArguments
+    {
+        /**
+         * The argument or option that was encountered.
+         * Is an instance of either ArgumentView or OptionView.
+         */
+        ViewT view;
+
+        /**
+         * The value of the argument or the option's argument, if any.
+         */
+        std::string_view value;
+
+        /**
+         * Gives access to the arguments and options processed so far. Can be
+         * used to get or set the values of arguments and options.
+         */
+        ParsedArgumentsBuilder builder;
+
+        /**
+         * Add new arguments to the command line that is being parsed. These
+         * arguments are inserted immediately after the current argument
+         * and can be anything, including options and
+         * commands.
+         */
+        std::vector<std::string> new_arguments;
+
+        CallbackArguments(const ViewT& view,
+                          std::string_view value,
+                          std::shared_ptr<ParsedArgumentsImpl> impl)
+            : view(view),
+              value(value),
+              builder(std::move(impl))
+        {
+        }
+    };
+
+    /**
+     * @brief The parameter type for argument callbacks.
+     */
+    using ArgumentCallbackArguments = CallbackArguments<ArgumentView>;
+
+    /**
      * @brief A callback that is called each time given arguments appear
      *      on the command line.
-     *
-     * The three parameters are:
-     * - ArgumentView: the argument that was encountered (particularly
-     *   useful if the same function has been registered with multiple
-     *   arguments).
-     * - std::string_view: the raw value of the argument. Note that this
-     *   value can also be retrieved via the ParsedArgumentsBuilder.
-     * - ParsedArgumentsBuilder: this object can be used to read or modify
-     *   the values of arguments and options.
      */
-    using ArgumentCallback = std::function<void(ArgumentView,
-                                                std::string_view,
-                                                ParsedArgumentsBuilder)>;
+    using ArgumentCallback = std::function<void(ArgumentCallbackArguments&)>;
+
+    /**
+     * @brief The parameter type for option callbacks.
+     */
+    using OptionCallbackArguments = CallbackArguments<OptionView>;
 
     /**
      * @brief A callback that is called each time given options appear
      *      on the command line.
-     *
-     * The three parameters are:
-     * - OptionView: the option that was encountered (particularly
-     *   useful if the same function has been registered with multiple
-     *   options).
-     * - std::string_view: the raw value of the option if the option actually
-     *   has one. Note that this value can also be retrieved via the
-     *   ParsedArgumentsBuilder if the option operation is ASSIGN or APPEND.
-     * - ParsedArgumentsBuilder: this object can be used to read or modify
-     *   the values of arguments and options.
      */
-    using OptionCallback = std::function<void(OptionView,
-                                              std::string_view,
-                                              ParsedArgumentsBuilder)>;
+    using OptionCallback = std::function<void(OptionCallbackArguments&)>;
 
     /**
-     * @brief A callback that is meant to return a part of the help text.
+     * @brief A callback that returns a part of the help text.
      */
     using TextCallback = std::function<std::string()>;
 }

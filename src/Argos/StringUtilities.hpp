@@ -48,7 +48,8 @@ namespace argos
 
     bool is_lower(std::string_view word);
 
-    inline void pop_front(std::span<std::string_view>& span)
+    template <typename T>
+    inline void pop_front(std::span<T>& span)
     {
         span = span.subspan(1);
     }

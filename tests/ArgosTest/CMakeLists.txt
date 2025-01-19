@@ -16,19 +16,20 @@ FetchContent_MakeAvailable(catch)
 
 add_executable(ArgosTest
     Argv.hpp
+    U8Adapter.hpp
     test_ArgumentCounter.cpp
     test_ArgumentParser.cpp
     test_ArgumentValue.cpp
+    test_Callbacks.cpp
     test_HelpWriter.cpp
-    test_ParsedArguments.cpp
     test_ParseValue.cpp
+    test_ParsedArguments.cpp
     test_StandardOptionIterator.cpp
     test_StringUtilities.cpp
+    test_Subcommands.cpp
     test_TextFormatter.cpp
     test_TextWriter.cpp
     test_WordSplitter.cpp
-    test_Subcommands.cpp
-    U8Adapter.hpp
 )
 
 target_link_libraries(ArgosTest

@@ -38,12 +38,20 @@ namespace argos
                 return std::get<StandardOptionIterator>(iterator).current();
         }
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const
+        [[nodiscard]] std::span<std::string> remaining_arguments()
         {
             if (std::holds_alternative<OptionIterator>(iterator))
                 return std::get<OptionIterator>(iterator).remaining_arguments();
             else
                 return std::get<StandardOptionIterator>(iterator).remaining_arguments();
+        }
+
+        void insert(const std::vector<std::string>& args)
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                std::get<OptionIterator>(iterator).insert(args);
+            else
+                std::get<StandardOptionIterator>(iterator).insert(args);
         }
 
         std::variant<OptionIterator, StandardOptionIterator> iterator;
