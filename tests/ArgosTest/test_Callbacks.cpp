@@ -64,7 +64,7 @@ TEST_CASE("Callback for all options")
         }
 
         size_t& i;
-        std::array<std::string, 2> values = {"-b", "-c"};
+        std::array<std::string, 2> values = {{"-b", "-c"}};
     };
 
     size_t i = 0;
@@ -96,7 +96,7 @@ TEST_CASE("Callback for all arguments")
         }
 
         size_t& i;
-        std::array<std::string, 2> values = {"FILE", "URL"};
+        std::array<std::string, 2> values = {{"FILE", "URL"}};
     };
 
     size_t i = 0;
