@@ -18,8 +18,8 @@ namespace argos
 {
     namespace
     {
-        template <typename It, typename Value, typename IsLess>
-        It lower_bound(It begin, It end, Value&& v, IsLess is_less)
+        template <typename ItT, typename ValueT, typename IsLessT>
+        ItT lower_bound(ItT begin, ItT end, ValueT&& v, IsLessT is_less)
         {
             while (begin != end)
             {

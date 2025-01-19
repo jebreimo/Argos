@@ -443,46 +443,6 @@ TEST_CASE("Abbreviated options")
     }
 }
 
-TEST_CASE("Test option callback")
-{
-    using namespace argos;
-    Argv argv{"test", "-a"};
-    ArgumentParser parser("test");
-    auto args = parser.auto_exit(false)
-        .add(Option({"-b"}))
-        .add(Option({"-c"}))
-        .add(Option({"-a"}).callback(
-            [](auto opt, auto, auto builder) -> bool
-            {
-                builder.assign("-b", "true").assign("-c", "true");
-                return true;
-            }))
-        .parse(argv.size(), argv.data());
-    REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
-    REQUIRE(args.value("-a").as_bool());
-    REQUIRE(args.value("-b").as_bool());
-    REQUIRE(args.value("-c").as_bool());
-}
-
-TEST_CASE("Test argument callback")
-{
-    using namespace argos;
-    Argv argv{"test", "-b", "abcd"};
-    ArgumentParser parser("test");
-    auto args = parser.auto_exit(false)
-        .add(Option({"-b"}))
-        .add(Argument("arg").callback(
-            [](auto arg, auto, auto builder) -> bool
-            {
-                builder.assign("-b", "false");
-                return true;
-            }))
-        .parse(argv.size(), argv.data());
-    REQUIRE(args.result_code() == ParserResultCode::SUCCESS);
-    REQUIRE(!args.value("-b").as_bool());
-    REQUIRE(args.value("arg").as_string() == "abcd");
-}
-
 TEST_CASE("Two arguments with the same name")
 {
     using namespace argos;

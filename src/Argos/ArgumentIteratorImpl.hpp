@@ -88,6 +88,8 @@ namespace argos
 
         void reactivate_multi_command_parent(size_t index);
 
+        void update_arguments(const std::vector<std::string>& args);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;

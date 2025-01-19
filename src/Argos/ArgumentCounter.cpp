@@ -89,10 +89,16 @@ namespace argos
     }
 
     ArgumentCounter::ArgumentCounter(const CommandData& command,
-                                     size_t argument_count)
+                                     size_t argument_count,
+                                     size_t initial_count)
         : m_counters(make_argument_counters(command, argument_count)),
           m_first_optional(m_counters.size())
     {
+        for (size_t i = 0; i < initial_count; ++i)
+        {
+            if (next_argument() == nullptr)
+                break;
+        }
     }
 
     const ArgumentData* ArgumentCounter::next_argument()

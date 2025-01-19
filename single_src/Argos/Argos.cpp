@@ -360,7 +360,9 @@ namespace argos
 
         explicit ArgumentCounter(const CommandData& command);
 
-        ArgumentCounter(const CommandData& command, size_t argument_count);
+        ArgumentCounter(const CommandData& command,
+                        size_t argument_count,
+                        size_t initial_count = 0);
 
         const ArgumentData* next_argument();
 
@@ -472,10 +474,16 @@ namespace argos
     }
 
     ArgumentCounter::ArgumentCounter(const CommandData& command,
-                                     size_t argument_count)
+                                     size_t argument_count,
+                                     size_t initial_count)
         : m_counters(make_argument_counters(command, argument_count)),
           m_first_optional(m_counters.size())
     {
+        for (size_t i = 0; i < initial_count; ++i)
+        {
+            if (next_argument() == nullptr)
+                break;
+        }
     }
 
     const ArgumentData* ArgumentCounter::next_argument()
@@ -778,10 +786,12 @@ namespace argos
 
         [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+        [[nodiscard]] std::span<std::string> remaining_arguments() const;
+
+        void insert(const std::vector<std::string>& args);
     private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
+        std::vector<std::string> m_all_args;
+        std::span<std::string> m_args;
         size_t m_pos = 0;
         char m_prefix = '-';
     };
@@ -812,10 +822,14 @@ namespace argos
 
         [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+        [[nodiscard]] std::span<std::string> remaining_arguments();
+
+        void insert(std::vector<std::string> args);
     private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
+        void split_concatenated_flags();
+
+        std::vector<std::string> m_all_args;
+        std::span<std::string> m_args;
         size_t m_pos = 0;
     };
 }
@@ -856,12 +870,20 @@ namespace argos
                 return std::get<StandardOptionIterator>(iterator).current();
         }
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const
+        [[nodiscard]] std::span<std::string> remaining_arguments()
         {
             if (std::holds_alternative<OptionIterator>(iterator))
                 return std::get<OptionIterator>(iterator).remaining_arguments();
             else
                 return std::get<StandardOptionIterator>(iterator).remaining_arguments();
+        }
+
+        void insert(const std::vector<std::string>& args)
+        {
+            if (std::holds_alternative<OptionIterator>(iterator))
+                std::get<OptionIterator>(iterator).insert(args);
+            else
+                std::get<StandardOptionIterator>(iterator).insert(args);
         }
 
         std::variant<OptionIterator, StandardOptionIterator> iterator;
@@ -1036,6 +1058,8 @@ namespace argos
 
         void reactivate_multi_command_parent(size_t index);
 
+        void update_arguments(const std::vector<std::string>& args);
+
         void error(const std::string& message = {});
 
         std::shared_ptr<ParserData> m_data;
@@ -1205,7 +1229,8 @@ namespace argos
 
     bool is_lower(std::string_view word);
 
-    inline void pop_front(std::span<std::string_view>& span)
+    template <typename T>
+    inline void pop_front(std::span<T>& span)
     {
         span = span.subspan(1);
     }
@@ -1400,14 +1425,15 @@ namespace argos
 
         if (opt.callback)
         {
-            opt.callback(OptionView(&opt), arg,
-                         ParsedArgumentsBuilder(parsed_args));
+            CallbackArguments args(OptionView(&opt), arg, parsed_args);
+            opt.callback(args);
+            update_arguments(args.new_arguments);
         }
         if (m_data->parser_settings.option_callback)
         {
-            m_data->parser_settings.option_callback(
-                OptionView(&opt), arg,
-                ParsedArgumentsBuilder(parsed_args));
+            CallbackArguments args(OptionView(&opt), arg, parsed_args);
+            m_data->parser_settings.option_callback(args);
+            update_arguments(args.new_arguments);
         }
 
         switch (opt.type)
@@ -1501,15 +1527,16 @@ namespace argos
                                                argument->argument_id);
             if (argument->callback)
             {
-                argument->callback(ArgumentView(argument), s,
-                                   ParsedArgumentsBuilder(parsed_args));
+                CallbackArguments args(ArgumentView(argument), s, parsed_args);
+                argument->callback(args);
+                update_arguments(args.new_arguments);
             }
 
             if (m_data->parser_settings.argument_callback)
             {
-                m_data->parser_settings.argument_callback(
-                    ArgumentView(argument), s,
-                    ParsedArgumentsBuilder(parsed_args));
+                CallbackArguments args(ArgumentView(argument), s, parsed_args);
+                m_data->parser_settings.argument_callback(args);
+                update_arguments(args.new_arguments);
             }
             return {IteratorResultCode::ARGUMENT, argument, s};
         }
@@ -1688,6 +1715,22 @@ namespace argos
         m_command = m_parsed_args.back()->command();
         m_argument_counter = {};
         m_state = State::ARGUMENTS_ONLY;
+    }
+
+    void ArgumentIteratorImpl::update_arguments(
+        const std::vector<std::string>& args)
+    {
+        if (args.empty())
+            return;
+
+        m_iterator.insert(args);
+        if (!ArgumentCounter::requires_argument_count(*m_command))
+            return;
+
+        auto current_count = m_argument_counter.count();
+        auto total_count = current_count + count_arguments();
+        m_argument_counter = ArgumentCounter(*m_command, total_count,
+                                             current_count);
     }
 
     void ArgumentIteratorImpl::error(const std::string& message)
@@ -4403,7 +4446,7 @@ namespace argos
     }
 
     OptionIterator::OptionIterator(std::vector<std::string_view> args, char prefix)
-        : m_all_args(std::move(args)),
+        : m_all_args(args.begin(), args.end()),
           m_args(m_all_args),
           m_prefix(prefix)
     {
@@ -4475,9 +4518,20 @@ namespace argos
         return m_args[0];
     }
 
-    std::span<std::string_view> OptionIterator::remaining_arguments() const
+    std::span<std::string> OptionIterator::remaining_arguments() const
     {
         return m_pos == 0 ? m_args : m_args.subspan(1);
+    }
+
+    void OptionIterator::insert(const std::vector<std::string>& args)
+    {
+        auto args_index = m_all_args.size() - m_args.size();
+        auto insert_index = args_index;
+        if (m_pos != 0)
+            insert_index++;
+        m_all_args.insert(m_all_args.begin() + insert_index,
+                          args.begin(), args.end());
+        m_args = std::span(m_all_args.begin() + args_index, m_all_args.end());
     }
 }
 
@@ -5103,8 +5157,8 @@ namespace argos
 {
     namespace
     {
-        template <typename It, typename Value, typename IsLess>
-        It lower_bound(It begin, It end, Value&& v, IsLess is_less)
+        template <typename ItT, typename ValueT, typename IsLessT>
+        ItT lower_bound(ItT begin, ItT end, ValueT&& v, IsLessT is_less)
         {
             while (begin != end)
             {
@@ -5377,9 +5431,9 @@ namespace argos
                 .help("Display the program version.")
                 .constant("1")
                 .callback([v = data.version, stream]
-                (auto, auto, auto pa)
+                (auto& a)
                     {
-                        *stream << pa.program_name() << " " << v << "\n";
+                        *stream << a.builder.program_name() << " " << v << "\n";
                         return true;
                     })
                 .release();
@@ -5406,34 +5460,32 @@ namespace argos
 namespace argos
 {
     StandardOptionIterator::StandardOptionIterator()
-        : m_args()
-    {}
+    {
+    }
 
     StandardOptionIterator::StandardOptionIterator(std::vector<std::string_view> args)
-        : m_all_args(std::move(args)),
+        : m_all_args(args.begin(), args.end()),
           m_args(m_all_args)
-    {}
+    {
+    }
 
     StandardOptionIterator::StandardOptionIterator(const StandardOptionIterator& rhs)
         : m_all_args(rhs.m_all_args),
           m_args(m_all_args.begin() + rhs.m_all_args.size() - rhs.m_args.size(), m_all_args.end()),
           m_pos(rhs.m_pos)
-    {}
+    {
+    }
 
     std::optional<std::string> StandardOptionIterator::next()
     {
-        if (m_pos == std::string_view::npos)
+        if (m_pos != 0)
         {
-            m_pos = 0;
-            pop_front(m_args);
-        }
-        else if (m_pos != 0)
-        {
+            // m_pos is always greater than one if we get here.
             if (m_pos < m_args[0].size() && m_args[0][1] != '-')
             {
                 const auto c = m_args[0][m_pos++];
                 if (m_pos == m_args[0].size())
-                    m_pos = std::string_view::npos;
+                    m_pos = std::string::npos;
                 return std::string{'-', c};
             }
             pop_front(m_args);
@@ -5445,25 +5497,23 @@ namespace argos
 
         if (m_args[0].size() <= 2 || m_args[0][0] != '-')
         {
-            m_pos = std::string_view::npos;
-            return std::string(m_args[0]);
+            m_pos = std::string::npos;
+            return m_args[0];
         }
 
         if (m_args[0][1] != '-')
         {
             m_pos = 2;
-            return std::string(m_args[0].substr(0, 2));
+            return m_args[0].substr(0, 2);
         }
 
-        const auto eq = m_args[0].find('=');
-        if (eq == std::string_view::npos)
-        {
-            m_pos = std::string_view::npos;
-            return std::string(m_args[0]);
-        }
+        m_pos = m_args[0].find('=');
 
-        m_pos = eq + 1;
-        return std::string(m_args[0].substr(0, m_pos));
+        if (m_pos == std::string::npos)
+            return m_args[0];
+
+        m_pos++;
+        return m_args[0].substr(0, m_pos);
     }
 
     std::optional<std::string> StandardOptionIterator::next_value()
@@ -5471,11 +5521,11 @@ namespace argos
         if (m_args.empty())
             return {};
 
-        if (m_pos != std::string_view::npos)
+        if (m_pos != std::string::npos)
         {
-            const auto result = m_args[0].substr(m_pos);
-            m_pos = std::string_view::npos;
-            return std::string(result);
+            const auto pos = m_pos;
+            m_pos = std::string::npos;
+            return m_args[0].substr(pos);
         }
 
         pop_front(m_args);
@@ -5485,7 +5535,7 @@ namespace argos
             return {};
         }
 
-        return std::string(m_args[0]);
+        return m_args[0];
     }
 
     std::string_view StandardOptionIterator::current() const
@@ -5495,9 +5545,34 @@ namespace argos
         return m_args[0];
     }
 
-    std::span<std::string_view> StandardOptionIterator::remaining_arguments() const
+    std::span<std::string> StandardOptionIterator::remaining_arguments()
     {
+        split_concatenated_flags();
         return m_pos == 0 ? m_args : m_args.subspan(1);
+    }
+
+    void StandardOptionIterator::insert(std::vector<std::string> args)
+    {
+        split_concatenated_flags();
+        auto args_index = m_all_args.size() - m_args.size();
+        auto insert_index = args_index;
+        if (m_pos != 0)
+            insert_index++;
+        m_all_args.insert(m_all_args.begin() + insert_index,
+                          args.begin(), args.end());
+        m_args = std::span(m_all_args.begin() + args_index, m_all_args.end());
+    }
+
+    void StandardOptionIterator::split_concatenated_flags()
+    {
+        if (m_pos == 0 || m_pos >= m_args[0].size() || m_args[0][1] == '-')
+            return;
+
+        auto index = m_all_args.size() - m_args.size();
+        m_all_args.insert(m_all_args.begin() + index + 1,
+                          "-" + m_args[0].substr(m_pos));
+        m_all_args[index].resize(m_pos);
+        m_args = std::span(m_all_args.begin() + index, m_all_args.end());
     }
 }
 

@@ -30,10 +30,12 @@ namespace argos
 
         [[nodiscard]] std::string_view current() const;
 
-        [[nodiscard]] std::span<std::string_view> remaining_arguments() const;
+        [[nodiscard]] std::span<std::string> remaining_arguments() const;
+
+        void insert(const std::vector<std::string>& args);
     private:
-        std::vector<std::string_view> m_all_args;
-        std::span<std::string_view> m_args;
+        std::vector<std::string> m_all_args;
+        std::span<std::string> m_args;
         size_t m_pos = 0;
         char m_prefix = '-';
     };
