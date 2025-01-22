@@ -92,6 +92,9 @@ namespace argos
 
         void error(const std::string& message = {});
 
+        bool has_all_mandatory_options(const ParsedArgumentsImpl& parsed_args,
+                                       const CommandData& command);
+
         std::shared_ptr<ParserData> m_data;
         const CommandData* m_command = nullptr;
         std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
