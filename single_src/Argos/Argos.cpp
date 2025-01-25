@@ -1062,6 +1062,9 @@ namespace argos
 
         void error(const std::string& message = {});
 
+        bool has_all_mandatory_options(const ParsedArgumentsImpl& parsed_args,
+                                       const CommandData& command);
+
         std::shared_ptr<ParserData> m_data;
         const CommandData* m_command = nullptr;
         std::vector<std::shared_ptr<ParsedArgumentsImpl>> m_parsed_args;
@@ -1639,27 +1642,20 @@ namespace argos
     bool ArgumentIteratorImpl::check_argument_and_option_counts()
     {
         auto& parsed_args = *parsed_arguments();
-        for (const auto& o : m_command->options)
-        {
-            if (!o->optional && !parsed_args.has(o->value_id))
-            {
-                auto flags = o->flags.front();
-                for (unsigned i = 1; i < o->flags.size(); ++i)
-                    flags += ", " + o->flags[i];
-                error("Mandatory option is missing: " + flags);
-                return false;
-            }
-        }
+        if (!has_all_mandatory_options(parsed_args, *m_command))
+            return false;
+
         if (*m_command->require_subcommand && parsed_args.subcommands().empty())
         {
             error("No command was given.");
             return false;
         }
+
         if (m_argument_counter.is_complete())
         {
             m_state = State::DONE;
-            for (const auto& parsed_args : m_parsed_args)
-                parsed_args->set_result_code(ParserResultCode::SUCCESS);
+            for (const auto& pa : m_parsed_args)
+                pa->set_result_code(ParserResultCode::SUCCESS);
             return true;
         }
         else
@@ -1745,6 +1741,25 @@ namespace argos
         for (const auto& parsed_args : m_parsed_args)
             parsed_args->set_result_code(ParserResultCode::FAILURE);
         m_state = State::ERROR;
+    }
+
+    bool ArgumentIteratorImpl::has_all_mandatory_options(
+        const ParsedArgumentsImpl& parsed_args,
+        const CommandData& command)
+    {
+        for (const auto& o : command.options)
+        {
+            if (!o->optional && !parsed_args.has(o->value_id))
+            {
+                auto flags = o->flags.front();
+                for (unsigned i = 1; i < o->flags.size(); ++i)
+                    flags += ", " + o->flags[i];
+                error("Mandatory option is missing: " + flags);
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
