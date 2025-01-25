@@ -142,7 +142,7 @@ if(ARGOS_UPDATE_SINGLE_SRC)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     if(WIN32)
         configure_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.cmd.in
+            tools/make_single_src/make_argos_cpp.cmd.in
             make_argos_cpp.cmd)
         add_custom_target(UpdateSingleSrc ALL
             BYPRODUCTS
@@ -153,7 +153,7 @@ if(ARGOS_UPDATE_SINGLE_SRC)
             )
     else()
         configure_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/tools/make_argos_cpp.sh.in
+            tools/make_single_src/make_argos_cpp.sh.in
             make_argos_cpp.sh)
         add_custom_target(UpdateSingleSrc ALL
             BYPRODUCTS

@@ -8,6 +8,12 @@
 # License text is included with the source distribution.
 # ===========================================================================
 
+# This script is used to calculate the size of compiled functions in a
+# binary file. It uses the nm command to extract the addresses of the
+# functions and then calculates the size of each function by subtracting
+# the address of the current function from the address of the next function.
+# The nm command must be available in the system's PATH.
+
 import argparse
 import re
 import subprocess
