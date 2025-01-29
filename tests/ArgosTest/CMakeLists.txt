@@ -7,12 +7,17 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.14)
 
-include(FetchContent)
-FetchContent_Declare(catch
-    GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
-    GIT_TAG "v3.4.0"
+find_package(catch2 3.4.0 QUIET)
+
+if(NOT TARGET Catch2::Catch2WithMain)
+    message(STATUS "Fetching Catch2...")
+    include(FetchContent)
+    FetchContent_Declare(catch2
+        GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
+        GIT_TAG "v3.4.0"
     )
-FetchContent_MakeAvailable(catch)
+    FetchContent_MakeAvailable(catch2)
+endif ()
 
 add_executable(ArgosTest
     Argv.hpp
