@@ -29,6 +29,9 @@ option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
 # Build examples
 option(ARGOS_BUILD_EXAMPLES "Build the examples" OFF)
 
+# Build docs
+option(ARGOS_BUILD_DOCS "Build the documentation" OFF)
+
 # Updated amalgamated source and header files
 option(ARGOS_UPDATE_SINGLE_SRC "Update the amalgamated source and header files" OFF)
 
@@ -127,7 +130,9 @@ TargetEnableAllWarnings(Argos)
 
 add_library(Argos::Argos ALIAS Argos)
 
-add_subdirectory(docs/doxygen EXCLUDE_FROM_ALL)
+if(ARGOS_BUILD_DOCS)
+    add_subdirectory(docs/doxygen EXCLUDE_FROM_ALL)
+endif()
 
 if(ARGOS_BUILD_TEST)
     include(CodeCoverage)
