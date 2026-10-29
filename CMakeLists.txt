@@ -7,16 +7,19 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-project(Argos VERSION 1.7.2)
+project(Argos VERSION 1.7.3)
 
 set(CMAKE_CXX_STANDARD 20)
 
+option(ARGOS_DEVELOPMENT_MODE "Enable development mode" OFF)
+
 # Set ARGOS_MASTER_PROJECT to ON if Argos is the root level project.
 if(NOT DEFINED ARGOS_MASTER_PROJECT)
-    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    if((CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR) OR ARGOS_DEVELOPMENT_MODE)
         set(ARGOS_MASTER_PROJECT ON)
     else()
         set(ARGOS_MASTER_PROJECT OFF)
+        message("Using Argos ${PROJECT_VERSION}")
     endif()
 endif()
 
@@ -27,13 +30,13 @@ option(ARGOS_BUILD_TEST "Build tests" ${ARGOS_MASTER_PROJECT})
 option(ARGOS_INSTALL "Generate the install target" ${ARGOS_MASTER_PROJECT})
 
 # Build examples
-option(ARGOS_BUILD_EXAMPLES "Build the examples" OFF)
+option(ARGOS_BUILD_EXAMPLES "Build the examples" ${ARGOS_DEVELOPMENT_MODE})
 
 # Build docs
-option(ARGOS_BUILD_DOCS "Build the documentation" OFF)
+option(ARGOS_BUILD_DOCS "Build the documentation" ${ARGOS_DEVELOPMENT_MODE})
 
 # Updated amalgamated source and header files
-option(ARGOS_UPDATE_SINGLE_SRC "Update the amalgamated source and header files" OFF)
+option(ARGOS_UPDATE_SINGLE_SRC "Update the amalgamated source and header files" ${ARGOS_DEVELOPMENT_MODE})
 
 include(GNUInstallDirs)
 
