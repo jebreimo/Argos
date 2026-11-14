@@ -7,14 +7,18 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.14)
 
-find_package(catch2 3.4.0 QUIET)
+# Catch2 must be compiled with the same C++ standard as the tests, otherwise
+# StringMaker specializations for e.g. std::string_view won't be defined.
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(catch2 3.14.0 QUIET)
 
 if(NOT TARGET Catch2::Catch2WithMain)
     message(STATUS "Fetching Catch2...")
     include(FetchContent)
     FetchContent_Declare(catch2
         GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
-        GIT_TAG "v3.4.0"
+        GIT_TAG "v3.14.0"
     )
     FetchContent_MakeAvailable(catch2)
 endif ()

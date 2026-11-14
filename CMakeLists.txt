@@ -7,9 +7,7 @@
 # ===========================================================================
 cmake_minimum_required(VERSION 3.16)
 
-project(Argos VERSION 1.7.3)
-
-set(CMAKE_CXX_STANDARD 20)
+project(Argos VERSION 1.7.4)
 
 option(ARGOS_DEVELOPMENT_MODE "Enable development mode" OFF)
 
@@ -130,6 +128,8 @@ target_include_directories(Argos
     )
 
 TargetEnableAllWarnings(Argos)
+
+target_compile_features(Argos PUBLIC cxx_std_20)
 
 add_library(Argos::Argos ALIAS Argos)
 
